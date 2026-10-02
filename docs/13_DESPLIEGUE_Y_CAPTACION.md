@@ -7,6 +7,103 @@
 
 ---
 
+## 0 · Los 3 pasos que faltan (hazlo en este orden)
+
+### Paso 1 · Comprobar que existe tu empresa en la base de datos
+
+Supabase → tu proyecto → **SQL Editor** → *New query* → pega esto y pulsa **Run**:
+
+```sql
+select id, name, created_at from public.organizations order by created_at;
+```
+
+**Qué esperar:**
+
+- **Aparece una fila** (con tu nombre de empresa y una fecha) → sigue al paso 2.
+- **Sale «Success. No rows returned», sin filas** → tu empresa todavía no existe en la base de
+  datos, porque se crea automáticamente la primera vez que alguien se registra en el ERP. Haz
+  esto y vuelve al paso 2:
+  1. Abre el ERP (la URL de Vercel donde tienes desplegada la aplicación, o
+     `https://app.khcimport.autos` si ya le pusiste el subdominio).
+  2. Pulsa **Crear cuenta** con tu correo y una contraseña.
+  3. Confirma el correo si te llega el mensaje de Supabase.
+  4. Entra y comprueba en la barra lateral que pone tu correo y **Propietario**.
+  5. Vuelve a ejecutar la consulta del paso 1: ya debe aparecer tu empresa.
+
+### Paso 2 · Enlazar la web con tu empresa (la consulta que faltaba)
+
+En el mismo **SQL Editor**, pega esto y pulsa **Run**:
+
+```sql
+insert into public.web_sites (slug, org_id, name)
+select 'khc', id, 'KHC Auto Import'
+from public.organizations
+order by created_at
+limit 1
+on conflict (slug) do update set org_id = excluded.org_id;
+```
+
+**Qué esperar:** «Success. No rows returned» — es correcto, un `insert ... select` no devuelve filas.
+
+> **¿Qué hace esto?** Crea una fila que dice: «la web `khc` (khcimport.autos) pertenece a esta
+> empresa». Sin ella, cuando alguien rellena un formulario en la web, la base de datos no sabe a
+> qué empresa asignar el contacto y lo rechaza. Y las publicaciones tampoco se verían.
+
+Si te equivocas y lo ejecutas dos veces no pasa nada: actualiza la misma fila (eso significa
+`on conflict ... do update`).
+
+### Paso 3 · Comprobar que quedó bien
+
+```sql
+select slug, org_id, name from public.web_sites;
+```
+
+**Qué esperar:** una fila parecida a esta:
+
+| slug | org_id | name |
+| --- | --- | --- |
+| khc | `a1b2c3d4-…` (el mismo uuid que tu empresa) | KHC Auto Import |
+
+El `org_id` tiene que coincidir **exactamente** con el `id` que viste en el paso 1. Si no coincide,
+es que tienes más de una empresa en la base de datos: avísame y lo miramos.
+
+---
+
+## 0.b · Comprobar que la web está conectada de verdad
+
+Abre `https://khcimport.autos` y mira si aparece una **cinta naranja** con rayas y el texto
+*«Web en construcción · datos de ejemplo»*:
+
+- **No aparece** → perfecto, la web está leyendo tu Supabase y está lista para que publiques.
+- **Sí aparece** → a la web le faltan las claves. Ve a **Vercel → tu proyecto de la web →
+  Settings → Environment Variables** y comprueba que están estas tres (en *Production*):
+
+  | Nombre | Valor |
+  | --- | --- |
+  | `NEXT_PUBLIC_SUPABASE_URL` | la URL de tu proyecto Supabase (`https://xxxxx.supabase.co`) |
+  | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | la clave `anon public` (Supabase → Settings → API) |
+  | `NEXT_PUBLIC_SITE_URL` | `https://khcimport.autos` |
+
+  Después, **Deployments → ⋯ → Redeploy**: sin volver a desplegar, la web sigue con la versión
+  antigua. La cinta debe desaparecer.
+
+### La prueba definitiva (2 minutos)
+
+1. En el ERP, dale de alta un coche de prueba (o abre uno de los datos de ejemplo y guárdalo).
+2. Sube 2 o 3 fotos en la pestaña **Fotos**.
+3. Pestaña **Web** → *Publicar en la web* → revisa el precio → **Publicar en la web**.
+4. Abre `https://khcimport.autos/coches`: el coche debe aparecer. Pulsa su tarjeta y comprueba la
+   ficha.
+5. Copia el enlace y mándatelo por WhatsApp: debe salir una tarjeta con la foto y el precio.
+6. En la web, rellena el formulario «Quiero que me llaméis» de ese coche.
+7. Vuelve al ERP → **Contactos web**: ahí debe estar la consulta.
+
+Si el paso 3 falla, el error sale en la consola del navegador (F12 → *Console*) y empieza casi
+siempre por «new row violates row-level security policy» (falta el paso 2 de arriba) o
+«permission denied» (falta ejecutar la migración).
+
+---
+
 ## 1. Mapa de lo que hay desplegado
 
 | Sistema | Dominio | Proyecto Vercel | Raíz |

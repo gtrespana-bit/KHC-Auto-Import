@@ -81,7 +81,8 @@ Los contactos que llegan por los formularios aparecen en el ERP, en **Contactos 
 - [x] Dominio creado: **khcimport.autos** y desplegado en producción (Vercel).
 - [x] Correo **info@khcimport.autos** creado.
 - [x] Migración `20261002000001_web_publica.sql` ejecutada en Supabase.
-- [ ] Registrar el sitio en la base de datos (una vez):
+- [ ] Registrar el sitio en la base de datos (una vez). Paso a paso con lo que debe salir en
+      cada consulta: [`../docs/13`](../docs/13_DESPLIEGUE_Y_CAPTACION.md) → sección **0**. En resumen:
       `insert into public.web_sites (slug, org_id, name) select 'khc', id, 'KHC Auto Import' from public.organizations order by created_at limit 1 on conflict (slug) do update set org_id = excluded.org_id;`
 - [ ] Variables de entorno en Vercel: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
       y `NEXT_PUBLIC_SITE_URL=https://khcimport.autos`. Sin ellas la web sale con la cinta naranja
