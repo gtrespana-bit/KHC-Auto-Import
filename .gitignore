@@ -12,6 +12,9 @@ dist
 dist-ssr
 .next
 .vercel
+
+# ERP compilado dentro del proyecto Next (se genera con `npm run build:erp`).
+public/erp
 *.local
 
 # Editor directories and files

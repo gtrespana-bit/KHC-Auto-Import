@@ -7,7 +7,7 @@ Este documento explica de dónde sale cada cifra de la sección **Oportunidades*
 
 | Mercado | Fuente | Anuncios | Archivo |
 |---|---|---|---|
-| Alemania (compra) | autoscout24.de | ~16.000 | `src/data/catalog/marketEvidence.js`, `candidateEvidence.js` |
+| Alemania (compra) | autoscout24.de | ~16.000 | `erp/src/data/catalog/marketEvidence.js`, `candidateEvidence.js` |
 | Alemania (compra) | **mobile.de** (el mayor portal alemán) | 37.580 capturados | `data/mobilede/rows.json` |
 | España (venta) | **milanuncios** (API de búsqueda) | 10.766 capturados → limpios en `clean.json` | `data/milanuncios/` |
 | España (venta) | coches.net, coches.com, autocasion, ocasionplus, autohero… | ~5.000 | `marketEvidence.js` |
@@ -65,7 +65,7 @@ Recalcular (sin conexión):
 python3 scripts/tools/filter_milanuncios.py
 node scripts/opportunities.mjs > docs/10_OPORTUNIDADES_MEDIDAS.md
 ```
-El segundo comando también regenera `src/data/catalog/empresaRanking.js`, que es lo que muestra la app.
+El segundo comando también regenera `erp/src/data/catalog/empresaRanking.js`, que es lo que muestra la app.
 
 Scripts individuales:
 - `scripts/mobilede-scrape.mjs`: admite `--only cayenne`, `--hilos`, `--pausa`, `--ver` y `--reset`.

@@ -2,25 +2,32 @@
   "name": "khc-auto-import",
   "private": true,
   "version": "1.0.0",
-  "description": "KHC Auto Import · ERP interno: gestión de importación, costes, impuestos, stock y ventas de vehículos en Galicia",
+  "description": "KHC Auto Import · Web pública (Next.js) y ERP de gestión (Vite) en un solo proyecto y un solo despliegue",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "next dev -H 0.0.0.0 -p 3000",
+    "dev:erp": "vite --config erp/vite.config.js",
+    "build": "npm run build:erp && npm run build:web",
+    "build:erp": "vite build --config erp/vite.config.js",
+    "build:web": "next build",
+    "start": "next start -H 0.0.0.0 -p 3000",
+    "preview:erp": "vite preview --config erp/vite.config.js",
     "check": "node scripts/check-domain.mjs && node scripts/check-prices.mjs",
     "catalog:stats": "node scripts/catalog-stats.mjs",
-    "preview": "vite preview",
     "smoke": "node scripts/smoke.mjs",
     "prices:check": "node scripts/check-prices.mjs",
     "scrape:de": "node scripts/autoscout-de-scrape.mjs --import"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.1",
+    "@vercel/analytics": "^2.0.1",
     "lucide-react": "^1.48.0",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "next": "^16.3.8",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",

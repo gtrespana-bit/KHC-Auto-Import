@@ -1,5 +1,5 @@
-import { GENERATED_DB, MODEL_DATA, catalogBrands, catalogSegments } from '../src/data/catalog/index.js';
-import { CURATED_DB } from '../src/data/vehicleDatabase.js';
+import { GENERATED_DB, MODEL_DATA, catalogBrands, catalogSegments } from '../erp/src/data/catalog/index.js';
+import { CURATED_DB } from '../erp/src/data/vehicleDatabase.js';
 
 const total = GENERATED_DB.length + CURATED_DB.length;
 const byBrand = {};

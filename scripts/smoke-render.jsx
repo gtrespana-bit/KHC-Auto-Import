@@ -5,30 +5,30 @@
 // ============================================================================
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { StoreProvider } from '../src/lib/store.jsx';
-import App from '../src/App.jsx';
-import DashboardView from '../src/views/DashboardView.jsx';
-import FleetView from '../src/views/FleetView.jsx';
-import CatalogView from '../src/views/CatalogView.jsx';
-import ImportSimulatorView from '../src/views/ImportSimulatorView.jsx';
-import CrmView from '../src/views/CrmView.jsx';
-import AccountingView from '../src/views/AccountingView.jsx';
-import TaxView from '../src/views/TaxView.jsx';
-import DocumentsView from '../src/views/DocumentsView.jsx';
-import ReportsView from '../src/views/ReportsView.jsx';
-import GuidesView from '../src/views/GuidesView.jsx';
-import SettingsView from '../src/views/SettingsView.jsx';
-import InvoicesView from '../src/views/InvoicesView.jsx';
-import AdModal from '../src/components/AdModal.jsx';
-import WebLeadsView from '../src/views/WebLeadsView.jsx';
-import PublishModal from '../src/components/PublishModal.jsx';
-import PlateEditor from '../src/components/PlateEditor.jsx';
-import WebPublicationPanel from '../src/components/WebPublicationPanel.jsx';
-import { PhotoManager, PhotoStrip } from '../src/components/Photos.jsx';
+import { StoreProvider } from '../erp/src/lib/store.jsx';
+import App from '../erp/src/App.jsx';
+import DashboardView from '../erp/src/views/DashboardView.jsx';
+import FleetView from '../erp/src/views/FleetView.jsx';
+import CatalogView from '../erp/src/views/CatalogView.jsx';
+import ImportSimulatorView from '../erp/src/views/ImportSimulatorView.jsx';
+import CrmView from '../erp/src/views/CrmView.jsx';
+import AccountingView from '../erp/src/views/AccountingView.jsx';
+import TaxView from '../erp/src/views/TaxView.jsx';
+import DocumentsView from '../erp/src/views/DocumentsView.jsx';
+import ReportsView from '../erp/src/views/ReportsView.jsx';
+import GuidesView from '../erp/src/views/GuidesView.jsx';
+import SettingsView from '../erp/src/views/SettingsView.jsx';
+import InvoicesView from '../erp/src/views/InvoicesView.jsx';
+import AdModal from '../erp/src/components/AdModal.jsx';
+import WebLeadsView from '../erp/src/views/WebLeadsView.jsx';
+import PublishModal from '../erp/src/components/PublishModal.jsx';
+import PlateEditor from '../erp/src/components/PlateEditor.jsx';
+import WebPublicationPanel from '../erp/src/components/WebPublicationPanel.jsx';
+import { PhotoManager, PhotoStrip } from '../erp/src/components/Photos.jsx';
 
 const LS_KEY = 'khc_autoimport_state_v1';
 
-import { demoState } from '../src/data/demoState.js';
+import { demoState } from '../erp/src/data/demoState.js';
 
 export const seedState = demoState;
 

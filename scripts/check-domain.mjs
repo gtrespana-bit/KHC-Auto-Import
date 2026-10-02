@@ -9,22 +9,22 @@ import {
   computeCvf, getIedmtRate, valorVenal, calcIedmt, calcItp, calcIvtm,
   calcPurchaseTax, calcSaleVat, calcIrpfGain, calcIs, calcReta,
   landingCost, breakEvenPrice, recalcVehicleTaxes,
-} from '../src/domain/taxes.js';
+} from '../erp/src/domain/taxes.js';
 import {
   vehiclePnl, fleetSummary, suggestedPrice, loanQuote, movementsFromData,
   monthlyPnl, profitabilityBy, cashForecast,
-} from '../src/domain/finance.js';
-import { DEFAULT_TARIFFS, IVTM_CORUNA_TURISMOS } from '../src/domain/rates.js';
-import { buildTaxCalendar, applyFilingStatus, documentProgress, buildAlerts } from '../src/domain/compliance.js';
-import { financeOffer } from '../src/domain/finance.js';
-import { catalogEstimate } from '../src/domain/catalogEstimate.js';
+} from '../erp/src/domain/finance.js';
+import { DEFAULT_TARIFFS, IVTM_CORUNA_TURISMOS } from '../erp/src/domain/rates.js';
+import { buildTaxCalendar, applyFilingStatus, documentProgress, buildAlerts } from '../erp/src/domain/compliance.js';
+import { financeOffer } from '../erp/src/domain/finance.js';
+import { catalogEstimate } from '../erp/src/domain/catalogEstimate.js';
 import {
   invoiceNumber, invoiceLines, buildAd, followUpMessage, whatsappLink, emailLink,
-  buildWebListing, webSlug, webTitle, webFeatures,
-} from '../src/lib/templates.js';
-import { publicationStatusForVehicle, PUBLICATION_STATUS } from '../src/lib/web.js';
-import { VEHICLE_DB, CURATED_DB, RELIABILITY_META } from '../src/data/vehicleDatabase.js';
-import { GENERATED_DB } from '../src/data/catalog/index.js';
+  buildWebListing, webSlug, webTitle, webFeatures, originLabel,
+} from '../erp/src/lib/templates.js';
+import { publicationStatusForVehicle, PUBLICATION_STATUS } from '../erp/src/lib/web.js';
+import { VEHICLE_DB, CURATED_DB, RELIABILITY_META } from '../erp/src/data/vehicleDatabase.js';
+import { GENERATED_DB } from '../erp/src/data/catalog/index.js';
 
 let passed = 0;
 const checks = [];
@@ -382,6 +382,24 @@ check('Anuncio para Wallapop respeta el límite de 1.000 caracteres', () => {
   assert.match(ad.body, /17.400/);
 });
 
+check('Anuncio: la garantía mínima de 12 meses siempre aparece, aunque la ficha no la traiga', () => {
+  const ad = buildAd({ vehicle: { brand: 'Seat', model: 'León', version: '1.6 TDI', year: 2017, km: 140000 }, price: 11900, company: { name: 'X' }, portal: 'generico' });
+  assert.match(ad.body, /Garantía mínima de 12 meses/);
+  assert.match(ad.short, /Garantía mínima de 12 meses/);
+  // Si la ficha anuncia más meses, se respeta.
+  const mas = buildAd({ vehicle: { brand: 'Seat', model: 'León', year: 2017, km: 140000, sale: { warrantyMonths: 24 } }, price: 11900, company: { name: 'X' } });
+  assert.match(mas.body, /Garantía mínima de 24 meses/);
+});
+
+check('Procedencia: nacional e importado se etiquetan sin inventar el origen', () => {
+  assert.equal(originLabel({ originCountry: 'Alemania' }).label, 'Importado de Alemania');
+  assert.equal(originLabel({ originCountry: 'Alemania' }).isImport, true);
+  assert.equal(originLabel({ originCountry: 'España' }).isImport, false);
+  assert.match(originLabel({ originCountry: 'España' }).label, /nacional/i);
+  // Sin dato de país no se afirma que venga de fuera.
+  assert.equal(originLabel({}).isImport, false);
+});
+
 check('WhatsApp: normaliza el teléfono español a formato internacional', () => {
   assert.equal(whatsappLink('600 111 222', 'hola').replace(/\?.*$/, ''), 'https://wa.me/34600111222');
   assert.equal(whatsappLink('+34 600111222', 'hola').replace(/\?.*$/, ''), 'https://wa.me/34600111222');
@@ -452,6 +470,11 @@ check('Web: el equipamiento solo afirma lo que está en la ficha', () => {
   assert.ok(conTodo.some((f) => /Dos llaves/.test(f)));
   assert.ok(conTodo.some((f) => /Etiqueta ambiental ECO/.test(f)));
   assert.ok(conTodo.some((f) => /Importado de Alemania/.test(f)));
+
+  // Un coche nacional se anuncia como nacional, no como importado.
+  const nacional = webFeatures({ cv: 150, fuel: 'Diésel', originCountry: 'España' });
+  assert.ok(nacional.some((f) => /nacional/i.test(f)));
+  assert.ok(!nacional.some((f) => /Importado/i.test(f)));
 });
 
 check('Web: la ficha publicada no contiene costes, margen, VIN ni matrícula', () => {
@@ -469,7 +492,7 @@ check('Web: la ficha publicada no contiene costes, margen, VIN ni matrícula', (
     assert.ok(!texto.toLowerCase().includes(String(secreto).toLowerCase()), `se ha colado información interna: ${secreto}`);
   }
   assert.ok(out.price === 21900);
-  assert.ok(/garantía de 12 meses/i.test(out.description), 'debe indicar la garantía');
+  assert.ok(/garantía mínima de 12 meses/i.test(out.description), 'debe indicar la garantía mínima');
 });
 
 check('Web: el slug es estable y no se repite dentro del sitio', () => {

@@ -2,8 +2,8 @@
 // Para cada grupo modelo+generación+combustible+potencia se llevan todos los
 // anuncios al mismo año y km con los coeficientes ajustados, y se calcula el
 // beneficio neto con los gastos reales de importación.
-import { MARKET_OBSERVATIONS, cvOf, fuelOf } from '../src/data/catalog/marketEvidence.js';
-import { CANDIDATE_OBSERVATIONS } from '../src/data/catalog/candidateEvidence.js';
+import { MARKET_OBSERVATIONS, cvOf, fuelOf } from '../erp/src/data/catalog/marketEvidence.js';
+import { CANDIDATE_OBSERVATIONS } from '../erp/src/data/catalog/candidateEvidence.js';
 import { existsSync, readFileSync } from 'node:fs';
 // mobile.de (data/mobilede/rows.json, capturado con scripts/mobilede-scrape.mjs): el mayor portal alemán.
 // Se quitan los que ya estaban por autoscout (mismo modelo, año, km y precio).
@@ -19,9 +19,9 @@ const MOBILE = FILES.filter((f) => existsSync(f)).flatMap((f) => JSON.parse(read
   .map(([brand, model, gen, market, engine, year, km, price, source, url]) => ({ brand, model, gen, market, kind: 'anuncio', engine, year, km, price, source, url }))
   .filter((o) => !have.has(dupKey(o)) && (have.add(dupKey(o)), true));
 const O = [...BASE, ...MOBILE];
-import { priceFit } from '../src/data/catalog/priceModel.js';
-import { catalogEstimate } from '../src/domain/catalogEstimate.js';
-import { GENERATED_DB } from '../src/data/catalog/index.js';
+import { priceFit } from '../erp/src/data/catalog/priceModel.js';
+import { catalogEstimate } from '../erp/src/domain/catalogEstimate.js';
+import { GENERATED_DB } from '../erp/src/data/catalog/index.js';
 import { CANDIDATES } from './candidates.mjs';
 
 const q = (a, p) => { const s = [...a].sort((x, y) => x - y); const i = (s.length - 1) * p; const l = Math.floor(i); return s[l] + (s[Math.min(l + 1, s.length - 1)] - s[l]) * (i - l); };
@@ -124,5 +124,5 @@ const sum = (f) => out.filter(f).length;
 md += `\n**Resumen:** ${out.length} grupos medidos · 🟢 ${sum((r) => verdict(r).startsWith('🟢'))} · 🟡 ${sum((r) => verdict(r).startsWith('🟡'))} · 🟠 ${sum((r) => verdict(r).startsWith('🟠'))} · 🔴 ${sum((r) => verdict(r).startsWith('🔴'))}\n`;
 console.log(md);
 // Datos para la app (vista «Oportunidades»): mismo cálculo, sin repetirlo en el navegador.
-import('node:fs').then(({ writeFileSync }) => writeFileSync('src/data/catalog/empresaRanking.js',
+import('node:fs').then(({ writeFileSync }) => writeFileSync('erp/src/data/catalog/empresaRanking.js',
   `// GENERADO por scripts/opportunities.mjs — no editar a mano.\nexport const EMPRESA_META = ${JSON.stringify({ at: new Date().toISOString().slice(0, 10), nDE: O.filter((o) => o.market === 'DE').length, nES: O.filter((o) => o.market === 'ES').length, neg: NEG })};\nexport const EMPRESA_RANKING = ${JSON.stringify(out.map((r) => ({ ...r, verdict: verdict(r), expenses: Math.round(r.expenses) })))};\n`));

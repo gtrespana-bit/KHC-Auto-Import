@@ -68,7 +68,7 @@ Regla de oro: *la web pública nunca ve costes, VIN, matrícula, margen ni notas
 
 5. **El nombre está a medias.** *(Resuelto el 2-10-2026.)* El repositorio de GitHub ya se
    llamaba `KHC-Auto-Import`, pero dentro del código todo decía «Coruña AutoImport»: título de la
-   app, README, PWA (`public/sw.js`, manifiesto), base de datos local (`coruna_autoimport_erp`),
+   app, README, PWA (`erp/public/sw.js`, manifiesto), base de datos local (`coruna_autoimport_erp`),
    clave de la sesión, fichero npm, respaldos… Se ha cambiado **entero** a KHC Auto Import, con
    **migración automática** de los datos locales (IndexedDB), la empresa activa y la sesión, para
    no perder nada ni obligar a volver a entrar. Queda pendiente, en el terreno comercial, registrar
@@ -80,7 +80,13 @@ Regla de oro: *la web pública nunca ve costes, VIN, matrícula, margen ni notas
 
 ## 2. Arquitectura recomendada
 
-### 2.1 Un repositorio, dos aplicaciones, dos despliegues, una base de datos
+### 2.1 Un repositorio, una base de datos y un solo despliegue (con dos dominios)
+
+> **Actualizado el 2 de octubre de 2026.** La primera versión de este documento proponía **dos
+> proyectos de Vercel**. Se revisó y se unificó en **un solo proyecto**, a petición del propietario,
+> mientras el negocio aún no había abierto. El diseño final es un único despliegue que sirve las dos
+> aplicaciones y las separa **por dominio** (no por carpeta), con el ERP compilado con Vite dentro
+> del proyecto Next.
 
 ```
                     ┌─────────────────────────── Supabase (UE) ──────────────────────────┐
@@ -88,30 +94,69 @@ Regla de oro: *la web pública nunca ve costes, VIN, matrícula, margen ni notas
                     │  publications  ───────────────►  SELECT solo si status = publicado │
                     │  bucket vehicle-photos (privado)   bucket public-photos (público)  │
                     └───────▲───────────────────────────────────────────────▲────────────┘
-                            │ escritura (usuario con sesión, RLS por rol)   │ lectura anónima (RLS por
-                            │                                               │ estado y sitio)
-              ┌─────────────┴──────────────┐                 ┌──────────────┴───────────────┐
-              │  app.khcimport.autos      │                 │  khcimport.autos        │
-              │  ERP (Vite + React, actual)│                 │  Web pública (Next.js SSR)   │
-              │  Proyecto Vercel nº 1      │                 │  Proyecto Vercel nº 2        │
-              │  raíz del repo             │                 │  carpeta /web                │
-              └────────────────────────────┘                 └──────────────────────────────┘
+                            │ escritura (usuario con sesión, RLS por rol)   │ lectura anónima (RLS
+                            │                                               │ por estado y sitio)
+              ┌─────────────┴───────────────────────────────────────────────┴────────────┐
+              │                        Proyecto Vercel (uno solo)                        │
+              │                                                                          │
+              │  khcimport.autos        →  web pública (Next.js, raíz del repositorio)   │
+              │  app.khcimport.autos    →  ERP (Vite, compilado en public/erp)           │
+              │                                                                          │
+              │  middleware.js: enruta por dominio y traduce `/…` → `/erp/…` en el ERP   │
+              │  vercel.json: build `npm run build` (ERP + web) y cron /api/keepalive    │
+              └──────────────────────────────────────────────────────────────────────────┘
 ```
+
+**Estructura del repositorio:**
+
+| Carpeta | Qué es |
+| --- | --- |
+| `app/`, `components/`, `lib/`, `public/` | Web pública (Next.js) y su despliegue. |
+| `erp/` | ERP: `erp/src` (React), `erp/index.html`, `erp/public` (PWA) y `erp/vite.config.js`. Se compila a `public/erp/`. |
+| `scripts/`, `data/`, `supabase/`, `docs/` | Herramientas, evidencia de precios, esquema de base de datos y documentación. |
 
 **Decisiones y por qué:**
 
 | Decisión | Motivo |
 | --- | --- |
-| Web en el **mismo repositorio**, carpeta `/web` | Un solo sitio donde trabajar, compartir la configuración de Vercel y el esquema de datos; no se toca la estructura actual del ERP (sigue en la raíz). |
-| **Dos proyectos de Vercel** (raíz y `web/`) | El `vercel.json` actual reescribe *todas* las rutas a `index.html`. Si el ERP y la web viven en el mismo proyecto, esa regla se come las rutas de la web. Dos proyectos = dos configuraciones independientes y despliegues independientes (publicar un coche no recompila el ERP). |
-| ERP en **subdominio** (`app.`), no en carpeta (`/erp`) | El service worker del ERP está registrado en `/` y secuestra la navegación del origen. Si la web pública y el ERP comparten origen, un visitante puede acabar viendo el shell cacheado de la app. Con subdominios, cada origen tiene su caché, sus cookies y su PWA. Además, la web pública queda limpia para SEO. |
+| **Un solo proyecto de Vercel** | Un despliegue, una configuración y un cron para todo. El propietario pidió unificarlo antes de abrir: entonces era un par de días de trabajo y ahora sigue siéndolo, con cero riesgo comercial. |
+| Cada aplicación en **su dominio**, no en una carpeta | `app.khcimport.autos` (ERP) y `khcimport.autos` (web). Cada origen conserva sus cachés, sus cookies y su PWA: el *service worker* del ERP no puede servirle el shell de la app a un visitante de la web pública. Es la parte del diseño anterior que sí se mantiene. |
+| El ERP **sigue compilándose con Vite**, sin reescribirlo | Se evitó migrar 30 vistas y toda la lógica fiscal a Next.js. El ERP se compila a `public/erp/` y `middleware.js` lo sirve en su dominio; su código no cambió (solo las rutas de tres ficheros de configuración). |
+| El prefijo `/erp/` **no se ve** en el dominio del ERP | El middleware traduce `app.khcimport.autos/` a `/erp/index.html`, y lo mismo con sus ficheros (manifiesto, *service worker*, iconos). El ERP se instala y se usa como si fuera su propia web. |
+| Rutas de la web **sin barra final** (`skipTrailingSlashRedirect`) | Necesario para que `/erp/` no se normalice a `/erp` (rompería el *service worker* y el manifiesto). Las URL públicas de la web ya se escriben sin barra final y los canónicos están declarados. |
 | Web con **renderizado en servidor** (Next.js) | Dos motivos no negociables: (1) Google necesita HTML con el coche dentro; una SPA vacía indexa mal o no indexa. (2) Al compartir un coche por WhatsApp —el canal natural en Galicia— hay que ver una **tarjeta con la foto y el precio**; eso exige metaetiquetas generadas en servidor. |
-| Alternativa: **Astro** | Técnicamente incluso mejor para un catálogo (más ligero, islas de React). Es una elección válida; Next.js se elige aquí por ecosistema, ejemplos y `next/image` para las fotos. **Si en 6 meses queréis cambiar, se cambia solo la web: el contrato es la tabla, no el código.** |
 | **No compartir código** entre ERP y web | Compartir los módulos de costes/impuestos con la web sería volver a exponerlos. Lo único compartido es el esquema de la tabla `publications` (y, como mucho, un fichero de tipos y formateo). |
+
+### 2.1.b · La pregunta «¿y no sería mejor un solo proyecto?» (resuelta)
+
+Se planteó al preparar el lanzamiento y **se decidió unificar** (2 de octubre de 2026). Esta es la
+historia de la decisión, por si alguien vuelve a preguntárselo:
+
+1. **Primero se recomendó no tocar nada.** Con dos proyectos el día a día es idéntico (los coches se
+   publican desde el ERP con un botón) y juntarlos tenía un coste real: tocar el *service worker* de
+   la PWA, las rutas de la SPA y el manifiesto, con el riesgo concentrado en la app instalada del
+   móvil y en las cachés.
+2. **El propietario decidió hacerlo igualmente, y con razón:** su argumento fue el momento. Antes de
+   abrir hay tiempo; después, con clientes y coches en la puerta, cualquier migración es peor. Ese
+   argumento pesa más que el coste técnico, así que se hizo.
+3. **Cómo se hizo, sin reescribir el ERP.** El ERP sigue siendo una aplicación Vite. Se movió a
+   `erp/`, se compila a `public/erp/` con `base: '/erp/'` y `middleware.js` lo sirve en su dominio
+   traduciendo las rutas. La web pública es el proyecto Next.js de la raíz.
+4. **Qué se resolvió por el camino** (los problemas que este documento anticipaba):
+   - El `vercel.json` viejo reescribía *todas* las rutas a `erp/index.html`: **se eliminó**. El ERP ahora
+     es un sitio estático con su propio `erp/index.html` y no interfiere con la web.
+   - El *service worker* del ERP ya no puede contaminar la web pública: se registra en la carpeta
+     donde se sirve la aplicación (`/` en su dominio) y su ámbito nunca alcanza el dominio de la web.
+   - El manifiesto de la PWA se sirve en el dominio del ERP, con `start_url` y `scope` en `/`.
+   - El prefijo interno `/erp/` se oculta al visitante; en el dominio público esos ficheros
+     responden 404 (no se expone la app interna).
+5. **Verificado**: la web pública responde en su dominio y bloquea `/erp`; el ERP responde en el
+   suyo (HTML, manifiesto, *service worker*, iconos y `/api/keepalive`) y no sirve ninguna ruta de la
+   web. Las comprobaciones del proyecto (74/74) y el render de las 117 vistas siguen pasando.
 
 ### 2.2 Lo que NO se comparte
 
-Nada de `src/domain/*`, ni `taxes.js`, ni `finance.js`, ni `priceModel.js` en el bundle
+Nada de `erp/src/domain/*`, ni `taxes.js`, ni `finance.js`, ni `priceModel.js` en el bundle
 público. La web pública no debe poder calcular un margen ni aunque alguien lo intente.
 
 ---
@@ -128,7 +173,7 @@ Una fila por vehículo publicado, con **campos copiados** (nada de `join` con `v
 | `site` | `'khc'` — si algún día hay más de una web o más de una empresa en la misma base. |
 | `status` | `borrador` · `publicado` · `reservado` · `vendido` · `archivado`. |
 | `slug` | `bmw-serie-3-320d-touring-2018-a-coruna`. Estable: si cambia, 301. |
-| `title`, `description` | Generados desde la ficha (ampliar `src/lib/templates.js` con el portal `web`). |
+| `title`, `description` | Generados desde la ficha (ampliar `erp/src/lib/templates.js` con el portal `web`). |
 | `price`, `price_note` | Precio público total (IVA incluido). `price_note` para «financiado desde…» o «reservado». |
 | `year`, `km`, `fuel`, `transmission`, `cv`, `cc`, `co2`, `badge`, `segment`, `doors`, `seats`, `color`, `first_reg_date` | Datos técnicos que sí son públicos. |
 | `features` | Equipamiento (array de textos). |
@@ -341,8 +386,10 @@ trae stock, el segundo encaja con el modelo de importación por encargo.
 
 ## 10. Decisiones tomadas (2 de octubre de 2026)
 
-1. **Arquitectura:** Next.js en este repositorio, carpeta `web/`, con dos proyectos de Vercel
-   (raíz = ERP en `app.`, `web/` = web pública en `www.`). Un solo Supabase.
+1. **Arquitectura (revisada el 2-10-2026):** un **solo repositorio** y un **solo proyecto de
+   Vercel**: Next.js en la raíz (web pública, `khcimport.autos`) y el ERP compilado con Vite en
+   `public/erp` (`app.khcimport.autos`), enrutado por dominio desde `middleware.js`. Un solo
+   Supabase, con la frontera `publications`. Ver §2.1.
 2. **Momento:** la web se construye ya y se publica cuando la empresa esté registrada (el
    propietario indicó que la sociedad se constituirá antes de empezar a vender). Hasta entonces
    puede quedarse sin indexar (`noindex`) y sin datos fiscales en el aviso legal.
@@ -350,6 +397,16 @@ trae stock, el segundo encaja con el modelo de importación por encargo.
    se reflejan solos al cambiar el estado del vehículo.
 4. **Marca y dominio:** «KHC Auto Import» es el nombre definitivo. Al registrador: `khcimport.autos`
    y `.com` (sin registros DNS en el momento del análisis), más correo profesional del dominio.
+
+### Posicionamiento, tono y diseño (2 de octubre de 2026)
+
+La web no se plantea como «web de un importador»: vendemos **vehículos
+seleccionados, nacionales e importados**, se compra en cualquier país que
+compense y todas las ventas salen con **garantía mínima de 12 meses**. El
+discurso, el sistema visual y las reglas de redacción están fijados en
+[`docs/14_IDENTIDAD_WEB_Y_POSICIONAMIENTO.md`](14_IDENTIDAD_WEB_Y_POSICIONAMIENTO.md),
+que es el documento de referencia antes de tocar textos de la web o de los
+anuncios.
 
 ### Estado de la implantación
 
@@ -359,6 +416,8 @@ trae stock, el segundo encaja con el modelo de importación por encargo.
 - [x] Fase 2 · ERP → web: pestaña **Web** en la ficha, modal de publicación, textos generados,
       fotos sin EXIF y con la matrícula tapada, vista previa, estados y re-sincronización.
 - [x] Fase 2.b · Contactos: módulo **Contactos web** con las consultas de la web.
+- [x] Fase 2.c · Identidad: rediseño premium, discurso nacional/importado, mercados de compra y
+      garantía mínima de 12 meses (página `/garantia` incluida). Ver `docs/14`.
 - [ ] Fase 3 · Web en producción: dominio, variables en Vercel, fotos reales y revisión legal.
 - [ ] Fase 4 · Captación: Google Business Profile, Search Console, feed para Google Vehicle Ads.
 - [ ] Fase 5 · Portales: un solo contenido comercial para web y anuncios.
@@ -367,16 +426,18 @@ trae stock, el segundo encaja con el modelo de importación por encargo.
 
 ## Anexo · Cambios técnicos concretos que implicará (para no llevarse sorpresas)
 
-- `vercel.json` de la raíz se queda como está (ERP); la carpeta `web/` lleva su propia
-  configuración.
+- `vercel.json` de la raíz es el del proyecto único: `buildCommand: npm run build` (compila el ERP
+  **y** la web) y el cron de `/api/keepalive`. Sin `outputDirectory` ni reescrituras.
 - Supabase Auth: añadir `https://app.khcimport.autos` y el dominio de la web a *Redirect
   URLs*; el ERP deja de vivir en `*.vercel.app` o se mantienen ambos durante la transición.
-- El service worker del ERP (`public/sw.js`) sube de versión cuando se cambie la marca, y
-  conviene renombrar la caché (`autoimport-v1` → `khc-v1`) para que los dispositivos
-  actualicen.
-- `src/lib/db.js`: la base de datos local y la clave de respaldo **no se renombran a lo
+- El *service worker* del ERP (`erp/public/sw.js`) deduce su ámbito del lugar donde se registra
+  (`/` en su dominio y en desarrollo), así que funciona igual en las dos situaciones sin rutas
+  escritas a mano. Su caché es `khc-autoimport-v3`: al cambiarla, los dispositivos se actualizan
+  solos.
+- `erp/src/lib/db.js`: la base de datos local y la clave de respaldo **no se renombran a lo
   loco**; si se hace, hay que migrar los datos (abrir la base antigua y copiarla). Lo mismo
   para `LEGACY_VEHICLES_KEY`.
-- El health check `/api/keepalive` sigue igual y sirve a los dos sistemas (misma base).
+- El health check `/api/keepalive` es ahora una ruta de Next (`app/api/keepalive/route.js`) y sigue
+  sirviendo a los dos sistemas (misma base). El cron lo llama a diario.
 - Los portales: el módulo de anuncios seguirá funcionando; cuando exista `publications`, el
   texto «web» y el texto «portal» saldrán del mismo contenido comercial.

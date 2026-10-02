@@ -8,7 +8,7 @@
 // Si se corta, vuelve a lanzarlo: sigue donde iba (data/mobilede/progress.jsonl). --reset empieza de cero.
 // Si sale 0 anuncios, sube data/mobilede/debug.html para ajustar el lector.
 import { writeFileSync, mkdirSync, readFileSync, appendFileSync, existsSync } from 'node:fs';
-import { MARKET_OBSERVATIONS as O, cvOf, fuelOf } from '../src/data/catalog/marketEvidence.js';
+import { MARKET_OBSERVATIONS as O, cvOf, fuelOf } from '../erp/src/data/catalog/marketEvidence.js';
 import { CANDIDATES } from './candidates.mjs';
 
 // generación → [marca en mobile.de, modelo en mobile.de, carrocería (EstateCar/Limousine/null)]

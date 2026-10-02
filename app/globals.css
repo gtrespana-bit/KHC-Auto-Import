@@ -1,0 +1,158 @@
+@import 'tailwindcss';
+
+/* ============================================================================
+   KHC AUTO IMPORT · SISTEMA DE DISEÑO
+   ----------------------------------------------------------------------------
+   Lenguaje visual «escaparate de automoción premium»: tinta muy oscura
+   (ink), marfil para los fondos claros y un dorado champán como único acento.
+   Reglas: mucho aire, filetes finos en vez de sombras, tipografía con serif
+   en los titulares y mayúsculas espaciadas en las etiquetas.
+
+   Bases de marca que este lenguaje tiene que sostener (docs/14):
+   1. Vendemos vehículos seleccionados: nacionales e importados.
+   2. Importamos de cualquier país de Europa cuando compensa (no solo DE).
+   3. Garantía mínima de 12 meses, por escrito, en todas las ventas.
+   ============================================================================ */
+
+@theme {
+  /* Tinta: azul-noche profundo, casi negro, para fondos y texto fuerte. */
+  --color-ink-950: #05080f;
+  --color-ink-900: #0a1020;
+  --color-ink-800: #121b30;
+  --color-ink-700: #1d2840;
+  --color-ink-600: #2f3c56;
+  --color-ink-500: #4a5872;
+  --color-ink-400: #6b7891;
+
+  /* Dorado champán: el único acento de marca. Nada de amarillo saturado. */
+  --color-gold-100: #f8f3e6;
+  --color-gold-200: #eee2c5;
+  --color-gold-300: #ddc99a;
+  --color-gold-400: #c9ad6d;
+  --color-gold-500: #b3934e;
+  --color-gold-600: #967838;
+  --color-gold-700: #755e2b;
+
+  /* Marfil: fondos claros cálidos, nunca blanco puro. */
+  --color-ivory: #f9f8f5;
+  --color-ivory-dark: #f1efe9;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-display: ui-serif, 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  @apply bg-ivory font-sans text-ink-600 antialiased;
+}
+
+::selection {
+  background: var(--color-gold-300);
+  color: var(--color-ink-950);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-gold-500);
+  outline-offset: 2px;
+}
+
+@layer components {
+  /* Contenedor único: todo el sitio comparte el mismo ancho y margen. */
+  .container-x {
+    @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
+  }
+
+  /* Etiqueta pequeña en mayúsculas espaciadas. */
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.28em] text-gold-600;
+  }
+
+  .eyebrow-light {
+    @apply text-[11px] font-semibold uppercase tracking-[0.28em] text-gold-400;
+  }
+
+  /* Titulares: serif, con el peso justo y sin apretar. */
+  .display {
+    @apply font-display font-semibold tracking-tight text-ink-900;
+  }
+
+  .display-light {
+    @apply font-display font-semibold tracking-tight text-white;
+  }
+
+  /* Filete fino de separación (sustituye a bordes gruesos y sombras). */
+  .rule {
+    @apply border-t border-ink-900/10;
+  }
+
+  .rule-light {
+    @apply border-t border-white/10;
+  }
+
+  /* Tarjeta: borde fino, esquinas discretas y sombra solo al pasar. */
+  .card {
+    @apply rounded-xl border border-ink-900/10 bg-white;
+  }
+
+  /* Botones. El dorado es la acción principal; el resto, contorno fino. */
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-gold-500 px-6 py-3 text-sm font-semibold tracking-wide text-ink-950 transition duration-300 hover:bg-gold-400;
+  }
+
+  .btn-dark {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-ink-900 px-6 py-3 text-sm font-semibold tracking-wide text-white transition duration-300 hover:bg-ink-800;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-ink-900/20 px-6 py-3 text-sm font-semibold tracking-wide text-ink-800 transition duration-300 hover:border-ink-900/40 hover:bg-white;
+  }
+
+  .btn-outline-light {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-white/25 px-6 py-3 text-sm font-semibold tracking-wide text-white transition duration-300 hover:border-white/50 hover:bg-white/5;
+  }
+
+  /* Enlace con subrayado dorado. */
+  .link-gold {
+    @apply inline-flex items-center gap-1.5 text-sm font-semibold text-gold-600 underline-offset-4 transition hover:text-gold-700 hover:underline;
+  }
+
+  /* Campos de formulario. */
+  .field {
+    @apply w-full rounded-lg border border-ink-900/15 bg-white px-3 py-2.5 text-sm text-ink-800 transition placeholder:text-ink-400 focus:border-gold-500 focus:outline-none focus:ring-2 focus:ring-gold-200;
+  }
+}
+
+/* Cinta de «modo demostración»: solo aparece cuando no hay Supabase. */
+.demo-ribbon {
+  background: repeating-linear-gradient(45deg, #b3934e, #b3934e 12px, #967838 12px, #967838 24px);
+  color: var(--color-ink-950);
+}
+
+/* Aviso legal pendiente (mientras no hay datos fiscales rellenados). */
+.pending {
+  @apply rounded bg-gold-100 px-1.5 py-0.5 font-medium text-gold-700 ring-1 ring-gold-200;
+}
+
+/* Desvanecido suave para las fotos del hero. */
+.hero-veil {
+  background:
+    linear-gradient(to right, rgba(5, 8, 15, 0.94) 0%, rgba(5, 8, 15, 0.78) 42%, rgba(5, 8, 15, 0.35) 100%),
+    linear-gradient(to top, rgba(5, 8, 15, 0.9) 0%, rgba(5, 8, 15, 0) 45%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
