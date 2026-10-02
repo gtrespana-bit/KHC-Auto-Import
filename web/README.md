@@ -49,12 +49,20 @@ Google). Es el modo en el que se puede trabajar en el diseño sin tocar datos re
 1. **Add New → Project** y elige el repositorio `KHC-Auto-Import`.
 2. En **Root Directory** selecciona **`web`** (así el ERP sigue desplegándose en su propio
    proyecto desde la raíz).
-3. Añade las variables de entorno (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+3. Revisa **Settings → General → Build & Development Settings**:
+   - *Framework Preset*: **Next.js**.
+   - *Build Command* y *Output Directory*: **sin override** (vacíos). El `vercel.json` de la
+     raíz del repo es del ERP (Vite) y declara `outputDirectory: "dist"`; Next.js genera
+     `.next`, así que copiar ese valor produce el error
+     `The Next.js output directory "dist" was not found`. `web/vercel.json` ya neutraliza
+     esa herencia (`buildCommand`/`outputDirectory` a `null`), pero no dejes un override
+     `dist` guardado en el dashboard.
+4. Añade las variables de entorno (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
    `NEXT_PUBLIC_SITE_URL`).
-4. **Antes** de asignar el dominio: si `khcimport.autos` ya está en el proyecto del ERP, hay que
+5. **Antes** de asignar el dominio: si `khcimport.autos` ya está en el proyecto del ERP, hay que
    quitarlo de allí (*Settings → Domains → Remove*) y añadirlo después en este proyecto.
    Vercel no permite el mismo dominio en dos proyectos.
-5. El ERP, en su proyecto de Vercel, se mueve a `app.khcimport.autos` para que la web pública
+6. El ERP, en su proyecto de Vercel, se mueve a `app.khcimport.autos` para que la web pública
    y la aplicación no compartan origen (cachés, service worker y cookies separadas).
    Recordatorio: actualizar *Site URL* y *Redirect URLs* en Supabase → Authentication.
 
@@ -119,7 +127,8 @@ web/
 │   └── layout.jsx page.jsx globals.css
 ├── components/           cabecera, pie, tarjetas, filtros, galería, formularios
 ├── lib/                  configuración, datos, formato y acceso a Supabase
-└── public/images/        imágenes de ejemplo (se sustituyen por las reales)
+├── public/images/        imágenes de ejemplo (se sustituyen por las reales)
+└── vercel.json           anula el outputDirectory "dist" del vercel.json del ERP (Vite)
 ```
 
 ## Qué NO hace esta web (a propósito)
