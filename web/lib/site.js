@@ -3,6 +3,13 @@
 // ----------------------------------------------------------------------------
 //  Todo lo que se ve en la web y hay que rellenar/actualizar en un solo sitio.
 //  ⚠ ANTES DE PUBLICAR: completar los campos marcados con [PENDIENTE].
+//
+//  Posicionamiento (leer docs/14_IDENTIDAD_WEB_Y_POSICIONAMIENTO.md):
+//   · Somos un negocio de venta de vehículos seleccionados, NO «solo un
+//     importador». El stock nacional importa tanto como el importado.
+//   · Importamos de cualquier país de Europa cuando compensa, no solo de
+//     Alemania. Alemania es el mercado con más oferta, no el único.
+//   · Todas las ventas incluyen, como mínimo, 12 meses de garantía.
 // ============================================================================
 
 // Dominio canónico: khcimport.autos (el «www» redirige a este desde Vercel).
@@ -14,10 +21,14 @@ export const site = {
   nif: '',                      // [PENDIENTE] NIF/CIF. Sin él, el aviso legal lo indica claramente.
   reacv: '',                    // [PENDIENTE] nº de registro de comerciante de vehículos, si aplica.
   url,
-  tagline: 'Importación de vehículos desde Alemania a Galicia',
+  // Titular de la web: «KHC Auto Import» sigue siendo el nombre comercial,
+  // aunque no todo lo que vendemos sea importado. Se mantiene por marca.
+  tagline: 'Vehículos seleccionados, con garantía mínima de 12 meses',
+  claim: 'Vehículos de calidad, con garantía mínima de 12 meses',
   description:
-    'Seleccionamos, importamos y matriculamos en España coches de segunda mano procedentes de Alemania. ' +
-    'Vehículos revisados, con historial, garantía y todos los papeles en regla. A Coruña y toda Galicia.',
+    'Comercializamos vehículos de ocasión seleccionados: stock nacional e importado de toda Europa. ' +
+    'Cada unidad se revisa, se entrega con su historial verificado y con garantía mínima de 12 meses. ' +
+    'A Coruña y toda Galicia.',
   phone: '+34 600 00 00 00',    // [PENDIENTE] teléfono real: aparece en botones y en los datos estructurados.
   phoneDisplay: '600 00 00 00', // [PENDIENTE]
   whatsapp: '34600000000',      // [PENDIENTE] solo dígitos, con prefijo del país.
@@ -36,8 +47,27 @@ export const site = {
   },
   hours: 'Lunes a sábado, 10:00–20:00 (con cita previa)',
   founded: '2026',
-  // Datos del negocio que se muestran como compromiso comercial.
+  // Compromiso comercial que se repite en toda la web. No cambiar a la ligera:
+  // es la promesa que sostiene el precio y aparece en el contrato.
   warrantyMonths: 12,
+  warrantyLine: 'Garantía mínima de 12 meses, por escrito, en todas las ventas',
+  // Países desde los que compramos habitualmente. Alemania concentra la mayor
+  // oferta, pero se compra donde está la mejor unidad, no donde está la moda.
+  origins: [
+    'Alemania',
+    'Francia',
+    'Bélgica',
+    'Países Bajos',
+    'Italia',
+    'Suiza',
+    'Austria',
+    'Luxemburgo',
+    'Portugal',
+  ],
+  originNote:
+    'Compramos sobre todo en Alemania por volumen y rigor de mantenimiento, pero también en Francia, ' +
+    'Bélgica, Países Bajos, Italia, Suiza, Austria, Luxemburgo y Portugal. Y, por supuesto, stock nacional: ' +
+    'no todo lo que vendemos viene de fuera.',
   social: {
     // [PENDIENTE] cuando existan:
     instagram: '',
@@ -46,15 +76,40 @@ export const site = {
 };
 
 export const nav = [
-  { href: '/coches', label: 'Coches disponibles' },
-  { href: '/como-funciona', label: 'Cómo funciona' },
+  { href: '/coches', label: 'Vehículos disponibles' },
+  { href: '/como-funciona', label: 'Cómo trabajamos' },
+  { href: '/garantia', label: 'Garantía 12 meses' },
   { href: '/encargo', label: 'Te lo buscamos' },
-  { href: '/compramos-tu-coche', label: 'Compramos tu coche' },
   { href: '/contacto', label: 'Contacto' },
+];
+
+/** Enlaces que no caben en la barra principal pero sí en el menú y el pie. */
+export const navSecondary = [
+  { href: '/compramos-tu-coche', label: 'Compramos tu coche' },
 ];
 
 export const legalLinks = [
   { href: '/legal/aviso-legal', label: 'Aviso legal' },
   { href: '/legal/privacidad', label: 'Privacidad' },
   { href: '/legal/cookies', label: 'Cookies' },
+];
+
+/** Los cuatro compromisos que se muestran como franja de confianza. */
+export const pillars = [
+  {
+    title: 'Garantía mínima de 12 meses',
+    text: 'Por escrito en el contrato, en todas las ventas. Nunca menos de un año.',
+  },
+  {
+    title: 'Nacional e importado',
+    text: 'Stock propio de España y unidades seleccionadas en el resto de Europa.',
+  },
+  {
+    title: 'Historial verificado',
+    text: 'Kilómetros, mantenimiento y siniestros comprobados antes de comprar.',
+  },
+  {
+    title: 'Entrega en toda Galicia',
+    text: 'Matriculación, transferencia e ITV en vigor incluidas en la operación.',
+  },
 ];

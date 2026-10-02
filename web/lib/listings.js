@@ -9,6 +9,7 @@
 // ============================================================================
 import { createClient } from '@supabase/supabase-js';
 import { DEMO_LISTINGS } from './demo.js';
+import { originOf } from './format.js';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -89,6 +90,9 @@ export function forSale(list) {
   return list.filter((l) => l.status === 'publicado' || l.status === 'reservado');
 }
 
+/** Vehículos disponibles (alias con el nombre que se usa en los textos). */
+export const availableVehicles = forSale;
+
 export function brandsOf(list) {
   return [...new Set(list.map((l) => l.brand).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
 }
@@ -106,6 +110,8 @@ export function applyFilters(list, params = {}) {
     out = out.filter((l) => `${l.title} ${l.version} ${l.brand} ${l.model}`.toLowerCase().includes(q));
   }
   if (params.marca) out = out.filter((l) => l.brand === params.marca);
+  if (params.procedencia === 'nacional') out = out.filter((l) => !originOf(l).isImport);
+  if (params.procedencia === 'importado') out = out.filter((l) => originOf(l).isImport);
   if (params.combustible) out = out.filter((l) => l.fuel === params.combustible);
   if (params.cambio) out = out.filter((l) => String(l.transmission || '').includes(params.cambio));
   if (max) out = out.filter((l) => Number(l.price) <= max);

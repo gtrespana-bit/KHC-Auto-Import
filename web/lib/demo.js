@@ -39,7 +39,7 @@ export const DEMO_LISTINGS = [
       'Acabado R-Line con asientos deportivos, techo panorámico y faros LED. Motor 2.0 TDI de 150 CV ' +
       'con cambio DSG: el equilibrio perfecto entre consumo y prestaciones, con etiqueta C y 118 g/km de CO₂ ' +
       '(sin impuesto de matriculación). Se entrega con ITV en vigor, revisión de aceite y filtros hecha y ' +
-      'garantía de 12 meses.',
+      'garantía mínima de 12 meses.',
     features: [
       'Acabado R-Line interior y exterior',
       'Techo panorámico y faros LED',
@@ -83,7 +83,7 @@ export const DEMO_LISTINGS = [
       'a diario. Pack M completo, suspensión deportiva, navegador profesional y asientos deportivos en cuero. ' +
       'Mantenimiento al día en servicio oficial BMW durante los primeros años, con historial de revisiones ' +
       'verificable. Cambio ZF de 8 velocidades, pastillas nuevas y neumáticos con más del 70 %. Entregado con ' +
-      'ITV favorable y 12 meses de garantía.',
+      'ITV favorable y garantía mínima de 12 meses.',
     features: [
       'Tracción total xDrive',
       'Pack M interior y exterior',
@@ -123,7 +123,7 @@ export const DEMO_LISTINGS = [
     description:
       'SUV compacto con acabado S-Line y motor gasolina microhíbrido de 150 CV. Unidad de Stuttgart con ' +
       '89.000 km, muy cuidada, sin golpes ni pintura. Virtual Cockpit, cámara de marcha atrás, sensores ' +
-      'delanteros y traseros y techo eléctrico. Se entrega revisado, con ITV en vigor y garantía de 12 meses.',
+      'delanteros y traseros y techo eléctrico. Se entrega revisado, con ITV en vigor y garantía mínima de 12 meses.',
     features: [
       'Virtual Cockpit y navegador',
       'Acabado S-Line completo',
@@ -164,7 +164,7 @@ export const DEMO_LISTINGS = [
       'Híbrido con etiqueta ECO y solo 4,2 l/100 km de media real. Unidad de un solo propietario en Alemania, ' +
       'con todas las revisiones pasadas en la red Toyota. Cambio automático e-CVT, muy suave en ciudad, ' +
       'y fiabilidad contrastada del sistema híbrido de Toyota. Ideal para uso urbano y para evitar ' +
-      'restricciones de tráfico. ITV en vigor y 12 meses de garantía.',
+      'restricciones de tráfico. ITV en vigor y garantía mínima de 12 meses.',
     features: [
       'Etiqueta ECO y bajo consumo real',
       'Etiqueta ambiental ECO',
@@ -198,14 +198,14 @@ export const DEMO_LISTINGS = [
     badge: 'C',
     segment: 'SUV',
     firstRegDate: '2020-02-10',
-    originCountry: 'Alemania',
+    originCountry: 'España',
     price: 22400,
     priceNote: 'Reservado. Si el comprador no confirma, vuelve a estar disponible.',
     description:
-      'SUV familiar con acabado Tecno, muy equipado y con garantía de fábrica ampliable. Procedente de ' +
-      'Múnich, con 95.000 km y revisiones al día. Asientos calefactados, cámara trasera, navegador, ' +
-      'control de crucero y barras de techo. Actualmente reservado: apúntate como alternativa y te avisamos ' +
-      'si se libera o te buscamos una unidad equivalente.',
+      'SUV familiar con acabado Tecno, muy equipado, y de los que no hay que importar: vehículo nacional, ' +
+      'matriculado en España, con 95.000 km y revisiones al día en la red oficial. Asientos calefactados, ' +
+      'cámara trasera, navegador, control de crucero y barras de techo. Actualmente reservado: apúntate ' +
+      'como alternativa y te avisamos si se libera, o te buscamos una unidad equivalente.',
     features: [
       'Asientos calefactados',
       'Navegador y cámara trasera',

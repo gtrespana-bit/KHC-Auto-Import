@@ -10,26 +10,28 @@ import { isDemo } from '@/lib/listings.js';
 export const metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: `${site.name} · Coches importados de Alemania con garantía en A Coruña`,
+    default: `${site.name} · Vehículos seleccionados con garantía mínima de 12 meses en A Coruña`,
     template: `%s | ${site.name}`,
   },
   description: site.description,
   applicationName: site.name,
   keywords: [
-    'coches importados',
-    'importación de coches Alemania',
     'coches de segunda mano A Coruña',
-    'comprar coche Galicia',
-    'coche alemán importado',
+    'vehículos de ocasión Galicia',
+    'comprar coche A Coruña',
+    'coches importados con garantía',
+    'importación de coches Europa',
+    'coches con garantía 12 meses',
+    'concesionario de coches usados A Coruña',
   ],
   openGraph: {
     type: 'website',
     locale: 'es_ES',
     siteName: site.name,
     url: site.url,
-    title: `${site.name} · Coches importados de Alemania con garantía`,
+    title: `${site.name} · Vehículos seleccionados con garantía mínima de 12 meses`,
     description: site.description,
-    images: [{ url: '/images/hero.jpg', width: 1600, height: 900, alt: `${site.name}` }],
+    images: [{ url: '/images/hero.jpg', width: 1376, height: 768, alt: `${site.name}` }],
   },
   twitter: { card: 'summary_large_image' },
   // En modo demostración (sin Supabase) no se indexa: evita que unos coches de
@@ -47,7 +49,7 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: '#0f172a',
+  themeColor: '#05080f',
   width: 'device-width',
   initialScale: 1,
 };
@@ -56,11 +58,19 @@ const orgLd = {
   '@context': 'https://schema.org',
   '@type': 'AutoDealer',
   name: site.name,
+  legalName: site.legalName,
+  slogan: site.claim,
   description: site.description,
   url: site.url,
   telephone: site.phone,
   email: site.email,
-  areaServed: site.areaServed,
+  // Zona de entrega + países en los que compramos (mercados de aprovisionamiento).
+  areaServed: [
+    site.city,
+    site.region,
+    'España',
+    ...site.origins.map((country) => ({ '@type': 'Country', name: country })),
+  ],
   address: {
     '@type': 'PostalAddress',
     addressLocality: site.address.city,
@@ -68,7 +78,10 @@ const orgLd = {
     addressCountry: 'ES',
     ...(site.address.street ? { streetAddress: site.address.street, postalCode: site.address.postalCode } : {}),
   },
+  currenciesAccepted: 'EUR',
   priceRange: '€€',
+  knowsLanguage: 'es',
+  sameAs: [site.social.instagram, site.social.facebook].filter(Boolean),
 };
 
 export default function RootLayout({ children }) {
@@ -76,7 +89,7 @@ export default function RootLayout({ children }) {
     <html lang="es">
       <body className="flex min-h-screen flex-col">
         {isDemo && (
-          <div className="demo-ribbon px-4 py-1.5 text-center text-[11px] font-bold uppercase tracking-wide text-slate-950">
+          <div className="demo-ribbon px-4 py-1.5 text-center text-[11px] font-bold uppercase tracking-wide">
             Web en construcción · datos de ejemplo
           </div>
         )}

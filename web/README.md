@@ -13,6 +13,26 @@ La frontera está en `../supabase/migrations/20261002000001_web_publica.sql`.
 
 ---
 
+## Identidad y tono (leer antes de tocar textos)
+
+Tres reglas gobiernan todos los textos de esta web (detalle en
+[`../docs/14_IDENTIDAD_WEB_Y_POSICIONAMIENTO.md`](../docs/14_IDENTIDAD_WEB_Y_POSICIONAMIENTO.md)):
+
+1. **Vendemos vehículos seleccionados**, no «importaciones». El stock es nacional e importado, y
+   ninguno de los dos se presenta como superior.
+2. **Compramos donde está la unidad correcta**: Alemania por volumen, pero también Francia, Bélgica,
+   Países Bajos, Italia, Suiza, Austria, Luxemburgo y Portugal. La lista vive en `lib/site.js`
+   (`site.origins`), nunca duplicada en las páginas.
+3. **Garantía mínima de 12 meses**, por escrito, en todas las ventas. Aparece en la cabecera, en cada
+   ficha, en el pie, en `/garantia` y en los anuncios que genera el ERP.
+
+El sistema visual (tinta + marfil + dorado champán, titulares en serif, filetes finos) está en
+`app/globals.css`. Los mensajes, en `lib/site.js`. La procedencia de cada ficha se traduce con
+`originOf()` (`lib/format.js`) y no se inventa nunca: si el vehículo no trae país, se dice
+«Disponible en España».
+
+---
+
 ## Poner en marcha
 
 ```bash

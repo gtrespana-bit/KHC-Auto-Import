@@ -1,6 +1,6 @@
 # 🚗 KHC Auto Import — Plan de negocio, ERP interno y web pública
 
-Sistema integral de gestión, inteligencia de mercado, simulación fiscal y guía operativa para el negocio de **importación de vehículos desde Europa para su venta en A Coruña y Galicia (España)**.
+Sistema integral de gestión, inteligencia de mercado, simulación fiscal y guía operativa para el negocio de **venta de vehículos seleccionados en A Coruña y Galicia (España)**: stock nacional y unidades importadas de toda Europa (Alemania, Francia, Bélgica, Países Bajos, Italia, Suiza, Austria, Luxemburgo o Portugal), siempre con **garantía mínima de 12 meses**.
 
 ---
 
@@ -166,7 +166,7 @@ eléctricos) están marcadas como estimación dentro de la propia aplicación y 
 ### Garantía técnica
 
 ```bash
-npm run check          # 72 aserciones sobre el motor fiscal, económico, facturación, plantillas y web
+npm run check          # 74 aserciones sobre el motor fiscal, económico, facturación, plantillas y web
 npm run catalog:stats  # integridad de la base de vehículos (ids, campos, horquillas)
 npm run smoke          # monta las 39 vistas con 3 escenarios de datos
 npm run build          # compilación de producción
@@ -177,8 +177,14 @@ npm run build          # compilación de producción
 ## 🌐 Web pública (carpeta `web/`)
 
 Además del ERP, el repositorio incluye la **web de cara al cliente** (Next.js, renderizado en
-servidor): catálogo de coches disponibles, fichas con galería, proceso de importación, búsqueda
-por encargo, compra de coches usados y captación de contactos.
+servidor): catálogo de vehículos disponibles, fichas con galería, cómo trabajamos, **página de
+garantía**, búsqueda por encargo, compra de vehículos usados y captación de contactos.
+
+**Posicionamiento (leer [`docs/14`](docs/14_IDENTIDAD_WEB_Y_POSICIONAMIENTO.md)):** la web no dice
+«somos importadores». Dice que vendemos vehículos seleccionados —**nacionales e importados**—, que
+compramos donde está la unidad correcta (no solo en Alemania) y que **todas las ventas salen con
+garantía mínima de 12 meses por escrito**. El diseño (tinta, marfil y dorado champán, titulares en
+serif, filetes finos) está centralizado en `web/app/globals.css` y en `web/lib/site.js`.
 
 - **Mismo repositorio, dos despliegues**: la raíz es el ERP (`app.khcimport.autos`) y `web/` es
   la web pública (`khcimport.autos`), cada uno en su proyecto de Vercel.
@@ -192,10 +198,16 @@ por encargo, compra de coches usados y captación de contactos.
   actualizar. Reservado y vendido se reflejan solos, y las fichas vendidas se mantienen por SEO.
 - **Contactos**: lo que rellenan los formularios de la web llega a *Contactos web* dentro del ERP
   (con llamada, WhatsApp, correo y creación de la ficha en el CRM en un clic).
+- **Procedencia visible en cada ficha**: nacional o importado (con su país), con filtro específico
+  en el catálogo y datos estructurados (`countryOfOrigin`) para Google. Si una ficha no trae país,
+  la web no afirma que sea importada.
+- **Garantía**: página propia (`/garantia`) con coberturas, exclusiones, garantía legal y preguntas
+  frecuentes; la promesa de «mínimo 12 meses» aparece en cabecera, fichas, pie y anuncios de portal.
 - Sin credenciales de Supabase, la web arranca en **modo demostración** (datos de ejemplo y
   `noindex`), ideal para trabajar en el diseño.
 
 Detalles, puesta en marcha y checklist previa a publicar: [`web/README.md`](web/README.md).
+Identidad, tono y sistema de diseño: [`docs/14_IDENTIDAD_WEB_Y_POSICIONAMIENTO.md`](docs/14_IDENTIDAD_WEB_Y_POSICIONAMIENTO.md).
 Decisiones de arquitectura y plan por fases: [`docs/12_WEB_PUBLICA_Y_PUBLICACION.md`](docs/12_WEB_PUBLICA_Y_PUBLICACION.md).
 
 ---

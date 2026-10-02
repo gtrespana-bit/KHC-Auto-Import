@@ -206,7 +206,16 @@ Abrir `https://khcimport.autos` y verificar:
 3. **`https://khcimport.autos/sitemap.xml`** → debe listar las páginas y los coches publicados.
 4. **Datos de contacto**: teléfono, WhatsApp y correo reales en `web/lib/site.js`
    (hoy hay valores de ejemplo: `+34 600 00 00 00` y `34600000000`).
-5. **Registrar el sitio en la base de datos** (si no se hizo). Es lo que dice a qué empresa
+5. **Identidad y mensajes** (rediseño del 2-10-2026): comprueba que siguen apareciendo los tres
+   mensajes fijos y que la página nueva carga:
+
+   - `https://khcimport.autos/garantia` → debe explicar coberturas, exclusiones y garantía legal.
+   - Cabecera y pie: «Garantía mínima de 12 meses en todas las ventas» y «Nacional e importado».
+   - Una ficha (`/coches/<slug>`): bloque de garantía, procedencia («Importado de …» o «Nacional») y
+     la especificación *Procedencia*.
+
+   Reglas de redacción y sistema visual: [`docs/14`](14_IDENTIDAD_WEB_Y_POSICIONAMIENTO.md).
+6. **Registrar el sitio en la base de datos** (si no se hizo). Es lo que dice a qué empresa
    pertenecen las publicaciones y los contactos de la web:
 
 ```sql
@@ -217,11 +226,11 @@ on conflict (slug) do update set org_id = excluded.org_id;
 select slug, org_id, name from public.web_sites;   -- comprobar
 ```
 
-6. **Prueba de punta a punta**: con el ERP conectado a Supabase, dar de alta un vehículo de
+7. **Prueba de punta a punta**: con el ERP conectado a Supabase, dar de alta un vehículo de
    prueba, publicarlo desde la pestaña **Web** y comprobarlo en `https://khcimport.autos/coches`.
    Después rellenar un formulario en la web y verlo llegar a **Contactos web** en el ERP.
 
-> Si en el paso 6 algo falla, lo más habitual es que falte el `grant`/política de la migración o
+> Si en el paso 7 algo falla, lo más habitual es que falte el `grant`/política de la migración o
 > el `insert` de `web_sites`. El error aparece en la consola del navegador con el mensaje de
 > Supabase.
 

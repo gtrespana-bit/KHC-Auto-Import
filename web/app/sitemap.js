@@ -2,7 +2,7 @@ import { getListings } from '@/lib/listings.js';
 import { site } from '@/lib/site.js';
 
 export default async function sitemap() {
-  const staticRoutes = ['', '/coches', '/como-funciona', '/encargo', '/compramos-tu-coche', '/contacto', '/legal/aviso-legal', '/legal/privacidad', '/legal/cookies'].map(
+  const staticRoutes = ['', '/coches', '/como-funciona', '/garantia', '/encargo', '/compramos-tu-coche', '/contacto', '/legal/aviso-legal', '/legal/privacidad', '/legal/cookies'].map(
     (path) => ({
       url: `${site.url}${path}`,
       lastModified: new Date(),

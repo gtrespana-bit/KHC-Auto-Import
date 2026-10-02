@@ -33,10 +33,10 @@ export default function ShareButton({ listing }) {
     <button
       type="button"
       onClick={share}
-      className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+      className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-ink-900/15 px-4 py-2.5 text-sm font-semibold text-ink-700 transition duration-300 hover:border-ink-900/30 hover:bg-ivory"
     >
-      {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Share2 className="h-4 w-4" />}
-      {copied ? 'Enlace copiado' : 'Compartir este coche'}
+      {copied ? <Check className="h-4 w-4 text-gold-600" /> : <Share2 className="h-4 w-4" strokeWidth={1.8} />}
+      {copied ? 'Enlace copiado' : 'Compartir este vehículo'}
     </button>
   );
 }

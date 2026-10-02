@@ -99,7 +99,7 @@ export default async function OpengraphImage({ params }) {
             </div>
           )}
           <div style={{ display: 'flex', color: '#34d399', fontSize: 26, fontWeight: 600 }}>
-            Garantía {listing?.warrantyMonths || 12} meses · IVA incluido
+            Garantía mínima de {listing?.warrantyMonths || 12} meses · IVA incluido
           </div>
           <div style={{ display: 'flex', color: '#94a3b8', fontSize: 24 }}>
             {site.areaServed} · {site.url.replace(/^https?:\/\//, '')}

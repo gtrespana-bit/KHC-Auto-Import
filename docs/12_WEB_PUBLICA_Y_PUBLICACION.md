@@ -351,6 +351,16 @@ trae stock, el segundo encaja con el modelo de importación por encargo.
 4. **Marca y dominio:** «KHC Auto Import» es el nombre definitivo. Al registrador: `khcimport.autos`
    y `.com` (sin registros DNS en el momento del análisis), más correo profesional del dominio.
 
+### Posicionamiento, tono y diseño (2 de octubre de 2026)
+
+La web no se plantea como «web de un importador»: vendemos **vehículos
+seleccionados, nacionales e importados**, se compra en cualquier país que
+compense y todas las ventas salen con **garantía mínima de 12 meses**. El
+discurso, el sistema visual y las reglas de redacción están fijados en
+[`docs/14_IDENTIDAD_WEB_Y_POSICIONAMIENTO.md`](14_IDENTIDAD_WEB_Y_POSICIONAMIENTO.md),
+que es el documento de referencia antes de tocar textos de la web o de los
+anuncios.
+
 ### Estado de la implantación
 
 - [x] Fase 0 · Nombre y dominio: renombrado completo en el código, PWA, docs y claves de
@@ -359,6 +369,8 @@ trae stock, el segundo encaja con el modelo de importación por encargo.
 - [x] Fase 2 · ERP → web: pestaña **Web** en la ficha, modal de publicación, textos generados,
       fotos sin EXIF y con la matrícula tapada, vista previa, estados y re-sincronización.
 - [x] Fase 2.b · Contactos: módulo **Contactos web** con las consultas de la web.
+- [x] Fase 2.c · Identidad: rediseño premium, discurso nacional/importado, mercados de compra y
+      garantía mínima de 12 meses (página `/garantia` incluida). Ver `docs/14`.
 - [ ] Fase 3 · Web en producción: dominio, variables en Vercel, fotos reales y revisión legal.
 - [ ] Fase 4 · Captación: Google Business Profile, Search Console, feed para Google Vehicle Ads.
 - [ ] Fase 5 · Portales: un solo contenido comercial para web y anuncios.

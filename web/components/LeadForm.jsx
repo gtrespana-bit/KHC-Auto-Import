@@ -2,12 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Send, CheckCircle2, AlertTriangle, MessageCircle } from 'lucide-react';
+import { Send, CheckCircle2, AlertTriangle, MessageCircle, ShieldCheck } from 'lucide-react';
 import { site } from '../lib/site.js';
 import { whatsappLink } from '../lib/format.js';
-
-const inputClass =
-  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-100';
 
 export default function LeadForm({
   kind = 'contacto',
@@ -68,17 +65,17 @@ export default function LeadForm({
 
   if (state === 'ok') {
     return (
-      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6">
-        <CheckCircle2 className="h-8 w-8 text-emerald-600" />
-        <p className="mt-3 text-base font-bold text-emerald-900">¡Gracias, {sentName}!</p>
-        <p className="mt-1 text-sm text-emerald-800">
+      <div className="card border-gold-200 bg-gold-100/60 p-6 sm:p-7">
+        <CheckCircle2 className="h-8 w-8 text-gold-600" strokeWidth={1.6} />
+        <p className="mt-3 font-display text-xl font-semibold text-ink-900">Gracias, {sentName}</p>
+        <p className="mt-2 text-sm leading-relaxed text-ink-600">
           Hemos recibido tu solicitud. Te llamamos en menos de 24 horas (normalmente mucho antes).
         </p>
         <a
           href={whatsappLink(site.whatsapp, whatsappText || `Hola, soy ${sentName}. Acabo de escribir por la web.`)}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
+          className="mt-5 inline-flex items-center gap-2 rounded-lg bg-ink-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-ink-800"
         >
           <MessageCircle className="h-4 w-4" /> Escribir por WhatsApp ahora
         </a>
@@ -87,37 +84,50 @@ export default function LeadForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <h2 className="text-lg font-bold text-slate-900">{title}</h2>
-      <p className="mt-1 text-sm text-slate-600">{subtitle}</p>
+    <form onSubmit={onSubmit} className="card p-6 sm:p-7">
+      <h2 className="font-display text-xl font-semibold tracking-tight text-ink-900">{title}</h2>
+      <p className="mt-2 text-sm leading-relaxed text-ink-500">{subtitle}</p>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+      <div className="mt-5 grid gap-3.5 sm:grid-cols-2">
         <label className="sm:col-span-1">
-          <span className="mb-1 block text-xs font-semibold text-slate-600">Nombre *</span>
-          <input name="name" required autoComplete="name" className={inputClass} placeholder="Tu nombre" />
+          <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-500">
+            Nombre *
+          </span>
+          <input name="name" required autoComplete="name" className="field" placeholder="Tu nombre" />
         </label>
         <label className="sm:col-span-1">
-          <span className="mb-1 block text-xs font-semibold text-slate-600">Teléfono</span>
-          <input name="phone" type="tel" autoComplete="tel" className={inputClass} placeholder="600 00 00 00" />
+          <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-500">
+            Teléfono
+          </span>
+          <input name="phone" type="tel" autoComplete="tel" className="field" placeholder="600 00 00 00" />
         </label>
         <label className="sm:col-span-2">
-          <span className="mb-1 block text-xs font-semibold text-slate-600">Correo electrónico</span>
-          <input name="email" type="email" autoComplete="email" className={inputClass} placeholder="tucorreo@ejemplo.com" />
+          <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-500">
+            Correo electrónico
+          </span>
+          <input name="email" type="email" autoComplete="email" className="field" placeholder="tucorreo@ejemplo.com" />
         </label>
         <label className="sm:col-span-2">
-          <span className="mb-1 block text-xs font-semibold text-slate-600">{messageLabel}</span>
-          <textarea name="message" rows={3} className={inputClass} placeholder={messagePlaceholder} />
+          <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-500">
+            {messageLabel}
+          </span>
+          <textarea name="message" rows={3} className="field" placeholder={messagePlaceholder} />
         </label>
       </div>
 
       {/* Trampa para robots: si se rellena, se descarta. */}
       <input name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
 
-      <label className="mt-4 flex items-start gap-2 text-xs text-slate-600">
-        <input name="consent" type="checkbox" required className="mt-0.5 h-4 w-4 rounded border-slate-300 text-amber-600" />
+      <label className="mt-4 flex items-start gap-2 text-xs leading-relaxed text-ink-500">
+        <input
+          name="consent"
+          type="checkbox"
+          required
+          className="mt-0.5 h-4 w-4 rounded border-ink-900/25 accent-gold-600"
+        />
         <span>
           He leído y acepto la{' '}
-          <Link href="/legal/privacidad" className="font-semibold text-amber-700 underline">
+          <Link href="/legal/privacidad" className="font-semibold text-gold-700 underline underline-offset-2">
             política de privacidad
           </Link>
           . Tus datos se usan solo para responder a esta solicitud.
@@ -131,18 +141,15 @@ export default function LeadForm({
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={state === 'sending'}
-        className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-3 text-sm font-bold text-white transition hover:bg-slate-800 disabled:opacity-60"
-      >
+      <button type="submit" disabled={state === 'sending'} className="btn-gold mt-5 w-full disabled:opacity-60">
         <Send className="h-4 w-4" />
         {state === 'sending' ? 'Enviando…' : submitLabel}
       </button>
 
-      <p className="mt-3 text-center text-xs text-slate-500">
-        O si lo prefieres, llámanos al{' '}
-        <a href={`tel:${site.phone.replace(/\s/g, '')}`} className="font-semibold text-slate-700">
+      <p className="mt-4 flex items-center justify-center gap-2 text-center text-xs text-ink-400">
+        <ShieldCheck className="h-4 w-4 text-gold-500" />
+        O llámanos al{' '}
+        <a href={`tel:${site.phone.replace(/\s/g, '')}`} className="font-semibold text-ink-700">
           {site.phoneDisplay}
         </a>
       </p>

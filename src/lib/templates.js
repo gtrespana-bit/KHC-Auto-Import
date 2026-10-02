@@ -70,8 +70,11 @@ export function buildAd({ vehicle = {}, price = 0, company = {}, portal = 'gener
     v.firstRegDate && `Primera matriculación ${dateEs(v.firstRegDate)}`,
   ].filter(Boolean);
 
+  // Garantía: en KHC nunca es inferior a 12 meses, así que el anuncio lo dice
+  // siempre (aunque la ficha no traiga el dato).
+  const garantiaMeses = n(v.sale?.warrantyMonths || company.warrantyMonths) || 12;
   const garantias = [
-    v.sale?.warrantyMonths ? `Garantía de ${v.sale.warrantyMonths} meses incluida` : null,
+    `Garantía mínima de ${Math.max(12, garantiaMeses)} meses incluida`,
     'ITV en vigor',
     'Libro de mantenimiento y dos llaves',
     'Vehículo revisado y con la documentación al día',
@@ -99,7 +102,10 @@ export function buildAd({ vehicle = {}, price = 0, company = {}, portal = 'gener
   const limit = PORTAL_LIMITS[portal] || PORTAL_LIMITS.generico;
   const short = [
     `${title}${year ? ` ${year}` : ''} · ${numEs(km, 0)} km · ${v.fuel || ''} ${v.transmission || ''}`.replace(/\s+/g, ' '),
-    `Revisado, ITV en vigor, libro de mantenimiento y dos llaves. Garantía incluida. ${numEs(n(price), 0)} €.`,
+    `Revisado, ITV en vigor, libro de mantenimiento y dos llaves. Garantía mínima de ${Math.max(
+      12,
+      garantiaMeses,
+    )} meses. ${numEs(n(price), 0)} €.`,
     company.city ? `${company.city}. Cambio de nombre incluido.` : '',
   ].filter(Boolean).join(' ');
 
@@ -160,6 +166,21 @@ export function emailLink(to = '', subject = '', body = '') {
 //  tiene el coche delante: es mejor una ficha corta y verdadera que una larga
 //  con promesas que no se pueden sostener.
 
+/**
+ * Procedencia del vehículo en lenguaje de cliente.
+ *
+ * No todo el stock es importado: hay también vehículos nacionales, así que
+ * nunca se dice «importado» por defecto. Si la ficha no trae país se habla de
+ * «nacional» (está matriculado y se vende en España), que es lo verificable.
+ */
+export function originLabel(vehicle = {}) {
+  const country = String(vehicle.originCountry || '').trim();
+  if (!country || /espa|nacional/i.test(country)) {
+    return { isImport: false, country: '', label: 'Vehículo nacional' };
+  }
+  return { isImport: true, country, label: `Importado de ${country}` };
+}
+
 /** Título para la web: marca + modelo + versión, sin duplicar palabras. */
 export function webTitle(vehicle = {}) {
   const v = vehicle;
@@ -177,7 +198,9 @@ export function webFeatures(vehicle = {}) {
   if (docs.serviceBook) out.push('Libro de mantenimiento');
   if (docs.keys) out.push('Dos llaves');
   if (docs.itv || v.itvDue) out.push(v.itvDue ? `ITV en vigor hasta ${dateEs(v.itvDue)}` : 'ITV en vigor');
-  if (v.originCountry) out.push(`Importado de ${v.originCountry} con documentación verificada`);
+  const origin = originLabel(v);
+  if (origin.isImport) out.push(`Importado de ${origin.country} con documentación verificada`);
+  else out.push('Vehículo nacional con documentación verificada');
   return out;
 }
 
@@ -203,16 +226,26 @@ export function buildWebListing({ vehicle = {}, company = {}, price = 0 } = {}) 
     `${v.brand || ''} ${v.model || ''}${v.version ? ` ${v.version}` : ''} ${presentacion ? `: unidad ${presentacion}` : ''}.`.replace(/\s+\./, '.').replace(/\s+/g, ' '),
   );
 
+  const origin = originLabel(v);
   if (v.firstRegDate) {
-    parrafos.push(`Primera matriculación en ${dateEs(v.firstRegDate)}${v.originCountry ? ` (${v.originCountry})` : ''}.`);
+    parrafos.push(
+      `Primera matriculación en ${dateEs(v.firstRegDate)}${origin.isImport ? ` (${origin.country})` : ''}.`,
+    );
   }
+  parrafos.push(
+    origin.isImport
+      ? 'Unidad seleccionada fuera de España: la importación, los impuestos y la matriculación ya están resueltos.'
+      : 'Vehículo con matrícula española: nos ocupamos de la transferencia y de los trámites con la DGT.',
+  );
 
   const estado = [
     'Se entrega revisado, con la puesta a punto hecha y la documentación al día',
     docs.serviceBook ? 'con libro de mantenimiento' : '',
     docs.keys ? 'y dos llaves' : '',
   ].filter(Boolean).join(' ');
-  parrafos.push(`${estado}. Incluye garantía de ${garantia} meses y acompañamiento en todos los trámites.`);
+  parrafos.push(
+    `${estado}. Incluye garantía mínima de ${Math.max(12, garantia)} meses, por escrito, y acompañamiento en todos los trámites.`,
+  );
 
   if (v.co2) {
     parrafos.push(`Emisiones de ${v.co2} g/km de CO₂${v.badge ? ` y etiqueta ambiental ${v.badge}` : ''}.`);

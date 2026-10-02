@@ -1,234 +1,304 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import {
-  ShieldCheck,
-  FileCheck2,
-  SearchCheck,
-  Wallet,
-  ArrowRight,
-  Phone,
-  MapPin,
-  Clock,
-} from 'lucide-react';
+import { ArrowRight, Phone, MapPin, Clock, ShieldCheck, FileCheck2, SearchCheck, Wallet, Globe2, Car } from 'lucide-react';
 import VehicleCard from '@/components/VehicleCard.jsx';
 import { getListings, forSale } from '@/lib/listings.js';
-import { site } from '@/lib/site.js';
+import { site, pillars } from '@/lib/site.js';
 
 export const revalidate = 60;
 
+const PILLAR_ICONS = [ShieldCheck, Car, SearchCheck, FileCheck2];
+
 const STEPS = [
   {
-    title: 'Nos dices qué buscas',
-    text: 'Presupuesto, uso, kilómetros al año y prioridades. Te proponemos unidades reales con su informe y su precio final puesto en Galicia.',
+    title: 'Nos cuentas qué buscas',
+    text: 'Uso, presupuesto, kilómetros al año y prioridades. Te proponemos unidades reales con su informe y su precio final puesto en Galicia.',
   },
   {
-    title: 'La seleccionamos en Alemania',
-    text: 'Filtramos por historial, kilometraje verificable y estado. Descartamos lo que no compraríamos para nosotros. Te enviamos las fotos y el informe antes de comprar.',
+    title: 'Seleccionamos la unidad',
+    text: 'Miramos en nuestro stock y en los mercados donde compensa comprar. Descartamos lo que no compraríamos para nosotros; te enviamos fotos e informe antes de cerrar nada.',
   },
   {
-    title: 'Importamos y matriculamos',
-    text: 'Transporte, ITV de importación, impuestos (IEDMT), matriculación en la DGT y transferencia. Nos ocupamos de todo el papeleo.',
+    title: 'Preparamos y matriculamos',
+    text: 'Revisión, puesta a punto, ITV e impuestos. Si el coche viene de fuera, nos ocupamos de la importación completa; si es nacional, de la transferencia.',
   },
   {
-    title: 'Te la entregamos revisada',
-    text: 'Entrega con ITV en vigor, revisión hecha, dos llaves y garantía de 12 meses. Con todos los documentos a tu nombre.',
+    title: 'Te lo entregamos con garantía',
+    text: 'Entrega con ITV en vigor, dos llaves, documentación a tu nombre y garantía mínima de 12 meses por escrito.',
   },
 ];
 
-const TRUST = [
-  { icon: ShieldCheck, title: 'Garantía 12 meses', text: 'En todas nuestras unidades, con póliza profesional.' },
-  { icon: FileCheck2, title: 'Todos los papeles', text: 'Matriculación, ITV e impuestos incluidos en el trato.' },
-  { icon: SearchCheck, title: 'Historial verificado', text: 'Kilometraje y mantenimiento comprobados antes de comprar.' },
-  { icon: Wallet, title: 'Financiación a medida', text: 'Estudiamos tu caso, con o sin entrada. Respuesta en 24 h.' },
+const SERVICES = [
+  {
+    icon: Globe2,
+    title: 'Te buscamos el coche que quieres',
+    text: 'Si no está en nuestro stock, lo localizamos: España o el resto de Europa, allí donde esté la mejor unidad. Tú recibes opciones con precio final y decides.',
+    href: '/encargo',
+    cta: 'Pedir búsqueda',
+  },
+  {
+    icon: Wallet,
+    title: 'Compramos tu coche',
+    text: 'Valoramos tu vehículo actual y lo compramos o lo descontamos del precio. Tasación el mismo día y gestión de la transferencia incluida.',
+    href: '/compramos-tu-coche',
+    cta: 'Valorar mi coche',
+  },
 ];
 
 export default async function HomePage() {
   const listings = await getListings();
-  const featured = forSale(listings).slice(0, 3);
-  const stock = forSale(listings).length;
+  const stock = forSale(listings);
+  const featured = stock.slice(0, 3);
 
   return (
     <>
-      {/* Hero */}
-      <section className="relative isolate overflow-hidden bg-slate-900">
+      {/* Hero ---------------------------------------------------------------- */}
+      <section className="relative isolate overflow-hidden bg-ink-950">
         <Image
           src="/images/hero.jpg"
           alt=""
           fill
           priority
           sizes="100vw"
-          className="object-cover opacity-45"
+          className="object-cover object-center opacity-70"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-slate-950/30" />
-        <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
-          <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-amber-300">
-            Importación desde Alemania · {site.areaServed}
-          </span>
-          <h1 className="mt-5 max-w-2xl text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl">
-            Coches alemanes con historial, garantía y todos los papeles en regla
+        <div className="hero-veil absolute inset-0" />
+        <div className="container-x relative py-24 sm:py-32">
+          <p className="eyebrow-light">A Coruña · Galicia · Nacional e importado</p>
+          <h1 className="display-light mt-6 max-w-3xl text-4xl leading-[1.08] sm:text-6xl">
+            Vehículos seleccionados,
+            <br className="hidden sm:block" /> con garantía mínima de 12 meses
           </h1>
-          <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-300 sm:text-lg">
-            Seleccionamos cada unidad en Alemania, la revisamos, la importamos y la matriculamos en España.
-            Tú solo tienes que elegir el coche y disfrutarlo.
+          <p className="mt-6 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg">
+            Vendemos coches de ocasión de calidad: stock nacional y unidades que traemos de toda Europa.
+            Cada uno revisado, con su historial verificado, su precio final claro y su garantía por escrito.
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link
-              href="/coches"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-6 py-3.5 text-sm font-bold text-slate-950 transition hover:bg-amber-400"
-            >
-              Ver coches disponibles
-              <span className="rounded-md bg-slate-950/15 px-2 py-0.5 text-xs">{stock}</span>
+
+          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            <Link href="/coches" className="btn-gold">
+              Ver vehículos disponibles
+              {stock.length > 0 && (
+                <span className="rounded bg-ink-950/15 px-2 py-0.5 text-xs font-bold">{stock.length}</span>
+              )}
             </Link>
-            <Link
-              href="/encargo"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10"
-            >
-              Te busco un coche concreto
+            <Link href="/encargo" className="btn-outline-light">
+              Buscamos tu coche a medida
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-300">
-            <span className="flex items-center gap-1.5">
-              <ShieldCheck className="h-4 w-4 text-amber-400" /> Garantía de 12 meses
-            </span>
-            <span className="flex items-center gap-1.5">
-              <FileCheck2 className="h-4 w-4 text-amber-400" /> Matriculación incluida
-            </span>
-            <span className="flex items-center gap-1.5">
-              <MapPin className="h-4 w-4 text-amber-400" /> Entrega en Galicia
-            </span>
-          </div>
+
+          <ul className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-3 text-[13px] text-white/65">
+            <li className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-gold-400" strokeWidth={1.8} /> Garantía mínima de 12 meses
+            </li>
+            <li className="flex items-center gap-2">
+              <FileCheck2 className="h-4 w-4 text-gold-400" strokeWidth={1.8} /> Revisados y con historial
+            </li>
+            <li className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-gold-400" strokeWidth={1.8} /> Entrega en toda Galicia
+            </li>
+          </ul>
         </div>
       </section>
 
-      {/* Confianza */}
-      <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto grid max-w-6xl gap-6 px-4 py-10 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
-          {TRUST.map((item) => (
-            <div key={item.title} className="flex gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-                <item.icon className="h-5 w-5" />
-              </span>
-              <div>
-                <p className="text-sm font-bold text-slate-900">{item.title}</p>
-                <p className="mt-0.5 text-xs leading-relaxed text-slate-600">{item.text}</p>
+      {/* Franja de compromisos ----------------------------------------------- */}
+      <section className="border-b border-white/10 bg-ink-900">
+        <div className="container-x grid gap-8 py-10 sm:grid-cols-2 lg:grid-cols-4">
+          {pillars.map((item, i) => {
+            const Icon = PILLAR_ICONS[i] || ShieldCheck;
+            return (
+              <div key={item.title} className="flex gap-3.5">
+                <Icon className="mt-0.5 h-5 w-5 shrink-0 text-gold-400" strokeWidth={1.6} />
+                <div>
+                  <p className="text-[13px] font-semibold text-white">{item.title}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-white/55">{item.text}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
-      {/* Destacados */}
-      <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-        <div className="flex flex-wrap items-end justify-between gap-4">
+      {/* Stock destacado ----------------------------------------------------- */}
+      <section className="container-x py-20 sm:py-24">
+        <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Coches disponibles</h2>
-            <p className="mt-1 text-sm text-slate-600">
-              Stock real, actualizado desde nuestro sistema de gestión. Si está aquí, está disponible.
+            <p className="eyebrow">Stock disponible</p>
+            <h2 className="display mt-3 text-3xl sm:text-4xl">Vehículos disponibles</h2>
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink-500">
+              Stock real, actualizado desde nuestro sistema de gestión. Si un vehículo está aquí, está
+              disponible; si se reserva, lo marcamos el mismo día.
             </p>
           </div>
-          <Link href="/coches" className="inline-flex items-center gap-1.5 text-sm font-bold text-amber-700 hover:underline">
+          <Link href="/coches" className="link-gold">
             Ver todo el stock <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
         {featured.length ? (
-          <div className="mt-7 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {featured.map((listing) => (
               <VehicleCard key={listing.slug} listing={listing} />
             ))}
           </div>
         ) : (
-          <p className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-6 text-sm text-slate-600">
-            Ahora mismo no hay coches publicados. Estamos trabajando en las próximas unidades:{' '}
-            <Link href="/encargo" className="font-semibold text-amber-700 underline">
-              cuéntanos qué buscas
-            </Link>{' '}
-            y te avisamos antes de que llegue.
-          </p>
+          <div className="mt-10 rounded-xl border border-ink-900/10 bg-white p-8">
+            <p className="font-display text-lg font-semibold text-ink-900">
+              Ahora mismo no hay vehículos publicados
+            </p>
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-500">
+              Estamos preparando las próximas unidades. Cuéntanos qué buscas y te avisamos antes de que
+              llegue, o te localizamos una a medida.
+            </p>
+            <Link href="/encargo" className="btn-dark mt-5">
+              Pedir búsqueda <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         )}
       </section>
 
-      {/* Cómo funciona */}
-      <section className="border-y border-slate-200 bg-slate-50">
-        <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-          <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Cómo funciona</h2>
-          <p className="mt-1 max-w-2xl text-sm text-slate-600">
-            Sin sorpresas: te decimos el precio final antes de comprar y nos ocupamos de toda la tramitación.
-          </p>
-          <ol className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      {/* Cómo trabajamos ----------------------------------------------------- */}
+      <section className="border-y border-ink-900/10 bg-white">
+        <div className="container-x py-20 sm:py-24">
+          <p className="eyebrow">Cómo trabajamos</p>
+          <h2 className="display mt-3 max-w-2xl text-3xl sm:text-4xl">
+            Precio final antes de decidir, y el papeleo por nuestra cuenta
+          </h2>
+
+          <ol className="mt-12 grid gap-10 md:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((step, i) => (
-              <li key={step.title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-sm font-bold text-white">
-                  {i + 1}
+              <li key={step.title} className="border-t border-ink-900/15 pt-6">
+                <span className="font-display text-2xl font-semibold text-gold-500">
+                  {String(i + 1).padStart(2, '0')}
                 </span>
-                <p className="mt-3 text-sm font-bold text-slate-900">{step.title}</p>
-                <p className="mt-1.5 text-xs leading-relaxed text-slate-600">{step.text}</p>
+                <p className="mt-4 font-display text-lg font-semibold text-ink-900">{step.title}</p>
+                <p className="mt-2 text-sm leading-relaxed text-ink-500">{step.text}</p>
               </li>
             ))}
           </ol>
-          <Link
-            href="/como-funciona"
-            className="mt-6 inline-flex items-center gap-1.5 text-sm font-bold text-amber-700 hover:underline"
-          >
+
+          <Link href="/como-funciona" className="link-gold mt-10">
             Ver el proceso completo <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </section>
 
-      {/* Dos servicios */}
-      <section className="mx-auto grid max-w-6xl gap-6 px-4 py-14 sm:px-6 lg:grid-cols-2">
-        <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
-          <h3 className="text-lg font-extrabold text-slate-900">Te buscamos el coche que quieres</h3>
-          <p className="mt-2 text-sm leading-relaxed text-slate-600">
-            Si no está en el catálogo, lo encontramos: dinos modelo, versión, presupuesto y prioridades.
-            Buscamos en el mercado alemán y te presentamos opciones reales con precio final en Galicia.
-          </p>
-          <Link
-            href="/encargo"
-            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-slate-800"
-          >
-            Pedir búsqueda <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
-          <h3 className="text-lg font-extrabold text-slate-900">Compramos tu coche</h3>
-          <p className="mt-2 text-sm leading-relaxed text-slate-600">
-            Valoramos tu coche actual y lo usamos como parte del pago. Tasación sin compromiso en el mismo
-            día, con oferta en firme y toda la gestión de la transferencia incluida.
-          </p>
-          <Link
-            href="/compramos-tu-coche"
-            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-amber-400"
-          >
-            Valorar mi coche <ArrowRight className="h-4 w-4" />
-          </Link>
+      {/* Procedencia --------------------------------------------------------- */}
+      <section className="bg-ink-950 text-white">
+        <div className="container-x grid gap-12 py-20 sm:py-24 lg:grid-cols-[1.05fr_1fr]">
+          <div>
+            <p className="eyebrow-light">De dónde vienen nuestros coches</p>
+            <h2 className="display-light mt-3 text-3xl sm:text-4xl">
+              Compramos donde está la unidad correcta, no donde está la moda
+            </h2>
+            <p className="mt-5 text-sm leading-relaxed text-white/65">
+              Trabajamos sobre todo con stock nacional y, cuando compensa, traemos la unidad de fuera:
+              Alemania por volumen y rigor de mantenimiento, pero también Francia, Bélgica, Países Bajos,
+              Italia, Suiza, Austria, Luxemburgo o Portugal. Elegimos por estado, historial y precio final,
+              no por bandera.
+            </p>
+            <p className="mt-4 text-sm leading-relaxed text-white/65">
+              En todos los casos el resultado es el mismo: un vehículo revisado, con su historial
+              comprobado, matriculado en España y con garantía mínima de 12 meses.
+            </p>
+            <Link href="/como-funciona" className="btn-outline-light mt-8">
+              Cómo seleccionamos cada coche <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="lg:pl-6">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-gold-400">
+              Mercados en los que compramos
+            </p>
+            <ul className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-white/10 pt-5 text-sm text-white/75 sm:grid-cols-3">
+              {site.origins.map((country) => (
+                <li key={country} className="border-b border-white/5 pb-2">
+                  {country}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-6 flex items-start gap-2 text-xs leading-relaxed text-white/45">
+              <Car className="mt-0.5 h-4 w-4 shrink-0 text-gold-500" strokeWidth={1.8} />
+              También vendemos vehículos nacionales, sin importación de por medio: no todo lo que tenemos
+              en el escaparate viene de fuera.
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* Cierre */}
-      <section className="mx-auto max-w-6xl px-4 pb-6 sm:px-6">
-        <div className="rounded-2xl bg-slate-900 p-8 text-white sm:p-10">
-          <h2 className="text-2xl font-extrabold tracking-tight">¿Hablamos?</h2>
-          <p className="mt-2 max-w-xl text-sm text-slate-300">
-            Cuéntanos qué necesitas y te asesoramos sin compromiso: qué modelo te conviene, qué coste tiene
-            traerlo y cuánto tardaríamos.
+      {/* Garantía ------------------------------------------------------------ */}
+      <section className="border-b border-ink-900/10 bg-gold-100/60">
+        <div className="container-x grid items-center gap-10 py-20 sm:py-24 lg:grid-cols-[1fr_0.9fr]">
+          <div>
+            <p className="eyebrow">Nuestro compromiso</p>
+            <h2 className="display mt-3 text-3xl sm:text-4xl">
+              Garantía mínima de 12 meses. Por escrito, siempre.
+            </h2>
+            <p className="mt-5 max-w-xl text-sm leading-relaxed text-ink-600">
+              Da igual si el coche es nacional o importado: todas nuestras ventas a consumidores salen con
+              una garantía mínima de un año, respaldada por una póliza profesional, además de la garantía
+              legal que te corresponde. Te entregamos las coberturas por escrito junto con el contrato.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link href="/garantia" className="btn-dark">
+                Qué cubre la garantía <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link href="/contacto" className="btn-outline">
+                Preguntar por una unidad
+              </Link>
+            </div>
+          </div>
+          <ul className="space-y-4">
+            {[
+              'Certificado de garantía entregado con el vehículo.',
+              'Cobertura de motor, transmisión y sistemas electrónicos principales.',
+              'Red de talleres en toda Galicia para hacer valer la garantía.',
+              'Revisión previa y puesta a punto antes de la entrega.',
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-3 border-b border-ink-900/10 pb-4 text-sm text-ink-700">
+                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" strokeWidth={1.8} />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* Servicios ----------------------------------------------------------- */}
+      <section className="container-x grid gap-6 py-20 sm:py-24 lg:grid-cols-2">
+        {SERVICES.map((service) => (
+          <div key={service.title} className="card flex flex-col p-8">
+            <service.icon className="h-6 w-6 text-gold-600" strokeWidth={1.6} />
+            <h3 className="mt-5 font-display text-xl font-semibold text-ink-900">{service.title}</h3>
+            <p className="mt-3 flex-1 text-sm leading-relaxed text-ink-500">{service.text}</p>
+            <Link href={service.href} className="link-gold mt-6">
+              {service.cta} <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        ))}
+      </section>
+
+      {/* Cierre -------------------------------------------------------------- */}
+      <section className="container-x pb-4">
+        <div className="bg-ink-950 px-8 py-14 text-white sm:px-14">
+          <p className="eyebrow-light">Hablemos</p>
+          <h2 className="display-light mt-3 text-3xl sm:text-4xl">¿Qué coche necesitas?</h2>
+          <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/65">
+            Cuéntanoslo y te asesoramos sin compromiso: qué unidad te conviene, qué coste tiene y en cuánto
+            tiempo la tienes en tus manos.
           </p>
-          <div className="mt-6 flex flex-col gap-4 text-sm sm:flex-row sm:items-center sm:gap-8">
-            <a href={`tel:${site.phone.replace(/\s/g, '')}`} className="flex items-center gap-2 font-semibold">
-              <Phone className="h-4 w-4 text-amber-400" /> {site.phoneDisplay}
+          <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3 text-sm text-white/70">
+            <a href={`tel:${site.phone.replace(/\s/g, '')}`} className="flex items-center gap-2 font-semibold text-white transition hover:text-gold-400">
+              <Phone className="h-4 w-4 text-gold-400" strokeWidth={1.8} /> {site.phoneDisplay}
             </a>
-            <span className="flex items-center gap-2 text-slate-300">
-              <Clock className="h-4 w-4 text-amber-400" /> {site.hours}
+            <span className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-gold-400" strokeWidth={1.8} /> {site.hours}
             </span>
-            <span className="flex items-center gap-2 text-slate-300">
-              <MapPin className="h-4 w-4 text-amber-400" /> {site.city} · {site.region}
+            <span className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-gold-400" strokeWidth={1.8} /> {site.city} · {site.region}
             </span>
           </div>
-          <Link
-            href="/contacto"
-            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-amber-500 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-amber-400"
-          >
+          <Link href="/contacto" className="btn-gold mt-8">
             Escríbenos <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
