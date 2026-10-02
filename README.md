@@ -172,6 +172,28 @@ npm run build          # compilación de producción
 
 ---
 
+## 🌐 Web pública (carpeta `web/`)
+
+Además del ERP, el repositorio incluye la **web de cara al cliente** (Next.js, renderizado en
+servidor): catálogo de coches disponibles, fichas con galería, proceso de importación, búsqueda
+por encargo, compra de coches usados y captación de contactos.
+
+- **Mismo repositorio, dos despliegues**: la raíz es el ERP (`app.khcautoimport.es`) y `web/` es
+  la web pública (`www.khcautoimport.es`), cada uno en su proyecto de Vercel.
+- **Misma base de datos, frontera clara**: la web **no** lee `vehicles`. Lee `publications`, una
+  tabla con solo los campos publicados (sin costes, márgenes, VIN ni matrícula) y las fotos del
+  bucket público `public-photos`. Esquema en
+  [`supabase/migrations/20261002000001_web_publica.sql`](supabase/migrations/20261002000001_web_publica.sql).
+- **Publicar sin trabajo doble**: el ERP publicará cada coche en un clic (siguiente paso);
+  reservado y vendido se reflejan solos y las fichas de vendidos se mantienen por SEO.
+- Sin credenciales de Supabase, la web arranca en **modo demostración** (datos de ejemplo y
+  `noindex`), ideal para trabajar en el diseño.
+
+Detalles, puesta en marcha y checklist previa a publicar: [`web/README.md`](web/README.md).
+Decisiones de arquitectura y plan por fases: [`docs/12_WEB_PUBLICA_Y_PUBLICACION.md`](docs/12_WEB_PUBLICA_Y_PUBLICACION.md).
+
+---
+
 ## 🚀 Despliegue en Vercel (Listo para Producción)
 
 El proyecto está **100% preparado y optimizado para desplegarse en Vercel** en 1 minuto:
