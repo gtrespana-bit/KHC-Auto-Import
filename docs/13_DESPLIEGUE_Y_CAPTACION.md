@@ -7,6 +7,37 @@
 
 ---
 
+## Antes de nada · Cómo entrar al ERP y qué proyecto es cada uno
+
+Hay **un repositorio** (`KHC-Auto-Import`) pero **dos proyectos de Vercel**, porque son dos
+aplicaciones distintas con dos compilaciones distintas:
+
+| Qué es | Carpeta del repo | Proyecto de Vercel | Dominio final |
+| --- | --- | --- | --- |
+| **ERP** (programa de gestión, uso interno) | `/` (raíz) | el proyecto **antiguo**, el que ya existía | `app.khcimport.autos` |
+| **Web pública** (escaparate, clientes) | `web/` | proyecto **nuevo**, con *Root Directory* = `web` | `khcimport.autos` |
+
+**Para entrar al ERP:** Vercel → abre el proyecto cuya *Root Directory* sea `.` (raíz) → pestaña
+**Domains** → la URL que aparezca ahí. Hoy es probable que ese proyecto todavía tenga
+`khcimport.autos`, así que **la dirección que abre el programa de gestión es el ERP**. Dentro, se
+entra con el correo y la contraseña de Supabase (los de *Crear cuenta*).
+
+**Cómo saber cuál es cuál sin equivocarse:** en Vercel, *Settings → General → Root Directory*. Si
+dice `web`, es la web pública; si dice `.` (o está vacío), es el ERP.
+
+**Y si el ERP dice «Datos locales»** en la barra lateral, a ese proyecto le faltan las variables
+`VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` (paso 2 de la sección siguiente).
+
+> **¿No sería mejor un solo proyecto, con el ERP en un subdominio o en `/erp`?**
+> Se puede, pero cuesta más de lo que parece y hoy no compensa: son dos tecnologías distintas
+> (Vite y Next.js), el `vercel.json` del ERP reescribe *todas* las rutas a `index.html` y su
+> *service worker* (el que hace que la app funcione instalada en el móvil) secuestra la navegación
+> del origen. Los detalles y lo que habría que tocar están en
+> [`docs/12`](12_WEB_PUBLICA_Y_PUBLICACION.md) → §2.1.b. Lo que sí está unificado, y es lo que
+> importa: **un solo repositorio y una sola base de datos**.
+
+---
+
 ## 0 · Los 3 pasos que faltan (hazlo en este orden)
 
 ### Paso 1 · Comprobar que existe tu empresa en la base de datos
@@ -46,26 +77,49 @@ on conflict (slug) do update set org_id = excluded.org_id;
 **Qué esperar:** «Success. No rows returned» — es correcto, un `insert ... select` no devuelve filas.
 
 > **¿Qué hace esto?** Crea una fila que dice: «la web `khc` (khcimport.autos) pertenece a esta
-> empresa». Sin ella, cuando alguien rellena un formulario en la web, la base de datos no sabe a
-> qué empresa asignar el contacto y lo rechaza. Y las publicaciones tampoco se verían.
+> empresa». Hace falta para los **formularios**: sin ella, cuando alguien escribe desde la web, la
+> base de datos no sabe a qué empresa asignar el contacto y lo rechaza con «Sitio web no
+> configurado».
+>
+> Ojo con una idea equivocada: **los coches publicados se ven aunque falte esta fila** (la lectura
+> pública de `publications` no depende de `web_sites`). Así que «veo mi coche en la web» **no**
+> demuestra que el enlace esté bien: lo que lo demuestra es que llegue un formulario.
 
 Si te equivocas y lo ejecutas dos veces no pasa nada: actualiza la misma fila (eso significa
 `on conflict ... do update`).
 
-### Paso 3 · Comprobar que quedó bien
+### Paso 3 · Comprobar que quedó bien (la consulta que lo dice todo)
 
 ```sql
-select slug, org_id, name from public.web_sites;
+-- Estado del enlace entre la web y tu empresa, y qué hay publicado.
+select
+  o.name                                as empresa,
+  w.slug                                as web,
+  case when w.org_id = o.id then 'OK' else 'REVISAR' end as enlace,
+  count(p.id) filter (where p.status = 'publicado') as publicados,
+  count(p.id) filter (where p.status = 'reservado') as reservados,
+  count(p.id) filter (where p.status = 'vendido')   as vendidos
+from public.organizations o
+left join public.web_sites w    on w.org_id = o.id
+left join public.publications p on p.org_id = o.id
+group by o.name, o.id, w.slug, w.org_id
+order by o.created_at;
 ```
 
-**Qué esperar:** una fila parecida a esta:
+**Qué esperar**, en la fila de tu empresa:
 
-| slug | org_id | name |
-| --- | --- | --- |
-| khc | `a1b2c3d4-…` (el mismo uuid que tu empresa) | KHC Auto Import |
+- **`enlace` = `OK`** → la web está enlazada. Es lo que querías verificar.
+- **`enlace` = `REVISAR`** → hay más de una empresa en la base de datos y `web_sites` apunta a
+  otra. Avísame y lo miramos.
+- **`web` = vacío** → falta la fila: vuelve al paso 2 y ejecuta el `insert`.
+- Las columnas `publicados`, `reservados` y `vendidos` son solo informativas (0 mientras no hayas
+  publicado nada).
 
-El `org_id` tiene que coincidir **exactamente** con el `id` que viste en el paso 1. Si no coincide,
-es que tienes más de una empresa en la base de datos: avísame y lo miramos.
+**La prueba definitiva (2 minutos):** rellena el formulario de `https://khcimport.autos/contacto`
+con un nombre reconocible («PRUEBA») y comprueba que aparece en el ERP → **Contactos web**. Si
+aparece, el enlace funciona de punta a punta. Si el formulario da error, abre F12 → *Console* o
+mira los *Logs* del proyecto de la web en Vercel: el mensaje será «Sitio web no configurado» (falta
+esta fila) o «permission denied» (falta ejecutar la migración de `docs/09`).
 
 ---
 
@@ -152,17 +206,31 @@ Vercel no deja que un dominio esté en dos proyectos a la vez. Primero se quita 
    Vercel te dirá el registro necesario (`CNAME app → cname.vercel-dns.com`) si no usas sus
    nameservers.
 
-### Paso 4 · Supabase (para no quedarte fuera del ERP)
+### Paso 4 · Supabase: qué URL va en cada casilla (esto confunde siempre)
 
-Al cambiar de dirección, el navegador tiene otra sesión y **te pedirá iniciar sesión de nuevo**.
-Antes, en Supabase → **Authentication → URL Configuration**:
+Antes de tocar Supabase, la idea clave: **quien inicia sesión es el ERP, no la web pública**. La web
+solo lee publicaciones con la clave anónima y no tiene login, así que las URLs de autenticación son
+las del ERP. La única web que importa aquí es la del **programa de gestión**.
 
-- *Site URL*: `https://app.khcimport.autos`
-- *Redirect URLs*: añade `https://app.khcimport.autos`, `https://khcimport.autos` y
-  `http://localhost:5173`.
+Supabase → **Authentication → URL Configuration**:
 
-Sin esto, los enlaces de confirmación de correo y de recuperación de contraseña apuntarán al sitio
-antiguo.
+| Casilla | Qué poner | Por qué |
+| --- | --- | --- |
+| **Site URL** | `https://app.khcimport.autos` | Es la dirección a la que Supabase manda los enlaces de confirmar correo y de recuperar contraseña: tienen que llevar al ERP. |
+| **Redirect URLs** | `https://app.khcimport.autos`, `http://localhost:5173`, y la URL `*.vercel.app` del ERP mientras siga viva | Son las direcciones desde las que se permite volver después de iniciar sesión. Sin `localhost` no podrás entrar en desarrollo. |
+| *(opcional)* | `https://khcimport.autos` | No hace falta (la web pública no autentica); añadirla no molesta. |
+
+Dos consecuencias normales al hacer este cambio:
+
+1. **Te pedirá iniciar sesión otra vez** en el ERP: el navegador guarda la sesión por dirección, y
+   `app.khcimport.autos` es un origen distinto de `khcimport.autos`. No se pierde nada: los datos
+   están en Supabase, no en el navegador.
+2. Si el correo de confirmación o de recuperación te lleva a la dirección vieja, es que `Site URL`
+   sigue apuntando ahí.
+
+> Si algún día prefieres **no** tener el ERP en un subdominio y dejarlo en su `*.vercel.app`, no pasa
+> nada: entonces `Site URL` sería esa dirección. Lo que no se puede es tener `khcimport.autos` en
+> los dos proyectos a la vez (Vercel no lo permite): ese dominio tiene que quedarse en el de la web.
 
 ### Paso 5 · Detalles que conviene arreglar
 

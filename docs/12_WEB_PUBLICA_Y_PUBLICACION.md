@@ -109,6 +109,48 @@ Regla de oro: *la web pública nunca ve costes, VIN, matrícula, margen ni notas
 | Alternativa: **Astro** | Técnicamente incluso mejor para un catálogo (más ligero, islas de React). Es una elección válida; Next.js se elige aquí por ecosistema, ejemplos y `next/image` para las fotos. **Si en 6 meses queréis cambiar, se cambia solo la web: el contrato es la tabla, no el código.** |
 | **No compartir código** entre ERP y web | Compartir los módulos de costes/impuestos con la web sería volver a exponerlos. Lo único compartido es el esquema de la tabla `publications` (y, como mucho, un fichero de tipos y formateo). |
 
+### 2.1.b · La pregunta razonable: «¿y no sería mejor un solo proyecto?»
+
+Es la primera cosa que pregunta cualquiera al ver dos proyectos de Vercel para un mismo negocio, y
+la respuesta corta es: **se puede, pero cuesta más de lo que parece, y el beneficio es cosmético.**
+
+Lo que **ya** está unificado y es lo que de verdad importa:
+
+- **Un solo repositorio**: se trabaja en un sitio, con un `git` y un historial.
+- **Una sola base de datos**: Supabase, con la frontera `publications` entre ERP y web.
+- **Una sola marca y una familia de dominios**: `khcimport.autos` (web) + `app.khcimport.autos` (ERP).
+- **Un botón**: publicar un coche en la web no obliga a recompilar nada, se hace desde el ERP.
+
+Lo que estaría duplicado, y por qué: dos **compilaciones**. El ERP es Vite (SPA estática) y la web es
+Next.js (renderizado en servidor). Un proyecto de Vercel tiene **un** *Root Directory*, **un** comando
+de compilación y **una** carpeta de salida. No hay forma de decirle «en `/` compila Vite y en `/erp`
+compila Next»: o se unifican las tecnologías, o se sirve una dentro de la otra.
+
+Un subdominio, por cierto, **no implica un proyecto distinto**: se pueden apuntar
+`khcimport.autos` y `app.khcimport.autos` al mismo proyecto de Vercel. El problema nunca es el
+dominio; es que cada uno necesita su compilación.
+
+#### Qué haría falta para tenerlo todo en un proyecto (con el ERP en `/erp`)
+
+| Cambio | Detalle | Riesgo |
+| --- | --- | --- |
+| Base del ERP | `vite.config.js` → `base: '/erp/'`, y compilar el ERP dentro de `web/public/erp/` | Rutas de assets, iconos y manifest salen mal si algo se escapa |
+| *Service worker* | Mover `public/sw.js` a `/erp/` y registrar con `scope: '/erp/'`; el manifiesto pasa a `start_url` y `scope` `/erp/` | El SW actual está registrado en `/` con ámbito de todo el origen y cachea `'/'`. Si comparte origen con la web, **puede servir el shell de la app a un visitante de la web pública** |
+| Rutas de la SPA | `vercel.json` actual reescribe `/((?!api/).*)` → `/index.html`: en un proyecto único se comería todas las páginas de la web. Habría que acotarlo a `/erp/:path*` y excluir assets | Es exactamente el fallo que ya nos encontramos al montar el proyecto de la web |
+| PWA instalada | Volver a probar la instalación en móvil (iOS y Android), el modo sin conexión y la actualización de caché | Se rompe en silencio: la app sigue abriendo pero con datos viejos |
+| Compilación | Un solo comando que compile las dos aplicaciones, o compilaciones con `--ignore` cruzadas | Un error en la web deja **fuera de servicio el ERP** (y al revés): un solo despliegue, un solo punto de fallo |
+
+#### Recomendación
+
+**Mantener los dos proyectos.** Coste real: un par de variables de entorno duplicadas y dos
+comandos de despliegue. A cambio: el ERP (que es la herramienta de trabajo diaria y se usa desde el
+móvil) no depende de que la web compile, y el *service worker* del ERP no puede interferir con la web
+pública. Si algún día unificáis tecnologías (por ejemplo, reescribiendo el ERP con Next.js), la
+pregunta se replantea sola: entonces sí sería un solo proyecto con el ERP en `/erp` o en su
+subdominio, sin tocar el *service worker* de nadie.
+
+---
+
 ### 2.2 Lo que NO se comparte
 
 Nada de `src/domain/*`, ni `taxes.js`, ni `finance.js`, ni `priceModel.js` en el bundle
