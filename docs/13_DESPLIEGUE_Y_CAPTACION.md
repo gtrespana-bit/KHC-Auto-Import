@@ -7,35 +7,30 @@
 
 ---
 
-## Antes de nada · Cómo entrar al ERP y qué proyecto es cada uno
+## Antes de nada · Un solo proyecto, dos direcciones
 
-Hay **un repositorio** (`KHC-Auto-Import`) pero **dos proyectos de Vercel**, porque son dos
-aplicaciones distintas con dos compilaciones distintas:
+Desde el **2 de octubre de 2026** todo vive en **un solo proyecto de Vercel** (un despliegue, una
+configuración, un cron). Lo que hay dentro:
 
-| Qué es | Carpeta del repo | Proyecto de Vercel | Dominio final |
-| --- | --- | --- | --- |
-| **ERP** (programa de gestión, uso interno) | `/` (raíz) | el proyecto **antiguo**, el que ya existía | `app.khcimport.autos` |
-| **Web pública** (escaparate, clientes) | `web/` | proyecto **nuevo**, con *Root Directory* = `web` | `khcimport.autos` |
+| Qué es | En el repositorio | Dirección pública |
+| --- | --- | --- |
+| **Web pública** (escaparate, clientes) | `app/`, `components/`, `lib/`, `public/` (Next.js) | `https://khcimport.autos` |
+| **ERP** (programa de gestión, uso interno) | `erp/` (Vite), compilado a `public/erp` | `https://app.khcimport.autos` |
+| Base de datos | `supabase/` | Supabase (UE), una sola para los dos |
 
-**Para entrar al ERP:** Vercel → abre el proyecto cuya *Root Directory* sea `.` (raíz) → pestaña
-**Domains** → la URL que aparezca ahí. Hoy es probable que ese proyecto todavía tenga
-`khcimport.autos`, así que **la dirección que abre el programa de gestión es el ERP**. Dentro, se
-entra con el correo y la contraseña de Supabase (los de *Crear cuenta*).
+**Cómo entrar al ERP:** abre `https://app.khcimport.autos` (o, mientras no hayas movido el dominio,
+la URL `*.vercel.app` del proyecto). Dentro se entra con el correo y la contraseña de Supabase. Si en
+la barra lateral pone **«Datos locales»**, faltan las variables de entorno (paso 2 de la sección
+siguiente).
 
-**Cómo saber cuál es cuál sin equivocarse:** en Vercel, *Settings → General → Root Directory*. Si
-dice `web`, es la web pública; si dice `.` (o está vacío), es el ERP.
+**Cómo saber qué estás viendo:** el ERP se reconoce por su barra lateral oscura con el menú (Flota y
+stock, Catálogo, Simulador…) y porque **no** lleva la franja naranja de «datos de ejemplo». La web
+pública tiene navegación clara con «Vehículos disponibles», «Cómo trabajamos», «Garantía 12 meses»…
 
-**Y si el ERP dice «Datos locales»** en la barra lateral, a ese proyecto le faltan las variables
-`VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` (paso 2 de la sección siguiente).
-
-> **¿No sería mejor un solo proyecto, con el ERP en un subdominio o en `/erp`?**
-> Decisión tomada: **se quedan dos proyectos por el momento**. Son dos tecnologías distintas (Vite y
-> Next.js) y un proyecto de Vercel admite una sola compilación; juntarlos hoy costaría un par de días
-> y arriesgaría la PWA del ERP, a cambio de un ahorro que en el día a día no se nota (los coches se
-> publican desde el ERP; no se toca Vercel para nada).
-> Detalle, coste real y **cuándo sí habría que replantearlo** (las tres señales que lo justificarían y
-> la forma correcta de hacerlo entonces): [`docs/12`](12_WEB_PUBLICA_Y_PUBLICACION.md) → §2.1.b.
-> Lo que sí está unificado, y es lo que importa: **un solo repositorio y una sola base de datos**.
+> **Nota técnica (por si la ves en un log o en el código):** dentro del despliegue, el ERP vive en la
+> carpeta `/erp/`; el enrutado por dominio (`middleware.js`) hace que el visitante nunca vea ese
+> prefijo ni pueda alcanzar el ERP desde el dominio público. Detalles en
+> [`docs/12`](12_WEB_PUBLICA_Y_PUBLICACION.md) → §2.1.
 
 ---
 
@@ -122,7 +117,7 @@ order by o.created_at;
 **La prueba definitiva (2 minutos):** rellena el formulario de `https://khcimport.autos/contacto`
 con un nombre reconocible («PRUEBA») y comprueba que aparece en el ERP → **Contactos web**. Si
 aparece, el enlace funciona de punta a punta. Si el formulario da error, abre F12 → *Console* o
-mira los *Logs* del proyecto de la web en Vercel: el mensaje será «Sitio web no configurado» (falta
+mira los *Logs* del proyecto en Vercel: el mensaje será «Sitio web no configurado» (falta
 esta fila) o «permission denied» (falta ejecutar la migración de `docs/09`).
 
 ---
@@ -133,7 +128,7 @@ Abre `https://khcimport.autos` y mira si aparece una **cinta naranja** con rayas
 *«Web en construcción · datos de ejemplo»*:
 
 - **No aparece** → perfecto, la web está leyendo tu Supabase y está lista para que publiques.
-- **Sí aparece** → a la web le faltan las claves. Ve a **Vercel → tu proyecto de la web →
+- **Sí aparece** → a la web le faltan las claves. Ve a **Vercel → tu proyecto →
   Settings → Environment Variables** y comprueba que están estas tres (en *Production*):
 
   | Nombre | Valor |
@@ -160,106 +155,101 @@ Si el paso 3 falla, el error sale en la consola del navegador (F12 → *Console*
 siempre por «new row violates row-level security policy» (falta el paso 2 de arriba) o
 «permission denied» (falta ejecutar la migración).
 
-## 0.c · Separar los dos proyectos en Vercel (por qué la web te lleva al ERP)
+## 0.c · Poner la web en su dominio (y el ERP en el suyo) — un solo proyecto
 
-**Lo que pasa:** el dominio `khcimport.autos` está asignado al proyecto de Vercel del **ERP**
-(el programa de gestión). Por eso al abrirlo te lleva a la aplicación. La web pública que
-construimos vive en la carpeta `web/` del repositorio y necesita **su propio proyecto de Vercel**.
+**El punto de partida real:** hoy `khcimport.autos` está asignado al proyecto antiguo, el del ERP.
+Hay que dejar `khcimport.autos` para la web y mover el ERP a `app.khcimport.autos`. Como todo vive ya
+en un solo proyecto, **no hay que crear nada**: solo añadir los dos dominios, cambiar las variables y
+borrar el proyecto viejo.
 
-Al final debe quedar así:
+### Paso 1 · Fusionar el pull request de esta rama en `main`
 
-| Qué | Dirección | Proyecto de Vercel | Root Directory |
-| --- | --- | --- | --- |
-| Web pública (tu escaparate) | `https://khcimport.autos` | proyecto «web» | `web` |
-| ERP (uso interno) | `https://app.khcimport.autos` | proyecto actual | `.` (raíz) |
+Vercel despliega lo que hay en `main`. Hasta que no se fusione, el proyecto único no existe (el
+repositorio ya tiene la estructura nueva: web en la raíz y ERP en `erp/`).
 
-### Paso 1 · Fusionar el pull request #7 en `main`
+### Paso 2 · Variables de entorno (las dos aplicaciones, un solo proyecto)
 
-La carpeta `web/` todavía no está en `main`: vive en la rama del pull request. Vercel solo
-despliega lo que hay en `main`, así que **primero** hay que fusionar el PR #7.
-(hasta entonces, el proyecto de la web daría error de compilación o no encontraría la carpeta).
+Vercel → proyecto → **Settings → Environment Variables** (marca *Production*, *Preview* y
+*Development*). Son **seis**:
 
-### Paso 2 · Crear el proyecto de la web
+| Nombre | Valor |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://<tu-proyecto>.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | la clave **anon public** (Supabase → Settings → API) |
+| `NEXT_PUBLIC_SITE_URL` | `https://khcimport.autos` |
+| `VITE_SUPABASE_URL` | la misma URL de Supabase |
+| `VITE_SUPABASE_ANON_KEY` | la misma clave anon |
+| `ERP_HOST` *(opcional)* | `app.khcimport.autos` (si no se define, ya es el valor por defecto) |
 
-1. Vercel → **Add New… → Project** → *Import Git Repository* → elige `KHC-Auto-Import`.
-2. En **Configure Project**, busca **Root Directory** → *Edit* → selecciona la carpeta **`web`**.
-   (Vercel detectará Next.js solo; no cambies Build ni Output).
-3. Abre **Environment Variables** y añade estas tres (marco *Production*, *Preview* y *Development*):
+Las `NEXT_PUBLIC_*` las usa la web pública y las `VITE_*` el ERP (y el cron de `/api/keepalive`).
+Después: **Deployments → ⋯ → Redeploy**. Sin volver a desplegar, la compilación no las lleva.
 
-   | Nombre | Valor |
-   | --- | --- |
-   | `NEXT_PUBLIC_SUPABASE_URL` | `https://<tu-proyecto>.supabase.co` |
-   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | la clave **anon public** (Supabase → Settings → API) |
-   | `NEXT_PUBLIC_SITE_URL` | `https://khcimport.autos` |
+### Paso 3 · Añadir los dos dominios
 
-4. **Deploy**. Abre la URL temporal (`...vercel.app`) y comprueba que **no** aparece la cinta
-   naranja de «datos de ejemplo».
+Vercel → proyecto único → **Settings → Domains**:
 
-### Paso 3 · Mover el dominio (el orden importa)
+1. **Add** → `khcimport.autos` (dominio principal de la web). Si quieres `www`, añádelo y elige
+   «Redirect to khcimport.autos».
+2. **Add** → `app.khcimport.autos` (ERP). Vercel te dirá el registro DNS necesario
+   (`CNAME app → cname.vercel-dns.com`) si no usas sus nameservers.
+3. **Project del ERP antiguo** → *Settings → Domains* → quita `khcimport.autos` de allí. Vercel no
+   permite el mismo dominio en dos proyectos: primero se añade aquí y luego se quita de allí, o al
+   revés, pero no puede estar en los dos a la vez.
 
-Vercel no deja que un dominio esté en dos proyectos a la vez. Primero se quita y luego se pone:
-
-1. **Proyecto del ERP** → *Settings* → *Domains* → en `khcimport.autos` → **Remove**.
-2. **Proyecto de la web** → *Settings* → *Domains* → **Add** → escribes `khcimport.autos` →
-   *Add*. Si además quieres que `www.khcimport.autos` funcione, añade también `www.khcimport.autos`
-   y elige «Redirect to khcimport.autos».
-   - Si el dominio usa los **nameservers de Vercel**, no hay que tocar DNS: se configura solo.
-   - Si lo compraste fuera y lo apuntaste con registros A/CNAME, Vercel te dirá qué registro poner:
-     normalmente `A` → `76.76.21.21` para el dominio raíz y `CNAME` → `cname.vercel-dns.com` para `www`.
-3. **Proyecto del ERP** → *Settings* → *Domains* → **Add** → `app.khcimport.autos` →
-   Vercel te dirá el registro necesario (`CNAME app → cname.vercel-dns.com`) si no usas sus
-   nameservers.
+Cuando los dos dominios respondan: `https://khcimport.autos` → web pública y
+`https://app.khcimport.autos` → ERP.
 
 ### Paso 4 · Supabase: qué URL va en cada casilla (esto confunde siempre)
 
 Antes de tocar Supabase, la idea clave: **quien inicia sesión es el ERP, no la web pública**. La web
 solo lee publicaciones con la clave anónima y no tiene login, así que las URLs de autenticación son
-las del ERP. La única web que importa aquí es la del **programa de gestión**.
+las del ERP.
 
 Supabase → **Authentication → URL Configuration**:
 
 | Casilla | Qué poner | Por qué |
 | --- | --- | --- |
 | **Site URL** | `https://app.khcimport.autos` | Es la dirección a la que Supabase manda los enlaces de confirmar correo y de recuperar contraseña: tienen que llevar al ERP. |
-| **Redirect URLs** | `https://app.khcimport.autos`, `http://localhost:5173`, y la URL `*.vercel.app` del ERP mientras siga viva | Son las direcciones desde las que se permite volver después de iniciar sesión. Sin `localhost` no podrás entrar en desarrollo. |
-| *(opcional)* | `https://khcimport.autos` | No hace falta (la web pública no autentica); añadirla no molesta. |
+| **Redirect URLs** | `https://app.khcimport.autos`, `http://localhost:5173`, `http://localhost:3000` y la URL `*.vercel.app` del proyecto | Son las direcciones desde las que se permite volver después de iniciar sesión. Sin las de `localhost` no podrás entrar en desarrollo. |
 
 Dos consecuencias normales al hacer este cambio:
 
 1. **Te pedirá iniciar sesión otra vez** en el ERP: el navegador guarda la sesión por dirección, y
-   `app.khcimport.autos` es un origen distinto de `khcimport.autos`. No se pierde nada: los datos
-   están en Supabase, no en el navegador.
+   `app.khcimport.autos` es un origen distinto. No se pierde nada: los datos están en Supabase.
 2. Si el correo de confirmación o de recuperación te lleva a la dirección vieja, es que `Site URL`
    sigue apuntando ahí.
 
-> Si algún día prefieres **no** tener el ERP en un subdominio y dejarlo en su `*.vercel.app`, no pasa
-> nada: entonces `Site URL` sería esa dirección. Lo que no se puede es tener `khcimport.autos` en
-> los dos proyectos a la vez (Vercel no lo permite): ese dominio tiene que quedarse en el de la web.
+### Paso 5 · Borrar el proyecto de Vercel antiguo
 
-### Paso 5 · Detalles que conviene arreglar
+Cuando el proyecto único sirva las dos direcciones y hayas comprobado el ERP en
+`app.khcimport.autos` (incluida la app instalable del móvil), borra el proyecto antiguo: dos
+proyectos desplegando el mismo repositorio solo generan confusión y despliegues duplicados.
 
-- **Nombre de la empresa**: en la consulta del paso 1 salió «Mi empresa». Es el nombre que usa el
-  ERP (aparece en la barra lateral, en las facturas y en el pie). Cámbialo en el ERP →
-  **Ajustes → Empresa → Nombre** por `KHC Auto Import` y se actualiza en la base de datos.
+Antes de borrarlo, comprueba en **Settings → Domains** que ya no tiene ningún dominio asignado.
+Si algo va mal, siempre se puede volver a crear en dos minutos con el *Root Directory* en `.`.
+
+### Paso 6 · Detalles que conviene arreglar
+
+- **Nombre de la empresa**: cámbialo en el ERP → **Ajustes → Empresa → «Nombre comercial / razón
+  social»** por `KHC Auto Import` (por defecto pone «Mi empresa»). Aparece en la barra lateral, en
+  las facturas, en los contratos y en el pie de los documentos.
 - **Correo del ERP**: revisa que en *Ajustes* estén el teléfono y el correo reales
   (`info@khcimport.autos`): los usan los anuncios, los contratos y las facturas.
-- **Web del ERP**: el dominio de la web ya viene por defecto en el código
-  (`src/lib/web.js`), pero si algún día cambia se puede fijar con la variable
-  `VITE_PUBLIC_WEB_URL` en el proyecto del ERP.
+- **Web del ERP**: el dominio de la web viene por defecto en el código (`erp/src/lib/web.js`); si
+  algún día cambia, se fija con `VITE_PUBLIC_WEB_URL`.
 
 ---
 
 ## 1. Mapa de lo que hay desplegado
 
-| Sistema | Dominio | Proyecto Vercel | Raíz |
+| Sistema | Dominio | En el repositorio | Despliegue |
 | --- | --- | --- | --- |
-| Web pública | `https://khcimport.autos` | proyecto de la web | `web/` |
-| ERP de gestión | `https://app.khcimport.autos` | proyecto del ERP (pendiente) | `/` (raíz del repo) |
-| Base de datos | Supabase (UE) | — | una sola para los dos |
+| Web pública | `https://khcimport.autos` | raíz (Next.js) | **un solo proyecto de Vercel** |
+| ERP de gestión | `https://app.khcimport.autos` | `erp/` (Vite → `public/erp`) | el mismo proyecto |
+| Base de datos | Supabase (UE) | `supabase/` | una sola para los dos |
 
-El ERP todavía no está en `app.`: mientras siga en su URL de Vercel, funciona igual. Cuando se
-mueva, hay que añadir el dominio en **Supabase → Authentication → URL Configuration → Redirect
-URLs** y volver a entrar desde el dominio nuevo.
+Mientras el dominio no esté movido, todo funciona igual en la URL `*.vercel.app` del proyecto: la
+raíz sirve la web y `/erp/` sirve el ERP (así se revisa sin tocar DNS).
 
 ---
 
@@ -276,7 +266,7 @@ Abrir `https://khcimport.autos` y verificar:
 2. **`https://khcimport.autos/robots.txt`** → debe decir `Allow: /` y la línea del `Sitemap`.
    Si dice `Disallow: /` es que sigue en modo demostración.
 3. **`https://khcimport.autos/sitemap.xml`** → debe listar las páginas y los coches publicados.
-4. **Datos de contacto**: teléfono, WhatsApp y correo reales en `web/lib/site.js`
+4. **Datos de contacto**: teléfono, WhatsApp y correo reales en `lib/site.js`
    (hoy hay valores de ejemplo: `+34 600 00 00 00` y `34600000000`).
 5. **Identidad y mensajes** (rediseño del 2-10-2026): comprueba que siguen apareciendo los tres
    mensajes fijos y que la página nueva carga:
@@ -327,7 +317,7 @@ dos opciones (ninguna obliga a tocar el código):
 - **Revisar el ERP a diario**: el módulo *Contactos web* muestra un contador en rojo mientras haya
   consultas sin atender. Es suficiente al principio.
 
-Cuando haya buzón real, en `web/lib/site.js` está el campo `email` para cambiarlo en un segundo.
+Cuando haya buzón real, en `lib/site.js` está el campo `email` para cambiarlo en un segundo.
 
 ---
 

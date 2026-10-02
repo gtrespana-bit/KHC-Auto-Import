@@ -11,7 +11,7 @@ DROP_GEN = {'Sportage NQ5'}  # autoscout los etiqueta como QL (ge997): no fiable
 cnt = collections.defaultdict(collections.Counter)
 for r in R: cnt[r[2]][ge(r)] += 1
 keep, why = [], collections.Counter()
-seen = set(re.findall(r"url: '(https://www\.autoscout24\.de/[^']+)'", (open('src/data/catalog/marketEvidence.js').read() + open('src/data/catalog/candidateEvidence.js').read())))
+seen = set(re.findall(r"url: '(https://www\.autoscout24\.de/[^']+)'", (open('erp/src/data/catalog/marketEvidence.js').read() + open('erp/src/data/catalog/candidateEvidence.js').read())))
 for r in R:
     g, c = r[2], ge(r)
     if r[9] in seen: why['duplicado'] += 1; continue
@@ -26,4 +26,4 @@ if '--import' in sys.argv:
     CG = set(json.loads(subprocess.run(['node', '-e', "import('./scripts/candidates.mjs').then(m=>console.log(JSON.stringify(m.CANDIDATES.map(c=>c.gen))))"], capture_output=True, text=True).stdout))
     json.dump([r for r in keep if r[2] not in CG], open('/tmp/_a.json', 'w')); json.dump([r for r in keep if r[2] in CG], open('/tmp/_b.json', 'w'))
     subprocess.run([sys.executable, 'scripts/tools/addrows.py', '/tmp/_a.json'], check=True)
-    subprocess.run([sys.executable, 'scripts/tools/addrows.py', '/tmp/_b.json', 'src/data/catalog/candidateEvidence.js'], check=True)
+    subprocess.run([sys.executable, 'scripts/tools/addrows.py', '/tmp/_b.json', 'erp/src/data/catalog/candidateEvidence.js'], check=True)

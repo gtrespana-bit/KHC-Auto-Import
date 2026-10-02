@@ -13,7 +13,7 @@ scripts de prueba. El estado en memoria es idéntico en los dos casos: las vista
 - [x] Esquema SQL ejecutado en el proyecto `ifbbzhotgvjsrohwywep` (tablas, roles, RLS, bucket de fotos).
 - [x] *Site URL* configurada en Supabase → Authentication.
 - [x] Código de la app migrado a Supabase (auth, repositorio, fotos, migración de datos locales).
-- [x] Cron de Vercel para que el plan gratuito no se pause (`api/keepalive.js`).
+- [x] Cron de Vercel para que el plan gratuito no se pause (`app/api/keepalive/route.js`).
 - [x] `.env.local` con las credenciales para desarrollo (no se sube a Git).
 - [x] **Segunda migración ejecutada** (`20261002000001_web_publica.sql`): publicaciones de la web,
       contactos de la web, sitio `khc` y bucket público `public-photos`.
@@ -129,7 +129,7 @@ profiles (user_id, email, full_name)
 
 ## 3. Roles y permisos
 
-Las políticas RLS son la barrera real; el front las refleja en `src/lib/roles.js` para ocultar
+Las políticas RLS son la barrera real; el front las refleja en `erp/src/lib/roles.js` para ocultar
 acciones y dar mensajes claros.
 
 | Acción | owner | manager | sales | accountant |
@@ -181,7 +181,7 @@ empresa activa (`localStorage`). El selector de empresa en la interfaz se añadi
 - Plan **Free**: suficiente para la Fase 1. Ojo: **se pausa tras 7 días sin actividad**; se
   reactiva desde el panel sin pérdida de datos. Entrar en la app cuenta como actividad.
   Para evitarlo, un **cron de Vercel** (`crons` en `vercel.json`) llama **cada día a las 06:00
-  UTC** a la función [`api/keepalive.js`](../api/keepalive.js), que hace una consulta trivial.
+  UTC** a la función [`app/api/keepalive/route.js`](../api/keepalive.js), que hace una consulta trivial.
   Usa las mismas variables `VITE_SUPABASE_*` del proyecto de Vercel. Se puede comprobar a mano
   abriendo `https://TU-DOMINIO/api/keepalive` (responde `{"ok":true,...}`) y ver las ejecuciones
   en Vercel → *Settings → Cron Jobs*. En el plan Hobby de Vercel los crons se ejecutan a diario

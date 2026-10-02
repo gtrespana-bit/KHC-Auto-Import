@@ -15,9 +15,9 @@ import {
   calibrationFactors,
   powerFactor,
   priceAt,
-} from '../src/data/catalog/index.js';
-import { predictPrice } from '../src/data/catalog/priceModel.js';
-import { priceFit } from '../src/data/catalog/priceModel.js';
+} from '../erp/src/data/catalog/index.js';
+import { predictPrice } from '../erp/src/data/catalog/priceModel.js';
+import { priceFit } from '../erp/src/data/catalog/priceModel.js';
 import {
   MARKET_OBSERVATIONS,
   evidenceStats,
@@ -27,9 +27,9 @@ import {
   EVIDENCE_CAPTURED_AT,
   PURCHASE_DISCOUNT,
   KM_HALFLIFE,
-} from '../src/data/catalog/marketEvidence.js';
-import { CURATED_DB, CURATED_RECONCILED } from '../src/data/vehicleDatabase.js';
-import { catalogEstimate } from '../src/domain/catalogEstimate.js';
+} from '../erp/src/data/catalog/marketEvidence.js';
+import { CURATED_DB, CURATED_RECONCILED } from '../erp/src/data/vehicleDatabase.js';
+import { catalogEstimate } from '../erp/src/domain/catalogEstimate.js';
 
 const eur = (n) => `${Math.round(n).toLocaleString('es-ES')} €`;
 const pct = (n) => `${(n * 100).toFixed(1).replace('.', ',')} %`;

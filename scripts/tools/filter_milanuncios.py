@@ -16,7 +16,7 @@ Filtros (el JSON no trae título, así que se usa el slug de la URL):
 import json, re, sys, subprocess, statistics, unicodedata, collections
 
 ROWS = 'data/milanuncios/rows.json'
-EVID = 'src/data/catalog/marketEvidence.js'
+EVID = 'erp/src/data/catalog/marketEvidence.js'
 BODY = ['touring sports', 'touring', 'variant', 'avant', 'estate', 'combi', 'st']
 OTHER = ['sportback', 'coupe', 'cabrio', 'gran-turismo', 'gran-coupe', 'gt', 'active-tourer',
          'gran-tourer', 'all-terrain', 'sportsvan', 'alltrack', 'scout', 'gtd', 'gti', 'r-line-gt']
@@ -76,7 +76,7 @@ def ok(r):
   return None
 
 rows = json.load(open(ROWS))
-src = open(EVID).read() + open('src/data/catalog/candidateEvidence.js').read()
+src = open(EVID).read() + open('erp/src/data/catalog/candidateEvidence.js').read()
 have = set(re.findall(r'-(\d{6,})\.htm', src))
 reasons = collections.Counter()
 keep, seen = [], set()
@@ -121,4 +121,4 @@ if '--import' in sys.argv:
   CG = {g for g, b in CANDS} | set(json.loads(subprocess.run(['node', '-e', "import('./scripts/candidates.mjs').then(m=>console.log(JSON.stringify(m.CANDIDATES.map(c=>c.gen))))"], capture_output=True, text=True).stdout))
   json.dump([r for r in clean if r[2] not in CG], open('/tmp/_a.json', 'w')); json.dump([r for r in clean if r[2] in CG], open('/tmp/_b.json', 'w'))
   subprocess.run([sys.executable, 'scripts/tools/addrows.py', '/tmp/_a.json'], check=True)
-  subprocess.run([sys.executable, 'scripts/tools/addrows.py', '/tmp/_b.json', 'src/data/catalog/candidateEvidence.js'], check=True)
+  subprocess.run([sys.executable, 'scripts/tools/addrows.py', '/tmp/_b.json', 'erp/src/data/catalog/candidateEvidence.js'], check=True)

@@ -9,7 +9,7 @@
 // text, category, fuel, yearFrom/yearTo, hpFrom/hpTo, kilometersFrom/kilometersTo,
 // priceFrom/priceTo y limit (hasta 100). Se hace una consulta por grupo y año.
 import { writeFileSync, mkdirSync, readFileSync } from 'node:fs';
-import { MARKET_OBSERVATIONS as O, cvOf, fuelOf } from '../src/data/catalog/marketEvidence.js';
+import { MARKET_OBSERVATIONS as O, cvOf, fuelOf } from '../erp/src/data/catalog/marketEvidence.js';
 import { CANDIDATES } from './candidates.mjs';
 
 const API = 'https://searchapi.gw.milanuncios.com/v3/classifieds';
@@ -123,7 +123,7 @@ writeFileSync('data/milanuncios/report.txt', `Captura ${new Date().toISOString()
 console.log(`\nTotal ${rows.length} anuncios válidos → data/milanuncios/rows.json`);
 
 if (process.argv.includes('--import')) {
-  const P = 'src/data/catalog/marketEvidence.js';
+  const P = 'erp/src/data/catalog/marketEvidence.js';
   let src = readFileSync(P, 'utf8');
   const q = (s) => `'${String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
   const fresh = rows.filter((r) => !src.includes(r[9]));

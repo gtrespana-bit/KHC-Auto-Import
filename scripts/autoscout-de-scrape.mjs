@@ -11,7 +11,7 @@
 // Lee el JSON __NEXT_DATA__ que la propia web incluye en cada página de resultados
 // (20 anuncios por página, hasta 20 páginas por búsqueda; se busca año a año).
 import { writeFileSync, mkdirSync, readFileSync, appendFileSync, existsSync } from 'node:fs';
-import { MARKET_OBSERVATIONS as O, cvOf, fuelOf } from '../src/data/catalog/marketEvidence.js';
+import { MARKET_OBSERVATIONS as O, cvOf, fuelOf } from '../erp/src/data/catalog/marketEvidence.js';
 import { CANDIDATES } from './candidates.mjs';
 // --es: misma búsqueda en autoscout24.es (precios de VENTA en España, sin Canarias)
 const ES = process.argv.includes('--es');
@@ -194,7 +194,7 @@ writeFileSync(DIR + '/report.txt', `Captura ${new Date().toISOString()}\n` + rep
 console.log(`\nTotal ${clean.length} anuncios válidos → data/autoscout/rows.json`);
 
 if (process.argv.includes('--import')) {
-  const P = 'src/data/catalog/marketEvidence.js';
+  const P = 'erp/src/data/catalog/marketEvidence.js';
   const src = readFileSync(P, 'utf8');
   const qq = (s) => `'${String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
   const fresh = clean.filter((r) => !src.includes(r[9]));

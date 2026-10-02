@@ -1,7 +1,7 @@
 # 14 · Identidad, posicionamiento y estilo de la web
 
 > Documento de decisión: **2 de octubre de 2026**.
-> Aplica a la web pública (`web/`) y a los textos comerciales que genera el ERP
+> Aplica a la web pública (la raíz del repositorio) y a los textos comerciales que genera el ERP
 > (anuncios, fichas web). El ERP interno no cambia.
 
 ---
@@ -38,7 +38,7 @@ Reglas de apoyo:
 - **Países**: Alemania primero por volumen y rigor documental, pero se nombran
   los demás mercados (Francia, Bélgica, Países Bajos, Italia, Suiza, Austria,
   Luxemburgo, Portugal) y **también España**. Fuente única:
-  `site.origins` en `web/lib/site.js`.
+  `site.origins` en `lib/site.js`.
 - **Nada de promesas que no se sostengan**: la ficha web solo afirma lo que
   está marcado en la ficha del ERP (libro, llaves, ITV). Si un dato no está,
   no se inventa.
@@ -52,7 +52,7 @@ Reglas de apoyo:
 
 ## 2 · Lenguaje visual (web pública)
 
-Diseño «escaparate premium», definido en `web/app/globals.css` como sistema
+Diseño «escaparate premium», definido en `app/globals.css` como sistema
 (`@theme` + clases de componente). Cambiar aquí, no clase a clase.
 
 | Pieza | Decisión |
@@ -68,7 +68,7 @@ Diseño «escaparate premium», definido en `web/app/globals.css` como sistema
 
 ## 3 · Qué ha cambiado, archivo por archivo
 
-### Web pública (`web/`)
+### Web pública (la raíz del repositorio)
 
 | Archivo | Cambio |
 | --- | --- |
@@ -90,14 +90,14 @@ Diseño «escaparate premium», definido en `web/app/globals.css` como sistema
 
 | Archivo | Cambio |
 | --- | --- |
-| `src/lib/templates.js` | Nuevo `originLabel()` (nacional / importado). Los anuncios de portales dicen **siempre** «Garantía mínima de 12 meses» (respetando plazos mayores). La ficha web que genera el ERP declara la procedencia real y la garantía mínima por escrito. |
+| `erp/src/lib/templates.js` | Nuevo `originLabel()` (nacional / importado). Los anuncios de portales dicen **siempre** «Garantía mínima de 12 meses» (respetando plazos mayores). La ficha web que genera el ERP declara la procedencia real y la garantía mínima por escrito. |
 | `scripts/check-domain.mjs` | 3 comprobaciones nuevas (garantía en anuncios, etiquetado de procedencia, garantía mínima en la ficha web): 74 en total. |
 
 ---
 
 ## 4 · Lo que sigue pendiente en la web (datos, no diseño)
 
-Todo esto está marcado con `[PENDIENTE]` en `web/lib/site.js`:
+Todo esto está marcado con `[PENDIENTE]` en `lib/site.js`:
 
 - [ ] **Teléfono y WhatsApp reales** (`phone`, `phoneDisplay`, `whatsapp`). Sin
       ellos, los botones de llamada y WhatsApp no sirven.
@@ -122,10 +122,10 @@ Todo esto está marcado con `[PENDIENTE]` en `web/lib/site.js`:
    de países a mano en las páginas.
 3. **Procedencia de una ficha**: sale de `originCountry` del vehículo. Si un
    coche no trae país, la web dice «Disponible en España» y nunca «importado».
-4. **Antes de subir cambios**:
+4. **Antes de subir cambios**, desde la raíz del repositorio:
    ```bash
-   cd web && npm run build      # compila y detecta enlaces/páginas rotas
-   cd .. && npm run check       # 74 comprobaciones, incluidas plantillas y web
+   npm run build     # compila el ERP (Vite) y la web (Next)
+   npm run check     # 74 comprobaciones, incluidas plantillas y web
    ```
-5. **Textos de anuncios**: los genera `buildAd()` en `src/lib/templates.js`.
+5. **Textos de anuncios**: los genera `buildAd()` en `erp/src/lib/templates.js`.
    Es el único sitio donde hay que tocar el discurso de los portales.

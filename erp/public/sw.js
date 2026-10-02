@@ -7,8 +7,19 @@
        y actualización en segundo plano.
      · Los datos NO pasan por el service worker: viven en IndexedDB.
    ========================================================================== */
-const CACHE = 'khc-autoimport-v2';
-const SHELL = ['/', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/apple-touch-icon.png'];
+// El ámbito del service worker depende de dónde se sirva el ERP: en
+// desarrollo es la raíz ('/') y en producción '/erp/' (el mismo despliegue
+// sirve la web pública en la raíz). Se deduce del propio ámbito de registro,
+// así no hay ninguna ruta escrita a mano.
+const BASE = new URL(self.registration.scope).pathname;
+const CACHE = 'khc-autoimport-v3';
+const SHELL = [
+  BASE,
+  `${BASE}manifest.webmanifest`,
+  `${BASE}icons/icon-192.png`,
+  `${BASE}icons/icon-512.png`,
+  `${BASE}icons/apple-touch-icon.png`,
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -34,10 +45,10 @@ self.addEventListener('fetch', (event) => {
       fetch(request)
         .then((res) => {
           const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put('/', copy));
+          caches.open(CACHE).then((c) => c.put(BASE, copy));
           return res;
         })
-        .catch(() => caches.match('/')),
+        .catch(() => caches.match(BASE)),
     );
     return;
   }

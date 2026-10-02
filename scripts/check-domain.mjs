@@ -9,22 +9,22 @@ import {
   computeCvf, getIedmtRate, valorVenal, calcIedmt, calcItp, calcIvtm,
   calcPurchaseTax, calcSaleVat, calcIrpfGain, calcIs, calcReta,
   landingCost, breakEvenPrice, recalcVehicleTaxes,
-} from '../src/domain/taxes.js';
+} from '../erp/src/domain/taxes.js';
 import {
   vehiclePnl, fleetSummary, suggestedPrice, loanQuote, movementsFromData,
   monthlyPnl, profitabilityBy, cashForecast,
-} from '../src/domain/finance.js';
-import { DEFAULT_TARIFFS, IVTM_CORUNA_TURISMOS } from '../src/domain/rates.js';
-import { buildTaxCalendar, applyFilingStatus, documentProgress, buildAlerts } from '../src/domain/compliance.js';
-import { financeOffer } from '../src/domain/finance.js';
-import { catalogEstimate } from '../src/domain/catalogEstimate.js';
+} from '../erp/src/domain/finance.js';
+import { DEFAULT_TARIFFS, IVTM_CORUNA_TURISMOS } from '../erp/src/domain/rates.js';
+import { buildTaxCalendar, applyFilingStatus, documentProgress, buildAlerts } from '../erp/src/domain/compliance.js';
+import { financeOffer } from '../erp/src/domain/finance.js';
+import { catalogEstimate } from '../erp/src/domain/catalogEstimate.js';
 import {
   invoiceNumber, invoiceLines, buildAd, followUpMessage, whatsappLink, emailLink,
   buildWebListing, webSlug, webTitle, webFeatures, originLabel,
-} from '../src/lib/templates.js';
-import { publicationStatusForVehicle, PUBLICATION_STATUS } from '../src/lib/web.js';
-import { VEHICLE_DB, CURATED_DB, RELIABILITY_META } from '../src/data/vehicleDatabase.js';
-import { GENERATED_DB } from '../src/data/catalog/index.js';
+} from '../erp/src/lib/templates.js';
+import { publicationStatusForVehicle, PUBLICATION_STATUS } from '../erp/src/lib/web.js';
+import { VEHICLE_DB, CURATED_DB, RELIABILITY_META } from '../erp/src/data/vehicleDatabase.js';
+import { GENERATED_DB } from '../erp/src/data/catalog/index.js';
 
 let passed = 0;
 const checks = [];

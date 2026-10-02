@@ -4,6 +4,31 @@ Sistema integral de gestión, inteligencia de mercado, simulación fiscal y guí
 
 ---
 
+## 🧭 Cómo está organizado el repositorio (un solo despliegue)
+
+Todo el sistema vive en **un único proyecto de Vercel** con dos dominios:
+
+| Aplicación | Para quién | Dirección | En el repositorio |
+| --- | --- | --- | --- |
+| **Web pública** (Next.js) | Clientes | `khcimport.autos` | raíz: `app/`, `components/`, `lib/`, `public/` |
+| **ERP de gestión** (React + Vite) | Uso interno | `app.khcimport.autos` | `erp/` (se compila a `public/erp/`) |
+| **Base de datos** (Supabase, UE) | Ambas | — | `supabase/` |
+
+`middleware.js` reparte las peticiones según el dominio: en el del ERP traduce las rutas a `/erp/…`
+(el visitante nunca ve el prefijo), y en el de la web deja el ERP inaccesible. Comandos habituales,
+todos desde la raíz:
+
+```bash
+npm run dev         # web pública en http://localhost:3000
+npm run dev:erp     # ERP en http://localhost:5173
+npm run build       # compila el ERP y después la web
+npm start           # sirve el resultado (web en /, ERP en /erp/)
+npm run check       # 74 comprobaciones (motor fiscal, catálogo, dominio, plantillas)
+npm run smoke       # renderiza las 117 vistas
+```
+
+---
+
 ## 📌 Contexto y Estrategia del Negocio
 
 El proyecto se divide en dos fases bien diferenciadas para minimizar riesgos, validar el mercado y optimizar la rentabilidad:
@@ -174,20 +199,20 @@ npm run build          # compilación de producción
 
 ---
 
-## 🌐 Web pública (carpeta `web/`)
+## 🌐 Web pública (raíz del repositorio)
 
-Además del ERP, el repositorio incluye la **web de cara al cliente** (Next.js, renderizado en
-servidor): catálogo de vehículos disponibles, fichas con galería, cómo trabajamos, **página de
-garantía**, búsqueda por encargo, compra de vehículos usados y captación de contactos.
+La **web de cara al cliente** (Next.js, renderizado en servidor): catálogo de vehículos disponibles,
+fichas con galería, cómo trabajamos, **página de garantía**, búsqueda por encargo, compra de
+vehículos usados y captación de contactos.
 
 **Posicionamiento (leer [`docs/14`](docs/14_IDENTIDAD_WEB_Y_POSICIONAMIENTO.md)):** la web no dice
 «somos importadores». Dice que vendemos vehículos seleccionados —**nacionales e importados**—, que
 compramos donde está la unidad correcta (no solo en Alemania) y que **todas las ventas salen con
 garantía mínima de 12 meses por escrito**. El diseño (tinta, marfil y dorado champán, titulares en
-serif, filetes finos) está centralizado en `web/app/globals.css` y en `web/lib/site.js`.
+serif, filetes finos) está centralizado en `app/globals.css` y en `lib/site.js`.
 
-- **Mismo repositorio, dos despliegues**: la raíz es el ERP (`app.khcimport.autos`) y `web/` es
-  la web pública (`khcimport.autos`), cada uno en su proyecto de Vercel.
+- **Un solo proyecto de Vercel, dos dominios**: `khcimport.autos` es esta web y
+  `app.khcimport.autos` es el ERP, servidos por el mismo despliegue y separados por dominio.
 - **Misma base de datos, frontera clara**: la web **no** lee `vehicles`. Lee `publications`, una
   tabla con solo los campos publicados (sin costes, márgenes, VIN ni matrícula) y las fotos del
   bucket público `public-photos`. Esquema en
@@ -206,68 +231,69 @@ serif, filetes finos) está centralizado en `web/app/globals.css` y en `web/lib/
 - Sin credenciales de Supabase, la web arranca en **modo demostración** (datos de ejemplo y
   `noindex`), ideal para trabajar en el diseño.
 
-Detalles, puesta en marcha y checklist previa a publicar: [`web/README.md`](web/README.md).
+Detalles, puesta en marcha y checklist previa a publicar:
+[`docs/15_WEB_PUBLICA_MANUAL.md`](docs/15_WEB_PUBLICA_MANUAL.md).
 Identidad, tono y sistema de diseño: [`docs/14_IDENTIDAD_WEB_Y_POSICIONAMIENTO.md`](docs/14_IDENTIDAD_WEB_Y_POSICIONAMIENTO.md).
 Decisiones de arquitectura y plan por fases: [`docs/12_WEB_PUBLICA_Y_PUBLICACION.md`](docs/12_WEB_PUBLICA_Y_PUBLICACION.md).
 
 ---
 
-## 🚀 Despliegue en Vercel (Listo para Producción)
+## 🚀 Despliegue en Vercel
 
-El proyecto está **100% preparado y optimizado para desplegarse en Vercel** en 1 minuto:
+Un solo proyecto, dos dominios. La configuración está en [`vercel.json`](vercel.json):
 
-### Opción A: Conectando GitHub a Vercel (Recomendado)
-1. Ve a [vercel.com](https://vercel.com) e inicia sesión.
-2. Pulsa en **"Add New... -> Project"**.
-3. Selecciona tu repositorio de GitHub `gtrespana-bit/car`.
-4. Vercel detectará automáticamente la configuración:
-   - **Framework Preset**: `Vite`
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
-5. **Antes de desplegar**, en *Environment Variables* añade `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`
-   (ver [`docs/09`](docs/09_SUPABASE_BASE_DE_DATOS_Y_USUARIOS.md)). Sin ellas la app arranca en modo local (datos solo en el navegador).
-6. Pulsa en **"Deploy"**. En menos de 40 segundos tu aplicación estará publicada en producción con HTTPS gratuito y CDN global.
+- `buildCommand: npm run build` → compila primero el ERP (Vite) y después la web (Next).
+- Cron diario a las 06:00 → `/api/keepalive` (`app/api/keepalive/route.js`), que hace una consulta
+  trivial a Supabase para que el proyecto gratuito no se pause.
 
-### Opción B: Mediante Vercel CLI
-```bash
-# Instalar Vercel CLI globalmente (si no lo tienes)
-npm i -g vercel
+Pasos, en orden:
 
-# Desplegar desde la raíz del proyecto
-vercel
+1. **Add New… → Project** → repositorio `gtrespana-bit/KHC-Auto-Import`.
+2. *Framework Preset*: **Next.js**. *Build Command*: `npm run build`. *Output*: sin override.
+3. **Environment Variables** (Production, Preview y Development):
 
-# Desplegar a producción
-vercel --prod
-```
+   | Nombre | Valor |
+   | --- | --- |
+   | `NEXT_PUBLIC_SUPABASE_URL` | `https://<proyecto>.supabase.co` |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | clave **anon public** |
+   | `NEXT_PUBLIC_SITE_URL` | `https://khcimport.autos` |
+   | `VITE_SUPABASE_URL` | la misma URL de Supabase |
+   | `VITE_SUPABASE_ANON_KEY` | la misma clave |
+   | `ERP_HOST` (opcional) | `app.khcimport.autos` |
 
-### Configuración incluida en el repositorio:
-- `vercel.json`: Reglas de reescritura (`rewrites`) para SPA (recargas y enlaces directos sin 404) y un **cron diario** que llama a `api/keepalive.js` para que el proyecto gratuito de Supabase no se pause por inactividad.
-- `api/keepalive.js`: única función de servidor; hace una consulta trivial a Supabase. Comprobable en `https://TU-DOMINIO/api/keepalive`.
-- `.env.example`: plantilla de las variables de entorno. Copiar como `.env.local` para desarrollo (no se sube a Git).
-- `package.json`: Scripts `dev`, `build`, `preview`, `check`, `catalog:stats` y `smoke`.
-- `dist`: Compilación limpia verificada sin errores de TypeScript ni dependencias faltantes.
+4. **Settings → Domains**: `khcimport.autos` (y `www` si se quiere) y `app.khcimport.autos`.
+   Si `khcimport.autos` sigue en el proyecto antiguo, quítalo de allí.
+5. **Supabase → Authentication → URL Configuration**: *Site URL* = `https://app.khcimport.autos`;
+   *Redirect URLs*: `https://app.khcimport.autos`, `http://localhost:3000`, `http://localhost:5173`
+   y la URL `*.vercel.app` del proyecto.
+
+`https://TU-DOMINIO/api/keepalive` responde con el estado de la base de datos y sirve de
+comprobación rápida. Paso a paso detallado:
+[`docs/13_DESPLIEGUE_Y_CAPTACION.md`](docs/13_DESPLIEGUE_Y_CAPTACION.md) → sección **0.c**.
 
 ---
 
 ## 💻 Desarrollo Local
 
 ```bash
-# 0. Credenciales de Supabase (opcional: sin ellas, modo local con IndexedDB)
-cp .env.example .env.local   # y rellena VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY
+# 0. Credenciales de Supabase (opcional: sin ellas, modo local con IndexedDB y modo demostración)
+cp .env.example .env.local   # rellena NEXT_PUBLIC_* (web) y VITE_* (ERP)
 
 # 1. Instalar dependencias
 npm install
 
-# 2. Iniciar servidor de desarrollo
-npm run dev
+# 2. Servidores de desarrollo
+npm run dev          # web pública en http://localhost:3000
+npm run dev:erp      # ERP en http://localhost:5173
 
-# 3. Compilar para producción
+# 3. Compilar para producción (ERP + web)
 npm run build
 
-# 4. Previsualizar la compilación de producción
-npm run preview
+# 4. Servir el resultado
+npm start            # web en /, ERP en /erp/ (en su dominio, en la raíz)
+npm run preview:erp  # solo el ERP compilado, con Vite
 
-# 5. Comprobaciones (motor fiscal, catálogo y render de todas las vistas)
+# 5. Comprobaciones (motor fiscal, catálogo, enrutado por dominio y render de todas las vistas)
 npm run check
 npm run catalog:stats
 npm run smoke
@@ -291,7 +317,9 @@ En el directorio `/docs` dispones de la biblioteca estratégica completa:
 10. [`docs/10_OPORTUNIDADES_MEDIDAS.md`](docs/10_OPORTUNIDADES_MEDIDAS.md): **Ranking de oportunidades** (142 grupos) con beneficio neto por coche en escenario empresa, realista, medio y prudente.
 11. [`docs/11_CAPTURA_DE_PRECIOS_Y_RANKING_EMPRESA.md`](docs/11_CAPTURA_DE_PRECIOS_Y_RANKING_EMPRESA.md): **De dónde sale cada precio**: fuentes (mobile.de, autoscout24, milanuncios…), filtros, cálculo «empresa», cómo actualizar la captura desde el PC y limitaciones conocidas.
 12. [`docs/12_WEB_PUBLICA_Y_PUBLICACION.md`](docs/12_WEB_PUBLICA_Y_PUBLICACION.md): **Web pública y publicación**: arquitectura, legal, costes y plan por fases.
-13. [`docs/13_DESPLIEGUE_Y_CAPTACION.md`](docs/13_DESPLIEGUE_Y_CAPTACION.md): **Despliegue y captación**: dominio `khcimport.autos`, comprobaciones de producción, Search Console, Google Business Profile y rutina de mantenimiento.
+13. [`docs/13_DESPLIEGUE_Y_CAPTACION.md`](docs/13_DESPLIEGUE_Y_CAPTACION.md): **Despliegue y captación**: proyecto único con `khcimport.autos` y `app.khcimport.autos`, comprobaciones de producción, Search Console, Google Business Profile y rutina de mantenimiento.
+14. [`docs/14_IDENTIDAD_WEB_Y_POSICIONAMIENTO.md`](docs/14_IDENTIDAD_WEB_Y_POSICIONAMIENTO.md): **Identidad y posicionamiento**: qué decimos y qué no, sistema visual y reglas de redacción para la web y los anuncios.
+15. [`docs/15_WEB_PUBLICA_MANUAL.md`](docs/15_WEB_PUBLICA_MANUAL.md): **Manual de la web pública**: puesta en marcha, variables, despliegue, publicación de un coche y solución de problemas.
 
 ### En la app
 - **Oportunidades:** ranking «empresa» (compra en el 10 % barato de Alemania −5 % negociado, venta a la mediana española, todos los gastos e IVA del margen). Al pulsar un modelo: cuenta gasto a gasto y anuncios reales enlazados de ambos países.

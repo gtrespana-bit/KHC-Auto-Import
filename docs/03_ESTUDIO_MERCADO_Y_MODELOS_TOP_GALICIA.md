@@ -20,7 +20,7 @@ Este informe presenta un análisis empírico con **precios reales de mercado con
 >   Los márgenes de las fichas estimadas pueden estar inflados: contrasta la venta.
 >
 > Todos los precios del catálogo están ahora contrastados contra anuncios reales
-> (`src/data/catalog/marketEvidence.js`) y verificados por `npm run prices:check`.
+> (`erp/src/data/catalog/marketEvidence.js`) y verificados por `npm run prices:check`.
 
 
 ---

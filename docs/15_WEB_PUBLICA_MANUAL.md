@@ -1,15 +1,17 @@
-# KHC Auto Import · Web pública
+# KHC Auto Import · Manual de la web pública
 
-Web de cara al cliente: catálogo de coches disponibles, proceso de importación, búsqueda por
-encargo, compra de coches usados y captación de contactos. Es un **proyecto Next.js
-independiente dentro del mismo repositorio**:
+Web de cara al cliente: catálogo de vehículos disponibles, cómo trabajamos, garantía, búsqueda por
+encargo, compra de vehículos usados y captación de contactos.
 
-- `../` → ERP de gestión (Vite + React, `app.khcimport.autos`).
-- `./` → web pública (Next.js, `khcimport.autos`).
+Vive en la **raíz del repositorio** (Next.js) y comparte **un solo proyecto de Vercel** con el ERP:
 
-Los dos usan **la misma base de datos de Supabase**, pero la web **nunca** lee las tablas del
-ERP: lee `public.publications`, que contiene solo los campos que el ERP decide publicar.
-La frontera está en `../supabase/migrations/20261002000001_web_publica.sql`.
+- `/` (raíz) → web pública (Next.js, `khcimport.autos`).
+- `/erp` en el repositorio → ERP de gestión (Vite, `erp/`), que se sirve en `app.khcimport.autos`
+  a través de `middleware.js`.
+
+Los dos usan **la misma base de datos de Supabase**, pero la web **nunca** lee las tablas del ERP:
+lee `public.publications`, que contiene solo los campos que el ERP decide publicar. La frontera está
+en `supabase/migrations/20261002000001_web_publica.sql`.
 
 ---
 
@@ -33,15 +35,19 @@ El sistema visual (tinta + marfil + dorado champán, titulares en serif, filetes
 
 ---
 
-## Poner en marcha
+## Poner en marcha (desde la raíz del repositorio)
 
 ```bash
-cd web
-cp .env.example .env.local   # opcional: sin credenciales arranca en modo demostración
 npm install
-npm run dev                  # http://localhost:3000
-npm run build && npm start   # producción
+cp .env.example .env.local   # opcional: sin credenciales arranca en modo demostración
+npm run dev                  # web pública en http://localhost:3000
+npm run dev:erp              # ERP en http://localhost:5173 (Vite)
+npm run build && npm start   # producción: compila ERP + web y las sirve juntas
 ```
+
+El ERP en desarrollo se revisa en `/erp/` dentro de la propia web si se prefiere
+(`http://localhost:3000/erp/`), porque los dominios de producción (`localhost` y los previews)
+también sirven la carpeta del ERP.
 
 ### Modo demostración
 
@@ -64,31 +70,51 @@ Google). Es el modo en el que se puede trabajar en el diseño sin tocar datos re
 
 ---
 
-## Despliegue en Vercel
+## Despliegue en Vercel (un solo proyecto)
 
-1. **Add New → Project** y elige el repositorio `KHC-Auto-Import`.
-2. En **Root Directory** selecciona **`web`** (así el ERP sigue desplegándose en su propio
-   proyecto desde la raíz).
-3. Revisa **Settings → General → Build & Development Settings**:
+El proyecto sirve **las dos aplicaciones**: la web en `khcimport.autos` y el ERP en
+`app.khcimport.autos`. No se crean dos proyectos.
+
+1. **Settings → General → Build & Development Settings**:
    - *Framework Preset*: **Next.js**.
-   - *Build Command* y *Output Directory*: **sin override** (vacíos). El `vercel.json` de la
-     raíz del repo es del ERP (Vite) y declara `outputDirectory: "dist"`; Next.js genera
-     `.next`, así que copiar ese valor produce el error
-     `The Next.js output directory "dist" was not found`. `web/vercel.json` ya neutraliza
-     esa herencia (`buildCommand`/`outputDirectory` a `null`), pero no dejes un override
-     `dist` guardado en el dashboard.
-4. Añade las variables de entorno (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-   `NEXT_PUBLIC_SITE_URL`).
-5. **Antes** de asignar el dominio: si `khcimport.autos` ya está en el proyecto del ERP, hay que
-   quitarlo de allí (*Settings → Domains → Remove*) y añadirlo después en este proyecto.
-   Vercel no permite el mismo dominio en dos proyectos.
-6. El ERP, en su proyecto de Vercel, se mueve a `app.khcimport.autos` para que la web pública
-   y la aplicación no compartan origen (cachés, service worker y cookies separadas).
-   Recordatorio: actualizar *Site URL* y *Redirect URLs* en Supabase → Authentication.
+   - *Build Command*: `npm run build` (compila el ERP con Vite **y** la web con Next).
+   - *Output Directory* y *Install Command*: **sin override**. Si el panel conserva un
+     `dist` heredado de la etapa anterior, bórralo: Next genera `.next` y ese valor produce
+     `The Next.js output directory "dist" was not found`.
+2. **Environment Variables** (Production, Preview y Development):
 
-Paso a paso con lo que debe salir en cada pantalla: [`../docs/13`](../docs/13_DESPLIEGUE_Y_CAPTACION.md) → sección **0.c**.
+   | Nombre | Valor |
+   | --- | --- |
+   | `NEXT_PUBLIC_SUPABASE_URL` | `https://<proyecto>.supabase.co` |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | clave **anon public** |
+   | `NEXT_PUBLIC_SITE_URL` | `https://khcimport.autos` |
+   | `VITE_SUPABASE_URL` | la misma URL (la usa el ERP y el cron) |
+   | `VITE_SUPABASE_ANON_KEY` | la misma clave |
+   | `ERP_HOST` *(opcional)* | `app.khcimport.autos` |
 
----
+3. **Settings → Domains**: añade `khcimport.autos` (y `www` si se quiere) y
+   `app.khcimport.autos`. Quita `khcimport.autos` del proyecto antiguo si todavía lo tiene.
+4. **Supabase → Authentication → URL Configuration**: *Site URL* = `https://app.khcimport.autos`
+   y en *Redirect URLs* las de `app.khcimport.autos`, `localhost:3000` y `localhost:5173`.
+
+Paso a paso con lo que debe salir en cada pantalla:
+[`docs/13`](13_DESPLIEGUE_Y_CAPTACION.md) → sección **0.c**.
+
+### Qué hace el enrutado por dominio
+
+`middleware.js` (raíz del repositorio) decide quién atiende cada petición:
+
+- En `app.khcimport.autos`, todo se traduce a `/erp/…` (y la raíz a su `index.html`), de modo que el
+  ERP se ve en `app.khcimport.autos/` —sin prefijos— con su manifiesto, su *service worker* y su app
+  instalable funcionando en ese origen.
+- En `khcimport.autos`, las rutas son las de la web y **nada del ERP es alcanzable**: sus ficheros
+  viven en `/erp/` y ahí responden 404.
+- En cualquier otro dominio (localhost, previews, sandbox) la web funciona igual y `/erp/` queda
+  accesible para poder revisar el ERP sin configurar dominios.
+- Todas las respuestas del ERP llevan `X-Robots-Tag: noindex` (es una aplicación interna).
+
+Para cambiar el subdominio del ERP no hay que tocar código: variable `ERP_HOST` (varios separados por
+comas).
 
 ## Publicar un coche (flujo completo)
 

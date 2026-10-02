@@ -24,7 +24,7 @@ En Galicia concurren factores geográficos específicos que determinan el valor 
 > **pocos kilómetros** (80-110k) y en compras por debajo del precio de anuncio.
 > Se han contrastado contra anuncios reales capturados el 24-09-2026 en
 > Mobile.de, AutoScout24.de, coches.net, Autocasión, Wallapop y Milanuncios
-> (ver `src/data/catalog/marketEvidence.js`) y hay dos correcciones importantes:
+> (ver `erp/src/data/catalog/marketEvidence.js`) y hay dos correcciones importantes:
 >
 > 1. **El margen real depende del kilometraje más que del modelo.** Al
 >    kilometraje de referencia del catálogo —que es el habitual en una
