@@ -212,6 +212,11 @@ Supabase → **Authentication → URL Configuration**:
 | **Site URL** | `https://app.khcimport.autos` | Es la dirección a la que Supabase manda los enlaces de confirmar correo y de recuperar contraseña: tienen que llevar al ERP. |
 | **Redirect URLs** | `https://app.khcimport.autos`, `http://localhost:5173`, `http://localhost:3000` y la URL `*.vercel.app` del proyecto | Son las direcciones desde las que se permite volver después de iniciar sesión. Sin las de `localhost` no podrás entrar en desarrollo. |
 
+> **¿Y `khcimport.autos`?** No hace falta añadirlo en Supabase, ni como *Site URL* ni como
+> *Redirect URL*: la web pública no tiene login (solo lee `publications` con la clave anónima, y eso
+> no pasa por la configuración de autenticación). Si algún día hubiera un área privada de clientes,
+> entonces sí.
+
 Tres consecuencias normales al hacer este cambio:
 
 1. **Te pedirá iniciar sesión otra vez** en el ERP: el navegador guarda la sesión por dirección, y
