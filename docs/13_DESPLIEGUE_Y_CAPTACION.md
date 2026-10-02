@@ -95,7 +95,9 @@ Si te equivocas y lo ejecutas dos veces no pasa nada: actualiza la misma fila (e
 select
   o.name                                as empresa,
   w.slug                                as web,
-  case when w.org_id = o.id then 'OK' else 'REVISAR' end as enlace,
+  case when w.slug is null then 'FALTA (haz el paso 2)'
+       when w.org_id = o.id then 'OK'
+       else 'REVISAR' end as enlace,
   count(p.id) filter (where p.status = 'publicado') as publicados,
   count(p.id) filter (where p.status = 'reservado') as reservados,
   count(p.id) filter (where p.status = 'vendido')   as vendidos
@@ -109,9 +111,10 @@ order by o.created_at;
 **Qué esperar**, en la fila de tu empresa:
 
 - **`enlace` = `OK`** → la web está enlazada. Es lo que querías verificar.
+- **`enlace` = `FALTA (haz el paso 2)`** → no existe la fila de `web_sites`: vuelve al paso 2 y
+  ejecuta el `insert`.
 - **`enlace` = `REVISAR`** → hay más de una empresa en la base de datos y `web_sites` apunta a
   otra. Avísame y lo miramos.
-- **`web` = vacío** → falta la fila: vuelve al paso 2 y ejecuta el `insert`.
 - Las columnas `publicados`, `reservados` y `vendidos` son solo informativas (0 mientras no hayas
   publicado nada).
 
