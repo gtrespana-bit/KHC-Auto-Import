@@ -102,6 +102,79 @@ Si el paso 3 falla, el error sale en la consola del navegador (F12 → *Console*
 siempre por «new row violates row-level security policy» (falta el paso 2 de arriba) o
 «permission denied» (falta ejecutar la migración).
 
+## 0.c · Separar los dos proyectos en Vercel (por qué la web te lleva al ERP)
+
+**Lo que pasa:** el dominio `khcimport.autos` está asignado al proyecto de Vercel del **ERP**
+(el programa de gestión). Por eso al abrirlo te lleva a la aplicación. La web pública que
+construimos vive en la carpeta `web/` del repositorio y necesita **su propio proyecto de Vercel**.
+
+Al final debe quedar así:
+
+| Qué | Dirección | Proyecto de Vercel | Root Directory |
+| --- | --- | --- | --- |
+| Web pública (tu escaparate) | `https://khcimport.autos` | proyecto «web» | `web` |
+| ERP (uso interno) | `https://app.khcimport.autos` | proyecto actual | `.` (raíz) |
+
+### Paso 1 · Fusionar el pull request #7 en `main`
+
+La carpeta `web/` todavía no está en `main`: vive en la rama del pull request. Vercel solo
+despliega lo que hay en `main`, así que **primero** hay que fusionar el PR #7.
+(hasta entonces, el proyecto de la web daría error de compilación o no encontraría la carpeta).
+
+### Paso 2 · Crear el proyecto de la web
+
+1. Vercel → **Add New… → Project** → *Import Git Repository* → elige `KHC-Auto-Import`.
+2. En **Configure Project**, busca **Root Directory** → *Edit* → selecciona la carpeta **`web`**.
+   (Vercel detectará Next.js solo; no cambies Build ni Output).
+3. Abre **Environment Variables** y añade estas tres (marco *Production*, *Preview* y *Development*):
+
+   | Nombre | Valor |
+   | --- | --- |
+   | `NEXT_PUBLIC_SUPABASE_URL` | `https://<tu-proyecto>.supabase.co` |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | la clave **anon public** (Supabase → Settings → API) |
+   | `NEXT_PUBLIC_SITE_URL` | `https://khcimport.autos` |
+
+4. **Deploy**. Abre la URL temporal (`...vercel.app`) y comprueba que **no** aparece la cinta
+   naranja de «datos de ejemplo».
+
+### Paso 3 · Mover el dominio (el orden importa)
+
+Vercel no deja que un dominio esté en dos proyectos a la vez. Primero se quita y luego se pone:
+
+1. **Proyecto del ERP** → *Settings* → *Domains* → en `khcimport.autos` → **Remove**.
+2. **Proyecto de la web** → *Settings* → *Domains* → **Add** → escribes `khcimport.autos` →
+   *Add*. Si además quieres que `www.khcimport.autos` funcione, añade también `www.khcimport.autos`
+   y elige «Redirect to khcimport.autos».
+   - Si el dominio usa los **nameservers de Vercel**, no hay que tocar DNS: se configura solo.
+   - Si lo compraste fuera y lo apuntaste con registros A/CNAME, Vercel te dirá qué registro poner:
+     normalmente `A` → `76.76.21.21` para el dominio raíz y `CNAME` → `cname.vercel-dns.com` para `www`.
+3. **Proyecto del ERP** → *Settings* → *Domains* → **Add** → `app.khcimport.autos` →
+   Vercel te dirá el registro necesario (`CNAME app → cname.vercel-dns.com`) si no usas sus
+   nameservers.
+
+### Paso 4 · Supabase (para no quedarte fuera del ERP)
+
+Al cambiar de dirección, el navegador tiene otra sesión y **te pedirá iniciar sesión de nuevo**.
+Antes, en Supabase → **Authentication → URL Configuration**:
+
+- *Site URL*: `https://app.khcimport.autos`
+- *Redirect URLs*: añade `https://app.khcimport.autos`, `https://khcimport.autos` y
+  `http://localhost:5173`.
+
+Sin esto, los enlaces de confirmación de correo y de recuperación de contraseña apuntarán al sitio
+antiguo.
+
+### Paso 5 · Detalles que conviene arreglar
+
+- **Nombre de la empresa**: en la consulta del paso 1 salió «Mi empresa». Es el nombre que usa el
+  ERP (aparece en la barra lateral, en las facturas y en el pie). Cámbialo en el ERP →
+  **Ajustes → Empresa → Nombre** por `KHC Auto Import` y se actualiza en la base de datos.
+- **Correo del ERP**: revisa que en *Ajustes* estén el teléfono y el correo reales
+  (`info@khcimport.autos`): los usan los anuncios, los contratos y las facturas.
+- **Web del ERP**: el dominio de la web ya viene por defecto en el código
+  (`src/lib/web.js`), pero si algún día cambia se puede fijar con la variable
+  `VITE_PUBLIC_WEB_URL` en el proyecto del ERP.
+
 ---
 
 ## 1. Mapa de lo que hay desplegado

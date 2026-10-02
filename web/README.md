@@ -49,10 +49,16 @@ Google). Es el modo en el que se puede trabajar en el diseño sin tocar datos re
 1. **Add New → Project** y elige el repositorio `KHC-Auto-Import`.
 2. En **Root Directory** selecciona **`web`** (así el ERP sigue desplegándose en su propio
    proyecto desde la raíz).
-3. Añade las variables de entorno.
-4. Domino: `khcimport.autos` (y redirección desde el dominio sin `www`).
+3. Añade las variables de entorno (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+   `NEXT_PUBLIC_SITE_URL`).
+4. **Antes** de asignar el dominio: si `khcimport.autos` ya está en el proyecto del ERP, hay que
+   quitarlo de allí (*Settings → Domains → Remove*) y añadirlo después en este proyecto.
+   Vercel no permite el mismo dominio en dos proyectos.
 5. El ERP, en su proyecto de Vercel, se mueve a `app.khcimport.autos` para que la web pública
    y la aplicación no compartan origen (cachés, service worker y cookies separadas).
+   Recordatorio: actualizar *Site URL* y *Redirect URLs* en Supabase → Authentication.
+
+Paso a paso con lo que debe salir en cada pantalla: [`../docs/13`](../docs/13_DESPLIEGUE_Y_CAPTACION.md) → sección **0.c**.
 
 ---
 
