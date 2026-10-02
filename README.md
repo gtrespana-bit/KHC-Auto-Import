@@ -180,8 +180,8 @@ Además del ERP, el repositorio incluye la **web de cara al cliente** (Next.js, 
 servidor): catálogo de coches disponibles, fichas con galería, proceso de importación, búsqueda
 por encargo, compra de coches usados y captación de contactos.
 
-- **Mismo repositorio, dos despliegues**: la raíz es el ERP (`app.khcautoimport.es`) y `web/` es
-  la web pública (`www.khcautoimport.es`), cada uno en su proyecto de Vercel.
+- **Mismo repositorio, dos despliegues**: la raíz es el ERP (`app.khcimport.autos`) y `web/` es
+  la web pública (`khcimport.autos`), cada uno en su proyecto de Vercel.
 - **Misma base de datos, frontera clara**: la web **no** lee `vehicles`. Lee `publications`, una
   tabla con solo los campos publicados (sin costes, márgenes, VIN ni matrícula) y las fotos del
   bucket público `public-photos`. Esquema en
@@ -278,6 +278,8 @@ En el directorio `/docs` dispones de la biblioteca estratégica completa:
 9. [`docs/09_SUPABASE_BASE_DE_DATOS_Y_USUARIOS.md`](docs/09_SUPABASE_BASE_DE_DATOS_Y_USUARIOS.md): **Base de datos y usuarios**: esquema en Supabase, roles y permisos, alta e invitación de usuarios, variables de entorno y solución de problemas.
 10. [`docs/10_OPORTUNIDADES_MEDIDAS.md`](docs/10_OPORTUNIDADES_MEDIDAS.md): **Ranking de oportunidades** (142 grupos) con beneficio neto por coche en escenario empresa, realista, medio y prudente.
 11. [`docs/11_CAPTURA_DE_PRECIOS_Y_RANKING_EMPRESA.md`](docs/11_CAPTURA_DE_PRECIOS_Y_RANKING_EMPRESA.md): **De dónde sale cada precio**: fuentes (mobile.de, autoscout24, milanuncios…), filtros, cálculo «empresa», cómo actualizar la captura desde el PC y limitaciones conocidas.
+12. [`docs/12_WEB_PUBLICA_Y_PUBLICACION.md`](docs/12_WEB_PUBLICA_Y_PUBLICACION.md): **Web pública y publicación**: arquitectura, legal, costes y plan por fases.
+13. [`docs/13_DESPLIEGUE_Y_CAPTACION.md`](docs/13_DESPLIEGUE_Y_CAPTACION.md): **Despliegue y captación**: dominio `khcimport.autos`, comprobaciones de producción, Search Console, Google Business Profile y rutina de mantenimiento.
 
 ### En la app
 - **Oportunidades:** ranking «empresa» (compra en el 10 % barato de Alemania −5 % negociado, venta a la mediana española, todos los gastos e IVA del margen). Al pulsar un modelo: cuenta gasto a gasto y anuncios reales enlazados de ambos países.

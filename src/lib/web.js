@@ -13,7 +13,7 @@ export const SITE_SLUG = 'khc';
 
 const fromEnv = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_PUBLIC_WEB_URL : '';
 
-export const PUBLIC_WEB_URL = (fromEnv || 'https://www.khcautoimport.es').replace(/\/+$/, '');
+export const PUBLIC_WEB_URL = (fromEnv || 'https://khcimport.autos').replace(/\/+$/, '');
 
 /** Estado que ve el visitante según el estado del vehículo en el ERP. */
 export function publicationStatusForVehicle(vehicle) {

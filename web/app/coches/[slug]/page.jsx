@@ -15,6 +15,7 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import Gallery from '@/components/Gallery.jsx';
+import ShareButton from '@/components/ShareButton.jsx';
 import LeadForm from '@/components/LeadForm.jsx';
 import JsonLd from '@/components/JsonLd.jsx';
 import VehicleCard from '@/components/VehicleCard.jsx';
@@ -33,7 +34,6 @@ export async function generateMetadata({ params }) {
   const { slug } = await params;
   const listing = await getListing(slug);
   if (!listing) return { title: 'Coche no encontrado' };
-  const cover = coverOf(listing);
   const title = `${listing.title} ${listing.year} · ${kmFmt(listing.km)} · ${eur(listing.price)}`;
   return {
     title,
@@ -43,10 +43,11 @@ export async function generateMetadata({ params }) {
       listing.location || site.city
     }.`.slice(0, 300),
     alternates: { canonical: `/coches/${slug}` },
+    // La imagen que aparece al compartir por WhatsApp la genera
+    // `opengraph-image.jsx` de esta misma carpeta, con la foto y el precio.
     openGraph: {
       title: `${title} | ${site.name}`,
       description: `Importado de Alemania con garantía. ${listing.fuel}, ${listing.transmission || ''}.`,
-      images: cover ? [{ url: cover.url, alt: cover.alt || listing.title }] : undefined,
       type: 'website',
     },
   };
@@ -217,6 +218,9 @@ export default async function ListingPage({ params }) {
               >
                 <MessageCircle className="h-4 w-4" /> Preguntar por WhatsApp
               </a>
+            </div>
+            <div className="mt-2 grid gap-2">
+              <ShareButton listing={listing} />
             </div>
             <p className="mt-3 text-center text-[11px] text-slate-500">
               ¿Prefieres verlo? Concertamos cita en {listing.location || site.city}.

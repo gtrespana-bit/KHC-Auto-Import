@@ -91,7 +91,7 @@ Regla de oro: *la web pública nunca ve costes, VIN, matrícula, margen ni notas
                             │ escritura (usuario con sesión, RLS por rol)   │ lectura anónima (RLS por
                             │                                               │ estado y sitio)
               ┌─────────────┴──────────────┐                 ┌──────────────┴───────────────┐
-              │  app.khcautoimport.es      │                 │  www.khcautoimport.es        │
+              │  app.khcimport.autos      │                 │  khcimport.autos        │
               │  ERP (Vite + React, actual)│                 │  Web pública (Next.js SSR)   │
               │  Proyecto Vercel nº 1      │                 │  Proyecto Vercel nº 2        │
               │  raíz del repo             │                 │  carpeta /web                │
@@ -159,7 +159,7 @@ Una fila por vehículo publicado, con **campos copiados** (nada de `join` con `v
    - Fotos: elige las de la ficha, marca la portada y **oculta las que muestren matrícula
      legible** (o tapa la matrícula al vuelo; ver §4.3).
    - Garantía y financiación (texto, sin cifras de TAE en v1).
-   - **Vista previa** en `https://www.khcautoimport.es/p/{token}` (privada, no indexable).
+   - **Vista previa** en `https://khcimport.autos/p/{token}` (privada, no indexable).
 3. Al confirmar: se escribe la fila en `publications` y se suben las fotos al bucket público.
 4. Si después cambia el precio, los km o las fotos en el ERP, la ficha muestra
    **«La web está desactualizada»** con un botón **Re-sincronizar**. Opción de sincronizar
@@ -312,7 +312,7 @@ trae stock, el segundo encaja con el modelo de importación por encargo.
 ## 8. Qué NO hacer (anti-patrones)
 
 1. **No conectar la web a `vehicles`.** Es el atajo que revienta el negocio entero.
-2. **No poner el ERP en `khcautoimport.es/erp`.** El service worker y las cachés del ERP
+2. **No poner el ERP en `khcimport.autos/erp`.** El service worker y las cachés del ERP
    contaminan la web pública; usar `app.` desde el principio.
 3. **No dejar la web en modo SPA sin renderizado** «porque ya tenemos React». Se paga en SEO
    y, sobre todo, en la tarjeta de previsualización de WhatsApp.
@@ -348,7 +348,7 @@ trae stock, el segundo encaja con el modelo de importación por encargo.
    puede quedarse sin indexar (`noindex`) y sin datos fiscales en el aviso legal.
 3. **Publicación:** botón manual con vista previa y re-sincronización; **reservado** y **vendido**
    se reflejan solos al cambiar el estado del vehículo.
-4. **Marca y dominio:** «KHC Auto Import» es el nombre definitivo. Al registrador: `khcautoimport.es`
+4. **Marca y dominio:** «KHC Auto Import» es el nombre definitivo. Al registrador: `khcimport.autos`
    y `.com` (sin registros DNS en el momento del análisis), más correo profesional del dominio.
 
 ### Estado de la implantación
@@ -369,7 +369,7 @@ trae stock, el segundo encaja con el modelo de importación por encargo.
 
 - `vercel.json` de la raíz se queda como está (ERP); la carpeta `web/` lleva su propia
   configuración.
-- Supabase Auth: añadir `https://app.khcautoimport.es` y el dominio de la web a *Redirect
+- Supabase Auth: añadir `https://app.khcimport.autos` y el dominio de la web a *Redirect
   URLs*; el ERP deja de vivir en `*.vercel.app` o se mantienen ambos durante la transición.
 - El service worker del ERP (`public/sw.js`) sube de versión cuando se cambie la marca, y
   conviene renombrar la caché (`autoimport-v1` → `khc-v1`) para que los dispositivos

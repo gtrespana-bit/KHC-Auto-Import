@@ -1,7 +1,9 @@
+import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 import Header from '@/components/Header.jsx';
 import Footer from '@/components/Footer.jsx';
 import JsonLd from '@/components/JsonLd.jsx';
+import WhatsAppFab from '@/components/WhatsAppFab.jsx';
 import { site } from '@/lib/site.js';
 import { isDemo } from '@/lib/listings.js';
 
@@ -33,6 +35,15 @@ export const metadata = {
   // En modo demostración (sin Supabase) no se indexa: evita que unos coches de
   // ejemplo aparezcan en Google como si fueran stock real.
   robots: isDemo ? { index: false, follow: false } : { index: true, follow: true },
+  // Verificación de propiedades en Google Search Console y Bing Webmaster.
+  // Se rellenan en Vercel (Settings → Environment Variables) con el código que
+  // da cada buscador; no hace falta tocar el código.
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+    other: process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION
+      ? { 'msvalidate.01': process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION }
+      : undefined,
+  },
 };
 
 export const viewport = {
@@ -72,7 +83,11 @@ export default function RootLayout({ children }) {
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
+        <WhatsAppFab />
         <JsonLd data={orgLd} />
+        {/* Analítica de Vercel: sin cookies ni datos personales (no necesita
+            banner de consentimiento). Se activa en el panel del proyecto. */}
+        <Analytics />
       </body>
     </html>
   );

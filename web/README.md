@@ -4,8 +4,8 @@ Web de cara al cliente: catálogo de coches disponibles, proceso de importación
 encargo, compra de coches usados y captación de contactos. Es un **proyecto Next.js
 independiente dentro del mismo repositorio**:
 
-- `../` → ERP de gestión (Vite + React, `app.khcautoimport.es`).
-- `./` → web pública (Next.js, `www.khcautoimport.es`).
+- `../` → ERP de gestión (Vite + React, `app.khcimport.autos`).
+- `./` → web pública (Next.js, `khcimport.autos`).
 
 Los dos usan **la misma base de datos de Supabase**, pero la web **nunca** lee las tablas del
 ERP: lee `public.publications`, que contiene solo los campos que el ERP decide publicar.
@@ -38,7 +38,9 @@ Google). Es el modo en el que se puede trabajar en el diseño sin tocar datos re
 | `NEXT_PUBLIC_SUPABASE_URL` | Sí (en producción) | URL del proyecto Supabase. |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Sí (en producción) | Clave pública (segura: la seguridad la imponen las políticas RLS). |
 | `NEXT_PUBLIC_SITE_URL` | Recomendada | Dominio público, para canónicas, sitemap y Open Graph. |
-| `LEAD_WEBHOOK_URL` | No | Webhook al que se reenvía cada contacto (Telegram, Slack, Make…). |
+| `LEAD_WEBHOOK_URL` | No | Webhook al que se reenvía cada contacto (Telegram, Make, n8n…). |
+| `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` | No | Código de verificación de Google Search Console. |
+| `NEXT_PUBLIC_BING_SITE_VERIFICATION` | No | Código de verificación de Bing Webmaster Tools. |
 
 ---
 
@@ -48,8 +50,8 @@ Google). Es el modo en el que se puede trabajar en el diseño sin tocar datos re
 2. En **Root Directory** selecciona **`web`** (así el ERP sigue desplegándose en su propio
    proyecto desde la raíz).
 3. Añade las variables de entorno.
-4. Domino: `www.khcautoimport.es` (y redirección desde el dominio sin `www`).
-5. El ERP, en su proyecto de Vercel, se mueve a `app.khcautoimport.es` para que la web pública
+4. Domino: `khcimport.autos` (y redirección desde el dominio sin `www`).
+5. El ERP, en su proyecto de Vercel, se mueve a `app.khcimport.autos` para que la web pública
    y la aplicación no compartan origen (cachés, service worker y cookies separadas).
 
 ---
@@ -76,18 +78,23 @@ Los contactos que llegan por los formularios aparecen en el ERP, en **Contactos 
 
 ## Antes de publicar la web (checklist)
 
-- [ ] Ejecutar la migración `20261002000001_web_publica.sql` en Supabase.
-- [ ] Registrar el sitio:
+- [x] Dominio creado: **khcimport.autos** y desplegado en producción (Vercel).
+- [x] Correo **info@khcimport.autos** creado.
+- [x] Migración `20261002000001_web_publica.sql` ejecutada en Supabase.
+- [ ] Registrar el sitio en la base de datos (una vez):
       `insert into public.web_sites (slug, org_id, name) select 'khc', id, 'KHC Auto Import' from public.organizations order by created_at limit 1 on conflict (slug) do update set org_id = excluded.org_id;`
-- [ ] Rellenar `lib/site.js`: teléfono real, correo, WhatsApp, dirección y **NIF/CIF** cuando la
+- [ ] Variables de entorno en Vercel: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+      y `NEXT_PUBLIC_SITE_URL=https://khcimport.autos`. Sin ellas la web sale con la cinta naranja
+      de «datos de ejemplo» y queda fuera de Google.
+- [ ] Rellenar `lib/site.js`: **teléfono real**, WhatsApp, correo, dirección y **NIF/CIF** cuando la
       sociedad esté constituida (el aviso legal lo marca como pendiente mientras esté vacío).
 - [ ] Sustituir las fotos de ejemplo (`public/images/`) por fotos reales publicadas desde el ERP.
-- [ ] Configurar las variables en Vercel y comprobar que `robots.txt` ya **no** dice `Disallow: /`.
+- [ ] Comprobar que `https://khcimport.autos/robots.txt` ya **no** dice `Disallow: /`.
 - [ ] Alta en Google Search Console (enviar `sitemap.xml`) y en Google Business Profile con el
-      mismo nombre, dirección y teléfono.
+      mismo nombre, dirección y teléfono. Detalle en [`../docs/13`](../docs/13_DESPLIEGUE_Y_CAPTACION.md).
 - [ ] Revisar el aviso legal, la política de privacidad y la de cookies con la gestoría.
-- [ ] Si algún día se activa analítica o publicidad: actualizar `legal/cookies` y añadir panel de
-      consentimiento (hoy la web no usa cookies y no muestra banner).
+- [ ] Si algún día se activa publicidad: actualizar `legal/cookies` y añadir panel de consentimiento
+      (hoy la web no usa cookies y no muestra banner; la analítica es de Vercel, sin cookies).
 
 ---
 

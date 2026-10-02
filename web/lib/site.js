@@ -5,6 +5,7 @@
 //  ⚠ ANTES DE PUBLICAR: completar los campos marcados con [PENDIENTE].
 // ============================================================================
 
+// Dominio canónico: khcimport.autos (el «www» redirige a este desde Vercel).
 const url = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/+$/, '');
 
 export const site = {
@@ -20,7 +21,7 @@ export const site = {
   phone: '+34 600 00 00 00',    // [PENDIENTE] teléfono real: aparece en botones y en los datos estructurados.
   phoneDisplay: '600 00 00 00', // [PENDIENTE]
   whatsapp: '34600000000',      // [PENDIENTE] solo dígitos, con prefijo del país.
-  email: 'info@khcautoimport.es',
+  email: 'info@khcimport.autos',
   city: 'A Coruña',
   region: 'Galicia',
   areaServed: 'A Coruña y Galicia',
