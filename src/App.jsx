@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import {
   Gauge, TrendingUp, Car, Database, Calculator, Users, Wallet, FileWarning, FileCheck2, BarChart3,
   BookOpen, Settings as SettingsIcon, Menu, X, Building2, HardDrive, MapPin, ShieldCheck,
-  ReceiptText, Cloud, CloudOff, LogOut, UserRound, Upload,
+  ReceiptText, Cloud, CloudOff, LogOut, UserRound, Upload, Globe,
 } from 'lucide-react';
 import { StoreProvider, useStore } from './lib/store.jsx';
 import { AuthProvider, useOptionalAuth } from './lib/auth.jsx';
@@ -23,6 +23,7 @@ import TaxView from './views/TaxView.jsx';
 import DocumentsView from './views/DocumentsView.jsx';
 import ReportsView from './views/ReportsView.jsx';
 import InvoicesView from './views/InvoicesView.jsx';
+import WebLeadsView from './views/WebLeadsView.jsx';
 import GuidesView from './views/GuidesView.jsx';
 import SettingsView from './views/SettingsView.jsx';
 
@@ -34,6 +35,7 @@ const NAV = [
     { id: 'catalog', label: 'Catálogo', icon: Database },
     { id: 'simulator', label: 'Simulador', icon: Calculator },
     { id: 'crm', label: 'Clientes y ventas', icon: Users },
+    { id: 'web', label: 'Contactos web', icon: Globe },
   ] },
   { group: 'Gestión', items: [
     { id: 'accounting', label: 'Contabilidad', icon: Wallet },
@@ -81,10 +83,13 @@ function Shell() {
 
   const pendingInvoices = state.vehicles.filter(isSold).filter((v) => !(state.invoices || []).some((i) => i.vehicleId === v.id)).length;
 
+  const newLeads = (state.leads || []).filter((l) => l.status === 'nuevo').length;
+
   const counters = {
     fleet: summary.stockCount || null,
     crm: openContacts || null,
     invoices: pendingInvoices || null,
+    web: newLeads || null,
   };
 
   const go = (v) => setView(v);
@@ -108,7 +113,7 @@ function Shell() {
               <Car className="w-5 h-5" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-extrabold text-white leading-tight truncate">{state.company.name || 'Coruña AutoImport'}</p>
+              <p className="text-sm font-extrabold text-white leading-tight truncate">{state.company.name || 'KHC Auto Import'}</p>
               <p className="text-[10px] text-slate-500 flex items-center gap-1"><MapPin className="w-3 h-3 text-amber-500" />A Coruña · Galicia</p>
             </div>
           </div>
@@ -173,7 +178,7 @@ function Shell() {
       <div className="lg:pl-64">
         <header className="sticky top-0 z-30 lg:hidden border-b border-slate-800 bg-slate-950/90 backdrop-blur-md px-4 py-3 flex items-center justify-between print:hidden">
           <button onClick={() => setMenu(true)} className="text-slate-300 hover:text-white p-1"><Menu className="w-5 h-5" /></button>
-          <p className="text-sm font-bold text-white">{state.company.name || 'Coruña AutoImport'}</p>
+          <p className="text-sm font-bold text-white">{state.company.name || 'KHC Auto Import'}</p>
           <Badge tone="amber">{summary.stockCount} en stock</Badge>
         </header>
 
@@ -203,6 +208,7 @@ function Shell() {
           {view === 'documents' && <DocumentsView />}
           {view === 'invoices' && <InvoicesView />}
           {view === 'reports' && <ReportsView />}
+          {view === 'web' && <WebLeadsView />}
           {view === 'guides' && <GuidesView vehicles={state.vehicles} />}
           {view === 'settings' && <SettingsView />}
         </main>
@@ -210,7 +216,7 @@ function Shell() {
         <footer className="border-t border-slate-800/80 bg-slate-900/60 py-6 mt-8 print:hidden">
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-[11px] text-slate-500">
             <p>
-              <span className="text-slate-300 font-semibold">{state.company.name || 'Coruña AutoImport'}</span> — gestión de importación y venta de vehículos.
+              <span className="text-slate-300 font-semibold">{state.company.name || 'KHC Auto Import'}</span> — gestión de importación y venta de vehículos.
               {isCloud ? 'Datos alojados en la nube (Supabase, UE) con acceso por usuario y rol.' : 'Datos guardados únicamente en este navegador.'}
             </p>
             <p className="flex flex-wrap items-center gap-2">

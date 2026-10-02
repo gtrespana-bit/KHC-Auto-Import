@@ -1,4 +1,4 @@
-# 🚗 Coruña AutoImport - Plan de Negocio y Sistema de Gestión
+# 🚗 KHC Auto Import — Plan de negocio, ERP interno y web pública
 
 Sistema integral de gestión, inteligencia de mercado, simulación fiscal y guía operativa para el negocio de **importación de vehículos desde Europa para su venta en A Coruña y Galicia (España)**.
 
@@ -48,6 +48,8 @@ Puesta en marcha en [`docs/09_SUPABASE_BASE_DE_DATOS_Y_USUARIOS.md`](docs/09_SUP
 | **Documentación** | 15 documentos por vehículo (8 obligatorios) y ficha de expediente imprimible |
 | **Fotos** | Galería por vehículo guardada en IndexedDB (redimensionada a 1.600 px), con foto principal y orden, visible en la flota y usable en el anuncio |
 | **Informes** | Cuenta de resultados, valoración de stock, carga fiscal y evolución mensual. Imprimible en PDF |
+| **Publicación web** | Botón **Publicar en la web** en cada ficha: contenido comercial, fotos sin EXIF y con la matrícula tapada, vista previa y re-sincronización cuando cambia el precio o los km |
+| **Contactos web** | Bandeja de los formularios de la web pública (llamada, WhatsApp, correo, ficha en el CRM y seguimiento) |
 | **Ajustes** | Empresa, régimen fiscal, tarifas editables del ejercicio, respaldo de datos y fuentes de cada cifra |
 
 ### 💶 Precios de compra y venta: de dónde sale cada cifra
@@ -164,9 +166,9 @@ eléctricos) están marcadas como estimación dentro de la propia aplicación y 
 ### Garantía técnica
 
 ```bash
-npm run check          # 65 aserciones sobre el motor fiscal, económico, facturación y plantillas
+npm run check          # 72 aserciones sobre el motor fiscal, económico, facturación, plantillas y web
 npm run catalog:stats  # integridad de la base de vehículos (ids, campos, horquillas)
-npm run smoke          # monta las 34 vistas con 3 escenarios de datos
+npm run smoke          # monta las 39 vistas con 3 escenarios de datos
 npm run build          # compilación de producción
 ```
 
@@ -184,8 +186,12 @@ por encargo, compra de coches usados y captación de contactos.
   tabla con solo los campos publicados (sin costes, márgenes, VIN ni matrícula) y las fotos del
   bucket público `public-photos`. Esquema en
   [`supabase/migrations/20261002000001_web_publica.sql`](supabase/migrations/20261002000001_web_publica.sql).
-- **Publicar sin trabajo doble**: el ERP publicará cada coche en un clic (siguiente paso);
-  reservado y vendido se reflejan solos y las fichas de vendidos se mantienen por SEO.
+- **Publicar sin trabajo doble**: en la ficha del vehículo, pestaña **Web** → *Publicar en la web*.
+  Se publica solo el contenido comercial (precio, km, descripción, fotos, garantía); si cambian el
+  precio o los kilómetros, la ficha avisa de que «la web está desactualizada» con un botón para
+  actualizar. Reservado y vendido se reflejan solos, y las fichas vendidas se mantienen por SEO.
+- **Contactos**: lo que rellenan los formularios de la web llega a *Contactos web* dentro del ERP
+  (con llamada, WhatsApp, correo y creación de la ficha en el CRM en un clic).
 - Sin credenciales de Supabase, la web arranca en **modo demostración** (datos de ejemplo y
   `noindex`), ideal para trabajar en el diseño.
 

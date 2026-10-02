@@ -20,9 +20,13 @@ import GuidesView from '../src/views/GuidesView.jsx';
 import SettingsView from '../src/views/SettingsView.jsx';
 import InvoicesView from '../src/views/InvoicesView.jsx';
 import AdModal from '../src/components/AdModal.jsx';
+import WebLeadsView from '../src/views/WebLeadsView.jsx';
+import PublishModal from '../src/components/PublishModal.jsx';
+import PlateEditor from '../src/components/PlateEditor.jsx';
+import WebPublicationPanel from '../src/components/WebPublicationPanel.jsx';
 import { PhotoManager, PhotoStrip } from '../src/components/Photos.jsx';
 
-const LS_KEY = 'coruna_autoimport_erp_state_v1';
+const LS_KEY = 'khc_autoimport_state_v1';
 
 import { demoState } from '../src/data/demoState.js';
 
@@ -61,6 +65,11 @@ const CASES = [
   ['Ajustes · datos', () => <SettingsView initialTab="datos" />],
   ['Facturación', () => <InvoicesView />],
   ['Anuncio (modal abierto)', () => <AdModal open vehicle={demoState().vehicles[0]} onClose={() => {}} />],
+  ['Contactos web', () => <WebLeadsView />],
+  ['Publicar en la web (modal)', () => <PublishModal open vehicle={demoState().vehicles[1]} onClose={() => {}} />],
+  ['Tapar matrícula (modal)', () => <PlateEditor open photo={{ id: 'ph-1', dataUrl: 'data:image/jpeg;base64,' }} onClose={() => {}} />],
+  ['Ficha · pestaña Web', () => <WebPublicationPanel vehicle={demoState().vehicles[1]} isNew={false} />],
+  ['Ficha · pestaña Web sin guardar', () => <WebPublicationPanel vehicle={demoState().vehicles[1]} isNew />],
   ['Gestor de fotos', () => <PhotoManager vehicleId="veh-golf" />],
   ['Miniatura de foto', () => <PhotoStrip vehicleId="veh-golf" />],
 ];

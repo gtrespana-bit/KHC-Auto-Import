@@ -14,6 +14,21 @@ const anonKey = import.meta.env?.VITE_SUPABASE_ANON_KEY || '';
 
 export const isSupabaseConfigured = Boolean(url && anonKey);
 
+/** Traslada la sesión guardada por la versión «coruna_autoimport_auth». */
+function migrateAuthKey() {
+  const NEW_KEY = 'khc_autoimport_auth';
+  try {
+    const legacy = localStorage.getItem('coruna_autoimport_auth');
+    if (legacy && !localStorage.getItem(NEW_KEY)) {
+      localStorage.setItem(NEW_KEY, legacy);
+      localStorage.removeItem('coruna_autoimport_auth');
+    }
+  } catch {
+    /* sin localStorage no hay nada que migrar */
+  }
+  return NEW_KEY;
+}
+
 let client = null;
 export function getSupabase() {
   if (!isSupabaseConfigured) return null;
@@ -23,7 +38,9 @@ export function getSupabase() {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
-        storageKey: 'coruna_autoimport_auth',
+        // La clave de sesión cambió con el renombrado: se migra sola para no
+        // tener que volver a iniciar sesión tras la actualización.
+        storageKey: migrateAuthKey(),
       },
     });
   }

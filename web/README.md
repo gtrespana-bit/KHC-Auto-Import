@@ -56,13 +56,18 @@ Google). Es el modo en el que se puede trabajar en el diseño sin tocar datos re
 
 ## Publicar un coche (flujo completo)
 
-1. En el ERP: ficha del vehículo → **Publicar en la web** (solo `owner`/`manager`).
+1. En el ERP: ficha del vehículo → pestaña **Web** → **Publicar en la web** (solo `owner`/`manager`).
 2. Se rellena el contenido público (título, descripción, precio, equipamiento, garantía), se
-   revisan las fotos y se genera una **vista previa privada**.
+   eligen las fotos (con opción de **tapar la matrícula** en la copia publicada) y se revisa la
+   **vista previa**.
 3. Al confirmar, el ERP escribe en `publications` y copia las fotos al bucket público
-   `public-photos` (redimensionadas, sin EXIF y con la matrícula tapada si procede).
+   `public-photos` (redimensionadas, sin EXIF y sin la matrícula si se ha tapado).
 4. La web la muestra en menos de un minuto (revalidación de 60 s). Al marcar el coche como
-   reservado o vendido, la ficha se actualiza sola.
+   reservado o vendido en el ERP, la ficha se actualiza sola.
+5. Si después cambian el precio o los kilómetros, el ERP avisa de que «la web está
+   desactualizada» y se actualiza con un botón.
+
+Los contactos que llegan por los formularios aparecen en el ERP, en **Contactos web**.
 
 > Si un coche vendido desaparece del catálogo, **su ficha sigue accesible** con el aviso de
 > vendido: eso mantiene el SEO y da confianza. No se borran URLs.

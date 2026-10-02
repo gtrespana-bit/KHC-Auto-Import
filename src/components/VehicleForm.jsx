@@ -8,6 +8,7 @@ import { landingCost, recalcVehicleTaxes, calcIedmt, calcPurchaseTax, computeCvf
 import { DOCUMENT_CHECKLIST } from '../domain/compliance.js';
 import { searchVehicles, VEHICLE_DB, RELIABILITY_META } from '../data/vehicleDatabase.js';
 import { PhotoManager } from './Photos.jsx';
+import WebPublicationPanel from './WebPublicationPanel.jsx';
 
 const SELLER_TYPES = [
   { value: 'dealer_vat', label: 'Profesional UE con IVA (adquisición intracomunitaria)' },
@@ -75,7 +76,7 @@ const emptyVehicle = () => ({
 });
 
 export default function VehicleForm({ open, onClose, vehicle, onSaved }) {
-  const { state, saveVehicle, toast, tariffs } = useStore();
+  const { state, saveVehicle, toast, tariffs, can } = useStore();
   const [draft, setDraft] = useState(() => (vehicle ? structuredClone(vehicle) : emptyVehicle()));
   const [query, setQuery] = useState('');
   const [tab, setTab] = useState('ficha');
@@ -156,6 +157,9 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved }) {
     { id: 'venta', label: 'Venta y cliente' },
     { id: 'docs', label: 'Documentación' },
     { id: 'fotos', label: 'Fotos' },
+    ...(can('publications') || (state.publications || []).some((p) => p.vehicleId === draft.id)
+      ? [{ id: 'web', label: 'Web' }]
+      : []),
   ];
 
   return (
@@ -408,6 +412,22 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved }) {
             <Textarea rows={5} value={draft.notes} onChange={(v) => set({ notes: v })} placeholder="Estado del coche, negociación, incidencias, acuerdos con el comprador…" />
           </Field>
         </div>
+      )}
+
+      {tab === 'web' && (
+        <WebPublicationPanel
+          vehicle={{ ...draft, cvf: draft.cvf || cvf }}
+          isNew={isNew}
+          onSaveFirst={() => {
+            if (!draft.brand || !draft.model) {
+              toast('Indica al menos marca y modelo', 'error');
+              return;
+            }
+            saveVehicle({ ...draft, cvf: draft.cvf || cvf });
+            toast('Ficha guardada: ya puedes publicarla en la web');
+            setTab('web');
+          }}
+        />
       )}
 
       {tab === 'fotos' && (

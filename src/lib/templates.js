@@ -3,7 +3,7 @@
 // ----------------------------------------------------------------------------
 //  Funciones puras (sin React ni DOM) para poder testearlas con `npm run check`.
 // ============================================================================
-import { round2, numEs, todayISO, dateEs } from './format.js';
+import { round2, numEs, todayISO, dateEs, slug } from './format.js';
 import { VAT } from '../domain/rates.js';
 
 const n = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
@@ -150,4 +150,100 @@ export function emailLink(to = '', subject = '', body = '') {
   return `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
+// ---------------------------------------------------------------------------
+// FICHA PARA LA WEB PÚBLICA
+// ---------------------------------------------------------------------------
+//
+//  Ojo con la honestidad: la descripción solo afirma lo que está marcado en la
+//  ficha (libro de mantenimiento, llaves, ITV) o lo que se deduce de sus datos
+//  (año, km, combustible, etiqueta). El equipamiento concreto lo añade quien
+//  tiene el coche delante: es mejor una ficha corta y verdadera que una larga
+//  con promesas que no se pueden sostener.
+
+/** Título para la web: marca + modelo + versión, sin duplicar palabras. */
+export function webTitle(vehicle = {}) {
+  const v = vehicle;
+  const base = `${v.brand || ''} ${v.model || ''}`.trim();
+  return `${base}${v.version ? ` ${v.version}` : ''}`.replace(/\s+/g, ' ').trim().slice(0, 90);
+}
+
+/** Equipamiento y garantías que la ficha respalda de verdad. */
+export function webFeatures(vehicle = {}) {
+  const v = vehicle;
+  const docs = v.documents || {};
+  const out = [];
+  if (v.cv) out.push(`${v.cv} CV · ${v.fuel || ''}${v.transmission ? ` · ${v.transmission}` : ''}`.replace(/\s+/g, ' '));
+  if (v.badge) out.push(`Etiqueta ambiental ${v.badge}`);
+  if (docs.serviceBook) out.push('Libro de mantenimiento');
+  if (docs.keys) out.push('Dos llaves');
+  if (docs.itv || v.itvDue) out.push(v.itvDue ? `ITV en vigor hasta ${dateEs(v.itvDue)}` : 'ITV en vigor');
+  if (v.originCountry) out.push(`Importado de ${v.originCountry} con documentación verificada`);
+  return out;
+}
+
+/**
+ * Texto de la ficha de la web. Sobrio y verificable: cuatro párrafos cortos.
+ * Devuelve `{ title, description, features }`.
+ */
+export function buildWebListing({ vehicle = {}, company = {}, price = 0 } = {}) {
+  const v = vehicle;
+  const kmTxt = numEs(n(v.km), 0);
+  const docs = v.documents || {};
+  const garantia = n(v.sale?.warrantyMonths ?? v.warrantyMonths ?? company.warrantyMonths ?? 12);
+
+  const parrafos = [];
+
+  const presentacion = [
+    `${v.fuel || ''} ${v.transmission || ''}`.trim() ? `${v.fuel || ''} con cambio ${v.transmission || ''}` : '',
+    v.year ? `de ${v.year}` : '',
+    n(v.km) ? `con ${kmTxt} km` : '',
+  ].filter(Boolean).join(', ');
+
+  parrafos.push(
+    `${v.brand || ''} ${v.model || ''}${v.version ? ` ${v.version}` : ''} ${presentacion ? `: unidad ${presentacion}` : ''}.`.replace(/\s+\./, '.').replace(/\s+/g, ' '),
+  );
+
+  if (v.firstRegDate) {
+    parrafos.push(`Primera matriculación en ${dateEs(v.firstRegDate)}${v.originCountry ? ` (${v.originCountry})` : ''}.`);
+  }
+
+  const estado = [
+    'Se entrega revisado, con la puesta a punto hecha y la documentación al día',
+    docs.serviceBook ? 'con libro de mantenimiento' : '',
+    docs.keys ? 'y dos llaves' : '',
+  ].filter(Boolean).join(' ');
+  parrafos.push(`${estado}. Incluye garantía de ${garantia} meses y acompañamiento en todos los trámites.`);
+
+  if (v.co2) {
+    parrafos.push(`Emisiones de ${v.co2} g/km de CO₂${v.badge ? ` y etiqueta ambiental ${v.badge}` : ''}.`);
+  }
+
+  const cierre = [
+    'Puedes verlo y probarlo con cita previa',
+    'aceptamos tu coche actual como parte del pago',
+    'y estudiamos financiación a medida',
+  ].join(', ');
+  parrafos.push(`${cierre}.`);
+
+  return {
+    title: webTitle(v),
+    description: parrafos.filter(Boolean).join('\n\n'),
+    features: webFeatures(v),
+    price: n(price),
+  };
+}
+
+/**
+ * Slug estable para la URL pública. Si ya existe otro coche con el mismo slug,
+ * añade un sufijo numérico (la BD exige que no se repitan dentro del sitio).
+ */
+export function webSlug(vehicle = {}, taken = []) {
+  const base = slug(`${vehicle.brand || ''} ${vehicle.model || ''} ${vehicle.year || ''}`) || `coche-${n(vehicle.year)}`;
+  if (!taken.includes(base)) return base;
+  let i = 2;
+  while (taken.includes(`${base}-${i}`) && i < 200) i += 1;
+  return `${base}-${i}`;
+}
+
 export { todayISO };
+

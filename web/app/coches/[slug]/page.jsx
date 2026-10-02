@@ -72,7 +72,9 @@ export default async function ListingPage({ params }) {
     { icon: Leaf, label: 'Etiqueta', value: listing.badge ? `Etiqueta ${listing.badge}` : '—' },
     { icon: MapPin, label: 'Ubicación', value: listing.location || site.city },
     { icon: Calendar, label: '1ª matriculación', value: dateEs(listing.firstRegDate) },
-  ].filter((s) => s.value && s.value !== '—' || s.label === 'Cambio');
+    // Se ocultan los datos que no tiene la ficha (salvo el cambio, que interesa
+    // aunque venga vacío para que la parrilla no baile entre coches).
+  ].filter((s) => s.label === 'Cambio' || (s.value != null && s.value !== '' && s.value !== '—'));
 
   const vehicleLd = {
     '@context': 'https://schema.org',

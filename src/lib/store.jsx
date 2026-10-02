@@ -9,6 +9,8 @@
 //   filings   → modelos tributarios con su importe calculado y su estado
 //   tasks     → avisos y vencimientos (ITV, seguro, garantía, cobros…)
 //   activity  → registro de auditoría de la última actividad
+//   publications → lo que se publica en la web pública (una por vehículo)
+//   leads     → contactos recibidos desde los formularios de la web
 //
 //  Persistencia: la decide `repo.js`. Con Supabase configurado y sesión
 //  iniciada, cada cambio se escribe como fila propia (cola con retardo corto y
@@ -21,6 +23,7 @@ import { getSupabase, describeError } from './supabase.js';
 import { useOptionalAuth } from './auth.jsx';
 import { canWrite } from './roles.js';
 import { uid, todayISO, num } from './format.js';
+import { SITE_SLUG, PUBLICATION_STATUS, publicationStatusForVehicle } from './web.js';
 import { DEFAULT_TARIFFS } from '../domain/rates.js';
 import { invoiceNumber, invoiceLines } from './templates.js';
 import { STATUS_FLOW } from '../domain/finance.js';
@@ -79,6 +82,8 @@ export const defaultState = () => ({
   invoices: [],
   tasks: [],
   activity: [],
+  publications: [],
+  leads: [],
   meta: { createdAt: new Date().toISOString(), savedAt: null },
 });
 
@@ -158,7 +163,42 @@ export function normalizeState(raw = {}) {
     invoices: raw.invoices || [],
     tasks: raw.tasks || [],
     activity: raw.activity || [],
+    publications: (raw.publications || []).map(normalizePublication),
+    leads: (raw.leads || []).map(normalizeLead),
     meta: { ...base.meta, ...(raw.meta || {}) },
+  };
+}
+
+/**
+ * Publicación en la web: `data` es el contenido público (lo único que sale de
+ * la empresa) y el resto son campos de control del ERP.
+ */
+export function normalizePublication(p = {}) {
+  return {
+    id: p.id || uid('pub'),
+    vehicleId: p.vehicleId || '',
+    site: p.site || SITE_SLUG,
+    status: PUBLICATION_STATUS[p.status] ? p.status : 'borrador',
+    publishedAt: p.publishedAt || null,
+    soldAt: p.soldAt || null,
+    updatedAt: p.updatedAt || null,
+    data: p.data || {},
+  };
+}
+
+function normalizeLead(l = {}) {
+  return {
+    id: l.id || uid('lead'),
+    kind: l.kind || 'contacto',
+    name: l.name || '',
+    phone: l.phone || '',
+    email: l.email || '',
+    message: l.message || '',
+    vehicleSlug: l.vehicleSlug || '',
+    source: l.source || '',
+    status: l.status || 'nuevo',
+    createdAt: l.createdAt || new Date().toISOString(),
+    updatedAt: l.updatedAt || null,
   };
 }
 
@@ -464,11 +504,89 @@ export function StoreProvider({ children }) {
     return invoice;
   }, [state.company, state.contacts, state.invoices, nextInvoiceNumber, upsert, setCompany]);
 
+  // --- Web pública ---------------------------------------------------------
+  /**
+   * Guarda (o actualiza) lo que se publica de un vehículo.
+   * Se usa tanto para el borrador como para publicar, reservar, vender o
+   * archivar: el contenido público viaja en `data` y nunca incluye costes.
+   */
+  const savePublication = useCallback((publication) => {
+    if (!guard('publications')) return null;
+    const record = normalizePublication({ site: SITE_SLUG, status: 'borrador', ...publication, updatedAt: new Date().toISOString() });
+    setState((prev) => {
+      const list = prev.publications || [];
+      const idx = list.findIndex((p) => p.id === record.id);
+      const next = idx >= 0 ? list.map((p, i) => (i === idx ? { ...p, ...record } : p)) : [record, ...list];
+      return { ...prev, publications: next };
+    });
+    enqueue(`publication:${record.id}`, () => repo.savePublication(record));
+    return record;
+  }, [enqueue, repo, guard]);
+
+  const removePublication = useCallback((id) => {
+    if (!guard('publications')) return;
+    setState((prev) => ({ ...prev, publications: (prev.publications || []).filter((p) => p.id !== id) }));
+    enqueue(`publication:${id}`, () => repo.removePublication(id), 50);
+  }, [enqueue, repo, guard]);
+
+  /** Sube la copia pública de una foto y devuelve `{ path, url }`. */
+  const uploadPublicPhoto = useCallback(
+    (vehicleId, photoId, dataUrl) => repo.uploadPublicPhoto(vehicleId, photoId, dataUrl),
+    [repo],
+  );
+
+  const deletePublicPhotos = useCallback((paths) => repo.deletePublicPhotos(paths), [repo]);
+
+  /**
+   * Reservado y vendido se reflejan solos en la web: en cuanto se cambia el
+   * estado del vehículo, la publicación sigue. Nunca se publica ni se retira
+   * nada por cambiar a otros estados (eso lo decide la persona).
+   */
+  const syncPublicationStatus = useCallback((vehicle) => {
+    const wanted = publicationStatusForVehicle(vehicle);
+    if (!wanted || !canWrite(role, 'publications')) return;
+    const live = (stateRef.current.publications || []).filter(
+      (p) => p.vehicleId === vehicle.id && ['publicado', 'reservado', 'vendido'].includes(p.status),
+    );
+    live.forEach((p) => {
+      if (p.status === wanted) return;
+      savePublication({
+        ...p,
+        status: wanted,
+        soldAt: wanted === 'vendido' ? p.soldAt || new Date().toISOString() : p.soldAt,
+      });
+    });
+  }, [savePublication, role]);
+
+  // --- Contactos de la web -------------------------------------------------
+  const updateLead = useCallback((id, patch) => {
+    if (!guard('leads')) return;
+    setState((prev) => {
+      const list = prev.leads || [];
+      const idx = list.findIndex((l) => l.id === id);
+      if (idx < 0) return prev;
+      const merged = { ...list[idx], ...patch, updatedAt: new Date().toISOString() };
+      enqueue(`lead:${id}`, () => repo.saveLead(merged));
+      return { ...prev, leads: list.map((l, i) => (i === idx ? merged : l)) };
+    });
+  }, [enqueue, repo, guard]);
+
+  const deleteLead = useCallback((id) => {
+    if (!guard('leads')) return;
+    setState((prev) => ({ ...prev, leads: (prev.leads || []).filter((l) => l.id !== id) }));
+    enqueue(`lead:${id}`, () => repo.removeLead(id), 50);
+  }, [enqueue, repo, guard]);
+
   const saveVehicle = useCallback((vehicle) => {
     const normalized = normalizeVehicle(vehicle);
     upsert('vehicles', normalized);
+    try {
+      syncPublicationStatus(normalized);
+    } catch (err) {
+      console.warn('[store] no se ha podido sincronizar la web:', err);
+    }
     return normalized;
-  }, [upsert]);
+  }, [upsert, syncPublicationStatus]);
 
   const deleteVehicle = useCallback((id) => {
     remove('vehicles', id);
@@ -513,6 +631,13 @@ export function StoreProvider({ children }) {
       issueInvoice,
       nextInvoiceNumber,
       deleteVehicle,
+      // Web pública
+      savePublication,
+      removePublication,
+      uploadPublicPhoto,
+      deletePublicPhotos,
+      updateLead,
+      deleteLead,
       getPhotos: repo.getPhotos,
       putPhotos,
       localBackup,
@@ -520,7 +645,7 @@ export function StoreProvider({ children }) {
       dismissLocalBackup,
       toasts,
     }),
-    [state, ready, repo, role, sync, tariffs, toast, log, setCompany, upsert, remove, updateCollection, replaceAll, loadDemo, removeDemo, hasDemo, resetData, reloadFromServer, saveVehicle, issueInvoice, nextInvoiceNumber, deleteVehicle, putPhotos, localBackup, importLocalBackup, dismissLocalBackup, toasts],
+    [state, ready, repo, role, sync, tariffs, toast, log, setCompany, upsert, remove, updateCollection, replaceAll, loadDemo, removeDemo, hasDemo, resetData, reloadFromServer, saveVehicle, issueInvoice, nextInvoiceNumber, deleteVehicle, savePublication, removePublication, uploadPublicPhoto, deletePublicPhotos, updateLead, deleteLead, putPhotos, localBackup, importLocalBackup, dismissLocalBackup, toasts],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

@@ -1,5 +1,5 @@
 /* ============================================================================
-   Service worker — PWA de Coruña AutoImport.
+   Service worker — PWA de KHC Auto Import.
    Estrategia:
      · Navegación: red primero, con respaldo en caché (funciona sin conexión
        una vez cargada la app).
@@ -7,7 +7,7 @@
        y actualización en segundo plano.
      · Los datos NO pasan por el service worker: viven en IndexedDB.
    ========================================================================== */
-const CACHE = 'autoimport-v1';
+const CACHE = 'khc-autoimport-v2';
 const SHELL = ['/', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/apple-touch-icon.png'];
 
 self.addEventListener('install', (event) => {

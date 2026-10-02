@@ -53,7 +53,7 @@ function Frame({ children }) {
             <Car className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-lg font-extrabold text-white leading-tight">Coruña AutoImport</p>
+            <p className="text-lg font-extrabold text-white leading-tight">KHC Auto Import</p>
             <p className="text-xs text-slate-500">Gestión de importación y venta de vehículos</p>
           </div>
         </div>
@@ -121,7 +121,7 @@ function AuthForms() {
         <>
           <Field label="Tu nombre"><Input value={fullName} onChange={setFullName} placeholder="Nombre y apellidos" /></Field>
           <Field label="Nombre de la empresa" hint="Puedes cambiarlo después en Ajustes">
-            <Input value={company} onChange={setCompany} placeholder="Coruña AutoImport" />
+            <Input value={company} onChange={setCompany} placeholder="KHC Auto Import" />
           </Field>
         </>
       )}

@@ -1,8 +1,8 @@
 {
-  "name": "coruna-autoimport",
+  "name": "khc-auto-import",
   "private": true,
   "version": "1.0.0",
-  "description": "Sistema de gestión, simulador de costes de importación y ventas de vehículos para A Coruña y Galicia",
+  "description": "KHC Auto Import · ERP interno: gestión de importación, costes, impuestos, stock y ventas de vehículos en Galicia",
   "type": "module",
   "scripts": {
     "dev": "vite",

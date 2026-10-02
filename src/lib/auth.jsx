@@ -10,7 +10,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { getSupabase, isSupabaseConfigured, describeError } from './supabase.js';
 
-const ORG_KEY = 'coruna_autoimport_org';
+const ORG_KEY = 'khc_autoimport_org';
+const LEGACY_ORG_KEY = 'coruna_autoimport_org';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
@@ -18,7 +19,20 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [memberships, setMemberships] = useState([]);
   const [orgId, setOrgIdState] = useState(() => {
-    try { return localStorage.getItem(ORG_KEY) || null; } catch { return null; }
+    try {
+      const current = localStorage.getItem(ORG_KEY);
+      if (current) return current;
+      // Versión anterior («coruna_autoimport_org»): se adopta y se limpia.
+      const legacy = localStorage.getItem(LEGACY_ORG_KEY);
+      if (legacy) {
+        localStorage.setItem(ORG_KEY, legacy);
+        localStorage.removeItem(LEGACY_ORG_KEY);
+        return legacy;
+      }
+      return null;
+    } catch {
+      return null;
+    }
   });
   const [status, setStatus] = useState(isSupabaseConfigured ? 'loading' : 'local'); // loading | anon | ready | recovery | local
   const [error, setError] = useState('');

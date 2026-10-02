@@ -66,14 +66,15 @@ Regla de oro: *la web pública nunca ve costes, VIN, matrícula, margen ni notas
    o casi), es el tiempo: dominio, correo, actualizaciones, fotos, copias de seguridad y
    cambios. Es asumible para una empresa de este tamaño, pero no es cero.
 
-5. **El nombre está a medias.** El repositorio de GitHub ya se llama `KHC-Auto-Import`, pero
-   dentro del código todo sigue diciendo «Coruña AutoImport»: título de la app, README, PWA
-   (`public/sw.js`, manifiesto), base de datos local (`coruna_autoimport_erp`), marca de agua
-   del estado en IndexedDB, esquema SQL… y el repositorio npm (`coruna-autoimport`). Hay que
-   decidir el nombre definitivo **una vez** y cambiarlo **entero** (sin perder los datos
-   locales ya guardados, que viven bajo la clave antigua). Y el mismo día, registrar el
-   dominio y montar el correo del dominio: vender coches de 20.000 € desde un Gmail resta
-   credibilidad.
+5. **El nombre está a medias.** *(Resuelto el 2-10-2026.)* El repositorio de GitHub ya se
+   llamaba `KHC-Auto-Import`, pero dentro del código todo decía «Coruña AutoImport»: título de la
+   app, README, PWA (`public/sw.js`, manifiesto), base de datos local (`coruna_autoimport_erp`),
+   clave de la sesión, fichero npm, respaldos… Se ha cambiado **entero** a KHC Auto Import, con
+   **migración automática** de los datos locales (IndexedDB), la empresa activa y la sesión, para
+   no perder nada ni obligar a volver a entrar. Queda pendiente, en el terreno comercial, registrar
+   el dominio y montar el correo del dominio: vender coches de 20.000 € desde un Gmail resta
+   credibilidad. Además, el ERP lleva ahora `noindex`: es una aplicación interna y no debe
+   aparecer en Google.
 
 ---
 
@@ -338,15 +339,29 @@ trae stock, el segundo encaja con el modelo de importación por encargo.
 
 ---
 
-## 10. Decisiones abiertas (pendientes de tu respuesta)
+## 10. Decisiones tomadas (2 de octubre de 2026)
 
-1. **Arquitectura**: ¿Next.js en este repositorio (recomendado), Astro, o repositorio aparte?
-2. **Momento**: ¿la web sale ya (con la venta como particular), espera a la constitución de
-   la empresa, o sale ahora en modo «marca» sin catálogo con precios?
-3. **Publicación**: ¿botón manual con vista previa + re-sincronización (recomendado) o
-   publicación automática según el estado del vehículo?
-4. **Marca y dominio**: ¿«KHC Auto Import» es el nombre definitivo? ¿Tenéis ya dominio o lo
-   registramos (`khcautoimport.es` y `.com` estaban libres en el momento de este análisis)?
+1. **Arquitectura:** Next.js en este repositorio, carpeta `web/`, con dos proyectos de Vercel
+   (raíz = ERP en `app.`, `web/` = web pública en `www.`). Un solo Supabase.
+2. **Momento:** la web se construye ya y se publica cuando la empresa esté registrada (el
+   propietario indicó que la sociedad se constituirá antes de empezar a vender). Hasta entonces
+   puede quedarse sin indexar (`noindex`) y sin datos fiscales en el aviso legal.
+3. **Publicación:** botón manual con vista previa y re-sincronización; **reservado** y **vendido**
+   se reflejan solos al cambiar el estado del vehículo.
+4. **Marca y dominio:** «KHC Auto Import» es el nombre definitivo. Al registrador: `khcautoimport.es`
+   y `.com` (sin registros DNS en el momento del análisis), más correo profesional del dominio.
+
+### Estado de la implantación
+
+- [x] Fase 0 · Nombre y dominio: renombrado completo en el código, PWA, docs y claves de
+      almacenamiento local (con migración automática de los datos y la sesión anteriores).
+- [x] Fase 1 · Base de datos: migración `20261002000001_web_publica.sql` ejecutada en Supabase.
+- [x] Fase 2 · ERP → web: pestaña **Web** en la ficha, modal de publicación, textos generados,
+      fotos sin EXIF y con la matrícula tapada, vista previa, estados y re-sincronización.
+- [x] Fase 2.b · Contactos: módulo **Contactos web** con las consultas de la web.
+- [ ] Fase 3 · Web en producción: dominio, variables en Vercel, fotos reales y revisión legal.
+- [ ] Fase 4 · Captación: Google Business Profile, Search Console, feed para Google Vehicle Ads.
+- [ ] Fase 5 · Portales: un solo contenido comercial para web y anuncios.
 
 ---
 

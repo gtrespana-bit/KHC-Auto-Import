@@ -15,6 +15,8 @@ scripts de prueba. El estado en memoria es idéntico en los dos casos: las vista
 - [x] Código de la app migrado a Supabase (auth, repositorio, fotos, migración de datos locales).
 - [x] Cron de Vercel para que el plan gratuito no se pause (`api/keepalive.js`).
 - [x] `.env.local` con las credenciales para desarrollo (no se sube a Git).
+- [x] **Segunda migración ejecutada** (`20261002000001_web_publica.sql`): publicaciones de la web,
+      contactos de la web, sitio `khc` y bucket público `public-photos`.
 
 **Pendiente, en este orden:**
 
@@ -34,6 +36,28 @@ scripts de prueba. El estado en memoria es idéntico en los dos casos: las vista
 **Después (Fase 2, cuando haga falta):** interfaz de equipo e invitaciones, selector de empresa
 para usuarios con varias, ocultar costes al rol comercial, plan Pro de Supabase por las copias
 de seguridad diarias.
+
+---
+
+## 0.b Migración de la web pública (2 de octubre de 2026)
+
+Además del esquema inicial, hay que ejecutar
+[`supabase/migrations/20261002000001_web_publica.sql`](../supabase/migrations/20261002000001_web_publica.sql),
+que crea las tablas de la web pública (`web_sites`, `publications`, `web_leads`), sus políticas RLS,
+el bucket público `public-photos` y la función `web_submit_lead` (lo único que puede llamar la web).
+
+Después, registrar el sitio apuntando a la empresa:
+
+```sql
+insert into public.web_sites (slug, org_id, name)
+select 'khc', id, 'KHC Auto Import' from public.organizations order by created_at limit 1
+on conflict (slug) do update set org_id = excluded.org_id;
+```
+
+Comprobar con `select slug, org_id, name from public.web_sites;`.
+
+Qué permite: el ERP publica cada coche (pestaña **Web** de la ficha) y recibe los contactos de la
+web en el módulo **Contactos web**. La web **no** puede leer `vehicles` en ningún caso.
 
 ---
 

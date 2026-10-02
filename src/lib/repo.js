@@ -6,19 +6,27 @@
 //   · local    → IndexedDB del navegador (sin credenciales; tests y desarrollo).
 //
 //  El estado en memoria de la app conserva la misma forma en ambos casos
-//  (company, vehicles, contacts, expenses, filings, invoices, tasks, activity),
-//  así que las vistas no saben ni les importa qué motor hay debajo.
+//  (company, vehicles, contacts, expenses, filings, invoices, tasks, activity,
+//  publications, leads), así que las vistas no saben ni les importa qué motor
+//  hay debajo.
+//
+//  La web pública NO usa este repositorio: tiene el suyo (`web/lib/listings.js`)
+//  y solo puede leer la tabla `publications` y llamar a `web_submit_lead`.
 // ============================================================================
 import { dbGet, dbPut, dbClear, getPhotos as localGetPhotos, putPhotos as localPutPhotos, deletePhotos as localDeletePhotos } from './db.js';
 
 export const COLLECTIONS = ['vehicles', 'contacts', 'expenses', 'filings', 'invoices', 'tasks', 'activity'];
 const PAGE = 1000;
-const BUCKET = 'vehicle-photos';
+const BUCKET = 'vehicle-photos';        // fotos internas (privado, URL firmada)
+const PUBLIC_BUCKET = 'public-photos';  // fotos publicadas en la web (público)
 const SIGNED_TTL = 60 * 60; // segundos
 const CACHE_TTL = 50 * 60 * 1000; // ms (renovamos antes de que caduque la firma)
 
 // ---------------------------------------------------------------------------
 // Motor local (IndexedDB): guarda el estado completo de una vez.
+//   `publications` y `leads` viajan dentro del propio estado: aquí no hay nada
+//   que hacer. Las «URLs públicas» de las fotos son los propios data-URL, que
+//   solo sirven para la vista previa (el modo local no alimenta la web real).
 // ---------------------------------------------------------------------------
 export function createLocalRepo() {
   return {
@@ -29,6 +37,12 @@ export function createLocalRepo() {
     getPhotos: localGetPhotos,
     putPhotos: localPutPhotos,
     deletePhotos: localDeletePhotos,
+    savePublication: async () => {},
+    removePublication: async () => {},
+    uploadPublicPhoto: async (_vehicleId, _photoId, dataUrl) => ({ path: '', url: dataUrl }),
+    deletePublicPhotos: async () => {},
+    saveLead: async () => {},
+    removeLead: async () => {},
   };
 }
 
@@ -71,6 +85,18 @@ export function createSupabaseRepo(sb, orgId) {
     });
     // El registro de actividad se ordena por fecha del evento y se limita
     if (state.activity) state.activity = state.activity.sort((a, b) => String(b.at).localeCompare(String(a.at))).slice(0, 200);
+    // Publicaciones de la web y contactos recibidos (tablas propias).
+    // Si la migración de la web no estuviera ejecutada, la app sigue
+    // funcionando: solo se pierde esa pantalla.
+    try {
+      const [publications, leads] = await Promise.all([listPublications(), listLeads()]);
+      state.publications = publications;
+      state.leads = leads;
+    } catch (err) {
+      console.warn('[repo] web pública:', err?.message || err);
+      state.publications = state.publications || [];
+      state.leads = state.leads || [];
+    }
     return state;
   }
 
@@ -112,6 +138,8 @@ export function createSupabaseRepo(sb, orgId) {
       const items = (state[key] || []).filter((x) => x && x.id);
       if (items.length) await insertMany(key, items);
     }
+    await replacePublications(state.publications || []);
+    await replaceLeads(state.leads || []);
     await saveCompany(state.company || {});
   }
 
@@ -129,6 +157,11 @@ export function createSupabaseRepo(sb, orgId) {
   async function clear({ keepCompany = true } = {}) {
     for (const key of COLLECTIONS) await clearTable(key);
     await deleteAllPhotos();
+    // La web también se vacía: publicaciones, fotos publicadas y contactos.
+    const pubs = await listPublications();
+    await clearTable('publications');
+    await deletePublicPhotos(pubs.flatMap((p) => (p.data?.photos || []).map((ph) => ph.path)).filter(Boolean));
+    await clearTable('web_leads');
     if (!keepCompany) await saveCompany({});
   }
 
@@ -219,6 +252,154 @@ export function createSupabaseRepo(sb, orgId) {
     photoCache.delete(vehicleId);
   }
 
+  // --- Web pública ---------------------------------------------------------
+  const pubFromRow = (r) => ({
+    id: r.id,
+    vehicleId: r.vehicle_id,
+    site: r.site,
+    status: r.status,
+    publishedAt: r.published_at,
+    soldAt: r.sold_at,
+    updatedAt: r.updated_at,
+    data: r.data || {},
+  });
+
+  async function listPublications() {
+    const { data, error } = await sb
+      .from('publications')
+      .select('id, vehicle_id, site, status, data, published_at, sold_at, updated_at')
+      .eq('org_id', orgId)
+      .order('created_at', { ascending: false });
+    fail(error);
+    return (data || []).map(pubFromRow);
+  }
+
+  /**
+   * Escribe la publicación. `data` guarda SOLO el contenido público; el resto
+   * son columnas reales (status, published_at, sold_at) que usa la web para
+   * filtrar. Nunca se copia aquí nada del expediente interno.
+   */
+  async function savePublication(pub) {
+    const row = {
+      org_id: orgId,
+      id: pub.id,
+      vehicle_id: pub.vehicleId,
+      site: pub.site || 'khc',
+      status: pub.status || 'borrador',
+      data: pub.data || {},
+      published_at: pub.publishedAt || null,
+      sold_at: pub.soldAt || null,
+    };
+    const { error } = await sb.from('publications').upsert(row, { onConflict: 'org_id,id' });
+    fail(error);
+  }
+
+  async function removePublication(id) {
+    const { error } = await sb.from('publications').delete().eq('org_id', orgId).eq('id', id);
+    fail(error);
+  }
+
+  async function replacePublications(list) {
+    await clearTable('publications');
+    for (const pub of list.filter((p) => p && p.id)) {
+      // eslint-disable-next-line no-await-in-loop
+      await savePublication(pub);
+    }
+  }
+
+  /**
+   * Sube la copia pública de una foto y devuelve su ruta y su URL.
+   * El nombre lleva marca de tiempo: al reemplazar una foto (p. ej. al tapar la
+   * matrícula) la URL cambia y la CDN no sirve la imagen antigua.
+   */
+  async function uploadPublicPhoto(vehicleId, photoId, dataUrl) {
+    if (!vehicleId || !photoId || !dataUrl) throw new Error('Falta la foto que publicar');
+    const stamp = Date.now().toString(36);
+    const path = `${orgId}/${vehicleId}/${photoId}-${stamp}.jpg`;
+    const blob = await dataUrlToBlob(dataUrl);
+    const { error } = await sb.storage.from(PUBLIC_BUCKET).upload(path, blob, {
+      contentType: 'image/jpeg',
+      cacheControl: '31536000',
+      upsert: true,
+    });
+    fail(error);
+    const { data } = sb.storage.from(PUBLIC_BUCKET).getPublicUrl(path);
+    return { path, url: data?.publicUrl || '' };
+  }
+
+  async function deletePublicPhotos(paths = []) {
+    const list = paths.filter(Boolean);
+    for (let i = 0; i < list.length; i += 100) {
+      await sb.storage.from(PUBLIC_BUCKET).remove(list.slice(i, i + 100));
+    }
+  }
+
+  // --- Contactos de la web -------------------------------------------------
+  const leadFromRow = (r) => ({
+    id: r.id,
+    kind: r.kind || 'contacto',
+    name: r.name || '',
+    phone: r.phone || '',
+    email: r.email || '',
+    message: r.message || '',
+    vehicleSlug: r.vehicle_slug || '',
+    source: r.source || '',
+    status: r.status || 'nuevo',
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
+  });
+
+  async function listLeads() {
+    const { data, error } = await sb
+      .from('web_leads')
+      .select('*')
+      .eq('org_id', orgId)
+      .order('created_at', { ascending: false })
+      .limit(500);
+    fail(error);
+    return (data || []).map(leadFromRow);
+  }
+
+  async function saveLead(lead) {
+    // El equipo puede cambiar el estado y ampliar el mensaje con notas de
+    // seguimiento. El resto del registro (datos del cliente) no se reescribe.
+    const { error } = await sb
+      .from('web_leads')
+      .update({ status: lead.status || 'nuevo', message: lead.message ?? null })
+      .eq('org_id', orgId)
+      .eq('id', lead.id);
+    fail(error);
+  }
+
+  async function removeLead(id) {
+    const { error } = await sb.from('web_leads').delete().eq('org_id', orgId).eq('id', id);
+    fail(error);
+  }
+
+  async function replaceLeads(list) {
+    await clearTable('web_leads');
+    const rows = list
+      .filter((l) => l && l.id)
+      .map((l) => ({
+        id: l.id,
+        org_id: orgId,
+        site: l.site || 'khc',
+        kind: l.kind || 'contacto',
+        name: l.name || '',
+        phone: l.phone || null,
+        email: l.email || null,
+        message: l.message || null,
+        vehicle_slug: l.vehicleSlug || null,
+        source: l.source || null,
+        status: l.status || 'nuevo',
+        created_at: l.createdAt || undefined,
+      }));
+    for (let i = 0; i < rows.length; i += 200) {
+      const { error } = await sb.from('web_leads').insert(rows.slice(i, i + 200));
+      fail(error);
+    }
+  }
+
   return {
     mode: 'supabase',
     orgId,
@@ -231,5 +412,13 @@ export function createSupabaseRepo(sb, orgId) {
     getPhotos,
     putPhotos,
     deletePhotos,
+    listPublications,
+    savePublication,
+    removePublication,
+    uploadPublicPhoto,
+    deletePublicPhotos,
+    listLeads,
+    saveLead,
+    removeLead,
   };
 }

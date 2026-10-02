@@ -18,7 +18,11 @@ import { DEFAULT_TARIFFS, IVTM_CORUNA_TURISMOS } from '../src/domain/rates.js';
 import { buildTaxCalendar, applyFilingStatus, documentProgress, buildAlerts } from '../src/domain/compliance.js';
 import { financeOffer } from '../src/domain/finance.js';
 import { catalogEstimate } from '../src/domain/catalogEstimate.js';
-import { invoiceNumber, invoiceLines, buildAd, followUpMessage, whatsappLink, emailLink } from '../src/lib/templates.js';
+import {
+  invoiceNumber, invoiceLines, buildAd, followUpMessage, whatsappLink, emailLink,
+  buildWebListing, webSlug, webTitle, webFeatures,
+} from '../src/lib/templates.js';
+import { publicationStatusForVehicle, PUBLICATION_STATUS } from '../src/lib/web.js';
 import { VEHICLE_DB, CURATED_DB, RELIABILITY_META } from '../src/data/vehicleDatabase.js';
 import { GENERATED_DB } from '../src/data/catalog/index.js';
 
@@ -430,6 +434,65 @@ check('Catálogo: horquillas de precio coherentes (DE ≤ ES y rango ordenado)',
 check('Catálogo: la potencia fiscal cuadra con la cilindrada', () => {
   const bad = VEHICLE_DB.filter((v) => Math.abs(v.cvf - computeCvf(v.cc, v.cyl || 4)) > 0.02);
   assert.equal(bad.length, 0, `CVF incoherente en: ${bad.slice(0, 3).map((v) => v.id).join(', ')}`);
+});
+
+// --- Web pública ------------------------------------------------------------
+check('Web: el título no duplica marca/modelo/versión', () => {
+  const t = webTitle({ brand: 'BMW', model: 'Serie 3 Touring', version: '320d' });
+  assert.equal(t, 'BMW Serie 3 Touring 320d');
+});
+
+check('Web: el equipamiento solo afirma lo que está en la ficha', () => {
+  const sinNada = webFeatures({ cv: 150, fuel: 'Diésel', transmission: 'Manual' });
+  assert.ok(sinNada.some((f) => /150 CV/.test(f)));
+  assert.ok(!sinNada.some((f) => /Libro|llaves|ITV/i.test(f)), 'no debe inventar libro, llaves ni ITV');
+
+  const conTodo = webFeatures({ cv: 150, fuel: 'Diésel', badge: 'ECO', documents: { serviceBook: true, keys: true, itv: true }, originCountry: 'Alemania' });
+  assert.ok(conTodo.some((f) => /Libro de mantenimiento/.test(f)));
+  assert.ok(conTodo.some((f) => /Dos llaves/.test(f)));
+  assert.ok(conTodo.some((f) => /Etiqueta ambiental ECO/.test(f)));
+  assert.ok(conTodo.some((f) => /Importado de Alemania/.test(f)));
+});
+
+check('Web: la ficha publicada no contiene costes, margen, VIN ni matrícula', () => {
+  const vehicle = {
+    brand: 'BMW', model: 'Serie 3 Touring', version: '320d', year: 2018, km: 128000, fuel: 'Diésel',
+    transmission: 'Automático', co2: 128, badge: 'C', firstRegDate: '2018-06-20', originCountry: 'Alemania',
+    vin: 'WBA8H71040K583921', plate: '1234 MZZ',
+    costs: { purchase: 16800, transport: 690, iedmt: 420 },
+    notes: 'Comprado barato en Múnich, margen previsto 3.100 €',
+    documents: { serviceBook: true, keys: true },
+  };
+  const out = buildWebListing({ vehicle, company: { name: 'KHC Auto Import', warrantyMonths: 12 }, price: 21900 });
+  const texto = `${out.title}\n${out.description}\n${out.features.join('\n')}`;
+  for (const secreto of ['16800', '16.800', 'WBA8H71040K583921', '1234 MZZ', 'margen', '3.100', 'compra']) {
+    assert.ok(!texto.toLowerCase().includes(String(secreto).toLowerCase()), `se ha colado información interna: ${secreto}`);
+  }
+  assert.ok(out.price === 21900);
+  assert.ok(/garantía de 12 meses/i.test(out.description), 'debe indicar la garantía');
+});
+
+check('Web: el slug es estable y no se repite dentro del sitio', () => {
+  const a = webSlug({ brand: 'BMW', model: 'Serie 3 Touring', year: 2018 }, []);
+  assert.equal(a, 'bmw-serie-3-touring-2018');
+  const b = webSlug({ brand: 'BMW', model: 'Serie 3 Touring', year: 2018 }, [a]);
+  assert.equal(b, 'bmw-serie-3-touring-2018-2');
+  const c = webSlug({ brand: 'BMW', model: 'Serie 3 Touring', year: 2018 }, [a, b]);
+  assert.equal(c, 'bmw-serie-3-touring-2018-3');
+});
+
+check('Web: reservado y vendido se reflejan solos; el resto no publica nada', () => {
+  assert.equal(publicationStatusForVehicle({ status: 'reservado' }), 'reservado');
+  assert.equal(publicationStatusForVehicle({ status: 'vendido' }), 'vendido');
+  assert.equal(publicationStatusForVehicle({ status: 'entregado' }), 'vendido');
+  assert.equal(publicationStatusForVehicle({ status: 'disponible' }), null);
+  assert.equal(publicationStatusForVehicle({ status: 'prospeccion' }), null);
+});
+
+check('Web: los estados de publicación previstos existen', () => {
+  for (const s of ['borrador', 'publicado', 'reservado', 'vendido', 'archivado']) {
+    assert.ok(PUBLICATION_STATUS[s], `falta el estado ${s}`);
+  }
 });
 
 // --- Ejecución --------------------------------------------------------------
