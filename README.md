@@ -1,4 +1,4 @@
-# 🚗 Coruña AutoImport - Plan de Negocio y Sistema de Gestión
+# 🚗 KHC Auto Import — Plan de negocio, ERP interno y web pública
 
 Sistema integral de gestión, inteligencia de mercado, simulación fiscal y guía operativa para el negocio de **importación de vehículos desde Europa para su venta en A Coruña y Galicia (España)**.
 
@@ -48,6 +48,8 @@ Puesta en marcha en [`docs/09_SUPABASE_BASE_DE_DATOS_Y_USUARIOS.md`](docs/09_SUP
 | **Documentación** | 15 documentos por vehículo (8 obligatorios) y ficha de expediente imprimible |
 | **Fotos** | Galería por vehículo guardada en IndexedDB (redimensionada a 1.600 px), con foto principal y orden, visible en la flota y usable en el anuncio |
 | **Informes** | Cuenta de resultados, valoración de stock, carga fiscal y evolución mensual. Imprimible en PDF |
+| **Publicación web** | Botón **Publicar en la web** en cada ficha: contenido comercial, fotos sin EXIF y con la matrícula tapada, vista previa y re-sincronización cuando cambia el precio o los km |
+| **Contactos web** | Bandeja de los formularios de la web pública (llamada, WhatsApp, correo, ficha en el CRM y seguimiento) |
 | **Ajustes** | Empresa, régimen fiscal, tarifas editables del ejercicio, respaldo de datos y fuentes de cada cifra |
 
 ### 💶 Precios de compra y venta: de dónde sale cada cifra
@@ -164,11 +166,37 @@ eléctricos) están marcadas como estimación dentro de la propia aplicación y 
 ### Garantía técnica
 
 ```bash
-npm run check          # 65 aserciones sobre el motor fiscal, económico, facturación y plantillas
+npm run check          # 72 aserciones sobre el motor fiscal, económico, facturación, plantillas y web
 npm run catalog:stats  # integridad de la base de vehículos (ids, campos, horquillas)
-npm run smoke          # monta las 34 vistas con 3 escenarios de datos
+npm run smoke          # monta las 39 vistas con 3 escenarios de datos
 npm run build          # compilación de producción
 ```
+
+---
+
+## 🌐 Web pública (carpeta `web/`)
+
+Además del ERP, el repositorio incluye la **web de cara al cliente** (Next.js, renderizado en
+servidor): catálogo de coches disponibles, fichas con galería, proceso de importación, búsqueda
+por encargo, compra de coches usados y captación de contactos.
+
+- **Mismo repositorio, dos despliegues**: la raíz es el ERP (`app.khcimport.autos`) y `web/` es
+  la web pública (`khcimport.autos`), cada uno en su proyecto de Vercel.
+- **Misma base de datos, frontera clara**: la web **no** lee `vehicles`. Lee `publications`, una
+  tabla con solo los campos publicados (sin costes, márgenes, VIN ni matrícula) y las fotos del
+  bucket público `public-photos`. Esquema en
+  [`supabase/migrations/20261002000001_web_publica.sql`](supabase/migrations/20261002000001_web_publica.sql).
+- **Publicar sin trabajo doble**: en la ficha del vehículo, pestaña **Web** → *Publicar en la web*.
+  Se publica solo el contenido comercial (precio, km, descripción, fotos, garantía); si cambian el
+  precio o los kilómetros, la ficha avisa de que «la web está desactualizada» con un botón para
+  actualizar. Reservado y vendido se reflejan solos, y las fichas vendidas se mantienen por SEO.
+- **Contactos**: lo que rellenan los formularios de la web llega a *Contactos web* dentro del ERP
+  (con llamada, WhatsApp, correo y creación de la ficha en el CRM en un clic).
+- Sin credenciales de Supabase, la web arranca en **modo demostración** (datos de ejemplo y
+  `noindex`), ideal para trabajar en el diseño.
+
+Detalles, puesta en marcha y checklist previa a publicar: [`web/README.md`](web/README.md).
+Decisiones de arquitectura y plan por fases: [`docs/12_WEB_PUBLICA_Y_PUBLICACION.md`](docs/12_WEB_PUBLICA_Y_PUBLICACION.md).
 
 ---
 
@@ -250,6 +278,8 @@ En el directorio `/docs` dispones de la biblioteca estratégica completa:
 9. [`docs/09_SUPABASE_BASE_DE_DATOS_Y_USUARIOS.md`](docs/09_SUPABASE_BASE_DE_DATOS_Y_USUARIOS.md): **Base de datos y usuarios**: esquema en Supabase, roles y permisos, alta e invitación de usuarios, variables de entorno y solución de problemas.
 10. [`docs/10_OPORTUNIDADES_MEDIDAS.md`](docs/10_OPORTUNIDADES_MEDIDAS.md): **Ranking de oportunidades** (142 grupos) con beneficio neto por coche en escenario empresa, realista, medio y prudente.
 11. [`docs/11_CAPTURA_DE_PRECIOS_Y_RANKING_EMPRESA.md`](docs/11_CAPTURA_DE_PRECIOS_Y_RANKING_EMPRESA.md): **De dónde sale cada precio**: fuentes (mobile.de, autoscout24, milanuncios…), filtros, cálculo «empresa», cómo actualizar la captura desde el PC y limitaciones conocidas.
+12. [`docs/12_WEB_PUBLICA_Y_PUBLICACION.md`](docs/12_WEB_PUBLICA_Y_PUBLICACION.md): **Web pública y publicación**: arquitectura, legal, costes y plan por fases.
+13. [`docs/13_DESPLIEGUE_Y_CAPTACION.md`](docs/13_DESPLIEGUE_Y_CAPTACION.md): **Despliegue y captación**: dominio `khcimport.autos`, comprobaciones de producción, Search Console, Google Business Profile y rutina de mantenimiento.
 
 ### En la app
 - **Oportunidades:** ranking «empresa» (compra en el 10 % barato de Alemania −5 % negociado, venta a la mediana española, todos los gastos e IVA del margen). Al pulsar un modelo: cuenta gasto a gasto y anuncios reales enlazados de ambos países.

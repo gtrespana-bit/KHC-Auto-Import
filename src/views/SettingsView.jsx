@@ -22,7 +22,7 @@ export default function SettingsView({ initialTab = 'empresa' }) {
   const overridden = Object.keys(c.tariffs || {}).filter((k) => Number(c.tariffs[k]) !== Number(DEFAULT_TARIFFS[k]));
 
   const exportJson = () => {
-    download(`coruna_autoimport_${todayISO()}.json`, JSON.stringify(state, null, 2), 'application/json');
+    download(`khc_autoimport_${todayISO()}.json`, JSON.stringify(state, null, 2), 'application/json');
     toast('Respaldo descargado. Guárdalo a buen recaudo.');
   };
 

@@ -120,6 +120,45 @@ Wallapop, Milanuncios o Coches.net, con los datos reales de la ficha (motor, km,
 garantías) y el precio que elijas. Controla el límite de caracteres de cada portal y te dice
 en vivo qué beneficio neto deja ese precio. Versión corta para responder rápido.
 
+### Publicar un coche en la web
+
+En la ficha del vehículo, pestaña **Web** → botón *Publicar en la web* (solo propietario y gestor).
+
+1. **Contenido:** precio publicado, garantía, título, descripción y equipamiento. Todo llega
+   rellenado desde la ficha; el botón *Regenerar desde la ficha* vuelve a redactarlo si has
+   cambiado los datos. La descripción solo afirma lo que está marcado en la ficha (libro de
+   mantenimiento, llaves, ITV): revisa que lo que afirmas es verdad.
+2. **Fotos:** marca las que se publican, elige la portada y, si se ve la matrícula, pulsa el lápiz
+   para **taparla** (se pixela solo en la copia que sube a la web; la original de la ficha no se
+   toca). Las imágenes salen redimensionadas y sin datos EXIF (nada de geolocalización).
+3. **Vista previa:** comprueba cómo quedará en la web antes de publicar.
+4. **Publicar.** El coche aparece en la web en menos de un minuto.
+
+Después:
+
+- Si cambias el **precio o los kilómetros** en la ficha, verás el aviso *«La web está
+  desactualizada»* con un botón para actualizar. Nada se actualiza solo salvo el estado.
+- Al marcar el coche como **Reservado** o **Vendido**, la web se actualiza sola. La ficha del
+  coche vendido se mantiene publicada (con el aviso de vendido): es bueno para Google y transmite
+  confianza. Si quieres retirarla, *Retirar de la web*.
+- El botón **Copiar enlace** sirve para pegar la ficha en WhatsApp, un email o la respuesta a un
+  comprador.
+- **Nunca** se publican: precio de compra, costes, margen, VIN, matrícula, documentación, datos
+  del vendedor anterior ni notas internas. La web lee su propia tabla, no la ficha del ERP.
+
+### Contactos web
+
+Los formularios de la web (ficha de un coche, búsqueda por encargo, compramos tu coche y contacto)
+caen en el módulo **Contactos web** del menú lateral, con un contador en rojo mientras haya
+consultas sin atender.
+
+- Cada consulta trae tipo, teléfono, correo, mensaje y de qué página viene.
+- Acciones directas: **WhatsApp**, llamar, correo y *Crear ficha en el CRM* (la crea en
+  *Clientes y ventas* con el mensaje ya dentro).
+- Estados: **Nuevo → Contactado → Ganado** (o Descartado), con notas internas de seguimiento.
+- Si no hay credenciales de Supabase configuradas, esta pantalla avisa: en modo local no puede
+  recibir los contactos reales de la web.
+
 ### Financiación al comprador
 En la pestaña *Venta y cliente* de cada ficha y en el CRM. Metes entrada, TIN, plazo y tu
 comisión, y te da la cuota mensual, los intereses, el total que paga el cliente y **tu comisión

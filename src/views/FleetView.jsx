@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Car, Plus, Download, Pencil, Trash2, LayoutGrid, List, Megaphone, Camera } from 'lucide-react';
+import { Car, Plus, Download, Pencil, Trash2, LayoutGrid, List, Megaphone, Camera, Globe } from 'lucide-react';
 import { Card, Button, Badge, SearchInput, Select, Table, Stat, SectionTitle, ConfirmDialog, EmptyState, Progress, cx } from '../components/ui.jsx';
 import { useStore } from '../lib/store.jsx';
 import { eur, eur0, dateEs, download, toCsv, pct as pctFmt, daysBetween, todayISO } from '../lib/format.js';
@@ -8,20 +8,26 @@ import { landingCost } from '../domain/taxes.js';
 import { documentProgress } from '../domain/compliance.js';
 import VehicleForm from '../components/VehicleForm.jsx';
 import AdModal from '../components/AdModal.jsx';
+import PublishModal from '../components/PublishModal.jsx';
 import { PhotoStrip } from '../components/Photos.jsx';
 
 const STATUS_TONE = Object.fromEntries(STATUS_FLOW.map((s) => [s.id, s.color]));
 
 export default function FleetView({ onOpenVehicle, autoOpenId, onAutoOpened }) {
-  const { state, deleteVehicle, toast, tariffs } = useStore();
+  const { state, deleteVehicle, toast, tariffs, can } = useStore();
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('');
   const [editing, setEditing] = useState(null);
   const [adFor, setAdFor] = useState(null);
+  const [publishFor, setPublishFor] = useState(null);
   const [confirm, setConfirm] = useState(null);
   const [board, setBoard] = useState(false);
 
   const vehicles = state.vehicles;
+  const publishedIds = useMemo(
+    () => new Set((state.publications || []).filter((p) => ['publicado', 'reservado', 'vendido'].includes(p.status)).map((p) => p.vehicleId)),
+    [state.publications],
+  );
   const summary = useMemo(() => fleetSummary(vehicles, { regime: state.company.vatRegime === 'general' ? 'general' : 'rebu', tariffs }), [vehicles, state.company.vatRegime, tariffs]);
 
   const filtered = useMemo(() => {
@@ -123,6 +129,20 @@ export default function FleetView({ onOpenVehicle, autoOpenId, onAutoOpened }) {
       align: 'right',
       render: (v) => (
         <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+          {can('publications') && (
+            <Button
+              size="sm"
+              variant="ghost"
+              icon={Globe}
+              onClick={() => setPublishFor(v)}
+              title={
+                publishedIds.has(v.id)
+                  ? 'Editar la publicación en la web'
+                  : 'Publicar este coche en la web'
+              }
+              className={publishedIds.has(v.id) ? 'text-emerald-400' : 'text-slate-400'}
+            />
+          )}
           <Button size="sm" variant="ghost" icon={Megaphone} onClick={() => setAdFor(v)} title="Generar anuncio" />
           <Button size="sm" variant="ghost" icon={Pencil} onClick={() => setEditing(v)} title="Editar" />
           <Button size="sm" variant="ghost" icon={Trash2} onClick={() => setConfirm(v)} title="Eliminar" />
@@ -207,6 +227,8 @@ export default function FleetView({ onOpenVehicle, autoOpenId, onAutoOpened }) {
       )}
 
       <AdModal open={!!adFor} vehicle={adFor} onClose={() => setAdFor(null)} />
+
+      <PublishModal open={!!publishFor} vehicle={publishFor} onClose={() => setPublishFor(null)} />
 
       <ConfirmDialog
         open={!!confirm}

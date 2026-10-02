@@ -4,14 +4,21 @@
 //  Todo el estado de la empresa vive en un único registro atómico. Se guarda
 //  en el navegador (los datos nunca salen de tu equipo) y se puede exportar a
 //  un fichero JSON de respaldo o importar de nuevo en otro navegador.
+//
+//  KHC Auto Import (antes «Coruña AutoImport»): la base de datos local y las
+//  claves de respaldo cambiaron de nombre. Para no perder nada, al abrir se
+//  MIGRAN automáticamente los datos del almacén anterior (una sola vez, sin
+//  borrar el antiguo: si algún día se vuelve a la versión previa, sigue ahí).
 // ============================================================================
 
-const DB_NAME = 'coruna_autoimport_erp';
+const DB_NAME = 'khc_autoimport_erp';
+const LEGACY_DB_NAMES = ['coruna_autoimport_erp'];
 const DB_VERSION = 2;
 const STORE = 'app';
 const PHOTOS = 'photos';
 const KEY = 'state';
-const LS_FALLBACK = 'coruna_autoimport_erp_state_v1';
+const LS_FALLBACK = 'khc_autoimport_state_v1';
+const LEGACY_LS_FALLBACKS = ['coruna_autoimport_erp_state_v1'];
 export const LEGACY_VEHICLES_KEY = 'coruna_autoimport_vehicles_v1';
 
 function openDb() {
@@ -33,36 +40,124 @@ function openDb() {
   });
 }
 
+const readKey = (db, store, key) =>
+  new Promise((resolve) => {
+    try {
+      const req = db.transaction(store, 'readonly').objectStore(store).get(key);
+      req.onsuccess = () => resolve(req.result ?? null);
+      req.onerror = () => resolve(null);
+    } catch {
+      resolve(null);
+    }
+  });
+
+const writeKey = (db, store, key, value) =>
+  new Promise((resolve) => {
+    try {
+      const tx = db.transaction(store, 'readwrite');
+      tx.objectStore(store).put(value, key);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    } catch {
+      resolve(false);
+    }
+  });
+
+const readAllPhotos = (db) =>
+  new Promise((resolve) => {
+    try {
+      if (!db.objectStoreNames.contains(PHOTOS)) {
+        resolve([]);
+        return;
+      }
+      const entries = [];
+      const req = db.transaction(PHOTOS, 'readonly').objectStore(PHOTOS).openCursor();
+      req.onsuccess = () => {
+        const cursor = req.result;
+        if (!cursor) {
+          resolve(entries);
+          return;
+        }
+        entries.push([cursor.key, cursor.value]);
+        cursor.continue();
+      };
+      req.onerror = () => resolve(entries);
+    } catch {
+      resolve([]);
+    }
+  });
+
+/** Nombres de bases de datos existentes (cuando el navegador lo permite). */
+async function existingDatabases() {
+  if (typeof indexedDB.databases !== 'function') return null;
+  try {
+    const list = await indexedDB.databases();
+    return (list || []).map((d) => d.name);
+  } catch {
+    return null;
+  }
+}
+
+let migrationPromise = null;
+
+/**
+ * Copia, una sola vez, el estado y las fotos del almacén antiguo
+ * (`coruna_autoimport_erp`) al nuevo (`khc_autoimport_erp`). No borra nada.
+ */
+function migrateLegacy() {
+  if (migrationPromise) return migrationPromise;
+  migrationPromise = (async () => {
+    if (typeof indexedDB === 'undefined') return;
+    try {
+      const names = await existingDatabases();
+      const candidates = LEGACY_DB_NAMES.filter((name) => (names ? names.includes(name) : true));
+      for (const name of candidates) {
+        const legacy = await new Promise((resolve) => {
+          const req = indexedDB.open(name); // sin versión: si no existe, no crea tiendas
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => resolve(null);
+          req.onblocked = () => resolve(null);
+        });
+        if (!legacy) continue;
+        const state = await readKey(legacy, STORE, KEY);
+        const photos = await readAllPhotos(legacy);
+        legacy.close();
+        if (!state && !photos.length) continue;
+
+        const db = await openDb();
+        const current = await readKey(db, STORE, KEY);
+        if (!current && state) await writeKey(db, STORE, KEY, state);
+        for (const [vehicleId, list] of photos) {
+          const already = await readKey(db, PHOTOS, vehicleId);
+          if (!already) await writeKey(db, PHOTOS, vehicleId, list);
+        }
+        console.info(`[db] datos locales migrados desde «${name}» (el almacén antiguo no se ha borrado)`);
+      }
+    } catch (err) {
+      console.warn('[db] no se han podido migrar los datos anteriores:', err?.message || err);
+    }
+  })();
+  return migrationPromise;
+}
+
 export async function dbGet() {
   try {
+    await migrateLegacy();
     const db = await openDb();
-    return await new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE, 'readonly');
-      const req = tx.objectStore(STORE).get(KEY);
-      req.onsuccess = () => resolve(req.result || null);
-      req.onerror = () => reject(req.error);
-    });
+    return await readKey(db, STORE, KEY);
   } catch (err) {
     console.warn('[db] IndexedDB no disponible, usando localStorage:', err.message);
-    try {
-      const raw = localStorage.getItem(LS_FALLBACK);
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
+    return readFallback();
   }
 }
 
 export async function dbPut(state) {
   const payload = { ...state, meta: { ...state.meta, savedAt: new Date().toISOString() } };
   try {
+    await migrateLegacy();
     const db = await openDb();
-    await new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE, 'readwrite');
-      tx.objectStore(STORE).put(payload, KEY);
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-    });
+    const ok = await writeKey(db, STORE, KEY, payload);
+    if (!ok) throw new Error('escritura rechazada');
   } catch (err) {
     console.warn('[db] fallo en IndexedDB, guardando en localStorage:', err.message);
     try {
@@ -95,12 +190,15 @@ export async function dbClear() {
 
 /** Lectura síncrona del respaldo en localStorage (para la primera pintura). */
 export function readFallback() {
-  try {
-    const raw = localStorage.getItem(LS_FALLBACK);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
+  const read = (key) => {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  };
+  return read(LS_FALLBACK) || LEGACY_LS_FALLBACKS.map(read).find(Boolean) || null;
 }
 
 /** Lee los vehículos de la versión anterior de la app (localStorage). */
@@ -146,13 +244,9 @@ export function pickFile(accept = '.json') {
 export async function getPhotos(vehicleId) {
   if (!vehicleId) return [];
   try {
+    await migrateLegacy();
     const db = await openDb();
-    const list = await new Promise((resolve, reject) => {
-      const tx = db.transaction(PHOTOS, 'readonly');
-      const req = tx.objectStore(PHOTOS).get(vehicleId);
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => reject(req.error);
-    });
+    const list = await readKey(db, PHOTOS, vehicleId);
     return Array.isArray(list) ? list : [];
   } catch {
     return [];
@@ -162,13 +256,9 @@ export async function getPhotos(vehicleId) {
 export async function putPhotos(vehicleId, list) {
   if (!vehicleId) return;
   try {
+    await migrateLegacy();
     const db = await openDb();
-    await new Promise((resolve, reject) => {
-      const tx = db.transaction(PHOTOS, 'readwrite');
-      tx.objectStore(PHOTOS).put(list, vehicleId);
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-    });
+    await writeKey(db, PHOTOS, vehicleId, list);
   } catch (err) {
     console.error('[db] no se han podido guardar las fotos:', err.message);
   }
@@ -191,6 +281,9 @@ export async function deletePhotos(vehicleId) {
 /**
  * Redimensiona un fichero de imagen y lo devuelve como data-URL.
  * Necesita navegador (canvas); devuelve null si no está disponible.
+ *
+ * Al pasar por canvas se pierden los metadatos EXIF (incluida la geolocalización
+ * del móvil), que es justo lo que queremos antes de publicar en internet.
  */
 export function fileToDataUrl(file, { maxSize = 1600, quality = 0.82 } = {}) {
   return new Promise((resolve) => {

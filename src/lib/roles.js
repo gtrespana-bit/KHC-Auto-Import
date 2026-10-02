@@ -9,7 +9,7 @@
 export const ROLES = {
   owner: { label: 'Propietario', description: 'Acceso total, gestión del equipo y datos de la empresa' },
   manager: { label: 'Gestor', description: 'Todo el día a día, incluidos ajustes; no gestiona el equipo' },
-  sales: { label: 'Comercial', description: 'Flota, clientes, tareas y fotos. Sin gastos, impuestos ni facturas' },
+  sales: { label: 'Comercial', description: 'Flota, clientes, contactos de la web, tareas y fotos. Sin gastos, impuestos ni facturas' },
   accountant: { label: 'Gestoría', description: 'Solo lectura de toda la información' },
 };
 
@@ -23,6 +23,11 @@ const WRITERS = {
   filings: ['owner', 'manager'],
   invoices: ['owner', 'manager'],
   company: ['owner', 'manager'],
+  // Web pública: lo que se le enseña al cliente lo decide el propietario o el
+  // gestor. El rol comercial atiende los contactos que llegan de la web, pero
+  // no publica ni cambia precios públicos.
+  publications: ['owner', 'manager'],
+  leads: ['owner', 'manager', 'sales'],
   team: ['owner'],
   data: ['owner'], // importar/borrar todo
 };

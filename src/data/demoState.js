@@ -81,6 +81,58 @@ export function demoState() {
       { id: '303-2026-T1', model: '303', label: 'IVA 1T 2026', status: 'presentado', filedAt: '2026-04-18', paidAmount: 676.86 },
     ],
     activity: [{ id: 'log-1', at: '2026-09-20T09:12:00.000Z', text: 'Venta registrada: Volkswagen Golf 7.5' }],
+    // Publicaciones en la web pública (solo contenido comercial: ni costes ni margen).
+    publications: [
+      {
+        id: 'pub-rav4', vehicleId: 'veh-rav4', site: 'khc', status: 'publicado',
+        publishedAt: '2026-09-26T09:00:00.000Z', soldAt: null, updatedAt: '2026-09-26T09:00:00.000Z',
+        data: {
+          slug: 'toyota-rav4-2021',
+          title: 'Toyota RAV4 2.5 Hybrid 218 CV', version: '2.5 Hybrid 218 CV', brand: 'Toyota', model: 'RAV4 V',
+          year: 2021, km: 62000, fuel: 'Híbrido', transmission: 'e-CVT', cv: 218, cc: 2487, co2: 128,
+          badge: 'ECO', segment: 'C-SUV', firstRegDate: '2021-04-01', originCountry: 'Alemania',
+          price: 31900, priceNote: 'Precio al contado, IVA incluido.',
+          description: 'Toyota RAV4 V 2.5 Hybrid 218 CV: unidad de 2021 con 62.000 km, etiqueta ECO y consumo real contenido.\n\nSe entrega revisado y con la documentación al día, con libro de mantenimiento y dos llaves. Incluye garantía de 12 meses y acompañamiento en todos los trámites.',
+          features: ['218 CV · Híbrido · e-CVT', 'Etiqueta ambiental ECO', 'Libro de mantenimiento', 'Dos llaves'],
+          warrantyMonths: 12, financingText: 'Financiación a medida. Consúltanos condiciones sin compromiso.',
+          location: 'A Coruña', photos: [],
+        },
+      },
+      {
+        id: 'pub-golf', vehicleId: 'veh-golf', site: 'khc', status: 'vendido',
+        publishedAt: '2026-02-10T09:00:00.000Z', soldAt: '2026-03-14T09:00:00.000Z', updatedAt: '2026-03-14T09:00:00.000Z',
+        data: {
+          slug: 'volkswagen-golf-2019', title: 'Volkswagen Golf 7.5 2.0 TDI 150 CV DSG', version: '2.0 TDI 150 CV DSG',
+          brand: 'Volkswagen', model: 'Golf 7.5', year: 2019, km: 118000, fuel: 'Diésel', transmission: 'DSG',
+          cv: 150, cc: 1968, co2: 118, badge: 'C', segment: 'Compacto', firstRegDate: '2019-06-01',
+          originCountry: 'Alemania', price: 17400, priceNote: 'Vendido.',
+          description: 'Unidad vendida en 19 días. Mantenemos la ficha publicada como referencia.',
+          features: ['150 CV · Diésel · DSG', 'Etiqueta ambiental C', 'Libro de mantenimiento'],
+          warrantyMonths: 12, financingText: '', location: 'A Coruña', photos: [],
+        },
+      },
+    ],
+    // Contactos llegados desde los formularios de la web.
+    leads: [
+      {
+        id: 'lead-1', kind: 'coche', name: 'Marcos Varela', phone: '600 333 444', email: 'marcos@example.com',
+        message: 'Me interesa el RAV4. ¿Se puede ver el sábado por la mañana?',
+        vehicleSlug: 'toyota-rav4-2021', source: 'ficha:toyota-rav4-2021', status: 'nuevo',
+        createdAt: '2026-10-01T18:22:00.000Z', updatedAt: null,
+      },
+      {
+        id: 'lead-2', kind: 'encargo', name: 'Lucía Piñeiro', phone: '699 555 666',
+        email: '', message: 'Busco un Golf o un León automático, hasta 20.000 €, menos de 130.000 km, para enero.',
+        vehicleSlug: '', source: 'pagina:encargo', status: 'contactado',
+        createdAt: '2026-09-29T09:05:00.000Z', updatedAt: '2026-09-30T10:00:00.000Z',
+      },
+      {
+        id: 'lead-3', kind: 'compra', name: 'Sergio Paleo', phone: '622 777 888',
+        email: 'sergio@example.com', message: 'Tengo un León 1.6 TDI de 2016 con 178.000 km, ITV de marzo. ¿Cuánto me dais?',
+        vehicleSlug: '', source: 'pagina:compramos-tu-coche', status: 'nuevo',
+        createdAt: '2026-09-30T16:40:00.000Z', updatedAt: null,
+      },
+    ],
     meta: { createdAt: '2026-01-01T00:00:00.000Z', savedAt: '2026-09-20T09:12:00.000Z' },
   };
 }
