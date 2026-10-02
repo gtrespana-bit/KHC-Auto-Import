@@ -140,14 +140,59 @@ dominio; es que cada uno necesita su compilación.
 | PWA instalada | Volver a probar la instalación en móvil (iOS y Android), el modo sin conexión y la actualización de caché | Se rompe en silencio: la app sigue abriendo pero con datos viejos |
 | Compilación | Un solo comando que compile las dos aplicaciones, o compilaciones con `--ignore` cruzadas | Un error en la web deja **fuera de servicio el ERP** (y al revés): un solo despliegue, un solo punto de fallo |
 
-#### Recomendación
+#### Recomendación (con la sinceridad por delante)
 
-**Mantener los dos proyectos.** Coste real: un par de variables de entorno duplicadas y dos
-comandos de despliegue. A cambio: el ERP (que es la herramienta de trabajo diaria y se usa desde el
-móvil) no depende de que la web compile, y el *service worker* del ERP no puede interferir con la web
-pública. Si algún día unificáis tecnologías (por ejemplo, reescribiendo el ERP con Next.js), la
-pregunta se replantea sola: entonces sí sería un solo proyecto con el ERP en `/erp` o en su
-subdominio, sin tocar el *service worker* de nadie.
+**Hoy: mantener los dos proyectos.** No porque sea técnicamente superior, sino por una razón
+práctica: **lo que ahorrarías es cosmético y lo que arriesgas es tu herramienta de trabajo diaria.**
+Merece la pena decirlo sin adornos:
+
+- **Ahorro real de tenerlo junto**: un proyecto menos en el panel de Vercel, un par de variables de
+  entorno menos y un despliegue menos. Y, ojo: en el día a día **no tocas Vercel para nada**. Los
+  coches se publican desde el ERP con un botón. La fricción del día a día es cero en las dos
+  configuraciones.
+- **Coste real de juntarlo**: entre uno y dos días de trabajo (base de Vite, *service worker*, rutas,
+  manifiesto de la PWA y compilación única) con el riesgo concentrado en lo más frágil: la **PWA
+  instalada en tu móvil** y las cachés. Un *service worker* mal acotado puede servir el shell de la
+  app a un visitante de la web pública, y eso se detecta tarde y mal.
+- **Lo que se pierde al fusionar**: despliegues independientes. Hoy puedes publicar un cambio de la
+  web sin recompilar (ni arriesgar) el ERP, y al revés.
+
+En resumen: **no es una decisión técnica pendiente, es una decisión ya tomada y bien tomada para
+esta etapa.** Un negocio de una o dos personas no gana nada por tener un proyecto menos en un panel
+que abre dos veces al año.
+
+#### Cuándo sí habría que replantearlo (los disparadores)
+
+Esta decisión **no es para siempre**. Hay tres señales claras, y cuando aparezca cualquiera de las
+tres, se revisa:
+
+1. **Se reescribe el ERP.** Si algún día el programa de gestión se rehace (rediseño a fondo, o
+   migración a Next.js), entonces el coste de fusionar deja de existir: se escribe ya en la misma
+   tecnología y **sí** conviene un solo proyecto. Fusionar *por esto* sin reescribir no tiene
+   sentido; reescribir *para* fusionar, menos.
+2. **El ERP deja de ser de usar y tirar y pasa a ser multiusuario de verdad**: tres o más personas
+   trabajando a la vez, acceso de comerciales o clientes, correos automáticos, PDFs generados en
+   servidor, integraciones. En ese escenario hace falta backend propio, y Next.js lo da gratis. Ahí
+   el ERP deja de ser una app estática y la fusión pasa a ser la opción natural.
+3. **El mantenimiento empieza a doler**: dos `package-lock.json`, dos actualizaciones de
+   dependencias, dos sistemas de diseño que se separan. Hoy son cinco minutos al mes; si algún día
+   son un problema real, es señal de que toca unificar.
+
+#### El destino natural, cuando llegue el momento
+
+Si algún día se unifica, la forma correcta **no es `/erp`**, sino **un solo proyecto de Next.js con
+dos dominios**: `khcimport.autos` para el escaparate y `app.khcimport.autos` para la gestión, con el
+enrutado por dominio resuelto en el propio servidor (`middleware` según el host). Ventajas frente a
+la carpeta `/erp`:
+
+- Cada aplicación conserva su origen: cachés, cookies y *service worker* separados, sin trucos.
+- Se puede desplegar cada mitad sin tocar la otra (aunque compartan proyecto, los cambios se pueden
+  limitar por rutas).
+- El SEO de la web no comparte nada con una app privada.
+
+Lo que **no** recomiendo es la carpeta `/erp` dentro de la web actual: es la opción que obliga a
+tocar el *service worker*, el manifiesto y las rutas del ERP, justo lo que hoy funciona bien y se usa
+desde el móvil a diario.
 
 ---
 

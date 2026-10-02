@@ -29,12 +29,13 @@ dice `web`, es la web pública; si dice `.` (o está vacío), es el ERP.
 `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` (paso 2 de la sección siguiente).
 
 > **¿No sería mejor un solo proyecto, con el ERP en un subdominio o en `/erp`?**
-> Se puede, pero cuesta más de lo que parece y hoy no compensa: son dos tecnologías distintas
-> (Vite y Next.js), el `vercel.json` del ERP reescribe *todas* las rutas a `index.html` y su
-> *service worker* (el que hace que la app funcione instalada en el móvil) secuestra la navegación
-> del origen. Los detalles y lo que habría que tocar están en
-> [`docs/12`](12_WEB_PUBLICA_Y_PUBLICACION.md) → §2.1.b. Lo que sí está unificado, y es lo que
-> importa: **un solo repositorio y una sola base de datos**.
+> Decisión tomada: **se quedan dos proyectos por el momento**. Son dos tecnologías distintas (Vite y
+> Next.js) y un proyecto de Vercel admite una sola compilación; juntarlos hoy costaría un par de días
+> y arriesgaría la PWA del ERP, a cambio de un ahorro que en el día a día no se nota (los coches se
+> publican desde el ERP; no se toca Vercel para nada).
+> Detalle, coste real y **cuándo sí habría que replantearlo** (las tres señales que lo justificarían y
+> la forma correcta de hacerlo entonces): [`docs/12`](12_WEB_PUBLICA_Y_PUBLICACION.md) → §2.1.b.
+> Lo que sí está unificado, y es lo que importa: **un solo repositorio y una sola base de datos**.
 
 ---
 
