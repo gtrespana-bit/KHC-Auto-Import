@@ -212,11 +212,15 @@ Supabase → **Authentication → URL Configuration**:
 | **Site URL** | `https://app.khcimport.autos` | Es la dirección a la que Supabase manda los enlaces de confirmar correo y de recuperar contraseña: tienen que llevar al ERP. |
 | **Redirect URLs** | `https://app.khcimport.autos`, `http://localhost:5173`, `http://localhost:3000` y la URL `*.vercel.app` del proyecto | Son las direcciones desde las que se permite volver después de iniciar sesión. Sin las de `localhost` no podrás entrar en desarrollo. |
 
-Dos consecuencias normales al hacer este cambio:
+Tres consecuencias normales al hacer este cambio:
 
 1. **Te pedirá iniciar sesión otra vez** en el ERP: el navegador guarda la sesión por dirección, y
    `app.khcimport.autos` es un origen distinto. No se pierde nada: los datos están en Supabase.
-2. Si el correo de confirmación o de recuperación te lleva a la dirección vieja, es que `Site URL`
+2. **Vuelve a instalar la app del móvil** desde `https://app.khcimport.autos` (Chrome o Safari →
+   *Añadir a pantalla de inicio*) y borra el icono antiguo, el que abrías en `khcimport.autos`: ahora
+   esa dirección es la web pública y ese icono te llevaría a la web. Los datos siguen en Supabase,
+   así que no se pierde nada: solo es volver a crear el acceso directo.
+3. Si el correo de confirmación o de recuperación te lleva a la dirección vieja, es que `Site URL`
    sigue apuntando ahí.
 
 ### Paso 5 · Borrar el proyecto de Vercel antiguo
