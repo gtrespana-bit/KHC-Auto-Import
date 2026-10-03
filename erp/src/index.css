@@ -45,3 +45,15 @@
   color: #0f766e !important;
 }
 
+/* ---------------------------------------------------------------------------
+   Estilo «Noche» del mapa de la calculadora de viajes.
+   En lugar de un servidor de teselas oscuras (hoy casi todos piden clave de
+   API), reutilizamos las teselas de OpenStreetMap y las oscurecemos con un
+   filtro CSS: mismo mapa, cero claves y un servidor menos del que depender.
+   El filtro solo afecta a la capa de teselas: las rutas, los marcadores y la
+   atribución siguen con sus colores originales.
+   ------------------------------------------------------------------------- */
+.trip-map-tiles--night {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(1.08) saturate(0.85);
+}
+

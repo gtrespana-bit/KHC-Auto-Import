@@ -94,6 +94,42 @@ devuelve:
 
 Desde aquí puedes enviar el coche a la flota con un clic.
 
+### Calculadora de viaje (rutas, peajes y gastos)
+
+Calcula lo que cuesta traer el coche por carretera: tres trazados alternativos sobre el mapa,
+kilómetros, horas, peajes estimados por país, combustible o electricidad según velocidad y
+carga, placas alemanas, vuelo, hotel y comidas, con la comparativa final frente al camión.
+
+**El mapa no necesita ninguna clave de API.** Usa servidores de teselas comunitarios de
+OpenStreetMap (`erp/src/domain/tripMap.js`):
+
+| Estilo | Servidor | Nota |
+| --- | --- | --- |
+| Claro | OSM France (`osmfr`) | Callejero en color |
+| Noche | OSM France + filtro CSS | Mismas teselas, oscurecidas sin servidor de pago |
+| Carreteras | OSM France (`hot`) | Más detalle de vías, nombres y puntos de interés |
+| Relieve | OpenTopoMap | Relieve sombreado y curvas de nivel |
+
+Cada estilo lleva una **cadena de servidores** y el botón **«Cambiar servidor»** (junto al
+selector de estilo) salta al siguiente de la lista. Hace falta ese botón porque hay dos
+bloqueos que **no lanzan ningún error** y que por tanto la conmutación automática no puede
+detectar:
+
+- **CARTO** (`basemaps.cartocdn.com`) dejó de servir sus teselas sin clave: responde 200 OK
+  con un PNG que lleva el marco de agua «API KEY REQUIRED» incrustado.
+- **Los servidores voluntarios de la OSMF** (`tile.openstreetmap.org`) responden **403**
+  («App is not following the tile usage policy») porque son para uso comunitario y de
+  prueba, no para una aplicación de empresa. Por eso ya no se usan.
+
+Si algún día un servidor vuelve a marcar o bloquear las teselas, pulsa **«Cambiar servidor»**:
+el mapa pasa al siguiente de la cadena (OpenStreetMap Alemania/FOSSGIS, CyclOSM…) sin esperar
+a nadie.
+
+Los servidores comunitarios son para **uso moderado**, que es el de un ERP con pocos usuarios.
+Si el consumo crece (o quieres un proveedor con SLA), contrata uno y define la variable
+`VITE_TRIP_MAP_TILE_URL` con la plantilla de teselas (`…/{z}/{x}/{y}.png`); se usa tal cual
+para los cuatro estilos, sin tocar código.
+
 ### Clientes y ventas
 Contactos con su origen (Wallapop, Coches.net, taller, boca a boca…), fase de negociación,
 presupuesto, vehículo de interés y próximo paso. Embudo visual y tareas con fecha límite.
