@@ -20,8 +20,9 @@ function fromSeed(v = {}) {
   if (v.co2 !== undefined && v.co2 !== null) out.co2 = Number(v.co2);
   if (v.fuel) out.fuel = v.fuel;
   if (v.newPrice) out.newPrice = Number(v.newPrice);
-  const buy = v.costs?.purchase ?? v.dePrice?.[0];
+  const buy = v.costs?.purchase ?? v.dePrice?.[0] ?? v.purchase;
   if (buy) out.purchase = Number(buy);
+  if (v.transport !== undefined) out.transport = Number(v.transport);
   return out;
 }
 

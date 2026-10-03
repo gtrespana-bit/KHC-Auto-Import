@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import {
   Gauge, TrendingUp, Car, Database, Calculator, Users, Wallet, FileWarning, FileCheck2, BarChart3,
   BookOpen, Settings as SettingsIcon, Menu, X, Building2, HardDrive, MapPin, ShieldCheck,
-  ReceiptText, Cloud, CloudOff, LogOut, UserRound, Upload, Globe,
+  ReceiptText, Cloud, CloudOff, LogOut, UserRound, Upload, Globe, Navigation,
 } from 'lucide-react';
 import { StoreProvider, useStore } from './lib/store.jsx';
 import { AuthProvider, useOptionalAuth } from './lib/auth.jsx';
@@ -17,6 +17,7 @@ import FleetView from './views/FleetView.jsx';
 import CatalogView from './views/CatalogView.jsx';
 import OpportunitiesView from './views/OpportunitiesView.jsx';
 import ImportSimulatorView from './views/ImportSimulatorView.jsx';
+import TripCalculatorView from './views/TripCalculatorView.jsx';
 import CrmView from './views/CrmView.jsx';
 import AccountingView from './views/AccountingView.jsx';
 import TaxView from './views/TaxView.jsx';
@@ -34,6 +35,7 @@ const NAV = [
     { id: 'opportunities', label: 'Oportunidades', icon: TrendingUp },
     { id: 'catalog', label: 'Catálogo', icon: Database },
     { id: 'simulator', label: 'Simulador', icon: Calculator },
+    { id: 'trip', label: 'Calculadora de viaje', icon: Navigation },
     { id: 'crm', label: 'Clientes y ventas', icon: Users },
     { id: 'web', label: 'Contactos web', icon: Globe },
   ] },
@@ -68,7 +70,7 @@ function Shell() {
   const { state, ready, tariffs, toasts, mode, role, sync, localBackup, importLocalBackup, dismissLocalBackup } = useStore();
   const auth = useOptionalAuth();
   const isCloud = mode === 'supabase';
-  const [view, setView] = useState('dashboard');
+  const [view, setView] = useState('trip');
   const [menu, setMenu] = useState(false);
   const [simSeed, setSimSeed] = useState(null);
   const [openVehicleId, setOpenVehicleId] = useState(null);
@@ -202,6 +204,7 @@ function Shell() {
           {view === 'opportunities' && <OpportunitiesView />}
           {view === 'catalog' && <CatalogView onSimulate={openSimulator} />}
           {view === 'simulator' && <ImportSimulatorView key={simSeed ? simSeed.at : 'sim'} seed={simSeed} />}
+          {view === 'trip' && <TripCalculatorView onApplyToSimulator={openSimulator} />}
           {view === 'crm' && <CrmView vehicles={state.vehicles} editVehicle={editVehicle} />}
           {view === 'accounting' && <AccountingView />}
           {view === 'taxes' && <TaxView />}
