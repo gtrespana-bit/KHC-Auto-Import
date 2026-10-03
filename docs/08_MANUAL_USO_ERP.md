@@ -94,6 +94,33 @@ devuelve:
 
 Desde aquí puedes enviar el coche a la flota con un clic.
 
+### Calculadora de viaje (rutas, peajes y gastos)
+
+Calcula lo que cuesta traer el coche por carretera: tres trazados alternativos sobre el mapa,
+kilómetros, horas, peajes estimados por país, combustible o electricidad según velocidad y
+carga, placas alemanas, vuelo, hotel y comidas, con la comparativa final frente al camión.
+
+**El mapa no necesita ninguna clave de API.** Usa servidores de teselas comunitarios de
+OpenStreetMap (`erp/src/domain/tripMap.js`):
+
+| Estilo | Servidor | Nota |
+| --- | --- | --- |
+| Claro | OpenStreetMap estándar | Callejero en color |
+| Noche | OpenStreetMap + filtro CSS | Mismas teselas, oscurecidas sin servidor de pago |
+| Carreteras | OSM France | Más detalle de vías, nombres y puntos de interés |
+| Relieve | OpenTopoMap | Relieve sombreado y curvas de nivel |
+
+Cada estilo lleva una **cadena de servidores**: si el primero falla, no responde o empieza a
+exigir clave, la aplicación salta al siguiente sola (lo verás como «Servidor alternativo»
+junto al selector de estilo). Eso evita repetir lo que pasó con CARTO: sus teselas
+`basemaps.cartocdn.com` dejaron de servirse sin clave y devolvían un PNG con el marco de agua
+«API KEY REQUIRED» en lugar de mapa.
+
+Los servidores comunitarios son para **uso moderado**, que es el de un ERP con pocos usuarios.
+Si el consumo crece (o quieres un proveedor con SLA), contrata uno y define la variable
+`VITE_TRIP_MAP_TILE_URL` con la plantilla de teselas (`…/{z}/{x}/{y}.png`); se usa tal cual
+para los cuatro estilos, sin tocar código.
+
 ### Clientes y ventas
 Contactos con su origen (Wallapop, Coches.net, taller, boca a boca…), fase de negociación,
 presupuesto, vehículo de interés y próximo paso. Embudo visual y tareas con fecha límite.

@@ -4,11 +4,17 @@ import 'leaflet/dist/leaflet.css';
 import {
   MapPin, Navigation, Fuel, Receipt, ShieldCheck, Truck,
   Car, Route, ExternalLink, ArrowRight, RotateCcw, Info,
-  Luggage, BatteryCharging, Map, Moon, Mountain,
+  Luggage, BatteryCharging, Map, Moon, Mountain, Sun,
 } from 'lucide-react';
 import { Card, Button, Field, Input, Money, Select, Stat, SectionTitle, Badge, Alert, cx } from '../components/ui.jsx';
 import { eur, eur0, numEs } from '../lib/format.js';
-import { DEFAULT_TRIP_MAP_STYLE_ID, TRIP_MAP_STYLES } from '../domain/tripMap.js';
+import {
+  DEFAULT_TRIP_MAP_STYLE_ID,
+  TRIP_MAP_STYLES,
+  tripMapStyle,
+  tripMapSources,
+  tripTileLayerOptions,
+} from '../domain/tripMap.js';
 import {
   TRIP_VEHICLES,
   TRIP_VEHICLE_BRANDS,
@@ -67,7 +73,7 @@ const vehicleRecordsForModel = (brand, model) => vehicleRecordsForBrand(brand).f
   (vehicle) => normalizeTripText(vehicle.model) === normalizeTripText(model),
 );
 const average = (values) => values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
-const MAP_STYLE_ICONS = { light: Map, dark: Moon, roads: Navigation, terrain: Mountain };
+const MAP_STYLE_ICONS = { light: Sun, dark: Moon, roads: Navigation, terrain: Mountain };
 
 // ============================================================================
 //  ESTIMADOR DE PEAJES POR TRAMO Y CORREDOR (referencias editables)
@@ -152,6 +158,17 @@ function estimateRouteTollsAndBreakdown({ coords, distanceKm, durationHours, rou
 export default function TripCalculatorView({ onApplyToSimulator }) {
   // --- Estado de Origen y Destino ------------------------------------------
   const [mapStyleId, setMapStyleId] = useState(DEFAULT_TRIP_MAP_STYLE_ID);
+  // Servidor de teselas en uso dentro de la cadena del estilo elegido. Si un
+  // servidor no entrega ni una tesela (caída, 403, cambio de política…) se
+  // pasa al siguiente automáticamente: el mapa nunca se queda en blanco.
+  //   · styleId → a qué estilo pertenece el intento
+  //   · index   → posición dentro de la cadena de servidores del estilo
+  //   · status  → 'loading' | 'ready' | 'error'
+  const [tileFeed, setTileFeed] = useState({
+    styleId: DEFAULT_TRIP_MAP_STYLE_ID,
+    index: 0,
+    status: 'loading',
+  });
   const [origin, setOrigin] = useState(ORIGIN_PRESETS[0]); // Frankfurt
   const [dest, setDest] = useState(DEST_PRESETS[0]); // A Coruña
   const [originQuery, setOriginQuery] = useState(ORIGIN_PRESETS[0].name);
@@ -617,31 +634,71 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
 
   // Cada proveedor se carga como una capa intercambiable; Leaflet conserva
   // las atribuciones activas visibles en la esquina inferior del mapa.
+  //
+  // Si el servidor activo no entrega ni una tesela, se salta al siguiente de la
+  // cadena del estilo (y si no queda ninguno, se avisa en pantalla). Así un
+  // proveedor que empiece a exigir clave deja de ser un mapa inservible.
+  const activeStyle = useMemo(() => tripMapStyle(mapStyleId), [mapStyleId]);
+  const activeSources = useMemo(() => tripMapSources(activeStyle), [activeStyle]);
+  // Índice y estado derivados: al cambiar de estilo se vuelve a empezar por el
+  // primer servidor sin necesidad de un efecto extra que provoque un parpadeo.
+  const tileSourceIndex = tileFeed.styleId === activeStyle.id ? tileFeed.index : 0;
+  const tileStatus = tileFeed.styleId === activeStyle.id ? tileFeed.status : 'loading';
+  const activeSource = activeSources[Math.min(tileSourceIndex, activeSources.length - 1)] || null;
+
   useEffect(() => {
     const map = mapInstanceRef.current;
-    if (!map) return undefined;
-    const selectedStyle = TRIP_MAP_STYLES.find((style) => style.id === mapStyleId) || TRIP_MAP_STYLES[0];
-    const tileGroup = L.layerGroup();
+    if (!map || !activeSources.length) return undefined;
 
-    selectedStyle.layers.forEach((layer) => {
-      const tileLayer = L.tileLayer(layer.url, {
-        attribution: layer.attribution,
-        maxZoom: layer.maxZoom,
-        subdomains: layer.subdomains,
-        crossOrigin: true,
-      });
-      if (layer.opacity !== undefined) tileLayer.setOpacity(layer.opacity);
-      tileLayer.addTo(tileGroup);
-    });
+    const source = activeSources[Math.min(tileSourceIndex, activeSources.length - 1)];
+    const tileLayer = L.tileLayer(source.url, tripTileLayerOptions(activeStyle, source));
 
-    tileGroup.addTo(map);
-    mapTileLayerRef.current = tileGroup;
+    tileLayer.addTo(map);
+    mapTileLayerRef.current = tileLayer;
+
+    // Vigilancia del servidor: errores de tesela y vigía por si no responde.
+    let loaded = false;
+    let failures = 0;
+    // Solo se anota el resultado si el intento sigue siendo el actual.
+    const report = (status, index = tileSourceIndex) => setTileFeed((prev) => (
+      prev.styleId === activeStyle.id && prev.index === index && prev.status !== status
+        ? { ...prev, status }
+        : prev
+    ));
+    const advance = () => setTileFeed((prev) => ({
+      styleId: activeStyle.id,
+      index: (prev.styleId === activeStyle.id ? prev.index : 0) + 1,
+      status: 'loading',
+    }));
+    const giveUp = () => {
+      if (tileSourceIndex + 1 < activeSources.length) advance();
+      else report('error');
+    };
+
+    const handleLoad = () => {
+      loaded = true;
+      report('ready');
+    };
+    const handleError = () => {
+      if (loaded) return; // alguna tesela sí llegó: el servidor funciona
+      failures += 1;
+      if (failures >= 2) giveUp();
+    };
+    const watchdog = setTimeout(() => {
+      if (!loaded) giveUp();
+    }, 8000);
+
+    tileLayer.on('load', handleLoad);
+    tileLayer.on('tileerror', handleError);
 
     return () => {
-      if (map.hasLayer(tileGroup)) map.removeLayer(tileGroup);
-      if (mapTileLayerRef.current === tileGroup) mapTileLayerRef.current = null;
+      clearTimeout(watchdog);
+      tileLayer.off('load', handleLoad);
+      tileLayer.off('tileerror', handleError);
+      if (map.hasLayer(tileLayer)) map.removeLayer(tileLayer);
+      if (mapTileLayerRef.current === tileLayer) mapTileLayerRef.current = null;
     };
-  }, [mapStyleId]);
+  }, [activeStyle, activeSources, tileSourceIndex]);
 
   // Permitir hacer clic en el mapa para fijar Origen o Destino
   useEffect(() => {
@@ -1275,7 +1332,10 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
                         <button
                           key={id}
                           type="button"
-                          onClick={() => setMapStyleId(id)}
+                          onClick={() => {
+                            setMapStyleId(id);
+                            setTileFeed({ styleId: id, index: 0, status: 'loading' });
+                          }}
                           aria-pressed={mapStyleId === id}
                           title={description}
                           className={cx(
@@ -1292,9 +1352,26 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
                     })}
                   </div>
                 </div>
-                <span className="text-[10px] text-slate-500">
-                  Las atribuciones de los mapas se muestran en la esquina inferior
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  {tileStatus === 'loading' && <Badge tone="sky">Cargando mapa…</Badge>}
+                  {tileStatus === 'ready' && tileSourceIndex > 0 && (
+                    <Badge tone="amber">Servidor alternativo: {activeSource?.label || 'OpenStreetMap'}</Badge>
+                  )}
+                  {tileStatus === 'error' && <Badge tone="rose">Servidor de mapas no disponible</Badge>}
+                  {(tileStatus === 'error' || (tileStatus === 'ready' && tileSourceIndex > 0)) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      icon={RotateCcw}
+                      onClick={() => setTileFeed({ styleId: activeStyle.id, index: 0, status: 'loading' })}
+                    >
+                      Reintentar
+                    </Button>
+                  )}
+                  <span className="text-[10px] text-slate-500">
+                    Teselas de OpenStreetMap, sin API key · atribuciones en la esquina inferior
+                  </span>
+                </div>
               </div>
             </div>
 
