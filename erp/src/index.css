@@ -6,8 +6,42 @@
   }
 }
 
-/* Filtro oscuro para teselas de OpenStreetMap en el tema oscuro del ERP */
-.dark-tiles {
-  filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+/* Controles Leaflet a juego con el mapa premium; las teselas no se alteran por CSS. */
+.leaflet-container {
+  font-family: inherit;
+  background: #e2e8f0;
+}
+
+.leaflet-control-zoom.leaflet-bar {
+  overflow: hidden;
+  border: 0;
+  border-radius: 0.8rem;
+  box-shadow: 0 6px 18px rgb(15 23 42 / 22%);
+}
+
+.leaflet-control-zoom a {
+  width: 32px;
+  height: 32px;
+  line-height: 31px;
+  color: #0f172a !important;
+  background: rgb(255 255 255 / 95%) !important;
+  border-color: rgb(148 163 184 / 45%) !important;
+  transition: background-color 150ms ease;
+}
+
+.leaflet-control-zoom a:hover {
+  background: #f1f5f9 !important;
+}
+
+.leaflet-control-attribution {
+  padding: 2px 7px !important;
+  color: #334155 !important;
+  background: rgb(248 250 252 / 88%) !important;
+  border-top-left-radius: 0.55rem;
+  backdrop-filter: blur(8px);
+}
+
+.leaflet-control-attribution a {
+  color: #0f766e !important;
 }
 

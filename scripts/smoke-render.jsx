@@ -11,6 +11,7 @@ import DashboardView from '../erp/src/views/DashboardView.jsx';
 import FleetView from '../erp/src/views/FleetView.jsx';
 import CatalogView from '../erp/src/views/CatalogView.jsx';
 import ImportSimulatorView from '../erp/src/views/ImportSimulatorView.jsx';
+import TripCalculatorView from '../erp/src/views/TripCalculatorView.jsx';
 import CrmView from '../erp/src/views/CrmView.jsx';
 import AccountingView from '../erp/src/views/AccountingView.jsx';
 import TaxView from '../erp/src/views/TaxView.jsx';
@@ -41,6 +42,7 @@ const CASES = [
   ['Simulador · desglose', () => <ImportSimulatorView initialTab="desglose" />],
   ['Simulador · escenarios', () => <ImportSimulatorView initialTab="escenarios" />],
   ['Simulador · precargado desde catálogo', () => <ImportSimulatorView seed={{ brand: 'Toyota', model: 'RAV4 V', version: '2.5 Hybrid', years: [2019, 2024], cc: 2487, co2: 128, fuel: 'Híbrido', newPrice: 42900, dePrice: [22000, 28000] }} />],
+  ['Calculadora de viajes', () => <TripCalculatorView onApplyToSimulator={() => {}} />],
   ['Clientes · contactos', () => <CrmView vehicles={[]} />],
   ['Clientes · embudo', () => <CrmView vehicles={[]} initialTab="pipeline" />],
   ['Clientes · tareas', () => <CrmView vehicles={[]} initialTab="tareas" />],
