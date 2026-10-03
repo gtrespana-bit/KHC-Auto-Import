@@ -42,7 +42,7 @@ export const PREMIUM = [
   {
     b: 'BMW', m: 'Serie 5', seg: 'Berlina', dmd: 0.9,
     g: [
-      ['Serie 5 G30', 2017, 2023, 62500, [['b47_190', 118, { name: '520d 190 CV' }], ['b47_150', 114, { name: '518d 150 CV' }], ['b57_265', 142, { name: '530d 265 CV' }], ['b48_252', 148, { name: '530i 252 CV' }], ['b47_phev', 42, { name: '530e 292 CV' }]]],
+      ['Serie 5 G30', 2017, 2023, 64500, [['b47_190', 118, { name: '520d 190 CV' }], ['b47_150', 114, { name: '518d 150 CV' }], ['b57_265', 142, { name: '530d 265 CV' }], ['b48_252', 148, { name: '530i 252 CV' }], ['b48_phev252', 42, { name: '530e 252 CV (pre-LCI)', hp: 252 }], ['b48_phev', 44, { name: '530e 292 CV (LCI)', hp: 292 }]]],
       ['Serie 5 G60', 2024, 2025, 72500, [['b47_190', 120, { name: '520d 197 CV', hp: 197 }], ['b57_286', 145, { name: '540d 286 CV' }], ['b48_258', 150, { name: '530i 258 CV' }]]],
     ],
   },
@@ -69,7 +69,7 @@ export const PREMIUM = [
     b: 'BMW', m: 'X3', seg: 'D-SUV', dmd: 1.0,
     g: [
       ['X3 F25 LCI', 2014, 2017, 51500, [['b47_190', 130, { name: '20d 190 CV' }], ['n47_184', 132, { name: '20d 184 CV (N47)' }], ['n57_258', 152, { name: '30d 258 CV' }], ['b48_252', 148, { name: '28i 245 CV', hp: 245 }]]],
-      ['X3 G01', 2018, 2024, 58500, [['b47_190', 134, { name: '20d 190 CV' }], ['b47_150', 128, { name: '18d 150 CV' }], ['b57_265', 152, { name: '30d 265 CV' }], ['b48_252', 150, { name: '30i 252 CV' }], ['b47_phev', 45, { name: '30e 292 CV' }]]],
+      ['X3 G01', 2018, 2024, 58500, [['b47_190', 134, { name: '20d 190 CV' }], ['b47_150', 128, { name: '18d 150 CV' }], ['b57_265', 152, { name: '30d 265 CV' }], ['b48_252', 150, { name: '30i 252 CV' }], ['b48_phev', 45, { name: '30e 292 CV' }]]],
     ],
   },
   {
@@ -82,7 +82,7 @@ export const PREMIUM = [
     b: 'BMW', m: 'X5', seg: 'D-SUV', dmd: 0.82,
     g: [
       ['X5 F15', 2014, 2018, 76500, [['n57_258', 158, { name: '30d 258 CV' }], ['b57_265', 160, { name: '30d 265 CV' }], ['b48_306', 172, { name: '40i 340 CV', hp: 340 }]]],
-      ['X5 G05', 2018, 2025, 88500, [['b57_286', 165, { name: '30d 286 CV' }], ['b57_340', 175, { name: '40d 340 CV' }], ['b58_340', 185, { name: '40i 340 CV' }], ['b48_phev', 48, { name: '45e 394 CV', hp: 394 }]]],
+      ['X5 G05', 2018, 2025, 88500, [['b57_286', 165, { name: '30d 286 CV' }], ['b57_340', 175, { name: '40d 340 CV' }], ['b58_340', 185, { name: '40i 340 CV' }], ['b58_phev', 48, { name: '45e 394 CV', hp: 394 }]]],
     ],
   },
   {
@@ -191,15 +191,16 @@ export const PREMIUM = [
   {
     b: 'Porsche', m: 'Macan', seg: 'D-SUV', dmd: 0.95,
     g: [
-      ['Macan I', 2015, 2021, 68500, [['b48_252', 175, { name: 'Macan 252 CV' }], ['b48_306', 185, { name: 'Macan S 354 CV', hp: 354 }], ['b47_190', 155, { name: 'Macan S Diesel 258 CV', hp: 258, fuel: 'D' }]]],
-      ['Macan I restyling', 2022, 2024, 78500, [['porsche20_265', 180, {}], ['porsche29_380', 192, {}]]],
+      ['Macan I original', 2015, 2018, 68500, [['porsche20_252', 175, { name: '2.0 Turbo 252 CV' }], ['porsche30_340', 185, { name: 'Macan S 3.0 V6 340 CV' }], ['porsche30d_258', 155, { name: 'Macan S Diesel 3.0 V6 258 CV' }]]],
+      ['Macan I restyling', 2019, 2021, 74500, [['porsche20_252', 178, { name: '2.0 Turbo 252 CV' }], ['porsche30_354', 188, { name: 'Macan S 3.0 V6 354 CV' }], ['porsche29_380', 192, { name: 'Macan GTS 2.9 V6 380 CV' }]]],
+      ['Macan I última actualización', 2022, 2024, 78500, [['porsche20_265', 180, {}], ['porsche29_380', 192, {}]]],
     ],
   },
   {
     b: 'Porsche', m: 'Cayenne', seg: 'D-SUV', dmd: 0.8,
     g: [
-      ['Cayenne II', 2014, 2018, 88500, [['b57_265', 185, { name: 'Cayenne S Diesel 385 CV', hp: 385 }], ['porsche36_420', 205, {}]]],
-      ['Cayenne III', 2018, 2025, 105000, [['b58_340', 195, { name: 'Cayenne 340 CV' }], ['b57_286', 190, { name: 'Cayenne Diesel 286 CV' }], ['porsche29_440', 210, {}]]],
+      ['Cayenne II', 2014, 2018, 88500, [['porsche42tdi385', 185, { name: 'S Diesel 4.2 V8 385 CV' }], ['porsche36_420', 205, {}]]],
+      ['Cayenne III', 2018, 2025, 105000, [['porsche30_340c', 195, { name: '3.0 V6 340 CV' }], ['porsche29_440', 210, {}]]],
     ],
   },
 
@@ -207,13 +208,13 @@ export const PREMIUM = [
   {
     b: 'Volvo', m: 'V40', seg: 'Compacto', dmd: 0.9,
     g: [
-      ['V40', 2015, 2019, 33500, [['vl_d3_163', 112, { hp: 120, name: 'D2 120 CV' }], ['vl_d4_190', 118, { hp: 190, name: 'D4 190 CV' }], ['b38_140', 124, { hp: 122, name: 'T2 122 CV', fuel: 'G' }]]],
+      ['V40', 2015, 2019, 33500, [['vl_d3_163', 112, { hp: 120, name: 'D2 120 CV' }], ['vl_d4_190', 118, { hp: 190, name: 'D4 190 CV' }], ['volvo_t2_122', 124, { hp: 122, name: 'T2 122 CV', fuel: 'G', gear: 'A', rel: 'VOLVO_T2' }]]],
     ],
   },
   {
     b: 'Volvo', m: 'XC40', seg: 'C-SUV', dmd: 0.96,
     g: [
-      ['XC40', 2018, 2025, 45500, [['vl_d3_163', 122, { hp: 150, name: 'D3 150 CV' }], ['vl_b3_163', 128, { name: 'B3 163 CV' }], ['vl_b4_197', 138, { name: 'B4 197 CV' }], ['vl_t8_455', 45, { hp: 262, name: 'T4 Recharge PHEV 262 CV' }]]],
+      ['XC40', 2018, 2025, 45500, [['vl_d3_163', 122, { hp: 150, name: 'D3 150 CV' }], ['vl_b3_163', 128, { name: 'B3 163 CV' }], ['vl_b4_197', 138, { name: 'B4 197 CV' }], ['volvo_t4_phev', 45, { hp: 262, name: 'T4 Recharge PHEV 262 CV' }]]],
     ],
   },
   {

@@ -16,7 +16,7 @@ export const ASIATICOS = [
     b: 'Toyota', m: 'Corolla', seg: 'Compacto', dmd: 1.07,
     g: [
       ['Corolla E210', 2019, 2025, 28500, [['toy18h_122', 100], ['toy20h_184', 112], ['toy15_111', 124]]],
-      ['Auris II', 2015, 2019, 23500, [['toy18h_122', 92], ['toy14d_90', 108], ['toy12_69', 112, { hp: 99, name: '1.2 Turbo 116 CV', cc: 1197, rel: 'TOY_GAS' }]]],
+      ['Auris II', 2015, 2019, 23500, [['toy18h_122', 92], ['toy14d_90', 108], ['toy12_69', 112, { hp: 116, name: '1.2 Turbo 116 CV', cc: 1197, rel: 'TOY_12T' }]]],
     ],
   },
   {
@@ -35,7 +35,7 @@ export const ASIATICOS = [
   {
     b: 'Toyota', m: 'RAV4', seg: 'C-SUV', dmd: 1.14,
     g: [
-      ['RAV4 IV', 2015, 2018, 36500, [['toy20d_143', 130, { cc: 1998, name: '2.0 D-4D 143 CV', hp: 143, fuel: 'D', gear: 'M', rel: 'TOY_D' }], ['toy15_111', 148, { hp: 152, name: '2.0 VVT-i 152 CV', cc: 1987 }], ['toy18h_122', 120, { hp: 197, name: '2.5 Hybrid 197 CV', cc: 2494, fuel: 'H', gear: 'C', rel: 'HSD' }]]],
+      ['RAV4 IV', 2015, 2018, 36500, [['toy20d_143', 130, { cc: 1998, name: '2.0 D-4D 143 CV (2WW)', hp: 143, fuel: 'D', gear: 'M', rel: 'TOY_2WW' }], ['toy15_111', 148, { hp: 152, name: '2.0 VVT-i 152 CV', cc: 1987, rel: 'TOY_20G' }], ['toy18h_122', 120, { hp: 197, name: '2.5 Hybrid 197 CV', cc: 2494, fuel: 'H', gear: 'C', rel: 'HSD' }]]],
       ['RAV4 V', 2019, 2025, 42500, [['toy25h_218', 128], ['toy25h_218 4x4', 135, { name: '2.5 Hybrid 222 CV AWD-i', hp: 222 }], ['toy25phev_306', 26]]],
     ],
   },
@@ -72,7 +72,7 @@ export const ASIATICOS = [
   {
     b: 'Toyota', m: 'Aygo', seg: 'Urbano', dmd: 1.0,
     g: [
-      ['Aygo II', 2015, 2022, 12500, [['toy10_72', 98, { cc: 998, name: '1.0 VVT-i 72 CV', hp: 72, fuel: 'G', gear: 'M', rel: 'TOY_GAS' }]]],
+      ['Aygo II', 2015, 2022, 12500, [['toy10_72', 98, { cc: 998, name: '1.0 VVT-i 72 CV', hp: 72, fuel: 'G', gear: 'M', rel: 'TOY_10VVT' }]]],
     ],
   },
 
@@ -137,7 +137,7 @@ export const ASIATICOS = [
   {
     b: 'Hyundai', m: 'H-1 / Staria', seg: 'Furgoneta Combi', dmd: 1.0, body: 'Furgón pasajeros',
     g: [
-      ['H-1 Travel', 2015, 2021, 36500, [['hkd25_170', 190, { cc: 2497, name: '2.5 CRDi 170 CV', hp: 170, fuel: 'D', gear: 'A', rel: 'R20' }]]],
+      ['H-1 Travel', 2015, 2021, 36500, [['hkd25_170', 190, { cc: 2497, name: '2.5 CRDi 170 CV (D4CB)', hp: 170, fuel: 'D', gear: 'A', rel: 'D4CB' }]]],
     ],
   },
 
@@ -263,27 +263,27 @@ export const ASIATICOS = [
     b: 'Nissan', m: 'Juke', seg: 'B-SUV', dmd: 1.0,
     g: [
       ['Juke II', 2019, 2025, 24500, [['ns13digt140', 118, { hp: 114, name: '1.0 DIG-T 114 CV', cc: 999, cyl: 3 }], ['rne-tech145', 106, { hp: 143, name: '1.6 Hybrid 143 CV' }], ['ns15dci115', 112]]],
-      ['Juke I', 2014, 2019, 20500, [['rn15dci115', 108], ['rn12tce115', 118, { hp: 117, name: '1.2 DIG-T 117 CV' }], ['ns10igt117', 120, { hp: 112, name: '1.6 112 CV', cc: 1598, cyl: 4, fuel: 'G' }]]],
+      ['Juke I', 2014, 2019, 20500, [['rn15dci115', 108], ['rn12tce115', 118, { hp: 117, name: '1.2 DIG-T 117 CV' }], ['ns10igt117', 120, { hp: 112, name: '1.6 112 CV (HR16DE)', cc: 1598, cyl: 4, fuel: 'G', rel: 'NISSAN_HR16' }]]],
     ],
   },
   {
     b: 'Nissan', m: 'Qashqai', seg: 'C-SUV', dmd: 1.06,
     g: [
       ['Qashqai J11', 2014, 2021, 28500, [['rn15dci115', 108], ['rn13digt140', 122, { hp: 140, name: '1.3 DIG-T 140 CV' }], ['rn16dci130', 118], ['rn12tce115', 124, { hp: 115, name: '1.2 DIG-T 115 CV' }]]],
-      ['Qashqai J12', 2021, 2025, 34500, [['rn13digt140', 124, { hp: 140, name: '1.3 DIG-T 140 CV mild hybrid' }], ['ns_epower190', 108], ['ns15digt158', 118]]],
+      ['Qashqai J12', 2021, 2025, 34500, [['rn13digt140', 124, { hp: 140, name: '1.3 DIG-T 140 CV mild hybrid' }], ['ns_epower190', 108], ['rn13digt140', 118, { hp: 158, name: '1.3 DIG-T 158 CV mild hybrid', fuel: 'M', gear: 'A', rel: 'H5HT' }]]],
     ],
   },
   {
     b: 'Nissan', m: 'X-Trail', seg: 'D-SUV', dmd: 0.98,
     g: [
       ['X-Trail T32', 2014, 2022, 36500, [['rn16dci130', 130], ['rn20dci150', 140, { hp: 177, name: '2.0 dCi 177 CV' }], ['rn13digt140', 138, { hp: 158, name: '1.3 DIG-T 158 CV' }]]],
-      ['X-Trail T33', 2022, 2025, 44500, [['ns_epower205', 118], ['ns15digt158', 128]]],
+      ['X-Trail T33', 2022, 2025, 44500, [['ns_epower205', 118]]],
     ],
   },
   {
     b: 'Nissan', m: 'Leaf', seg: 'Compacto', dmd: 0.82,
     g: [
-      ['Leaf ZE1', 2018, 2024, 33500, [['rn_ev_150', 0], ['rn_ev_218', 0]]],
+      ['Leaf ZE1', 2018, 2024, 33500, [['rn_ev_150', 0, { rel: 'EV_NISSAN' }], ['rn_ev_218', 0, { rel: 'EV_NISSAN' }]]],
     ],
   },
   {
@@ -304,7 +304,7 @@ export const ASIATICOS = [
     b: 'Honda', m: 'Jazz', seg: 'Urbano', dmd: 1.0,
     g: [
       ['Jazz IV', 2020, 2025, 23500, [['hn15hev131', 102, { hp: 109, name: '1.5 e:HEV 109 CV' }]]],
-      ['Jazz III', 2015, 2020, 18500, [['hn13_102', 112, { cc: 1318, name: '1.3 i-VTEC 102 CV', hp: 102, fuel: 'G', gear: 'M', rel: 'HONDA_10' }], ['hn16idtec120', 104]]],
+      ['Jazz III', 2015, 2020, 18500, [['hn13_102', 112, { cc: 1318, name: '1.3 i-VTEC 102 CV', hp: 102, fuel: 'G', gear: 'M', rel: 'HONDA_13' }], ['hn16idtec120', 104]]],
     ],
   },
   {
@@ -333,14 +333,14 @@ export const ASIATICOS = [
   {
     b: 'Mitsubishi', m: 'ASX', seg: 'C-SUV', dmd: 0.95,
     g: [
-      ['ASX', 2015, 2022, 25500, [['mm15mivec117', 130], ['mm16didi114', 122, { cc: 1560, name: '1.6 DI-D 114 CV', hp: 114, fuel: 'D', gear: 'M', rel: 'DV6' }]]],
+      ['ASX', 2015, 2022, 25500, [['mm15mivec117', 130, { cc: 1590, name: '1.6 MIVEC 117 CV', hp: 117, rel: 'MM_16' }], ['mm16didi114', 122, { cc: 1560, name: '1.6 DI-D 114 CV', hp: 114, fuel: 'D', gear: 'M', rel: 'DV6' }]]],
       ['ASX II', 2023, 2025, 28500, [['rn13tce130', 124], ['rne-tech145', 106], ['rn15blue_115', 110]]],
     ],
   },
   {
     b: 'Mitsubishi', m: 'Outlander', seg: 'D-SUV', dmd: 0.98,
     g: [
-      ['Outlander III', 2015, 2022, 36500, [['mm22did150', 145], ['mm24phev224', 40], ['mm15mivec117', 150, { hp: 150, name: '2.0 MIVEC 150 CV', cc: 1998 }]]],
+      ['Outlander III', 2015, 2022, 36500, [['mm22did150', 145], ['mm24phev224', 40], ['mm15mivec117', 150, { hp: 150, name: '2.0 MIVEC 150 CV', cc: 1998, rel: 'MM_20' }]]],
     ],
   },
   {
@@ -352,7 +352,7 @@ export const ASIATICOS = [
   {
     b: 'Mitsubishi', m: 'Eclipse Cross', seg: 'C-SUV', dmd: 0.93,
     g: [
-      ['Eclipse Cross', 2018, 2024, 30500, [['mm15mivec117', 142, { hp: 163, name: '1.5 Turbo 163 CV', cc: 1499 }], ['mm22did150', 150, { hp: 148, name: '2.2 DI-D 148 CV' }], ['mm24phev224', 42]]],
+      ['Eclipse Cross', 2018, 2024, 30500, [['mm15mivec117', 142, { hp: 163, name: '1.5 Turbo 163 CV', cc: 1499, rel: 'MM_15T' }], ['mm22did150', 150, { hp: 148, name: '2.2 DI-D 148 CV' }], ['mm24phev224', 42]]],
     ],
   },
 
@@ -419,7 +419,7 @@ export const ASIATICOS = [
   {
     b: 'SsangYong', m: 'Korando', seg: 'C-SUV', dmd: 0.9,
     g: [
-      ['Korando C300', 2019, 2025, 28500, [['ss22d178', 140, { hp: 136, name: '1.6 Diésel 136 CV', cc: 1597, rel: 'MJET16' }], ['ss15t163', 150, { cc: 1497, name: '1.5 Turbo 163 CV', hp: 163, fuel: 'G', gear: 'A', rel: 'SSY_22' }]]],
+      ['Korando C300', 2019, 2025, 28500, [['ss22d178', 140, { hp: 136, name: '1.6 Diésel 136 CV', cc: 1597, rel: 'MJET16' }], ['ss15t163', 150, { cc: 1497, name: '1.5 Turbo 163 CV', hp: 163, fuel: 'G', gear: 'A', rel: 'SSY_15T' }]]],
     ],
   },
   {

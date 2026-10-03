@@ -15,7 +15,7 @@ export const OTROS = [
     b: 'Ford', m: 'Focus', seg: 'Compacto', dmd: 1.0,
     g: [
       ['Focus IV', 2018, 2025, 25500, [['fd10eb125', 112], ['fd10eb155', 106], ['fd15eb150', 122], ['fd20ecoblue120', 104], ['fd15tdci120', 100]]],
-      ['Focus III', 2014, 2018, 21500, [['fd10eb125', 114], ['fd15eb150', 124], ['fd15tdci120', 102], ['fd20tdci140', 110, { cc: 1997, name: '2.0 TDCi 150 CV', hp: 150, fuel: 'D', gear: 'M', rel: 'FD_D15' }]]],
+      ['Focus III', 2014, 2018, 21500, [['fd10eb125', 114], ['fd15eb150', 124], ['fd15tdci120', 102], ['fd20tdci140', 110, { cc: 1997, name: '2.0 TDCi 150 CV', hp: 150, fuel: 'D', gear: 'M', rel: 'FORD_DW10' }]]],
     ],
   },
   {
@@ -34,7 +34,7 @@ export const OTROS = [
     b: 'Ford', m: 'Kuga', seg: 'C-SUV', dmd: 1.0,
     g: [
       ['Kuga III', 2020, 2025, 33500, [['fd20ecoblue120', 118], ['fd20ecoblue150', 126], ['fd25t200', 30], ['fd15eb150', 132]]],
-      ['Kuga II', 2014, 2019, 29500, [['fd15tdci120', 112], ['fd20ecoblue150', 128, { hp: 150, name: '2.0 TDCi 150 CV', rel: 'ECOBLUE' }], ['fd15eb150', 134], ['fd10eb125', 124]]],
+      ['Kuga II', 2014, 2019, 29500, [['fd15tdci120', 112], ['fd20ecoblue150', 128, { hp: 150, cc: 1997, name: '2.0 TDCi 150 CV', fuel: 'D', rel: 'FORD_DW10' }], ['fd15eb150', 134], ['fd10eb125', 124]]],
     ],
   },
   {
@@ -59,7 +59,7 @@ export const OTROS = [
     b: 'Ford', m: 'Tourneo Connect', seg: 'Furgoneta Combi', dmd: 1.02, body: 'Furgoneta mixta',
     g: [
       ['Tourneo Connect II', 2015, 2022, 27500, [['fd15tdci120', 120, { hp: 100, name: '1.5 TDCi 100 CV' }], ['fd10eb100', 126, { hp: 100, name: '1.0 EcoBoost 100 CV' }]]],
-      ['Tourneo Connect III', 2022, 2025, 33500, [['psa15bhd100', 118], ['psa15bhd130', 122], ['psa12pt110', 126], ['psa_ev_136', 0, { name: 'E-Tourneo Connect 136 CV' }]]],
+      ['Tourneo Connect III', 2022, 2025, 33500, [['15tsi130', 118, { hp: 114, name: '1.5 EcoBoost 114 CV (VW EA211)', rel: 'EA211_15' }], ['20tdi102', 112, { hp: 102, name: '2.0 EcoBlue 102 CV (VW EA288)', rel: 'EA288' }], ['20tdi150', 120, { hp: 122, name: '2.0 EcoBlue 122 CV (VW EA288)', rel: 'EA288' }]]],
     ],
   },
   {
@@ -84,13 +84,13 @@ export const OTROS = [
   {
     b: 'Ford', m: 'Ranger', seg: 'Pick-up', dmd: 1.05, body: 'Pick-up 4x4',
     g: [
-      ['Ranger T6', 2016, 2022, 42500, [['fd20ecoblue150', 210, { hp: 170, name: '2.0 EcoBlue 170 CV' }], ['fd20ecoblue240', 225], ['fd25t200', 220, { cc: 3198, name: '3.2 TDCi 200 CV', hp: 200, cyl: 5, fuel: 'D', gear: 'A', rel: 'ECOBLUE' }]]],
+      ['Ranger T6', 2016, 2022, 42500, [['fd20ecoblue150', 210, { hp: 170, name: '2.0 EcoBlue 170 CV' }], ['fd20ecoblue240', 225], ['fd25t200', 220, { cc: 3198, name: '3.2 TDCi Duratorq 200 CV', hp: 200, cyl: 5, fuel: 'D', gear: 'A', rel: 'FORD_DURATORQ_32' }]]],
     ],
   },
   {
     b: 'Ford', m: 'Explorer', seg: 'D-SUV', dmd: 0.85,
     g: [
-      ['Explorer VI', 2019, 2025, 76500, [['fd25t200', 55, { name: '3.0 V6 PHEV 457 CV', hp: 457, cyl: 6, cc: 2956, fuel: 'P', gear: 'A', rel: 'FD_PHEV' }]]],
+      ['Explorer VI', 2019, 2025, 76500, [['fd25t200', 55, { name: '3.0 V6 PHEV 457 CV', hp: 457, cyl: 6, cc: 2956, fuel: 'P', gear: 'A', rel: 'FORD_30PHEV' }]]],
     ],
   },
 
@@ -130,7 +130,7 @@ export const OTROS = [
   {
     b: 'Smart', m: '#1', seg: 'B-SUV', dmd: 0.85,
     g: [
-      ['Smart #1', 2022, 2025, 41500, [['mg_ev_143', 0, { hp: 272, name: 'Eléctrico 272 CV', rel: 'EV_MG' }]]],
+      ['Smart #1', 2022, 2025, 41500, [['mg_ev_143', 0, { hp: 272, name: 'Eléctrico 272 CV', rel: 'EV_SMART_GEELY' }]]],
     ],
   },
 
@@ -138,7 +138,7 @@ export const OTROS = [
   {
     b: 'Iveco', m: 'Daily', seg: 'Furgón grande', dmd: 1.1, body: 'Furgón',
     g: [
-      ['Daily 35S', 2015, 2025, 48500, [['iveco23d136', 210, { hp: 136, name: '2.3 F1A 136 CV' }], ['iveco23d156', 220], ['iveco30_180', 230, { cc: 2998, name: '3.0 F1C 180 CV', hp: 180, fuel: 'D', gear: 'A', cyl: 4, rel: 'F1A' }]]],
+      ['Daily 35S', 2015, 2025, 48500, [['iveco23d136', 210, { hp: 136, name: '2.3 F1A 136 CV' }], ['iveco23d156', 220], ['iveco30_180', 230, { cc: 2998, name: '3.0 F1C 180 CV', hp: 180, fuel: 'D', gear: 'A', cyl: 4, rel: 'F1C' }]]],
     ],
   },
   {
@@ -150,7 +150,7 @@ export const OTROS = [
   {
     b: 'Fiat', m: 'Doblò', seg: 'Furgoneta Combi', dmd: 1.02, body: 'Furgoneta mixta',
     g: [
-      ['Doblò II', 2015, 2022, 22500, [['fiat13mjet95', 118], ['fiat16mjet120', 122], ['fiat12f70', 124, { hp: 95, name: '1.4 95 CV' }]]],
+      ['Doblò II', 2015, 2022, 22500, [['fiat13mjet95', 118], ['fiat16mjet120', 122], ['fiat12f70', 124, { hp: 95, cc: 1368, name: '1.4 FIRE 95 CV', rel: 'FIAT_FIRE14' }]]],
       ['Doblò III', 2022, 2025, 28500, [['psa15bhd100', 112], ['psa15bhd130', 116], ['psa12pt110', 120], ['psa_ev_136', 0, { name: 'e-Doblò 136 CV' }]]],
     ],
   },
@@ -159,7 +159,7 @@ export const OTROS = [
   {
     b: 'Dacia', m: 'Spring', seg: 'Urbano', dmd: 0.75,
     g: [
-      ['Spring', 2021, 2025, 19500, [['rn_ev_150', 0, { hp: 45, name: 'Eléctrico 45 CV' }], ['rn_ev_150', 0, { hp: 65, name: 'Eléctrico 65 CV' }]]],
+      ['Spring', 2021, 2025, 19500, [['rn_ev_150', 0, { hp: 45, name: 'Eléctrico 45 CV', rel: 'EV_SPRING' }], ['rn_ev_150', 0, { hp: 65, name: 'Eléctrico 65 CV', rel: 'EV_SPRING' }]]],
     ],
   },
   {
