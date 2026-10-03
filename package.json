@@ -15,6 +15,7 @@
     "check": "node scripts/check-domain.mjs && node scripts/check-prices.mjs",
     "catalog:stats": "node scripts/catalog-stats.mjs",
     "smoke": "node scripts/smoke.mjs",
+    "test:trip": "node scripts/test-trip-vehicle.mjs",
     "prices:check": "node scripts/check-prices.mjs",
     "scrape:de": "node scripts/autoscout-de-scrape.mjs --import"
   },

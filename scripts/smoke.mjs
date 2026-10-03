@@ -1,6 +1,19 @@
 // Runner de la prueba de humo: levanta Vite para poder importar JSX en Node.
 import { createServer } from 'vite';
 
+// Leaflet lee algunas propiedades del DOM al importarse, aunque durante SSR de humo no se monta el mapa.
+globalThis.window ||= globalThis;
+globalThis.window.screen ||= { deviceXDPI: 96, logicalXDPI: 96 };
+globalThis.navigator ||= { userAgent: 'node', platform: 'linux' };
+globalThis.document ||= {
+  documentElement: { style: {} },
+  body: { appendChild() {}, removeChild() {}, style: {} },
+  createElement: () => ({ style: {}, getContext: () => null }),
+  createElementNS: () => ({ createSVGRect() {} }),
+  addEventListener() {},
+  removeEventListener() {},
+};
+
 const server = await createServer({
   configFile: false,
   root: process.cwd(),
