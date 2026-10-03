@@ -5,3 +5,9 @@
     @apply bg-slate-950 text-slate-100 antialiased font-sans selection:bg-amber-500 selection:text-black;
   }
 }
+
+/* Filtro oscuro para teselas de OpenStreetMap en el tema oscuro del ERP */
+.dark-tiles {
+  filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+}
+
