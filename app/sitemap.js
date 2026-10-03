@@ -1,10 +1,11 @@
 import { GUIDE_POSTS } from '@/lib/guia.js';
 import { MOTORS } from '@/lib/motores.js';
+import { MODELOS } from '@/lib/modelos.js';
 import { getListings } from '@/lib/listings.js';
 import { site } from '@/lib/site.js';
 
 export default async function sitemap() {
-  const staticRoutes = ['', '/coches', '/como-funciona', '/guia', '/guia/motores', '/garantia', '/encargo', '/compramos-tu-coche', '/contacto', '/legal/aviso-legal', '/legal/privacidad', '/legal/cookies'].map(
+  const staticRoutes = ['', '/coches', '/como-funciona', '/guia', '/guia/motores', '/guia/modelos', '/garantia', '/encargo', '/compramos-tu-coche', '/contacto', '/legal/aviso-legal', '/legal/privacidad', '/legal/cookies'].map(
     (path) => ({
       url: `${site.url}${path}`,
       lastModified: new Date(),
@@ -40,5 +41,12 @@ export default async function sitemap() {
     priority: 0.6,
   }));
 
-  return [...staticRoutes, ...listingRoutes, ...guiaRoutes, ...motorRoutes];
+  const modeloRoutes = MODELOS.map((modelo) => ({
+    url: `${site.url}/guia/modelos/${modelo.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly',
+    priority: 0.5,
+  }));
+
+  return [...staticRoutes, ...listingRoutes, ...guiaRoutes, ...motorRoutes, ...modeloRoutes];
 }

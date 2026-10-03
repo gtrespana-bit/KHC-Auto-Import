@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Clock, Wrench } from 'lucide-react';
+import { ArrowRight, CarFront, Clock, Wrench } from 'lucide-react';
 import { GUIDE_POSTS } from '@/lib/guia.js';
 import { site } from '@/lib/site.js';
 
@@ -59,6 +59,30 @@ export default function GuiaPage() {
           </div>
           <span className="link-gold shrink-0">
             Ver fichas <ArrowRight className="h-4 w-4" />
+          </span>
+        </Link>
+
+        <Link
+          href="/guia/modelos"
+          className="group mt-5 flex flex-col gap-6 border border-ink-900/10 bg-white p-8 transition hover:border-gold-400/60 sm:flex-row sm:items-center sm:p-10"
+        >
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-ink-900/10 bg-ivory-dark">
+            <CarFront className="h-6 w-6 text-gold-600" strokeWidth={1.6} />
+          </div>
+          <div className="flex-1">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
+              Registro de modelos
+            </p>
+            <h2 className="display mt-2 text-2xl font-semibold text-ink-900 transition group-hover:text-gold-700 sm:text-3xl">
+              Más de 230 modelos, generación por generación
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-600">
+              Qué motor buscar y cuál evitar en cada modelo y generación del mercado: el registro
+              completo con el que decidimos nuestras compras, abierto para ti.
+            </p>
+          </div>
+          <span className="link-gold shrink-0">
+            Explorar modelos <ArrowRight className="h-4 w-4" />
           </span>
         </Link>
 

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, Wrench } from 'lucide-react';
+import { ArrowRight, CarFront, Wrench } from 'lucide-react';
 import { MOTORS, MOTOR_GROUPS, VERDICT_TONES } from '@/lib/motores.js';
 import { site } from '@/lib/site.js';
 
@@ -101,6 +101,27 @@ export default function MotoresIndexPage() {
             </section>
           );
         })}
+
+        <Link
+          href="/guia/modelos"
+          className="group mt-12 flex flex-col gap-4 border border-ink-900/10 bg-white p-8 transition hover:border-gold-400/60 sm:flex-row sm:items-center"
+        >
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-ink-900/10 bg-ivory-dark">
+            <CarFront className="h-5 w-5 text-gold-600" strokeWidth={1.6} />
+          </div>
+          <div className="flex-1">
+            <h2 className="display text-xl font-semibold text-ink-900 transition group-hover:text-gold-700">
+              ¿Buscas al revés? Explora por modelo
+            </h2>
+            <p className="mt-1 text-sm leading-relaxed text-ink-600">
+              Más de 230 fichas de modelo con sus generaciones y el veredicto de cada motor: del
+              Golf al Qashqai, del Serie 3 al 3008.
+            </p>
+          </div>
+          <span className="link-gold shrink-0">
+            Ver modelos <ArrowRight className="h-4 w-4" />
+          </span>
+        </Link>
 
         <div className="mt-16 bg-ink-950 px-8 py-12 text-white sm:px-12">
           <div className="flex items-start gap-4">
