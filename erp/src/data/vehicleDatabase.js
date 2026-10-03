@@ -203,8 +203,13 @@ function reconcileWithCatalog(list) {
 
 export const CURATED_RECONCILED = reconcileWithCatalog(CURATED_DB);
 
-export const VEHICLE_DB = [...CURATED_RECONCILED, ...GENERATED_DB]
-  .filter((v) => !['Seat', 'Cupra'].includes(v.brand)); // fabricadas en España: no compensa importarlas
+// El simulador de importación conserva la vista comercial (sin Seat/Cupra,
+// porque normalmente no compensa importarlos). La calculadora de viajes usa
+// ALL_VEHICLE_DB: para calcular un trayecto sí tiene sentido poder escoger
+// cualquier coche del catálogo, también uno fabricado en España.
+export const ALL_VEHICLE_DB = [...CURATED_RECONCILED, ...GENERATED_DB];
+export const VEHICLE_DB = ALL_VEHICLE_DB
+  .filter((v) => !['Seat', 'Cupra'].includes(v.brand));
 export const CURATED_COUNT = CURATED_DB.length;
 export const GENERATED_COUNT = GENERATED_DB.length;
 
@@ -230,13 +235,13 @@ export const vehicleSearchText = (v) =>
  * (en cualquier orden). Ordena por relevancia (coincidencia de marca/modelo
  * primero y motores roca antes que los prohibidos, para no sugerir chatarra).
  */
-export function searchVehicles(query, limit = 12) {
+export function searchVehicles(query, limit = 12, source = VEHICLE_DB) {
   const q = normalize(query);
-  if (!q) return VEHICLE_DB.slice(0, limit);
+  if (!q) return source.slice(0, limit);
   const tokens = q.split(" ").filter(Boolean);
 
   const scored = [];
-  for (const v of VEHICLE_DB) {
+  for (const v of source) {
     const text = vehicleSearchText(v);
     const head = normalize(`${v.brand} ${v.model}`);
     if (!tokens.every((t) => text.includes(t))) continue;
@@ -254,11 +259,11 @@ export function searchVehicles(query, limit = 12) {
   return scored.sort((a, b) => b.score - a.score).slice(0, limit).map((s) => s.v);
 }
 
-export const getBrands = () => [...new Set(VEHICLE_DB.map((v) => v.brand))].sort();
-export const getModelsForBrand = (brand) =>
-  [...new Set(VEHICLE_DB.filter((v) => normalize(v.brand) === normalize(brand)).map((v) => v.model))].sort();
-export const getVersionsFor = (brand, model) =>
-  VEHICLE_DB.filter((v) => normalize(v.brand) === normalize(brand) && normalize(v.model) === normalize(model));
+export const getBrands = (source = VEHICLE_DB) => [...new Set(source.map((v) => v.brand))].sort();
+export const getModelsForBrand = (brand, source = VEHICLE_DB) =>
+  [...new Set(source.filter((v) => normalize(v.brand) === normalize(brand)).map((v) => v.model))].sort();
+export const getVersionsFor = (brand, model, source = VEHICLE_DB) =>
+  source.filter((v) => normalize(v.brand) === normalize(brand) && normalize(v.model) === normalize(model));
 
 export const RELIABILITY_META = {
   gold: { label: "Motor roca", color: "emerald" },

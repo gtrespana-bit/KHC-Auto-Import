@@ -4,9 +4,18 @@ import 'leaflet/dist/leaflet.css';
 import {
   MapPin, Navigation, Fuel, Receipt, Plane, Hotel, ShieldCheck, Truck,
   Car, Clock, Route, Sparkles, ExternalLink, ArrowRight, RotateCcw, Users, Info,
+  Search, CheckCircle2, Zap, Gauge, SlidersHorizontal,
 } from 'lucide-react';
 import { Card, Button, Field, Input, Money, Select, Stat, SectionTitle, Badge, Alert, cx } from '../components/ui.jsx';
 import { eur, eur0, numEs } from '../lib/format.js';
+import {
+  ALL_VEHICLE_DB,
+  getBrands,
+  getModelsForBrand,
+  getVersionsFor,
+  searchVehicles,
+  vehicleLabel,
+} from '../data/vehicleDatabase.js';
 
 // ============================================================================
 //  CIUDADES EUROPEAS Y ESPAÑOLAS PRECARGADAS (Con coordenadas reales)
@@ -34,154 +43,117 @@ const DEST_PRESETS = [
 ];
 
 // ============================================================================
-//  PERFILES DE VEHÍCULOS REALES (Consumo en Autopista, Combustible, Kfz-Steuer)
+//  MODELO DE CONSUMO PARA VIAJES LARGOS
+// ----------------------------------------------------------------------------
+// La base de vehículos contiene CO₂ homologado, cilindrada, potencia,
+// carrocería y combustible, pero no una cifra de consumo única por versión.
+// Aquí se transforma esa información en una estimación específica de
+// autopista. No se usa el consumo urbano ni el combinado sin corregir.
 // ============================================================================
-const VEHICLE_PROFILES = [
-  {
-    id: 'focus_st',
-    label: 'Ford Focus ST 2.3 EcoBoost (280 CV)',
-    short: 'Focus ST 280',
-    badge: 'Hot Hatch',
-    consumption: 9.5,
-    fuelType: 'gasolina98',
-    fuelPrice: 1.86,
-    cc: 2261,
-    co2: 179,
-    kfzSteuerMonth: 34,
-    brand: 'Ford',
-    model: 'Focus',
-    version: '2.3 EcoBoost ST 280 CV',
-    fuel: 'Gasolina',
-    newPrice: 41500,
-    purchase: 17900,
-  },
-  {
-    id: 'golf_gti',
-    label: 'VW Golf 7.5 / 8 GTI 2.0 TSI (245–300 CV)',
-    short: 'Golf GTI',
-    badge: 'Hot Hatch',
-    consumption: 9.0,
-    fuelType: 'gasolina98',
-    fuelPrice: 1.86,
-    cc: 1984,
-    co2: 168,
-    kfzSteuerMonth: 32,
-    brand: 'Volkswagen',
-    model: 'Golf',
-    version: '2.0 TSI GTI Performance DSG',
-    fuel: 'Gasolina',
-    newPrice: 44000,
-    purchase: 19400,
-  },
-  {
-    id: 'audi_q7_tdi',
-    label: 'Audi Q7 50 TDI 3.0 V6 quattro (286 CV)',
-    short: 'Audi Q7 3.0 TDI',
-    badge: 'Gran SUV',
-    consumption: 9.6,
-    fuelType: 'diesel',
-    fuelPrice: 1.70,
-    cc: 2967,
-    co2: 210,
-    kfzSteuerMonth: 48,
-    brand: 'Audi',
-    model: 'Q7',
-    version: '50 TDI 3.0 V6 quattro Tiptronic',
-    fuel: 'Diésel',
-    newPrice: 82000,
-    purchase: 28900,
-  },
-  {
-    id: 'audi_q7_phev',
-    label: 'Audi Q7 55 TFSIe / e-tron quattro (PHEV)',
-    short: 'Audi Q7 TFSIe (0% Mod.576)',
-    badge: 'PHEV 0% Imp.',
-    consumption: 9.4,
-    fuelType: 'gasolina95',
-    fuelPrice: 1.80,
-    cc: 2995,
-    co2: 64,
-    kfzSteuerMonth: 26,
-    brand: 'Audi',
-    model: 'Q7',
-    version: '55 TFSIe quattro Tiptronic (PHEV)',
-    fuel: 'Híbrido enchufable',
-    newPrice: 87500,
-    purchase: 29500,
-  },
-  {
-    id: 'cayenne_v6',
-    label: 'Porsche Cayenne 3.0 V6 / S Gasolina (340–440 CV)',
-    short: 'Porsche Cayenne V6/S',
-    badge: 'Gran SUV',
-    consumption: 12.2,
-    fuelType: 'gasolina98',
-    fuelPrice: 1.88,
-    cc: 2995,
-    co2: 225,
-    kfzSteuerMonth: 52,
-    brand: 'Porsche',
-    model: 'Cayenne',
-    version: '3.0 V6 AWD Tiptronic',
-    fuel: 'Gasolina',
-    newPrice: 98000,
-    purchase: 33500,
-  },
-  {
-    id: 'cayenne_ehybrid',
-    label: 'Porsche Cayenne E-Hybrid 3.0 V6 PHEV (462 CV)',
-    short: 'Cayenne E-Hybrid (0% Mod.576)',
-    badge: 'PHEV 0% Imp.',
-    consumption: 10.5,
-    fuelType: 'gasolina98',
-    fuelPrice: 1.88,
-    cc: 2995,
-    co2: 74,
-    kfzSteuerMonth: 28,
-    brand: 'Porsche',
-    model: 'Cayenne',
-    version: 'E-Hybrid 3.0 V6 AWD (PHEV)',
-    fuel: 'Híbrido enchufable',
-    newPrice: 105000,
-    purchase: 32900,
-  },
-  {
-    id: 'golf_r_s3',
-    label: 'VW Golf R / Audi S3 / BMW M340i (300–374 CV)',
-    short: 'Golf R / S3 / M340i',
-    badge: 'Deportivo AWD',
-    consumption: 9.8,
-    fuelType: 'gasolina98',
-    fuelPrice: 1.88,
-    cc: 1984,
-    co2: 188,
-    kfzSteuerMonth: 38,
-    brand: 'Volkswagen',
-    model: 'Golf',
-    version: '2.0 TSI R 4Motion DSG',
-    fuel: 'Gasolina',
-    newPrice: 54000,
-    purchase: 23900,
-  },
-  {
-    id: 'diesel_20',
-    label: 'Berlina / SUV 2.0 TDI (Golf GTD, BMW 320d, A4, Tiguan)',
-    short: '2.0 TDI / 320d',
-    badge: 'Eficiente',
-    consumption: 5.8,
-    fuelType: 'diesel',
-    fuelPrice: 1.68,
-    cc: 1968,
-    co2: 119,
-    kfzSteuerMonth: 22,
-    brand: 'BMW',
-    model: 'Serie 3',
-    version: '320d Touring Steptronic',
-    fuel: 'Diésel',
-    newPrice: 48000,
-    purchase: 15900,
-  },
-];
+const FUEL_PRICES = {
+  diesel: 1.70,
+  gasoline: 1.82,
+  hybrid: 1.82,
+  lpg: 1.02,
+  cng: 1.25,
+  electric: 0.25,
+};
+
+const normalized = (value) => String(value || '').toLowerCase()
+  .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+function energyKind(vehicle) {
+  const fuel = normalized(vehicle?.fuel);
+  if (fuel.includes('electr')) return 'electric';
+  if (fuel.includes('enchuf') || fuel.includes('phev')) return 'phev';
+  if (fuel.includes('diesel') || fuel.includes('diésel')) return 'diesel';
+  if (fuel.includes('glp') || fuel.includes('lpg')) return 'lpg';
+  if (fuel.includes('gnc') || fuel.includes('cng')) return 'cng';
+  if (fuel.includes('hibr')) return 'hybrid';
+  return 'gasoline';
+}
+
+function bodyAdjustment(vehicle) {
+  const text = normalized(`${vehicle?.segment} ${vehicle?.body} ${vehicle?.model}`);
+  if (/furgon|van|monovolumen|7 plazas|pickup/.test(text)) return 1.06;
+  if (/d-suv|e-suv|gran suv|suv/.test(text)) return 1.035;
+  if (/familiar|touring|avant|combi|estate/.test(text)) return 1.015;
+  return 1;
+}
+
+/**
+ * Estimación de crucero en autopista (no de ciudad):
+ * - combustibles líquidos: CO₂ / factor de carbono, con un incremento de
+ *   velocidad sostenida y carga real;
+ * - PHEV: se ignora la ventaja de homologación que presupone batería cargada,
+ *   porque en un viaje internacional largo acaba funcionando el motor térmico;
+ * - eléctricos: kWh/100 km de autopista, incluyendo velocidad y carrocería.
+ *
+ * Es una cifra de presupuesto, por eso el usuario puede corregirla. La ficha
+ * deja visible el método para no presentar una falsa precisión de laboratorio.
+ */
+function highwayConsumption(vehicle) {
+  const kind = energyKind(vehicle);
+  const cc = Number(vehicle?.cc) || 0;
+  const cv = Number(vehicle?.cv) || 0;
+  const segmentFactor = bodyAdjustment(vehicle);
+  const text = normalized(`${vehicle?.version} ${vehicle?.engine}`);
+  const awdFactor = /quattro|4motion|xdrive|awd|4x4|allrad|awd/.test(text) ? 1.035 : 1;
+
+  if (kind === 'electric') {
+    const base = (16.5 + (cv * 0.012) + (segmentFactor - 1) * 100) * 1.14 * awdFactor;
+    return { value: Number(Math.max(16, base).toFixed(1)), unit: 'kWh/100 km', energyLabel: 'electricidad', kind };
+  }
+
+  if (kind === 'phev') {
+    // En un trayecto de 2.000 km se presupone que no se puede recargar de
+    // forma continua. El valor es el del motor térmico en autopista.
+    const base = 5.3 + (cc / 1000) * 1.02 + (cv / 250) * 0.75 + (segmentFactor - 1) * 100;
+    return { value: Number(Math.max(5.5, base * awdFactor).toFixed(1)), unit: 'L/100 km', energyLabel: 'combustible térmico', kind };
+  }
+
+  const carbonFactor = kind === 'diesel' ? 26.4 : kind === 'lpg' ? 15.1 : kind === 'cng' ? 20.0 : 23.1;
+  const homologated = Number(vehicle?.co2) > 0
+    ? Number(vehicle.co2) / carbonFactor
+    : 6.5 + (cc / 1000) * 0.9 + (cv / 250) * 0.7;
+  const motorwayFactor = kind === 'diesel' ? 1.16 : kind === 'hybrid' ? 1.20 : 1.22;
+  const value = homologated * motorwayFactor * segmentFactor * awdFactor;
+  return { value: Number(Math.max(3.5, value).toFixed(1)), unit: 'L/100 km', energyLabel: 'combustible', kind };
+}
+
+function defaultEnergyPrice(vehicle) {
+  return FUEL_PRICES[energyKind(vehicle)] || FUEL_PRICES.gasoline;
+}
+
+// Variable de desgaste: neumáticos, mantenimiento y depreciación marginal por
+// los kilómetros extra. Se autocompleta según el valor del coche, pero queda
+// editable para reflejar una póliza/contabilidad concreta.
+function estimateWearCostPerKm(vehicle) {
+  const newPrice = Number(vehicle?.newPrice) || 0;
+  const kind = energyKind(vehicle);
+  const valueComponent = Math.min(0.08, newPrice / 1000000);
+  const energyComponent = kind === 'electric' ? 0.008 : 0;
+  return Number(Math.max(0.045, 0.045 + valueComponent + energyComponent).toFixed(3));
+}
+
+// Estimación editable del Kfz-Steuer alemán mensual para que también se
+// autocompleten los gastos administrativos asociados al coche escogido.
+function estimateKfzSteuerMonth(vehicle) {
+  const cc = Number(vehicle?.cc) || 0;
+  const co2 = Number(vehicle?.co2) || 0;
+  const kind = energyKind(vehicle);
+  const basePer100 = kind === 'diesel' ? 9.50 : 2.00;
+  const base = Math.ceil(cc / 100) * basePer100;
+  const excess = Math.max(0, co2 - 95);
+  const co2Tax = excess <= 20
+    ? excess * 2
+    : 20 * 2 + Math.min(15, excess - 20) * 2.20 + Math.max(0, excess - 35) * 2.50;
+  return Number(((base + co2Tax) / 12).toFixed(2));
+}
+
+const DEFAULT_VEHICLE = searchVehicles('Volkswagen Golf 2.0 TDI', 1, ALL_VEHICLE_DB)[0]
+  || searchVehicles('', 1, ALL_VEHICLE_DB)[0];
+const DEFAULT_HIGHWAY_CONSUMPTION = highwayConsumption(DEFAULT_VEHICLE);
 
 const PACE_MODES = [
   { id: 'eco', label: 'Eco / Crucero suave (110–120 km/h)', factor: 0.91, speedFactor: 1.08 },
@@ -269,6 +241,166 @@ function estimateRouteTollsAndBreakdown({ coords, distanceKm, durationHours, rou
   };
 }
 
+function VehicleCascadeSelector({ vehicle, onSelect }) {
+  const [brandQuery, setBrandQuery] = useState(vehicle?.brand || '');
+  const [modelQuery, setModelQuery] = useState(vehicle?.model || '');
+  const [versionQuery, setVersionQuery] = useState(vehicle?.version || '');
+  const [freeQuery, setFreeQuery] = useState('');
+  const [open, setOpen] = useState(null);
+
+  useEffect(() => {
+    if (!vehicle) return;
+    setBrandQuery(vehicle.brand || '');
+    setModelQuery(vehicle.model || '');
+    setVersionQuery(vehicle.version || '');
+  }, [vehicle?.id]);
+
+  const brands = useMemo(() => getBrands(ALL_VEHICLE_DB), []);
+  const selectedBrand = brands.find((b) => normalized(b) === normalized(brandQuery));
+  const models = useMemo(
+    () => selectedBrand ? getModelsForBrand(selectedBrand, ALL_VEHICLE_DB) : [],
+    [selectedBrand],
+  );
+  const selectedModel = models.find((m) => normalized(m) === normalized(modelQuery));
+  const versions = useMemo(
+    () => selectedBrand && selectedModel ? getVersionsFor(selectedBrand, selectedModel, ALL_VEHICLE_DB) : [],
+    [selectedBrand, selectedModel],
+  );
+
+  const matchingBrands = brands.filter((b) => !brandQuery || normalized(b).includes(normalized(brandQuery))).slice(0, 14);
+  const matchingModels = models.filter((m) => !modelQuery || normalized(m).includes(normalized(modelQuery))).slice(0, 18);
+  const matchingVersions = versions.filter((v) => !versionQuery || normalized(`${v.version} ${v.engine}`).includes(normalized(versionQuery))).slice(0, 16);
+  const freeResults = useMemo(
+    () => freeQuery.trim().length >= 2 ? searchVehicles(freeQuery, 12, ALL_VEHICLE_DB) : [],
+    [freeQuery],
+  );
+
+  const selectVehicle = (next) => {
+    // Las opciones de versión llevan una vista privada (_render); nunca la
+    // guardamos en el vehículo seleccionado ni la propagamos al cálculo.
+    const cleanNext = ALL_VEHICLE_DB.find((candidate) => candidate.id === next.id) || next;
+    setBrandQuery(cleanNext.brand || '');
+    setModelQuery(cleanNext.model || '');
+    setVersionQuery(cleanNext.version || '');
+    setFreeQuery('');
+    setOpen(null);
+    onSelect(cleanNext);
+  };
+
+  const menu = (items, render, keyPrefix) => items.length > 0 && (
+    <div className="absolute z-50 mt-1 left-0 right-0 max-h-64 overflow-y-auto rounded-xl bg-slate-900 border border-slate-700 shadow-2xl shadow-black/60 divide-y divide-slate-800">
+      {items.map((item, index) => (
+        <button
+          key={`${keyPrefix}-${item.id || item}-${index}`}
+          type="button"
+          onMouseDown={(event) => { event.preventDefault(); render(item); }}
+          className="w-full text-left px-3 py-2.5 hover:bg-slate-800 transition-colors"
+        >
+          {typeof item === 'string' ? <span className="text-xs text-white font-semibold">{item}</span> : item._render || item}
+        </button>
+      ))}
+    </div>
+  );
+
+  const chosenLabel = vehicle ? vehicleLabel(vehicle) : 'Ningún motor seleccionado';
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3">
+        <div className="flex items-start gap-2">
+          <CheckCircle2 className="w-4 h-4 mt-0.5 text-emerald-400 shrink-0" />
+          <div className="min-w-0">
+            <p className="text-xs font-bold text-white truncate">{chosenLabel}</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              {vehicle ? `${vehicle.engine || 'Motor catalogado'} · ${vehicle.fuel || 'Combustible'} · ${vehicle.cc || '—'} cc · ${vehicle.cv || '—'} CV · CO₂ ${vehicle.co2 || '—'} g/km` : 'Elige marca, modelo y motor para cargar todos los datos técnicos.'}
+            </p>
+          </div>
+          {vehicle?.reliability === 'banned' && <Badge tone="rose">No recomendado</Badge>}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div className="relative">
+          <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1">Marca</label>
+          <Input
+            value={brandQuery}
+            onChange={(value) => { setBrandQuery(value); setModelQuery(''); setVersionQuery(''); setOpen('brand'); }}
+            onFocus={() => setOpen('brand')}
+            placeholder="Ej. BMW"
+          />
+          {open === 'brand' && menu(matchingBrands, (brand) => { setBrandQuery(brand); setModelQuery(''); setVersionQuery(''); setOpen('model'); }, 'brand')}
+        </div>
+        <div className="relative">
+          <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1">Modelo</label>
+          <Input
+            value={modelQuery}
+            onChange={(value) => { setModelQuery(value); setVersionQuery(''); setOpen('model'); }}
+            onFocus={() => setOpen('model')}
+            placeholder={selectedBrand ? 'Ej. Serie 3' : 'Primero la marca'}
+          />
+          {open === 'model' && menu(matchingModels, (model) => { setModelQuery(model); setVersionQuery(''); setOpen('version'); }, 'model')}
+        </div>
+        <div className="relative">
+          <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1">Motor / versión</label>
+          <Input
+            value={versionQuery}
+            onChange={(value) => { setVersionQuery(value); setOpen('version'); }}
+            onFocus={() => setOpen('version')}
+            placeholder={selectedModel ? 'Ej. 320d 190 CV' : 'Primero el modelo'}
+          />
+          {open === 'version' && menu(matchingVersions.map((v) => ({
+            ...v,
+            _render: (
+              <div>
+                <p className="text-xs font-semibold text-white">{v.version}</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">{v.engine} · {v.fuel} · {v.transmission || 'Cambio'} · {v.years?.[0]}–{v.years?.[1]}</p>
+              </div>
+            ),
+          })), (version) => selectVehicle(version), 'version')}
+        </div>
+      </div>
+
+      <div className="relative">
+        <div className="flex items-center gap-2 mb-1">
+          <Search className="w-3.5 h-3.5 text-amber-400" />
+          <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">O busca directamente marca, modelo o motor</label>
+        </div>
+        <Input
+          value={freeQuery}
+          onChange={(value) => { setFreeQuery(value); setOpen('search'); }}
+          onFocus={() => setOpen('search')}
+          placeholder="Ej. BMW 320d B47, Audi Q7 3.0 TDI, Toyota RAV4 híbrido…"
+        />
+        {open === 'search' && freeResults.length > 0 && (
+          <div className="absolute z-50 mt-1 left-0 right-0 max-h-72 overflow-y-auto rounded-xl bg-slate-900 border border-slate-700 shadow-2xl shadow-black/60 divide-y divide-slate-800">
+            {freeResults.map((result) => (
+              <button
+                key={result.id}
+                type="button"
+                onMouseDown={(event) => { event.preventDefault(); selectVehicle(result); }}
+                className="w-full text-left px-3 py-2.5 hover:bg-slate-800 transition-colors"
+              >
+                <div className="flex items-start gap-2">
+                  <Zap className="w-3.5 h-3.5 mt-0.5 text-sky-400 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-white truncate">{result.brand} {result.model} · {result.version}</p>
+                    <p className="text-[10px] text-slate-400 mt-0.5">{result.engine} · {result.fuel} · {result.cc} cc · {result.cv} CV · {result.years?.[0]}–{result.years?.[1]}</p>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+        <Gauge className="w-3.5 h-3.5 text-amber-400" />
+        Autocompletado desde {ALL_VEHICLE_DB.length} versiones del catálogo · la cifra cargada es específica de autopista, no urbana.
+      </div>
+    </div>
+  );
+}
+
 export default function TripCalculatorView({ onApplyToSimulator }) {
   // --- Estado de Origen y Destino ------------------------------------------
   const [origin, setOrigin] = useState(ORIGIN_PRESETS[0]); // Frankfurt
@@ -286,11 +418,12 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
   const [routeError, setRouteError] = useState(null);
 
   // --- Estado del Vehículo y Conducción ------------------------------------
-  const [profileId, setProfileId] = useState('focus_st');
+  const [selectedVehicle, setSelectedVehicle] = useState(DEFAULT_VEHICLE);
   const [paceId, setPaceId] = useState('normal');
-  const [customConsumption, setCustomConsumption] = useState(9.5);
-  const [customFuelPrice, setCustomFuelPrice] = useState(1.86);
-  const [customKfzSteuer, setCustomKfzSteuer] = useState(34);
+  const [customConsumption, setCustomConsumption] = useState(DEFAULT_HIGHWAY_CONSUMPTION.value);
+  const [customFuelPrice, setCustomFuelPrice] = useState(defaultEnergyPrice(DEFAULT_VEHICLE));
+  const [customKfzSteuer, setCustomKfzSteuer] = useState(estimateKfzSteuerMonth(DEFAULT_VEHICLE));
+  const [wearCostPerKm, setWearCostPerKm] = useState(estimateWearCostPerKm(DEFAULT_VEHICLE));
 
   // --- Estado de Papeles Alemanes, Viaje y Camión --------------------------
   const [plateDuration, setPlateDuration] = useState('15d'); // '15d' (79€) | '30d' (95€) | 'none' (0€)
@@ -311,24 +444,41 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
   const routeLayersRef = useRef([]);
   const markersRef = useRef([]);
 
-  const activeProfile = useMemo(
-    () => VEHICLE_PROFILES.find((p) => p.id === profileId) || VEHICLE_PROFILES[0],
-    [profileId],
-  );
   const activePace = useMemo(
     () => PACE_MODES.find((p) => p.id === paceId) || PACE_MODES[1],
     [paceId],
   );
+  const activeEnergy = useMemo(() => highwayConsumption(selectedVehicle), [selectedVehicle]);
+  const activeProfile = useMemo(() => ({
+    id: selectedVehicle?.id,
+    label: selectedVehicle ? vehicleLabel(selectedVehicle) : 'Vehículo personalizado',
+    short: selectedVehicle ? `${selectedVehicle.brand} ${selectedVehicle.model}` : 'Vehículo personalizado',
+    consumption: Number(customConsumption || 0),
+    consumptionUnit: activeEnergy.unit,
+    energyLabel: activeEnergy.energyLabel,
+    energyKind: activeEnergy.kind,
+    isElectric: activeEnergy.kind === 'electric',
+    brand: selectedVehicle?.brand || '',
+    model: selectedVehicle?.model || '',
+    version: selectedVehicle?.version || '',
+    cc: selectedVehicle?.cc || 0,
+    co2: selectedVehicle?.co2 || 0,
+    fuel: selectedVehicle?.fuel || '',
+    newPrice: selectedVehicle?.newPrice || 0,
+    purchase: selectedVehicle?.dePrice ? Math.round((selectedVehicle.dePrice[0] + selectedVehicle.dePrice[1]) / 2) : 0,
+  }), [selectedVehicle, customConsumption, activeEnergy]);
 
-  // Al cambiar de perfil de coche, cargamos su consumo, precio de litro y Kfz-Steuer real
-  const selectVehicleProfile = (id) => {
-    setProfileId(id);
-    const found = VEHICLE_PROFILES.find((p) => p.id === id);
-    if (found) {
-      setCustomConsumption(found.consumption);
-      setCustomFuelPrice(found.fuelPrice);
-      setCustomKfzSteuer(found.kfzSteuerMonth);
-    }
+  // Cada selección del catálogo rellena de nuevo la estimación de autopista,
+  // el precio energético y el impuesto alemán. Los tres campos siguen siendo
+  // editables porque el coche real, la estación de servicio y la ruta mandan.
+  const selectVehicleFromCatalog = (vehicle) => {
+    if (!vehicle) return;
+    const energy = highwayConsumption(vehicle);
+    setSelectedVehicle(vehicle);
+    setCustomConsumption(energy.value);
+    setCustomFuelPrice(defaultEnergyPrice(vehicle));
+    setCustomKfzSteuer(estimateKfzSteuerMonth(vehicle));
+    setWearCostPerKm(estimateWearCostPerKm(vehicle));
   };
 
   // --- Buscador de direcciones Nominatim (OpenStreetMap) -------------------
@@ -673,10 +823,13 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
     const baseHours = selectedRoute?.durationHours || 20.5;
     const realHours = Number((baseHours * activePace.speedFactor).toFixed(1));
 
-    // 1. Combustible real
-    const effectiveLitersPer100 = Number((Number(customConsumption || 0) * activePace.factor).toFixed(2));
-    const totalLiters = Number(((distanceKm / 100) * effectiveLitersPer100).toFixed(1));
-    const fuelCost = Number((totalLiters * Number(customFuelPrice || 0)).toFixed(2));
+    // 1. Energía real del viaje. Para un eléctrico la unidad es kWh; para
+    // el resto, litros. En ambos casos el ritmo modifica el consumo de ruta.
+    const effectiveConsumption = Number((Number(customConsumption || 0) * activePace.factor).toFixed(2));
+    const energyAmount = Number(((distanceKm / 100) * effectiveConsumption).toFixed(1));
+    const totalLiters = activeProfile.isElectric ? 0 : energyAmount;
+    const totalKwh = activeProfile.isElectric ? energyAmount : 0;
+    const fuelCost = Number((energyAmount * Number(customFuelPrice || 0)).toFixed(2));
 
     // 2. Peajes reales de la ruta seleccionada (o override manual)
     const routeTolls = selectedRoute ? selectedRoute.totalTolls : 131.20;
@@ -708,17 +861,24 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
     const hotelTotal = Number((Number(hotelNights || 0) * Number(hotelRate || 0)).toFixed(2));
     const foodTotal = Number((Number(tripDays || 0) * Number(foodPerDay || 0) * travelers).toFixed(2));
     const travelPersonalTotal = Number((flightsTotal + trainTotal + hotelTotal + foodTotal).toFixed(2));
+    const wearTotal = Number((distanceKm * Number(wearCostPerKm || 0)).toFixed(2));
 
-    // 5. Total Bajada Rodando vs Total Camión
-    const drivingGrandTotal = Number((germanPlatesTotal + fuelCost + tollsCost + travelPersonalTotal).toFixed(2));
+    // 5. Total Bajada Rodando vs Total Camión. Incluimos el coste marginal
+    // de esos kilómetros para no comparar sólo gasolina contra transporte.
+    const drivingGrandTotal = Number((germanPlatesTotal + fuelCost + tollsCost + travelPersonalTotal + wearTotal).toFixed(2));
     const truckGrandTotal = Number((Number(truckCost || 0) + Number(spainTempInsurance || 0)).toFixed(2));
     const diffVsTruck = Number((truckGrandTotal - drivingGrandTotal).toFixed(2)); // Positivo = Rodando es más barato
 
     return {
       distanceKm,
       realHours,
-      effectiveLitersPer100,
+      effectiveLitersPer100: effectiveConsumption,
+      effectiveConsumption,
+      consumptionUnit: activeProfile.consumptionUnit,
+      energyLabel: activeProfile.energyLabel,
       totalLiters,
+      totalKwh,
+      energyAmount,
       fuelCost,
       tollsCost,
       plateInsurance,
@@ -731,6 +891,7 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
       hotelTotal,
       foodTotal,
       travelPersonalTotal,
+      wearTotal,
       drivingGrandTotal,
       truckGrandTotal,
       diffVsTruck,
@@ -738,6 +899,7 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
   }, [
     selectedRoute,
     activePace,
+    activeProfile,
     customConsumption,
     customFuelPrice,
     customKfzSteuer,
@@ -749,6 +911,7 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
     hotelRate,
     foodPerDay,
     tripDays,
+    wearCostPerKm,
     travelers,
     truckCost,
     spainTempInsurance,
@@ -769,7 +932,7 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
       <SectionTitle
         icon={Navigation}
         title="Calculadora de Viajes, Rutas y Peajes (Europa → España)"
-        subtitle="Compara al céntimo cuánto cuesta bajar un coche rodando por cada ruta (combustible real, peajes por país, placas rojas alemanas, vuelo y hotel) frente a traerlo en camión portacoches."
+        subtitle="Compara el coste total de bajar cualquier coche por cada ruta: consumo específico de autopista, peajes por país, placas alemanas, energía, desgaste, vuelo, hotel y comidas frente al camión portacoches."
         right={
           <div className="flex flex-wrap items-center gap-2">
             <a
@@ -814,9 +977,9 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
           icon={Route}
         />
         <Stat
-          label="Combustible del Viaje"
+          label={activeProfile.isElectric ? 'Energía del Viaje' : 'Combustible del Viaje'}
           value={eur(calc.fuelCost)}
-          hint={`${numEs(calc.totalLiters)} L (${calc.effectiveLitersPer100} L/100km a ${eur(customFuelPrice)}/L)`}
+          hint={`${numEs(calc.energyAmount)} ${calc.consumptionUnit === 'kWh/100 km' ? 'kWh' : 'L'} · ${calc.effectiveConsumption} ${calc.consumptionUnit} a ${eur(customFuelPrice)}/${activeProfile.isElectric ? 'kWh' : 'L'}`}
           tone="amber"
           icon={Fuel}
         />
@@ -829,7 +992,7 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
         <Stat
           label="Total Bajada Rodando"
           value={eur(calc.drivingGrandTotal)}
-          hint={`Placas ${eur(calc.germanPlatesTotal)} + Viaje/Ruta ${eur(calc.drivingGrandTotal - calc.germanPlatesTotal)}`}
+          hint={`Placas ${eur(calc.germanPlatesTotal)} + Ruta/personas/desgaste ${eur(calc.drivingGrandTotal - calc.germanPlatesTotal)}`}
           tone={calc.diffVsTruck >= 0 ? 'emerald' : 'amber'}
           icon={Car}
         />
@@ -992,57 +1155,71 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
               2. Coche a Importar y Consumo Real en Autopista
             </h3>
 
-            <div className="grid grid-cols-2 gap-1.5">
-              {VEHICLE_PROFILES.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => selectVehicleProfile(p.id)}
-                  className={cx(
-                    'text-left p-2.5 rounded-xl border transition-all',
-                    profileId === p.id
-                      ? 'bg-amber-500/15 border-amber-500/70 text-white'
-                      : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700',
-                  )}
-                >
-                  <div className="flex items-center justify-between gap-1">
-                    <span className="text-xs font-bold truncate">{p.short}</span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-amber-400 font-semibold shrink-0">
-                      {p.consumption} L
-                    </span>
-                  </div>
-                  <p className="text-[10px] text-slate-400 mt-0.5 truncate">
-                    {p.badge} · Kfz-Steuer {p.kfzSteuerMonth}€
-                  </p>
-                </button>
-              ))}
+            <VehicleCascadeSelector
+              vehicle={selectedVehicle}
+              onSelect={selectVehicleFromCatalog}
+            />
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 rounded-xl bg-slate-950/60 border border-slate-800 p-3">
+              <div>
+                <p className="text-[10px] uppercase text-slate-500">Cilindrada / potencia</p>
+                <p className="text-xs font-bold text-white mt-0.5">{selectedVehicle?.cc || '—'} cc · {selectedVehicle?.cv || '—'} CV</p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase text-slate-500">Cambio</p>
+                <p className="text-xs font-bold text-white mt-0.5">{selectedVehicle?.transmission || '—'}</p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase text-slate-500">CO₂ homologado</p>
+                <p className="text-xs font-bold text-white mt-0.5">{selectedVehicle?.co2 || '—'} g/km</p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase text-slate-500">Años / etiqueta</p>
+                <p className="text-xs font-bold text-white mt-0.5">{selectedVehicle?.years?.[0] || '—'}–{selectedVehicle?.years?.[1] || '—'} · {selectedVehicle?.badge || '—'}</p>
+              </div>
             </div>
 
             <div className="grid grid-cols-3 gap-2.5">
-              <Field label="Consumo (L/100km)">
+              <Field
+                label={`Consumo de autopista (${activeEnergy.unit})`}
+                hint={`Estimado: ${activeEnergy.value} ${activeEnergy.unit} · ajustable a tu unidad`}
+              >
                 <Input
                   type="number"
+                  min="0"
                   step="0.1"
                   value={customConsumption}
                   onChange={setCustomConsumption}
                 />
               </Field>
-              <Field label="Precio Comb. (€/L)">
+              <Field
+                label={activeProfile.isElectric ? 'Precio electricidad (€/kWh)' : 'Precio combustible (€/L)'}
+                hint={activeProfile.isElectric ? 'Media de carga; sustituye por tu tarifa' : 'Precio medio del trayecto'}
+              >
                 <Input
                   type="number"
+                  min="0"
                   step="0.01"
                   value={customFuelPrice}
                   onChange={setCustomFuelPrice}
                 />
               </Field>
-              <Field label="Kfz-Steuer 1 mes (€)">
+              <Field label="Kfz-Steuer 1 mes (€)" hint="Estimación alemana editable">
                 <Input
                   type="number"
-                  step="1"
+                  min="0"
+                  step="0.01"
                   value={customKfzSteuer}
                   onChange={setCustomKfzSteuer}
                 />
               </Field>
+            </div>
+
+            <div className="flex items-start gap-2 rounded-lg border border-sky-500/20 bg-sky-500/5 px-3 py-2 text-[11px] text-sky-200">
+              <SlidersHorizontal className="w-3.5 h-3.5 mt-0.5 text-sky-400 shrink-0" />
+              <span>
+                <strong>Modelo de autopista:</strong> parte de CO₂ y características de esta versión, aplica un factor de crucero sostenido y contempla que un PHEV termina usando el motor térmico. No es consumo urbano ni WLTP combinado; puedes afinarlo con el dato real del coche.
+              </span>
             </div>
 
             <Field label="Ritmo de Conducción en Autopista / Autobahn">
@@ -1083,8 +1260,8 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {routes.map((r) => {
               const active = r.id === selectedRouteId;
-              const rLiters = Number(((r.distanceKm / 100) * calc.effectiveLitersPer100).toFixed(1));
-              const rFuelCost = Number((rLiters * Number(customFuelPrice || 0)).toFixed(2));
+              const rEnergyAmount = Number(((r.distanceKm / 100) * calc.effectiveConsumption).toFixed(1));
+              const rFuelCost = Number((rEnergyAmount * Number(customFuelPrice || 0)).toFixed(2));
               const rDirectRoadCost = Number((rFuelCost + r.totalTolls).toFixed(2));
               return (
                 <button
@@ -1127,7 +1304,7 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
                       </span>
                     </div>
                     <div className="flex justify-between text-slate-400">
-                      <span>Combustible ({rLiters} L):</span>
+                      <span>{activeProfile.isElectric ? 'Energía' : 'Combustible'} ({rEnergyAmount} {activeProfile.isElectric ? 'kWh' : 'L'}):</span>
                       <span className="text-slate-200 font-semibold">{eur(rFuelCost)}</span>
                     </div>
                     <div className="flex justify-between text-slate-400">
@@ -1135,7 +1312,7 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
                       <span className="text-amber-400 font-semibold">{eur(r.totalTolls)}</span>
                     </div>
                     <div className="flex justify-between pt-1 border-t border-slate-800/60 text-slate-200 font-bold">
-                      <span>Gasolina + Peajes:</span>
+                      <span>{activeProfile.isElectric ? 'Energía + Peajes:' : 'Combustible + Peajes:'}</span>
                       <span className="text-emerald-400">{eur(rDirectRoadCost)}</span>
                     </div>
                   </div>
@@ -1171,6 +1348,7 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
                 setManualTollOverride('');
                 setTruckCost(1000);
                 setSpainTempInsurance(50.97);
+                setWearCostPerKm(estimateWearCostPerKm(selectedVehicle));
               }}
             >
               Restaurar tarifas oficiales 2026
@@ -1235,6 +1413,17 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
             <Field label="Seguro AXA 7d España (€)" hint="Solo si viene en camión">
               <Money value={spainTempInsurance} onChange={setSpainTempInsurance} />
             </Field>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-800">
+            <Field label="Desgaste + mantenimiento (€/km)" hint="Neumáticos, revisiones y depreciación marginal">
+              <Input type="number" min="0" step="0.001" value={wearCostPerKm} onChange={setWearCostPerKm} />
+            </Field>
+            <div className="rounded-lg bg-slate-950/50 border border-slate-800 px-3 py-2 self-end">
+              <p className="text-[10px] uppercase text-slate-500">Coste variable estimado</p>
+              <p className="text-sm font-bold text-amber-300 mt-0.5">{eur(calc.wearTotal)}</p>
+              <p className="text-[10px] text-slate-500">en {numEs(calc.distanceKm)} km</p>
+            </div>
           </div>
 
           {/* Desglose de kilómetros y peajes por país */}
@@ -1306,9 +1495,13 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
 
               <div className="py-2 flex justify-between">
                 <span className="text-slate-400">
-                  Combustible ({numEs(calc.distanceKm)} km · {numEs(calc.totalLiters)} L a {eur(customFuelPrice)}/L)
+                  {activeProfile.isElectric ? 'Energía' : 'Combustible'} ({numEs(calc.distanceKm)} km · {numEs(calc.energyAmount)} {activeProfile.isElectric ? 'kWh' : 'L'} a {eur(customFuelPrice)}/{activeProfile.isElectric ? 'kWh' : 'L'})
                 </span>
                 <span className="font-semibold text-amber-300">{eur(calc.fuelCost)}</span>
+              </div>
+              <div className="py-2 flex justify-between">
+                <span className="text-slate-400">Desgaste, mantenimiento y depreciación ({eur(wearCostPerKm)}/km)</span>
+                <span className="font-semibold text-slate-200">{eur(calc.wearTotal)}</span>
               </div>
               <div className="py-2 flex justify-between">
                 <span className="text-slate-400">Peajes de la Ruta Seleccionada</span>
@@ -1350,7 +1543,7 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
                 </span>
               ) : (
                 <span>
-                  <strong>¡Gana el Camión Portacoches por {eur(Math.abs(calc.diffVsTruck))}!</strong> Con el consumo del <strong>{activeProfile.short}</strong> ({calc.effectiveLitersPer100} L/100km), bajarlo rodando sale más caro que pedir un camión.
+                  <strong>¡Gana el Camión Portacoches por {eur(Math.abs(calc.diffVsTruck))}!</strong> Con el consumo de autopista del <strong>{activeProfile.short}</strong> ({calc.effectiveConsumption} {calc.consumptionUnit}), bajarlo rodando sale más caro que pedir un camión.
                 </span>
               )}
             </Alert>

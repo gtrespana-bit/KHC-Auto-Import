@@ -97,7 +97,7 @@ export function Field({ label, hint, children, className = '', required }) {
 
 const inputClass = 'w-full rounded-lg bg-slate-950/60 border border-slate-700 px-3 py-2 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500/70 focus:ring-1 focus:ring-amber-500/40 transition-colors';
 
-export function Input({ value, onChange, type = 'text', placeholder, className = '', step, min, max, list }) {
+export function Input({ value, onChange, type = 'text', placeholder, className = '', step, min, max, list, onFocus, onBlur, onKeyDown, autoComplete }) {
   return (
     <input
       type={type}
@@ -108,6 +108,10 @@ export function Input({ value, onChange, type = 'text', placeholder, className =
       placeholder={placeholder}
       value={value ?? ''}
       onChange={(e) => onChange(type === 'number' ? (e.target.value === '' ? '' : Number(e.target.value)) : e.target.value)}
+      onFocus={onFocus}
+      onBlur={onBlur}
+      onKeyDown={onKeyDown}
+      autoComplete={autoComplete}
       className={cx(inputClass, className)}
     />
   );
