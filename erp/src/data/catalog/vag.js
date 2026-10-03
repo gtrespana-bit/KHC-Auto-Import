@@ -113,13 +113,13 @@ export const VAG = [
   {
     b: 'Volkswagen', m: 'ID.3', seg: 'Compacto', dmd: 0.86,
     g: [
-      ['ID.3', 2020, 2025, 40500, [['psa_ev_136', 0, { hp: 204, name: 'Eléctrico Pro 204 CV', gear: 'E' }], ['psa_ev_156', 0, { hp: 150, name: 'Eléctrico Pure 150 CV', gear: 'E' }]]],
+      ['ID.3', 2020, 2025, 40500, [['psa_ev_136', 0, { hp: 204, name: 'Eléctrico Pro 204 CV', gear: 'E', rel: 'EV_VAG' }], ['psa_ev_156', 0, { hp: 150, name: 'Eléctrico Pure 150 CV', gear: 'E', rel: 'EV_VAG' }]]],
     ],
   },
   {
     b: 'Volkswagen', m: 'ID.4', seg: 'C-SUV', dmd: 0.85,
     g: [
-      ['ID.4', 2021, 2025, 46500, [['psa_ev_136', 0, { hp: 204, name: 'Eléctrico Pro 204 CV', gear: 'E' }], ['psa_ev_156', 0, { hp: 286, name: 'Eléctrico GTX 286 CV', gear: 'E' }]]],
+      ['ID.4', 2021, 2025, 46500, [['psa_ev_136', 0, { hp: 204, name: 'Eléctrico Pro 204 CV', gear: 'E', rel: 'EV_VAG' }], ['psa_ev_156', 0, { hp: 286, name: 'Eléctrico GTX 286 CV', gear: 'E', rel: 'EV_VAG' }]]],
     ],
   },
 
@@ -198,7 +198,7 @@ export const VAG = [
   {
     b: 'Audi', m: 'Q4 e-tron', seg: 'C-SUV', dmd: 0.84,
     g: [
-      ['Q4 e-tron', 2021, 2025, 52500, [['psa_ev_136', 0, { hp: 204, name: '40 e-tron 204 CV', gear: 'E' }], ['psa_ev_156', 0, { hp: 299, name: '50 e-tron quattro 299 CV', gear: 'E' }]]],
+      ['Q4 e-tron', 2021, 2025, 52500, [['psa_ev_136', 0, { hp: 204, name: '40 e-tron 204 CV', gear: 'E', rel: 'EV_VAG' }], ['psa_ev_156', 0, { hp: 299, name: '50 e-tron quattro 299 CV', gear: 'E', rel: 'EV_VAG' }]]],
     ],
   },
 
@@ -278,7 +278,7 @@ export const VAG = [
   {
     b: 'Cupra', m: 'Born', seg: 'Compacto', dmd: 0.88,
     g: [
-      ['Born', 2021, 2025, 39500, [['psa_ev_136', 0, { hp: 204, name: 'Eléctrico 204 CV', gear: 'E' }], ['psa_ev_156', 0, { hp: 231, name: 'Eléctrico VZ 231 CV', gear: 'E' }]]],
+      ['Born', 2021, 2025, 39500, [['psa_ev_136', 0, { hp: 204, name: 'Eléctrico 204 CV', gear: 'E', rel: 'EV_VAG' }], ['psa_ev_156', 0, { hp: 231, name: 'Eléctrico VZ 231 CV', gear: 'E', rel: 'EV_VAG' }]]],
     ],
   },
 

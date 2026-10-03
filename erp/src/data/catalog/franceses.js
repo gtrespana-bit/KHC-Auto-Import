@@ -140,13 +140,13 @@ export const FRANCESES = [
     b: 'Renault', m: 'Scénic', seg: 'Monovolumen', dmd: 0.94,
     g: [
       ['Scénic IV', 2016, 2022, 29500, [['rn15dci115', 104], ['rn13tce140', 118], ['rn16dci160', 116]]],
-      ['Scénic E-Tech', 2024, 2025, 42500, [['rn_ev_218', 0, {}]]],
+      ['Scénic E-Tech', 2024, 2025, 42500, [['rn_ev_218', 0, { rel: 'EV_RENAULT' }]]],
     ],
   },
   {
     b: 'Renault', m: 'Espace', seg: 'Monovolumen 7 plazas', dmd: 0.85,
     g: [
-      ['Espace V', 2015, 2023, 45500, [['rn16dci160', 128], ['rn20dci175', 138], ['rn18tce225', 145, { cc: 1798, name: '1.8 TCe 225 CV', hp: 225, rel: 'M9R' }]]],
+      ['Espace V', 2015, 2023, 45500, [['rn16dci160', 128], ['rn20dci175', 138], ['rn18tce225', 145, { cc: 1798, name: '1.8 TCe 225 CV', hp: 225, rel: 'RN_18T' }]]],
     ],
   },
   {
@@ -164,7 +164,7 @@ export const FRANCESES = [
   {
     b: 'Renault', m: 'Zoe', seg: 'Urbano', dmd: 0.8,
     g: [
-      ['Zoe', 2016, 2024, 26500, [['rn_ev_150', 0, { hp: 92, name: 'Eléctrico 92 CV' }], ['rn_ev_150', 0, { hp: 135, name: 'Eléctrico 135 CV' }]]],
+      ['Zoe', 2016, 2024, 26500, [['rn_ev_150', 0, { hp: 92, name: 'Eléctrico 92 CV', rel: 'EV_ZOE' }], ['rn_ev_150', 0, { hp: 135, name: 'Eléctrico 135 CV', rel: 'EV_ZOE' }]]],
     ],
   },
 
@@ -173,7 +173,7 @@ export const FRANCESES = [
     b: 'Dacia', m: 'Sandero', seg: 'Urbano', dmd: 1.1,
     g: [
       ['Sandero III', 2020, 2025, 14500, [['rn10sce75', 110], ['rn10tce90', 108], ['rn10lpg100', 106], ['rn15dci95', 100]]],
-      ['Sandero II', 2015, 2020, 11500, [['rn15dci95', 98], ['rn10sce75', 112], ['rn12tce115', 110, { hp: 90, name: '0.9 TCe 90 CV', cc: 898, cyl: 3, rel: 'B4D' }]]],
+      ['Sandero II', 2015, 2020, 11500, [['rn15dci95', 98], ['rn10sce75', 112], ['rn12tce115', 110, { hp: 90, name: '0.9 TCe 90 CV (H4B)', cc: 898, cyl: 3, rel: 'H4B' }]]],
     ],
   },
   {
@@ -207,7 +207,7 @@ export const FRANCESES = [
   {
     b: 'Opel', m: 'Astra', seg: 'Compacto', dmd: 0.95,
     g: [
-      ['Astra K', 2015, 2021, 23500, [['op16d136', 102], ['psa12pt130', 114], ['fd15eb150', 118, { hp: 145, name: '1.4 Turbo 145 CV' }]]],
+      ['Astra K', 2015, 2021, 23500, [['op16d136', 102], ['psa12pt130', 114], ['fd15eb150', 118, { hp: 145, cc: 1364, name: '1.4 Turbo 145 CV', rel: 'GM_14T' }]]],
       ['Astra L', 2021, 2025, 29500, [['psa15bhd130', 106], ['psa12pt130', 112], ['psa15phev136', 108], ['psa_ev_156', 0, { name: 'Astra Electric 156 CV' }]]],
     ],
   },
@@ -252,7 +252,7 @@ export const FRANCESES = [
   {
     b: 'Fiat', m: 'Tipo', seg: 'Compacto', dmd: 0.92,
     g: [
-      ['Tipo (356)', 2016, 2024, 19500, [['fiat16mjet120', 106], ['fiat14ma140', 118, { hp: 120, name: '1.4 120 CV', rel: 'FIREFLY' }], ['fiat10h70', 104], ['fiat13mjet95', 100]]],
+      ['Tipo (356)', 2016, 2024, 19500, [['fiat16mjet120', 106], ['fiat14ma140', 118, { hp: 120, name: '1.4 T-Jet 120 CV', rel: 'FIAT_TJET14' }], ['fiat10h70', 104], ['fiat13mjet95', 100]]],
     ],
   },
   {
@@ -264,7 +264,7 @@ export const FRANCESES = [
   {
     b: 'Fiat', m: 'Ducato', seg: 'Furgón grande', dmd: 1.12, body: 'Furgón',
     g: [
-      ['Ducato 250', 2015, 2025, 38500, [['iveco23d136', 195], ['iveco23d156', 200], ['fiat16mjet120', 180, { hp: 120, name: '2.0 MultiJet 120 CV' }]]],
+      ['Ducato 250', 2015, 2025, 38500, [['iveco23d136', 195], ['iveco23d156', 200], ['fiat20mjet120', 180, { hp: 120, name: '2.0 MultiJet 120 CV' }]]],
     ],
   },
   {
@@ -292,7 +292,7 @@ export const FRANCESES = [
   {
     b: 'Alfa Romeo', m: 'Giulia', seg: 'Berlina', dmd: 0.8,
     g: [
-      ['Giulia (952)', 2016, 2024, 48500, [['alfa20jtdm190', 118], ['alfa20g280', 148], ['alfa16jtdm120', 112], ['alfa20g280', 158, { hp: 510, name: '2.9 V6 Quadrifoglio 510 CV', cc: 2891, cyl: 6, rel: 'EA839' }]]],
+      ['Giulia (952)', 2016, 2024, 48500, [['alfa20jtdm190', 118], ['alfa20g280', 148], ['alfa16jtdm120', 112], ['alfa29v6_510', 158, { hp: 510, name: '2.9 V6 Quadrifoglio 510 CV' }]]],
     ],
   },
   {

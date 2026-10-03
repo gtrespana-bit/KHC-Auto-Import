@@ -79,7 +79,7 @@ const R = {
   BLUEHDI15: {
     reliability: "banned",
     reliabilityTitle: "ALERTA: Stellantis 1.5 BlueHDi (DV5)",
-    reliabilityNote: "Cadena de 7 mm entre árboles de levas subdimensionada (rotura + válvulas dobladas) y depósito de AdBlue que cristaliza (~1.200 €). PROHIBIDO importar.",
+    reliabilityNote: "Stellantis reconoce problemas de cadena de árbol de levas y amplió cobertura para determinadas unidades/generaciones. La elegibilidad depende de VIN, fecha, mercado y mantenimiento; no implica que todas las versiones fallen ni que toda unidad esté cubierta.",
   },
   DW10: {
     reliability: "ok",
@@ -102,9 +102,9 @@ const R = {
     reliabilityNote: "Diésel de referencia por sencillez y consumo (4,5 l/100 km). Cambiar correa cada 120.000 km / 6 años. Vigilar inyectores en unidades pre-2012.",
   },
   ECOBOOST10: {
-    reliability: "banned",
-    reliabilityTitle: "ALERTA: Ford 1.0 EcoBoost 'Fox' (hasta 2019)",
-    reliabilityNote: "Correa de distribución y de bomba de aceite bañadas en aceite que se degradan y destruyen el motor. Solo aceptable el 1.0 EcoBoost mHEV (2020+) que volvió a cadena.",
+    reliability: "warn",
+    reliabilityTitle: "PRECAUCIÓN: Ford 1.0 EcoBoost (revisión por código)",
+    reliabilityNote: "La distribución cambia según código, año y aplicación: hay versiones con correa húmeda y otras revisadas; la bomba de aceite puede conservar correa húmeda. Campañas y alcance difieren por mercado. Confirma VIN, código y factura de mantenimiento antes de dar un veredicto.",
   },
   POWERSHIFT: {
     reliability: "banned",
@@ -128,8 +128,8 @@ const R = {
   },
   MULTIAIR: {
     reliability: "banned",
-    reliabilityTitle: "ALERTA: Jeep/Fiat 1.4 MultiAir / 1.6 MJet (2015-2019)",
-    reliabilityNote: "Fallos en electroválvulas MultiAir, cajas DDCT problemáticas y anomalías eléctricas crónicas CAN-Bus. Evitar Renegade / Compass / 500X de esos años.",
+    reliabilityTitle: "ALERTA: gasolina Fiat/Jeep 1.4 MultiAir",
+    reliabilityNote: "Se han descrito fallos del módulo electrohidráulico MultiAir. El 1.6 MultiJet diésel pertenece a otra familia y el cambio DDCT es un componente distinto: verifica cada sistema por separado.",
   },
   SKYACTIV: {
     reliability: "gold",
@@ -152,9 +152,9 @@ const R = {
     reliabilityNote: "Variador continuo por correa metálica que patina y rompe (4.500 €). Evitar Qashqai / X-Trail / Juke automáticos.",
   },
   MHEV_ECOBOOST: {
-    reliability: "ok",
-    reliabilityTitle: "MOTOR CORRECTO: Ford 1.0 EcoBoost mHEV (2020+, cadena)",
-    reliabilityNote: "Ford abandonó la correa húmeda en la versión microhíbrida. Aceptable con libro de mantenimiento. Etiqueta ECO.",
+    reliability: "warn",
+    reliabilityTitle: "PRECAUCIÓN: Ford 1.0 EcoBoost mHEV (verificar variante)",
+    reliabilityNote: "No se debe inferir el sistema de distribución solo por la etiqueta mHEV o el año: confirma código de motor, calendario Ford aplicable y posibles correas auxiliares bañadas en aceite por VIN. Aceptable únicamente con identificación e historial verificables.",
   },
 };
 
@@ -174,8 +174,9 @@ const R_EXT = {
   M264: { reliability: "ok", reliabilityTitle: "CORRECTO: Mercedes M264 48V", reliabilityNote: "Evolución del M274 con sistema 48 V. Fiabilidad correcta; revisa el compresor auxiliar eléctrico y las actualizaciones de software." },
   M274: { reliability: "ok", reliabilityTitle: "CORRECTO: Mercedes 1.6/2.0 M274", reliabilityNote: "Motor gasolina de origen Mercedes/Nissan-Renault (2.0). Bomba de agua y termostato mejorables. Fiable con mantenimiento al día." },
   EV_MB: { reliability: "warn", reliabilityTitle: "ATENCIÓN: eléctrico usado (Mercedes EQ)", reliabilityNote: "Mecánicamente sencillo, pero exige certificado de estado de batería (SoH) y revisar la garantía de 8 años/160.000 km. La depreciación es alta: negocia fuerte o evita." },
-  EV_PSA: { reliability: "warn", reliabilityTitle: "ATENCIÓN: eléctrico usado (Stellantis/VW)", reliabilityNote: "Comprueba el SoH de la batería y el estado del cargador embarcado. Valor residual bajo: solo interesa si el precio cae por debajo del equivalente térmico." },
-  EV_RN: { reliability: "warn", reliabilityTitle: "ATENCIÓN: eléctrico usado (Renault)", reliabilityNote: "Los Zoe con batería en alquiler (leasing) obligan a mantener la cuota mensual: revisa el contrato antes de comprar. Exige informe de SoH." },
+  EV_PSA: { reliability: "warn", reliabilityTitle: "ATENCIÓN: eléctrico usado Stellantis", reliabilityNote: "Comprueba el SoH de la batería y el estado del cargador embarcado. El código de familia no sustituye la revisión por VIN, batería y versión." },
+  EV_RN: { reliability: "warn", reliabilityTitle: "ATENCIÓN: eléctrico usado Renault", reliabilityNote: "Revisa informe de SoH, garantía y titularidad de la batería por VIN; las condiciones de alquiler de batería se aplican solo a algunas unidades antiguas del Zoe." },
+  EV_ZOE: { reliability: "warn", reliabilityTitle: "ATENCIÓN: Renault Zoe usado", reliabilityNote: "En algunas unidades antiguas la batería podía estar en alquiler; confirma titularidad/contrato y SoH por VIN. No generalizar el leasing a todos los Zoe." },
   EV_HK: { reliability: "ok", reliabilityTitle: "ELÉCTRICO FIABLE: Hyundai/Kia E-GMP", reliabilityNote: "Plataforma 800 V con baterías muy duraderas y garantía de 8 años/160.000 km. Buen valor residual dentro del segmento eléctrico." },
   EV_FIAT: { reliability: "ok", reliabilityTitle: "ELÉCTRICO SENCILLO: Fiat 500e", reliabilityNote: "Poca mecánica y gran demanda urbana. Verifica SoH de batería y que la garantía de 8 años sea transferible." },
   EV_MZ: { reliability: "ok", reliabilityTitle: "ELÉCTRICO: Mazda MX-30", reliabilityNote: "Batería pequeña (35,5 kWh) y autonomía real corta: solo para uso urbano. Depreciación muy alta, negocia con fuerza." },
@@ -209,10 +210,10 @@ const R_EXT = {
   ALFA_20: { reliability: "ok", reliabilityTitle: "CORRECTO: 2.0 Turbo GME 280 CV", reliabilityNote: "Bloque de origen Chrysler con turbo twin-scroll. Mecánica sencilla para el segmento; revisa el sistema de tracción Q4 y el termostato." },
   ECOBOOST15: { reliability: "warn", reliabilityTitle: "PRECAUCIÓN: Ford 1.5 EcoBoost 4 cilindros", reliabilityNote: "Bloque abierto con problemas de infiltración de refrigerante en los cilindros (2013-2018) y culatas fisuradas. Solo unidades post-2019 con el bloque mejorado y pruebas de compresión." },
   ECOBOOST20: { reliability: "warn", reliabilityTitle: "PRECAUCIÓN: Ford 2.0 EcoBoost", reliabilityNote: "Culatas con fisuras y consumo de refrigerante documentado en Focus ST, Kuga y Mondeo. Evita salvo historial de culata sustituida." },
-  ECOBLUE: { reliability: "ok", reliabilityTitle: "CORRECTO: Ford 2.0 EcoBlue", reliabilityNote: "Diésel de cadena diseñado por Ford para Transit, Kuga y Focus. Correcto con mantenimiento; vigila el sistema de AdBlue y el volante bimasa." },
+  ECOBLUE: { reliability: "warn", reliabilityTitle: "PRECAUCIÓN: Ford 2.0 EcoBlue", reliabilityNote: "Aplicaciones relevantes montan correa de distribución en aceite. Ford UK redujo a 6 años/160.000 km (100.000 millas) el intervalo de ciertas Transit/Transit Custom/Tourneo 2.0 EcoBlue por vida útil afectada por dilución de aceite y uso. Confirmar pauta por VIN, mercado y vehículo; no extrapolar el intervalo a toda la gama." },
   ECOBLUE_BI: { reliability: "warn", reliabilityTitle: "PRECAUCIÓN: 2.0 EcoBlue BiTurbo 240 CV", reliabilityNote: "El segundo turbo y sus actuadores fallan con frecuencia y la reparación supera los 3.000 €. Prefiere el monoturbo 150/170 CV." },
-  FD_D15: { reliability: "warn", reliabilityTitle: "PRECAUCIÓN: 1.5 TDCi (derivado DV5)", reliabilityNote: "Motor de origen PSA: mismo riesgo de cadena de 7 mm y cristalización de AdBlue que el 1.5 BlueHDi. Evita en Focus, Fiesta, Puma y Mondeo." },
-  FD_PHEV: { reliability: "warn", reliabilityTitle: "PRECAUCIÓN: Ford Kuga 2.5 PHEV", reliabilityNote: "Ciclo Atkinson con eCVT, mecánica fiable, pero la campaña de llamada a revisión por baterías (2020) y el riesgo de incendio obliga a verificar el VIN y el estado de la batería." },
+  FD_D15: { reliability: "warn", reliabilityTitle: "PRECAUCIÓN: Ford 1.5 TDCi / EcoBlue", reliabilityNote: "Hay diferencias de arquitectura y distribución por código y año; algunos antecedentes de cadena/AdBlue no deben extrapolarse a todas las aplicaciones. Identifica motor y mercado por VIN y revisa campañas e historial antes de clasificar." },
+  FD_PHEV: { reliability: "warn", reliabilityTitle: "PRECAUCIÓN: Ford Kuga 2.5 PHEV", reliabilityNote: "El 2.5 Atkinson/e-CVT es distinto del sistema de alta tensión. Determinadas campañas de batería afectan a años/VIN/mercados concretos: consulta campañas abiertas y el estado de la batería; no supongas que toda unidad está afectada." },
   SKYACTIV_D: { reliability: "warn", reliabilityTitle: "PRECAUCIÓN: Mazda 2.2 Skyactiv-D", reliabilityNote: "Acumulación de carbonilla en la admisión, dilución de aceite y culatas con holguras. Reparaciones caras y depreciación alta. Prefiere los gasolina Skyactiv-G." },
   SKYACTIV_X: { reliability: "ok", reliabilityTitle: "CORRECTO: Skyactiv-X (encendido por compresión)", reliabilityNote: "Tecnología SPCCI compleja pero sin turbo y con cadena. Consumo muy bajo. Exige libro de mantenimiento oficial y revisa el sensor de presión del colector." },
   HONDA_10: { reliability: "gold", reliabilityTitle: "MOTOR FIABLE: Honda 1.0 VTEC Turbo", reliabilityNote: "Tres cilindros con cadena y turbo pequeño. Fabricación Honda: fiabilidad excelente y consumo contenido." },
@@ -231,7 +232,7 @@ const R_EXT = {
   JLR_I6D: { reliability: "warn", reliabilityTitle: "PRECAUCIÓN: Land Rover 3.0 I6 diésel Ingenium", reliabilityNote: "Mismo diseño Ingenium con cadena trasera: coste de sustitución superior a 4.000 € por la mano de obra. Solo con garantía vigente o historial de cadena cambiada." },
   JLR_I6P: { reliability: "warn", reliabilityTitle: "PRECAUCIÓN: Land Rover 3.0 I6 PHEV", reliabilityNote: "Motor Ingenium de seis cilindros más sistema híbrido de 400 V: complejidad y coste de reparación muy altos. Evita salvo precio de derribo." },
   JLR_V8: { reliability: "warn", reliabilityTitle: "PRECAUCIÓN: 5.0 V8 sobrealimentado JLR", reliabilityNote: "Cadena de distribución y cojinetes de cigüeñal con desgaste prematuro en unidades con mantenimiento irregular. Consumo y mantenimiento muy altos: solo para cliente que lo pida expresamente." },
-  VOLVO_B: { reliability: "ok", reliabilityTitle: "CORRECTO: Volvo B3/B4/B5 mild hybrid", reliabilityNote: "Motor Ingenium de gasolina con hibridación ligera 48 V y correa. Correcto con mantenimiento oficial; revisa el módulo 48 V y el filtro de partículas en uso urbano." },
+  VOLVO_B: { reliability: "ok", reliabilityTitle: "CORRECTO: Volvo B3/B4/B5 mild hybrid", reliabilityNote: "Familia de gasolina Volvo Drive-E/VEA con hibridación ligera de 48 V; no es JLR Ingenium. Revisa historial, actualizaciones y el sistema 48 V en la unidad concreta." },
   VOLVO_T8: { reliability: "warn", reliabilityTitle: "PRECAUCIÓN: Volvo T8 Recharge PHEV", reliabilityNote: "Combinación de motor turbo/sobrealimentado y sistema eléctrico de 400 V. Averías caras y depreciación alta; exige batería con garantía vigente." },
   SSY_22: { reliability: "ok", reliabilityTitle: "CORRECTO: SsangYong 2.2 diésel", reliabilityNote: "Bloque derivado de tecnología Mercedes, robusto y barato de reparar, con caja Aisin fiable. Poco valor residual: compra muy barato y vende rápido." },
   F1A: { reliability: "gold", reliabilityTitle: "FURGÓN INDESTRUCTIBLE: Iveco 2.3 MultiJet (F1A)", reliabilityNote: "El motor de Daily, Ducato y Jumper: cadena, inyección common-rail y 500.000 km de vida útil. La mejor base para camperizar o para reparto en Galicia." },

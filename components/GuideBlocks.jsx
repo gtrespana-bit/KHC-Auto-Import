@@ -1,8 +1,8 @@
 import Image from 'next/image';
-import { Check, Lightbulb } from 'lucide-react';
+import { BookOpenCheck, Check, ExternalLink, Lightbulb } from 'lucide-react';
 
 // Renderizador único de bloques editoriales de la Guía de compra.
-// Tipos: p | h2 | ul | tip | data | img. Lo comparten los artículos
+// Tipos: p | h2 | ul | tip | data | img | sources. Lo comparten los artículos
 // (/guia/[slug]) y las fichas de motor (/guia/motores/[slug]).
 export default function GuideBlock({ block, first }) {
   switch (block.t) {
@@ -69,6 +69,28 @@ export default function GuideBlock({ block, first }) {
             ))}
           </dl>
         </div>
+      );
+    case 'sources':
+      return (
+        <section className="mt-10 border border-ink-900/10 bg-ivory px-5 py-5 sm:px-6" aria-label={block.title || 'Fuentes y alcance'}>
+          <div className="flex items-start gap-3">
+            <BookOpenCheck className="mt-0.5 h-5 w-5 shrink-0 text-gold-700" aria-hidden="true" />
+            <div>
+              <h2 className="font-display text-lg font-semibold text-ink-900">{block.title || 'Fuentes y alcance'}</h2>
+              {block.scope && <p className="mt-2 text-xs leading-relaxed text-ink-500">{block.scope}</p>}
+            </div>
+          </div>
+          <ul className="mt-4 space-y-4 border-t border-ink-900/10 pt-4">
+            {block.items.map((item) => (
+              <li key={item.url}>
+                <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-900 underline decoration-ink-900/20 underline-offset-4 hover:decoration-ink-900">
+                  {item.label} <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                </a>
+                {item.note && <p className="mt-1 text-xs leading-relaxed text-ink-500">{item.note}</p>}
+              </li>
+            ))}
+          </ul>
+        </section>
       );
     default:
       return null;
