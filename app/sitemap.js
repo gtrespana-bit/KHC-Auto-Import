@@ -1,9 +1,10 @@
 import { GUIDE_POSTS } from '@/lib/guia.js';
+import { MOTORS } from '@/lib/motores.js';
 import { getListings } from '@/lib/listings.js';
 import { site } from '@/lib/site.js';
 
 export default async function sitemap() {
-  const staticRoutes = ['', '/coches', '/como-funciona', '/guia', '/garantia', '/encargo', '/compramos-tu-coche', '/contacto', '/legal/aviso-legal', '/legal/privacidad', '/legal/cookies'].map(
+  const staticRoutes = ['', '/coches', '/como-funciona', '/guia', '/guia/motores', '/garantia', '/encargo', '/compramos-tu-coche', '/contacto', '/legal/aviso-legal', '/legal/privacidad', '/legal/cookies'].map(
     (path) => ({
       url: `${site.url}${path}`,
       lastModified: new Date(),
@@ -32,5 +33,12 @@ export default async function sitemap() {
     priority: 0.6,
   }));
 
-  return [...staticRoutes, ...listingRoutes, ...guiaRoutes];
+  const motorRoutes = MOTORS.map((motor) => ({
+    url: `${site.url}/guia/motores/${motor.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly',
+    priority: 0.6,
+  }));
+
+  return [...staticRoutes, ...listingRoutes, ...guiaRoutes, ...motorRoutes];
 }

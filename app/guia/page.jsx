@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Clock } from 'lucide-react';
+import { ArrowRight, Clock, Wrench } from 'lucide-react';
 import { GUIDE_POSTS } from '@/lib/guia.js';
 import { site } from '@/lib/site.js';
 
@@ -36,6 +36,31 @@ export default function GuiaPage() {
             Sin relleno y sin consejos de folleto: datos que sirven para decidir.
           </p>
         </header>
+
+        <Link
+          href="/guia/motores"
+          className="group mt-12 flex flex-col gap-6 border border-gold-400/50 bg-gold-100/60 p-8 sm:flex-row sm:items-center sm:p-10"
+        >
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-gold-400/60 bg-white">
+            <Wrench className="h-6 w-6 text-gold-600" strokeWidth={1.6} />
+          </div>
+          <div className="flex-1">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-700">
+              Registro de fiabilidad
+            </p>
+            <h2 className="display mt-2 text-2xl font-semibold text-ink-900 transition group-hover:text-gold-700 sm:text-3xl">
+              Guía de motores: cuáles comprar y de cuáles huir
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-600">
+              Las fichas públicas de los motores más buscados del mercado de ocasión —del eterno 1.5
+              dCi al temido N47—, con el mismo criterio que usamos al comprar: qué falla, cuánto
+              cuesta y qué haríamos nosotros.
+            </p>
+          </div>
+          <span className="link-gold shrink-0">
+            Ver fichas <ArrowRight className="h-4 w-4" />
+          </span>
+        </Link>
 
         <div className="mt-14 divide-y divide-ink-900/10 border-y border-ink-900/10">
           {GUIDE_POSTS.map((post) => {
