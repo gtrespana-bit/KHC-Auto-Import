@@ -4,10 +4,11 @@ import 'leaflet/dist/leaflet.css';
 import {
   MapPin, Navigation, Fuel, Receipt, ShieldCheck, Truck,
   Car, Route, ExternalLink, ArrowRight, RotateCcw, Info,
-  Luggage, BatteryCharging, Map, Moon, Satellite, Mountain,
+  Luggage, BatteryCharging, Map, Moon, Mountain,
 } from 'lucide-react';
 import { Card, Button, Field, Input, Money, Select, Stat, SectionTitle, Badge, Alert, cx } from '../components/ui.jsx';
 import { eur, eur0, numEs } from '../lib/format.js';
+import { DEFAULT_TRIP_MAP_STYLE_ID, TRIP_MAP_STYLES } from '../domain/tripMap.js';
 import {
   TRIP_VEHICLES,
   TRIP_VEHICLE_BRANDS,
@@ -53,71 +54,6 @@ const DEST_PRESETS = [
   { id: 'barcelona', name: 'Barcelona, España', short: 'Barcelona', lat: 41.3874, lon: 2.1686 },
 ];
 
-const CARTO_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a>';
-const ESRI_IMAGERY_ATTRIBUTION = 'Imagery &copy; Esri, Maxar, Earthstar Geographics, and the GIS User Community';
-const ESRI_REFERENCE_ATTRIBUTION = '&copy; Esri, HERE, Garmin, &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>, and the GIS user community';
-
-const MAP_STYLES = [
-  {
-    id: 'light',
-    label: 'Claro',
-    description: 'Callejero claro, ideal para leer ciudades y carreteras',
-    icon: Map,
-    layers: [{
-      url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-      attribution: CARTO_ATTRIBUTION,
-      maxZoom: 20,
-      subdomains: 'abcd',
-    }],
-  },
-  {
-    id: 'dark',
-    label: 'Noche',
-    description: 'Callejero oscuro de alto contraste',
-    icon: Moon,
-    layers: [{
-      url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-      attribution: CARTO_ATTRIBUTION,
-      maxZoom: 20,
-      subdomains: 'abcd',
-    }],
-  },
-  {
-    id: 'satellite',
-    label: 'Satélite',
-    description: 'Imagen satelital con carreteras y etiquetas superpuestas',
-    icon: Satellite,
-    layers: [
-      {
-        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        attribution: ESRI_IMAGERY_ATTRIBUTION,
-        maxZoom: 19,
-      },
-      {
-        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',
-        attribution: ESRI_REFERENCE_ATTRIBUTION,
-        maxZoom: 19,
-        opacity: 0.9,
-      },
-      {
-        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
-        attribution: ESRI_REFERENCE_ATTRIBUTION,
-        maxZoom: 19,
-      },
-    ],
-  },
-  {
-    id: 'terrain',
-    label: 'Relieve',
-    description: 'Relieve sombreado y topografía para explorar el terreno',
-    icon: Mountain,
-    layers: [{
-      url: 'https://tile.opentopomap.org/{z}/{x}/{y}.png',
-      attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>, <a href="https://viewfinderpanoramas.org/" target="_blank" rel="noopener noreferrer">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org" target="_blank" rel="noopener noreferrer">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener noreferrer">CC-BY-SA</a>)',
-      maxZoom: 17,
-    }],
-  },
-];
 
 // Catálogo local con marca, modelo, motorización y ficha técnica. Si la versión
 // no existe en el catálogo, los tres campos siguen siendo editables y se puede
@@ -131,6 +67,7 @@ const vehicleRecordsForModel = (brand, model) => vehicleRecordsForBrand(brand).f
   (vehicle) => normalizeTripText(vehicle.model) === normalizeTripText(model),
 );
 const average = (values) => values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+const MAP_STYLE_ICONS = { light: Map, dark: Moon, roads: Navigation, terrain: Mountain };
 
 // ============================================================================
 //  ESTIMADOR DE PEAJES POR TRAMO Y CORREDOR (referencias editables)
@@ -214,7 +151,7 @@ function estimateRouteTollsAndBreakdown({ coords, distanceKm, durationHours, rou
 
 export default function TripCalculatorView({ onApplyToSimulator }) {
   // --- Estado de Origen y Destino ------------------------------------------
-  const [mapStyleId, setMapStyleId] = useState('light');
+  const [mapStyleId, setMapStyleId] = useState(DEFAULT_TRIP_MAP_STYLE_ID);
   const [origin, setOrigin] = useState(ORIGIN_PRESETS[0]); // Frankfurt
   const [dest, setDest] = useState(DEST_PRESETS[0]); // A Coruña
   const [originQuery, setOriginQuery] = useState(ORIGIN_PRESETS[0].name);
@@ -683,7 +620,7 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return undefined;
-    const selectedStyle = MAP_STYLES.find((style) => style.id === mapStyleId) || MAP_STYLES[0];
+    const selectedStyle = TRIP_MAP_STYLES.find((style) => style.id === mapStyleId) || TRIP_MAP_STYLES[0];
     const tileGroup = L.layerGroup();
 
     selectedStyle.layers.forEach((layer) => {
@@ -1332,24 +1269,27 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
                     aria-label="Seleccionar estilo del mapa"
                     className="inline-flex flex-wrap items-center gap-1 rounded-xl border border-slate-700/80 bg-slate-950/80 p-1 shadow-inner shadow-black/20"
                   >
-                    {MAP_STYLES.map(({ id, label, description, icon: StyleIcon }) => (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => setMapStyleId(id)}
-                        aria-pressed={mapStyleId === id}
-                        title={description}
-                        className={cx(
-                          'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-950',
-                          mapStyleId === id
-                            ? 'bg-amber-400 text-slate-950 shadow-md shadow-amber-950/30'
-                            : 'text-slate-400 hover:bg-slate-800 hover:text-white',
-                        )}
-                      >
-                        <StyleIcon className="h-3.5 w-3.5" aria-hidden="true" />
-                        <span>{label}</span>
-                      </button>
-                    ))}
+                    {TRIP_MAP_STYLES.map(({ id, label, description }) => {
+                      const StyleIcon = MAP_STYLE_ICONS[id] || Map;
+                      return (
+                        <button
+                          key={id}
+                          type="button"
+                          onClick={() => setMapStyleId(id)}
+                          aria-pressed={mapStyleId === id}
+                          title={description}
+                          className={cx(
+                            'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-950',
+                            mapStyleId === id
+                              ? 'bg-amber-400 text-slate-950 shadow-md shadow-amber-950/30'
+                              : 'text-slate-400 hover:bg-slate-800 hover:text-white',
+                          )}
+                        >
+                          <StyleIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                          <span>{label}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
                 <span className="text-[10px] text-slate-500">
