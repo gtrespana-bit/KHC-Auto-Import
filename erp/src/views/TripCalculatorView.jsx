@@ -573,10 +573,10 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
         zoom: 5,
         zoomControl: true,
       });
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap &copy; CARTO',
-        subdomains: 'abcd',
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
         maxZoom: 19,
+        className: 'dark-tiles',
       }).addTo(map);
       mapInstanceRef.current = map;
     }
