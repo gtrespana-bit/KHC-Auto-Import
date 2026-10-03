@@ -1,8 +1,9 @@
+import { GUIDE_POSTS } from '@/lib/guia.js';
 import { getListings } from '@/lib/listings.js';
 import { site } from '@/lib/site.js';
 
 export default async function sitemap() {
-  const staticRoutes = ['', '/coches', '/como-funciona', '/garantia', '/encargo', '/compramos-tu-coche', '/contacto', '/legal/aviso-legal', '/legal/privacidad', '/legal/cookies'].map(
+  const staticRoutes = ['', '/coches', '/como-funciona', '/guia', '/garantia', '/encargo', '/compramos-tu-coche', '/contacto', '/legal/aviso-legal', '/legal/privacidad', '/legal/cookies'].map(
     (path) => ({
       url: `${site.url}${path}`,
       lastModified: new Date(),
@@ -24,5 +25,12 @@ export default async function sitemap() {
     /* si la base de datos no responde, el sitemap sale solo con las páginas fijas */
   }
 
-  return [...staticRoutes, ...listingRoutes];
+  const guiaRoutes = GUIDE_POSTS.map((post) => ({
+    url: `${site.url}/guia/${post.slug}`,
+    lastModified: new Date(post.date),
+    changeFrequency: 'monthly',
+    priority: 0.6,
+  }));
+
+  return [...staticRoutes, ...listingRoutes, ...guiaRoutes];
 }
