@@ -12,6 +12,15 @@ import {
 // con «API KEY REQUIRED», así que el mapa se rompe sin lanzar ni un error.
 const KEY_GATED = /cartocdn|carto\.com|arcgisonline|googleapis|mapbox|maptiler|stadiamaps|thunderforest|here\.com|tomtom|api[-_]?key|access[_-]?token|[?&](?:key|token|apiKey|apikey)=/i;
 
+// Los servidores voluntarios de la OSMF responden 403 a esta aplicación
+// («App is not following the tile usage policy») y su imagen de bloqueo se
+// carga sin error, así que ni siquiera se puede detectar desde el navegador.
+const BLOCKED_HOSTS = /(^|\.)tile\.openstreetmap\.org/;
+
+// Servidores que sí han demostrado servir teselas a la app en producción:
+// por eso abren la cadena de todos los estilos.
+const PROVEN_HOSTS = /(^|\.)(openstreetmap\.fr|opentopomap\.org|tile-cyclosm\.openstreetmap\.fr)/;
+
 assert.equal(DEFAULT_TRIP_MAP_STYLE_ID, 'light', 'the default map style should be available without configuration');
 assert.ok(TRIP_MAP_STYLES.some((style) => style.id === 'roads'), 'a keyless road-map style is available');
 assert.ok(TRIP_MAP_STYLES.some((style) => style.id === 'terrain'), 'terrain style remains available');
@@ -43,6 +52,7 @@ for (const style of TRIP_MAP_STYLES) {
       assert.ok(source.subdomains, `${style.id} declares subdomains when the URL uses {s}`);
     }
     assert.doesNotMatch(source.url, KEY_GATED, `${style.id} must not use a key-protected map tile endpoint (${source.url})`);
+    assert.doesNotMatch(source.url, BLOCKED_HOSTS, `${style.id} must not use the OSMF volunteer tiles, which answer 403 to this app (${source.url})`);
     assert.doesNotMatch(source.attribution, /\bAPI key\b/i, `${style.id} attribution must not advertise a key requirement`);
 
     // Leaflet rompe al generar la URL de cada tesela si recibe
@@ -57,9 +67,16 @@ for (const style of TRIP_MAP_STYLES) {
   }
 
   // Los estilos de calle tienen respaldo: al menos dos servidores distintos.
-  if (style.id !== 'terrain') {
-    assert.ok(sources.length >= 2, `${style.id} has a fallback tile server`);
-  }
+  assert.ok(sources.length >= 2, `${style.id} has a fallback tile server`);
+
+  // El servidor que se usa primero es de los que ya funcionan en producción:
+  // la conmutación automática no detecta los bloqueos que llegan como imagen
+  // válida, así que el valor por defecto tiene que ser bueno sí o sí.
+  assert.match(
+    new URL(sources[0].url.replace(/\{[sxyz]\}/g, '1')).hostname,
+    PROVEN_HOSTS,
+    `${style.id} starts on a tile server proven to work for this app (${sources[0].url})`,
+  );
 }
 
 // El estilo oscuro se resuelve con CSS, no con un servidor de pago.

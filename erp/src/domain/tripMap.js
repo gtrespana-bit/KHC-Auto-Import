@@ -1,59 +1,50 @@
 // ============================================================================
 //  MAPA BASE DE LA CALCULADORA DE VIAJES — SOLO SERVIDORES SIN CLAVE DE API
 // ----------------------------------------------------------------------------
-//  Contexto (octubre de 2026): CARTO dejó de servir sus basemaps anónimos.
-//  `basemaps.cartocdn.com` sigue respondiendo 200 OK, pero el PNG que devuelve
-//  lleva el marco de agua «API KEY REQUIRED» incrustado en la propia imagen:
-//  ni el navegador ni Leaflet detectan un error, así que el mapa se queda
-//  cubierto de teselas inservibles sin que salte `tileerror`.
+//  Historial de por qué NO aparecen algunos servidores conocidos:
 //
-//  Por eso aquí NO hay ningún proveedor con clave:
-//    · se usan servidores comunitarios de OpenStreetMap (sin cuenta ni clave);
+//   1. CARTO (`basemaps.cartocdn.com`) dejó de servir sus basemaps sin clave:
+//      responde 200 OK con un PNG que lleva el marco de agua «API KEY REQUIRED»
+//      incrustado. Ni el navegador ni Leaflet ven un error, así que el mapa se
+//      queda cubierto de teselas inservibles sin que salte `tileerror`.
+//   2. Los servidores voluntarios de la OSMF (`tile.openstreetmap.org`) sí
+//      cumplen su política de uso y **bloquean esta aplicación con un 403**
+//      («App is not following the tile usage policy»): son para uso comunitario
+//      y de prueba, no para una app de empresa, y responden con una imagen de
+//      bloqueo que además se carga correctamente (otro caso indetectable).
+//
+//  Por eso aquí NO hay ningún proveedor con clave ni servidores que bloqueen:
+//    · se usan servidores comunitarios de OpenStreetMap (sin cuenta ni clave)
+//      que admiten este uso: capítulos nacionales (OSM France) y OpenTopoMap;
 //    · el estilo «Noche» se consigue con un filtro CSS sobre las mismas teselas
 //      (ver `.trip-map-tiles--night` en `erp/src/index.css`) en lugar de con un
 //      servidor propio de teselas oscuras que hoy casi siempre pide clave;
 //    · cada estilo declara una CADENA de servidores: si el primero falla o no
 //      responde, la vista pasa automáticamente al siguiente (ver
-//      `TripCalculatorView.jsx`), de modo que un cambio de política en un
-//      proveedor ya no deja el mapa en blanco;
+//      `TripCalculatorView.jsx`) y el usuario puede forzar el cambio con el
+//      botón «Cambiar servidor» cuando el bloqueo llega en forma de imagen
+//      válida (que es justo lo que hacen CARTO y la OSMF);
 //    · quien quiera un proveedor de pago (MapTiler, Thunderforest, CARTO con
 //      clave…) solo tiene que definir `VITE_TRIP_MAP_TILE_URL`: se usa tal cual
-//      para todos los estilos, sin tocar código.
-//
-//  Aviso de uso: las teselas comunitarias de OSM son para tráfico moderado
-//  (es el caso de un ERP interno). Si algún día crece el consumo, se cambia la
-//  URL por la del proveedor contratado con la variable de entorno de arriba.
+//      para todos los estilos, sin tocar código. **Es la opción recomendada en
+//      cuanto el consumo deje de ser anecdótico.**
 // ============================================================================
 
-const OSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>';
 const OSM_DE_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a> · Teselas: <a href="https://www.openstreetmap.de/" target="_blank" rel="noopener noreferrer">openstreetmap.de (FOSSGIS)</a>';
 const OSM_FR_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a> · Renderizado: <a href="https://openstreetmap.fr/" target="_blank" rel="noopener noreferrer">OSM France</a>';
+const OSM_FR_HOT_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a> · Teselas: <a href="https://www.hotosm.org/" target="_blank" rel="noopener noreferrer">Humanitarian OpenStreetMap Team</a> / <a href="https://openstreetmap.fr/" target="_blank" rel="noopener noreferrer">OSM France</a>';
+const CYCLOSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a> · Renderizado: <a href="https://www.cyclosm.org/" target="_blank" rel="noopener noreferrer">CyclOSM</a> / <a href="https://openstreetmap.fr/" target="_blank" rel="noopener noreferrer">OSM France</a>';
 const OPENTOPO_ATTRIBUTION = 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>, <a href="https://viewfinderpanoramas.org/" target="_blank" rel="noopener noreferrer">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org" target="_blank" rel="noopener noreferrer">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener noreferrer">CC-BY-SA</a>)';
 
 // --- Servidores disponibles (todos sin clave) -------------------------------
+//
+// Primero van los servidores que ya han demostrado servir teselas a esta
+// aplicación en producción: el capítulo francés (`*.openstreetmap.fr`) y
+// OpenTopoMap. Así el estilo por defecto funciona sin depender de la
+// conmutación automática, que no puede detectar los bloqueos que llegan
+// disfrazados de imagen válida.
 
-// OpenStreetMap estándar: el callejero de referencia, en color.
-const OSM_STANDARD = {
-  id: 'osm',
-  label: 'OpenStreetMap',
-  url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-  attribution: OSM_ATTRIBUTION,
-  maxZoom: 19,
-  maxNativeZoom: 19,
-};
-
-// Réplica alemana de la comunidad (FOSSGIS): mismos datos, otro servidor.
-// Sirve tanto de alternativa como de respaldo si el principal va lento o cae.
-const OSM_DE = {
-  id: 'osm-de',
-  label: 'OpenStreetMap Alemania',
-  url: 'https://tile.openstreetmap.de/{z}/{x}/{y}.png',
-  attribution: OSM_DE_ATTRIBUTION,
-  maxZoom: 19,
-  maxNativeZoom: 19,
-};
-
-// Estilo OSM France: más detalle de vías, nombres y puntos de interés.
+// Estilo OSM France: callejero en color con buen detalle de vías y nombres.
 const OSM_FR = {
   id: 'osm-fr',
   label: 'OSM France',
@@ -62,6 +53,40 @@ const OSM_FR = {
   attribution: OSM_FR_ATTRIBUTION,
   maxZoom: 20,
   maxNativeZoom: 20,
+};
+
+// Estilo «humanitario» del mismo capítulo francés: mismo servidor, más
+// detalle de vías, nombres y puntos de interés.
+const OSM_FR_HOT = {
+  id: 'osm-fr-hot',
+  label: 'OSM France · Detalle',
+  url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+  subdomains: 'abc',
+  attribution: OSM_FR_HOT_ATTRIBUTION,
+  maxZoom: 20,
+  maxNativeZoom: 19,
+};
+
+// CyclOSM: render que resalta la red viaria. Lo sirve también OSM France.
+const CYCLOSM = {
+  id: 'cyclosm',
+  label: 'CyclOSM (OSM France)',
+  url: 'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
+  subdomains: 'abc',
+  attribution: CYCLOSM_ATTRIBUTION,
+  maxZoom: 20,
+  maxNativeZoom: 19,
+};
+
+// Réplica alemana de la comunidad (FOSSGIS): mismos datos, otra infraestructura.
+// Entra como respaldo si los servidores franceses fallan.
+const OSM_DE = {
+  id: 'osm-de',
+  label: 'OpenStreetMap Alemania (FOSSGIS)',
+  url: 'https://tile.openstreetmap.de/{z}/{x}/{y}.png',
+  attribution: OSM_DE_ATTRIBUTION,
+  maxZoom: 19,
+  maxNativeZoom: 19,
 };
 
 // Topográfico con relieve sombreado y curvas de nivel.
@@ -83,27 +108,27 @@ export const TRIP_MAP_STYLES = [
   {
     id: 'light',
     label: 'Claro',
-    description: 'Callejero OpenStreetMap en color; no necesita API key',
-    sources: [OSM_STANDARD, OSM_DE, OSM_FR],
+    description: 'Callejero en color (OSM France); no necesita API key',
+    sources: [OSM_FR, OSM_DE, CYCLOSM],
   },
   {
     id: 'dark',
     label: 'Noche',
-    description: 'Mismas teselas de OpenStreetMap oscurecidas con un filtro (sin API key)',
+    description: 'Mismas teselas oscurecidas con un filtro CSS (sin API key)',
     tileClassName: 'trip-map-tiles--night',
-    sources: [OSM_STANDARD, OSM_DE, OSM_FR],
+    sources: [OSM_FR, OSM_DE, CYCLOSM],
   },
   {
     id: 'roads',
     label: 'Carreteras',
-    description: 'Estilo OSM France: más detalle de vías, nombres y puntos de interés',
-    sources: [OSM_FR, OSM_STANDARD, OSM_DE],
+    description: 'Estilo detalle: más vías, nombres y puntos de interés',
+    sources: [OSM_FR_HOT, OSM_FR, OSM_DE],
   },
   {
     id: 'terrain',
     label: 'Relieve',
     description: 'Relieve sombreado y topografía para explorar el terreno',
-    sources: [OPENTOPOMAP, OSM_STANDARD],
+    sources: [OPENTOPOMAP, OSM_FR, OSM_DE],
   },
 ];
 

@@ -1354,20 +1354,32 @@ export default function TripCalculatorView({ onApplyToSimulator }) {
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   {tileStatus === 'loading' && <Badge tone="sky">Cargando mapa…</Badge>}
-                  {tileStatus === 'ready' && tileSourceIndex > 0 && (
-                    <Badge tone="amber">Servidor alternativo: {activeSource?.label || 'OpenStreetMap'}</Badge>
+                  {tileStatus === 'ready' && (
+                    <Badge tone={tileSourceIndex > 0 ? 'amber' : 'slate'}>
+                      {tileSourceIndex > 0 ? 'Servidor alternativo' : 'Servidor'}: {activeSource?.label || 'OpenStreetMap'}
+                    </Badge>
                   )}
                   {tileStatus === 'error' && <Badge tone="rose">Servidor de mapas no disponible</Badge>}
-                  {(tileStatus === 'error' || (tileStatus === 'ready' && tileSourceIndex > 0)) && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      icon={RotateCcw}
-                      onClick={() => setTileFeed({ styleId: activeStyle.id, index: 0, status: 'loading' })}
-                    >
-                      Reintentar
-                    </Button>
-                  )}
+                  {/* Hay bloqueos que llegan como una imagen válida (CARTO
+                      devuelve «API KEY REQUIRED» y la OSMF su aviso de 403 sin
+                      lanzar ni un error), así que el usuario siempre puede
+                      saltar al siguiente servidor de la cadena a mano. */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={RotateCcw}
+                    title="Prueba con el siguiente servidor de teselas de OpenStreetMap"
+                    onClick={() => setTileFeed((prev) => {
+                      const current = prev.styleId === activeStyle.id ? prev.index : 0;
+                      return {
+                        styleId: activeStyle.id,
+                        index: (current + 1) % Math.max(activeSources.length, 1),
+                        status: 'loading',
+                      };
+                    })}
+                  >
+                    Cambiar servidor
+                  </Button>
                   <span className="text-[10px] text-slate-500">
                     Teselas de OpenStreetMap, sin API key · atribuciones en la esquina inferior
                   </span>

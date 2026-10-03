@@ -105,16 +105,25 @@ OpenStreetMap (`erp/src/domain/tripMap.js`):
 
 | Estilo | Servidor | Nota |
 | --- | --- | --- |
-| Claro | OpenStreetMap estándar | Callejero en color |
-| Noche | OpenStreetMap + filtro CSS | Mismas teselas, oscurecidas sin servidor de pago |
-| Carreteras | OSM France | Más detalle de vías, nombres y puntos de interés |
+| Claro | OSM France (`osmfr`) | Callejero en color |
+| Noche | OSM France + filtro CSS | Mismas teselas, oscurecidas sin servidor de pago |
+| Carreteras | OSM France (`hot`) | Más detalle de vías, nombres y puntos de interés |
 | Relieve | OpenTopoMap | Relieve sombreado y curvas de nivel |
 
-Cada estilo lleva una **cadena de servidores**: si el primero falla, no responde o empieza a
-exigir clave, la aplicación salta al siguiente sola (lo verás como «Servidor alternativo»
-junto al selector de estilo). Eso evita repetir lo que pasó con CARTO: sus teselas
-`basemaps.cartocdn.com` dejaron de servirse sin clave y devolvían un PNG con el marco de agua
-«API KEY REQUIRED» en lugar de mapa.
+Cada estilo lleva una **cadena de servidores** y el botón **«Cambiar servidor»** (junto al
+selector de estilo) salta al siguiente de la lista. Hace falta ese botón porque hay dos
+bloqueos que **no lanzan ningún error** y que por tanto la conmutación automática no puede
+detectar:
+
+- **CARTO** (`basemaps.cartocdn.com`) dejó de servir sus teselas sin clave: responde 200 OK
+  con un PNG que lleva el marco de agua «API KEY REQUIRED» incrustado.
+- **Los servidores voluntarios de la OSMF** (`tile.openstreetmap.org`) responden **403**
+  («App is not following the tile usage policy») porque son para uso comunitario y de
+  prueba, no para una aplicación de empresa. Por eso ya no se usan.
+
+Si algún día un servidor vuelve a marcar o bloquear las teselas, pulsa **«Cambiar servidor»**:
+el mapa pasa al siguiente de la cadena (OpenStreetMap Alemania/FOSSGIS, CyclOSM…) sin esperar
+a nadie.
 
 Los servidores comunitarios son para **uso moderado**, que es el de un ERP con pocos usuarios.
 Si el consumo crece (o quieres un proveedor con SLA), contrata uno y define la variable
