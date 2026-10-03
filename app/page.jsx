@@ -48,7 +48,7 @@ const SERVICES = [
 export default async function HomePage() {
   const listings = await getListings();
   const stock = forSale(listings);
-  const featured = stock.slice(0, 3);
+  const featured = stock;
 
   return (
     <>
@@ -187,9 +187,9 @@ export default async function HomePage() {
       <section className="bg-ink-950 text-white">
         <div className="container-x grid gap-12 py-20 sm:py-24 lg:grid-cols-[1.05fr_1fr]">
           <div>
-            <p className="eyebrow-light">De dónde vienen nuestros coches</p>
+            <p className="eyebrow-light">Procedencia</p>
             <h2 className="display-light mt-3 text-3xl sm:text-4xl">
-              Compramos donde está la unidad correcta, no donde está la moda
+              Nacional o importado: el mismo control
             </h2>
             <p className="mt-5 text-sm leading-relaxed text-white/65">
               Trabajamos sobre todo con stock nacional y, cuando compensa, traemos la unidad de fuera:
@@ -208,7 +208,7 @@ export default async function HomePage() {
 
           <div className="lg:pl-6">
             <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-gold-400">
-              Mercados en los que compramos
+              Cuando compramos fuera
             </p>
             <ul className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-white/10 pt-5 text-sm text-white/75 sm:grid-cols-3">
               {site.origins.map((country) => (

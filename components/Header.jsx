@@ -5,25 +5,12 @@ import Link from 'next/link';
 import { Menu, X, Phone, ShieldCheck, MapPin } from 'lucide-react';
 import { site, nav, navSecondary } from '../lib/site.js';
 
-/** Monograma de la marca: sobrio, sin iconos de coche ni adornos. */
-function Wordmark({ tone = 'dark' }) {
-  const dark = tone === 'dark';
+/** Monograma de la marca: logo real (silueta + KHC) sin texto adicional. */
+function Wordmark() {
   return (
-    <span className="flex items-baseline gap-2">
-      <span
-        className={`font-display text-[22px] font-semibold leading-none tracking-[0.02em] ${
-          dark ? 'text-ink-900' : 'text-white'
-        }`}
-      >
-        KHC
-      </span>
-      <span
-        className={`text-[10px] font-semibold uppercase leading-none tracking-[0.3em] ${
-          dark ? 'text-ink-400' : 'text-white/60'
-        }`}
-      >
-        Auto Import
-      </span>
+    <span className="flex items-center">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/brand/logo-khc-header.png" alt="KHC Auto Import" className="h-9 w-auto sm:h-10" />
     </span>
   );
 }

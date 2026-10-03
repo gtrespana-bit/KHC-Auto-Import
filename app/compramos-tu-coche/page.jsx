@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { BadgeEuro, Check } from 'lucide-react';
+import { ArrowRight, BadgeEuro, Check } from 'lucide-react';
 import LeadForm from '@/components/LeadForm.jsx';
 import { site } from '@/lib/site.js';
 
@@ -47,6 +47,12 @@ export default function CompramosTuCochePage() {
               Si estás pensando en cambiar de coche, valoramos el tuyo y te hacemos una oferta clara.
               Nos encargamos de la transferencia y, si lo prefieres, lo descontamos del precio de tu próximo
               vehículo.
+            </p>
+            <p className="mt-4 text-sm leading-relaxed text-ink-500">
+              ¿Solo quieres saber cuánto vale hoy?{' '}
+              <Link href="/valoracion" className="link-gold">
+                Pide tu valoración gratuita <ArrowRight className="h-4 w-4" />
+              </Link>
             </p>
 
             <ul className="mt-9 space-y-3.5">
