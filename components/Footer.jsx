@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import Link from 'next/link';
 import { MapPin, Mail, Phone, Clock, ShieldCheck } from 'lucide-react';
 import { site, nav, navSecondary, legalLinks } from '../lib/site.js';
@@ -5,15 +7,19 @@ import { isDemo } from '../lib/listings.js';
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  // Si el logo oficial está subido en public/brand/, se usa en lugar de la réplica SVG.
+  const hasBrandPng = fs.existsSync(path.join(process.cwd(), 'public', 'brand', 'logo-khc.png'));
 
   return (
     <footer className="mt-24 bg-ink-950 text-white/70">
       <div className="container-x grid gap-12 py-16 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.1fr]">
         <div>
-          <p className="flex items-baseline gap-2">
-            <span className="font-display text-[22px] font-semibold text-white">KHC</span>
-            <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/50">Auto Import</span>
-          </p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={hasBrandPng ? '/brand/logo-khc.png' : '/images/logo-khc.svg'}
+            alt="KHC Auto Import"
+            className="h-28 w-auto"
+          />
           <p className="mt-5 text-sm leading-relaxed">
             {site.claim}. Vendemos vehículos de ocasión seleccionados —stock nacional e importado de toda
             Europa— revisados, con su historial verificado y con garantía mínima de 12 meses por escrito.
