@@ -219,6 +219,7 @@ export default function FleetView({ onOpenVehicle, autoOpenId, onAutoOpened }) {
 
       {editing && (
         <VehicleForm
+          key={editing.id || 'nuevo'}
           open
           vehicle={editing.id ? editing : null}
           onClose={() => setEditing(null)}

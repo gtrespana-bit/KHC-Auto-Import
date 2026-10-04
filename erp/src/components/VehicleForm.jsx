@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Calculator, Save, X, ShieldAlert, RefreshCw, BadgeCheck, Camera, Percent } from 'lucide-react';
+import { Calculator, Save, X, ShieldAlert, RefreshCw, BadgeCheck, Camera, Percent, ClipboardCheck } from 'lucide-react';
 import { Modal, Field, Input, Money, Select, Textarea, Checkbox, Button, Row, Badge, Alert, Card, cx } from './ui.jsx';
 import { useStore } from '../lib/store.jsx';
 import { uid, todayISO, eur, eur0, pct as pctFmt } from '../lib/format.js';
@@ -7,6 +7,8 @@ import { STATUS_FLOW, vehiclePnl, financeOffer } from '../domain/finance.js';
 import { landingCost, recalcVehicleTaxes, calcIedmt, calcPurchaseTax, computeCvf, valorVenal } from '../domain/taxes.js';
 import { DOCUMENT_CHECKLIST } from '../domain/compliance.js';
 import { searchVehicles, VEHICLE_DB, RELIABILITY_META } from '../data/vehicleDatabase.js';
+import { getVehicleInspectionGuide, searchInspectionPresets } from '../data/vehicleInspection.js';
+import VehicleInspectionChecklist from './VehicleInspectionChecklist.jsx';
 import { PhotoManager } from './Photos.jsx';
 import WebPublicationPanel from './WebPublicationPanel.jsx';
 
@@ -60,9 +62,10 @@ const COST_GROUPS = [
 
 const emptyVehicle = () => ({
   id: uid('veh'),
-  brand: '', model: '', version: '', year: new Date().getFullYear(), firstRegDate: null,
+  brand: '', model: '', version: '', engine: '', engineCode: '', year: new Date().getFullYear(), firstRegDate: null,
   km: 0, vin: '', plate: '', fuel: 'Diésel', transmission: 'Manual',
   cc: 1968, cyl: 4, cv: 150, co2: 120, badge: 'C (Verde)', newPrice: 30000, segment: 'Compacto',
+  inspectionChecks: {},
   originCountry: 'Alemania', originCity: '', sellerType: 'dealer_vat', taxMethod: 'tablas',
   buyerIsBusiness: true, status: 'prospeccion',
   purchaseDate: todayISO(), arrivalDate: null, registrationDate: null,
@@ -75,11 +78,11 @@ const emptyVehicle = () => ({
   itvDue: null, insuranceDue: null, imageUrl: '', rotationDays: 60,
 });
 
-export default function VehicleForm({ open, onClose, vehicle, onSaved }) {
+export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTab }) {
   const { state, saveVehicle, toast, tariffs, can } = useStore();
   const [draft, setDraft] = useState(() => (vehicle ? structuredClone(vehicle) : emptyVehicle()));
   const [query, setQuery] = useState('');
-  const [tab, setTab] = useState('ficha');
+  const [tab, setTab] = useState(() => initialTab || (vehicle?.status === 'prospeccion' ? 'revision' : 'ficha'));
   const [fin, setFin] = useState(() => ({
     entry: vehicle?.sale?.financing?.entry ?? 2000,
     apr: vehicle?.sale?.financing?.apr ?? 7.95,
@@ -104,16 +107,20 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved }) {
     [draft.sale?.price, draft.targetSalePrice, fin],
   );
   const suggestions = useMemo(() => (query.length >= 2 ? searchVehicles(query, 8) : []), [query]);
+  const inspectionPresets = useMemo(() => searchInspectionPresets(query, 4), [query]);
+  const inspectionGuide = useMemo(() => getVehicleInspectionGuide(draft), [draft]);
 
   const applyCatalog = (v) => {
     set({
-      brand: v.brand, model: v.model, version: v.version, engine: v.engine,
+      brand: v.brand, model: v.model, version: v.version, engine: v.engine, engineCode: v.engineCode || '',
       year: v.years?.[0] || draft.year, firstRegDate: `${v.years?.[0] || draft.year}-06-01`,
       fuel: v.fuel, transmission: v.transmission, cc: v.cc, cyl: v.cyl || 4, cv: v.cv,
       co2: v.co2, badge: v.badge, newPrice: v.newPrice, cvf: v.cvf, segment: v.segment,
       originCountry: v.origin || draft.originCountry, rotationDays: v.rotationDays || 60,
       reliability: v.reliability, reliabilityTitle: v.reliabilityTitle, reliabilityNote: v.reliabilityNote,
-      catalogId: v.id,
+      catalogId: v.id, inspectionPresetId: '',
+      inspectionChecks: draft.catalogId === v.id ? (draft.inspectionChecks || {}) : {},
+      inspectionProfileKey: '',
       costs: {
         ...draft.costs,
         purchase: v.dePrice ? Math.round((v.dePrice[0] + v.dePrice[1]) / 2) : draft.costs.purchase,
@@ -122,7 +129,40 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved }) {
       targetSalePrice: v.esPrice ? Math.round((v.esPrice[0] + v.esPrice[1]) / 2) : draft.targetSalePrice,
     });
     setQuery('');
-    toast(`${v.brand} ${v.model} ${v.version} cargado en la ficha`);
+    setTab('revision');
+    toast(`${v.brand} ${v.model} ${v.version} cargado · abre la revisión precompra`);
+  };
+
+  const applyInspectionPreset = (preset) => {
+    set({
+      brand: preset.brand,
+      model: preset.model,
+      version: preset.version,
+      engine: preset.engine,
+      engineCode: preset.engineCode,
+      year: preset.year,
+      firstRegDate: null,
+      fuel: preset.fuel,
+      transmission: preset.transmission,
+      cc: preset.cc,
+      cyl: preset.cyl,
+      cv: preset.cv,
+      co2: preset.co2,
+      badge: preset.badge,
+      newPrice: '',
+      catalogId: '',
+      inspectionPresetId: preset.id,
+      inspectionChecks: draft.inspectionPresetId === preset.id ? (draft.inspectionChecks || {}) : {},
+      inspectionProfileKey: '',
+      reliability: preset.reliability,
+      reliabilityTitle: preset.reliabilityTitle,
+      reliabilityNote: preset.reliabilityNote,
+      costs: { ...draft.costs, purchase: 0 },
+      targetSalePrice: 0,
+    });
+    setQuery('');
+    setTab('revision');
+    toast(`${preset.brand} ${preset.model}: guía cargada, completa los datos exactos por VIN`);
   };
 
   const applyTaxes = () => {
@@ -145,7 +185,12 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved }) {
       toast('Indica al menos marca y modelo', 'error');
       return;
     }
-    const saved = saveVehicle({ ...draft, cvf: draft.cvf || cvf });
+    const saved = saveVehicle({
+      ...draft,
+      cvf: draft.cvf || cvf,
+      inspectionChecks: draft.inspectionChecks || {},
+      inspectionProfileKey: inspectionGuide.profileKey,
+    });
     toast(`${saved.brand} ${saved.model} guardado`);
     onSaved?.(saved);
     onClose();
@@ -153,6 +198,7 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved }) {
 
   const tabs = [
     { id: 'ficha', label: 'Ficha técnica' },
+    { id: 'revision', label: 'Revisión precompra', icon: ClipboardCheck },
     { id: 'costes', label: 'Costes e impuestos' },
     { id: 'venta', label: 'Venta y cliente' },
     { id: 'docs', label: 'Documentación' },
@@ -194,6 +240,7 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved }) {
               tab === t.id ? 'bg-amber-500 text-slate-950' : 'text-slate-400 hover:bg-slate-800',
             )}
           >
+            {t.icon && <t.icon className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />}
             {t.label}
           </button>
         ))}
@@ -223,6 +270,23 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved }) {
                 ))}
               </div>
             )}
+            {inspectionPresets.length > 0 && (
+              <div className="mt-3 border-t border-slate-800 pt-3">
+                <p className="text-[11px] uppercase tracking-wider text-amber-300 font-semibold mb-1.5">Guías de inspección sin precio de catálogo</p>
+                <div className="space-y-1">
+                  {inspectionPresets.map((preset) => (
+                    <button
+                      key={preset.id}
+                      onClick={() => applyInspectionPreset(preset)}
+                      className="w-full text-left px-3 py-2 rounded-lg bg-amber-500/5 border border-amber-500/20 hover:border-amber-400/50 transition-colors"
+                    >
+                      <span className="text-sm text-slate-100">{preset.brand} {preset.model}</span>
+                      <span className="block text-[11px] text-slate-400 mt-0.5">{preset.year} · {preset.engine} · completa potencia, caja y precio con los datos del coche/VIN.</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </Card>
 
           {draft.reliability && draft.reliability !== 'ok' && (
@@ -235,6 +299,8 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved }) {
             <Field label="Marca" required><Input value={draft.brand} onChange={(v) => set({ brand: v })} list="brands" /></Field>
             <Field label="Modelo" required><Input value={draft.model} onChange={(v) => set({ model: v })} list="models" /></Field>
             <Field label="Versión / acabado" className="col-span-2"><Input value={draft.version} onChange={(v) => set({ version: v })} /></Field>
+            <Field label="Motor / familia" className="col-span-2"><Input value={draft.engine || ''} onChange={(v) => set({ engine: v })} placeholder="Ej.: 2.0 TSI EA888" /></Field>
+            <Field label="Código de motor" className="col-span-2" hint="Confírmalo con el VIN o la documentación"><Input value={draft.engineCode || ''} onChange={(v) => set({ engineCode: v })} placeholder="Ej.: código indicado en el CoC" /></Field>
             <Field label="Año"><Input type="number" value={draft.year} onChange={(v) => set({ year: v })} /></Field>
             <Field label="1ª matriculación" hint="Determina la antigüedad fiscal"><Input type="date" value={draft.firstRegDate || ''} onChange={(v) => set({ firstRegDate: v })} /></Field>
             <Field label="Kilómetros"><Input type="number" value={draft.km} onChange={(v) => set({ km: v })} /></Field>
@@ -244,7 +310,7 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved }) {
               <Select value={draft.fuel} onChange={(v) => set({ fuel: v })} options={['Diésel', 'Gasolina', 'Híbrido', 'Microhíbrido', 'Híbrido enchufable', 'Eléctrico', 'GLP', 'GNC']} />
             </Field>
             <Field label="Cambio">
-              <Select value={draft.transmission} onChange={(v) => set({ transmission: v })} options={['Manual', 'Automático', 'Automático doble embrague', 'Automático CVT', 'Directo']} />
+              <Select value={draft.transmission} onChange={(v) => set({ transmission: v })} options={['Por confirmar', 'Manual', 'Automático', 'Automático doble embrague', 'Automático CVT', 'Directo']} />
             </Field>
             <Field label="Cilindrada (cc)"><Input type="number" value={draft.cc} onChange={(v) => set({ cc: v })} /></Field>
             <Field label="Cilindros"><Input type="number" value={draft.cyl} onChange={(v) => set({ cyl: v })} /></Field>
@@ -269,6 +335,14 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved }) {
           <datalist id="brands">{[...new Set(VEHICLE_DB.map((v) => v.brand))].map((b) => <option key={b} value={b} />)}</datalist>
           <datalist id="models">{[...new Set(VEHICLE_DB.map((v) => v.model))].map((m) => <option key={m} value={m} />)}</datalist>
         </div>
+      )}
+
+      {tab === 'revision' && (
+        <VehicleInspectionChecklist
+          vehicle={draft}
+          checks={draft.inspectionChecks || {}}
+          onChange={(inspectionChecks) => set({ inspectionChecks })}
+        />
       )}
 
       {tab === 'costes' && (
