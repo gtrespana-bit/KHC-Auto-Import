@@ -99,7 +99,7 @@ export default function CatalogView({ onSimulate }) {
   const [rel, setRel] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [onlyWinners, setOnlyWinners] = useState(false);
-  const [sort, setSort] = useState('margen');
+  const [sort, setSort] = useState('margen_prudente');
   const [page, setPage] = useState(0);
   const [detail, setDetail] = useState(null);
   const coverage = useMemo(() => ({
@@ -131,11 +131,19 @@ export default function CatalogView({ onSimulate }) {
     if (sort === 'precio_asc') sorted.sort((a, b) => (a.dePrice?.[0] ?? 1e9) - (b.dePrice?.[0] ?? 1e9));
     else if (sort === 'precio_desc') sorted.sort((a, b) => (b.dePrice?.[1] ?? 0) - (a.dePrice?.[1] ?? 0));
     else if (sort === 'rotacion') sorted.sort((a, b) => (a.rotationDays ?? 999) - (b.rotationDays ?? 999));
-    else if (sort === 'margen') sorted.sort((a, b) => {
+    else if (sort === 'margen_prudente') sorted.sort((a, b) => {
       const rank = (v) => {
         const empirical = ['regresion', 'evidencia', 'evidencia_generacion'].includes(v.priceSource?.de)
           && ['regresion', 'evidencia', 'evidencia_generacion'].includes(v.priceSource?.es);
         return empirical ? (prudent(v)?.profit ?? -Infinity) : -Infinity;
+      };
+      return rank(b) - rank(a);
+    });
+    else if (sort === 'margen_total') sorted.sort((a, b) => {
+      const rank = (v) => {
+        const e = est(v);
+        if (!e || e.profit == null) return -Infinity;
+        return e.profit;
       };
       return rank(b) - rank(a);
     });
@@ -308,7 +316,8 @@ export default function CatalogView({ onSimulate }) {
               { value: 'relevancia', label: 'Orden: fiabilidad' },
               { value: 'precio_asc', label: 'Orden: precio ↑' },
               { value: 'precio_desc', label: 'Orden: precio ↓' },
-              { value: 'margen', label: 'Orden: margen prudente con evidencia' },
+              { value: 'margen_total', label: 'Orden: beneficio total (central)' },
+              { value: 'margen_prudente', label: 'Orden: margen prudente con evidencia' },
               { value: 'rotacion', label: 'Orden: venta más rápida' },
             ]}
           />

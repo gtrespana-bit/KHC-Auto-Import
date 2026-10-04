@@ -191,9 +191,9 @@ export const PREMIUM = [
   {
     b: 'Porsche', m: 'Macan', seg: 'D-SUV', dmd: 0.95,
     g: [
-      ['Macan I original', 2015, 2018, 68500, [['porsche20_252', 175, { name: '2.0 Turbo 252 CV' }], ['porsche30_340', 185, { name: 'Macan S 3.0 V6 340 CV' }], ['porsche30d_258', 155, { name: 'Macan S Diesel 3.0 V6 258 CV' }]]],
-      ['Macan I restyling', 2019, 2021, 74500, [['porsche20_252', 178, { name: '2.0 Turbo 252 CV' }], ['porsche30_354', 188, { name: 'Macan S 3.0 V6 354 CV' }], ['porsche29_380', 192, { name: 'Macan GTS 2.9 V6 380 CV' }]]],
-      ['Macan I última actualización', 2022, 2024, 78500, [['porsche20_265', 180, {}], ['porsche29_380', 192, {}]]],
+      ['Macan 95B', 2015, 2018, 68500, [['porsche20_252', 175, { name: '2.0 Turbo 252 CV' }], ['porsche30_340', 185, { name: 'Macan S 3.0 V6 340 CV' }], ['porsche30d_258', 155, { name: 'Macan S Diesel 3.0 V6 258 CV' }]]],
+      ['Macan 95B', 2019, 2021, 74500, [['porsche20_252', 178, { name: '2.0 Turbo 252 CV' }], ['porsche30_354', 188, { name: 'Macan S 3.0 V6 354 CV' }], ['porsche29_380', 192, { name: 'Macan GTS 2.9 V6 380 CV' }]]],
+      ['Macan 95B', 2022, 2024, 78500, [['porsche20_265', 180, {}], ['porsche29_380', 192, {}]]],
     ],
   },
   {

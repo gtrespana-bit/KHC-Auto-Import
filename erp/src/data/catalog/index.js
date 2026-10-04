@@ -20,9 +20,13 @@
 import { computeCvf } from '../../utils/calculations.js';
 import { reliabilityOf } from './reliability.js';
 import { ENGINES } from './engines.js';
-import { evidenceStats, cvOf, PURCHASE_DISCOUNT, isEligibleObservation } from './marketEvidence.js';
+import { evidenceStats, cvOf, PURCHASE_DISCOUNT, isEligibleObservation, MARKET_OBSERVATIONS } from './marketEvidence.js';
+import { CANDIDATE_OBSERVATIONS } from './candidateEvidence.js';
 import { PERFORMANCE_MARKET_OBSERVATIONS, PERFORMANCE_VARIANT_PROFILES } from './performanceEvidence.js';
 import { predictPrice, predictPriceWithFit, priceFit } from './priceModel.js';
+
+// Combinar todas las observaciones de mercado
+const ALL_MARKET_OBSERVATIONS = [...MARKET_OBSERVATIONS, ...CANDIDATE_OBSERVATIONS];
 import { VAG } from './vag.js';
 import { PREMIUM } from './premium.js';
 import { FRANCESES } from './franceses.js';
@@ -231,8 +235,8 @@ export function buildCatalog(models = MODEL_DATA, currentYear = new Date().getFu
         };
       };
       const genEv = {
-        DE: evidenceStats(m.b, m.m, genName, 'DE', kmRef, null, null, normalizeOptions('DE')),
-        ES: evidenceStats(m.b, m.m, genName, 'ES', kmRef, null, null, normalizeOptions('ES')),
+        DE: evidenceStats(m.b, m.m, genName, 'DE', kmRef, null, null, { ...normalizeOptions('DE'), observations: ALL_MARKET_OBSERVATIONS }),
+        ES: evidenceStats(m.b, m.m, genName, 'ES', kmRef, null, null, { ...normalizeOptions('ES'), observations: ALL_MARKET_OBSERVATIONS }),
       };
       const genEvCvRef = {
         DE: median(genEv.DE ? genEv.DE.observations.map(cvOf).filter(Boolean) : []),
@@ -268,8 +272,8 @@ export function buildCatalog(models = MODEL_DATA, currentYear = new Date().getFu
           : null;
 
         // --- Precios: manda la evidencia; el modelo sólo cubre huecos -------
-        const evDe = evidenceStats(m.b, m.m, genName, 'DE', rowKmRef, cv, performanceProfile, normalizeOptions('DE', rowYearRef));
-        const evEs = evidenceStats(m.b, m.m, genName, 'ES', rowKmRef, cv, performanceProfile, normalizeOptions('ES', rowYearRef));
+        const evDe = evidenceStats(m.b, m.m, genName, "DE", rowKmRef, cv, performanceProfile, { ...normalizeOptions("DE", rowYearRef), observations: ALL_MARKET_OBSERVATIONS });
+        const evEs = evidenceStats(m.b, m.m, genName, "ES", rowKmRef, cv, performanceProfile, { ...normalizeOptions("ES", rowYearRef), observations: ALL_MARKET_OBSERVATIONS });
 
         /**
          * Tres niveles, de más a menos fiable:
