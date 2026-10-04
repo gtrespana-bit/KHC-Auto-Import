@@ -4,11 +4,19 @@ import { Card, SectionTitle, Badge } from '../components/ui.jsx';
 import { useStore } from '../lib/store.jsx';
 import { VEHICLE_DB } from '../data/vehicleDatabase.js';
 import { buildPerformanceOpportunityRows, performancePriceSourceLabel } from '../domain/performanceOpportunities.js';
+import { profitLevel } from '../domain/catalogEstimate.js';
 import { EMPRESA_RANKING, EMPRESA_META } from '../data/catalog/empresaRanking.js';
 
 const eur = (x) => `${Math.round(x).toLocaleString('es-ES')} €`;
 const pct = (x) => `${Math.round(x * 100)} %`;
 const TONE = { '🟢': 'emerald', '🟡': 'amber', '🟠': 'sky', '🔴': 'rose', '⚪': 'slate' };
+const PROFIT_TEXT_COLOR = {
+  emerald: 'text-emerald-400',
+  amber: 'text-amber-300',
+  rose: 'text-rose-400',
+  slate: 'text-slate-300',
+};
+const profitTextColor = (profit) => PROFIT_TEXT_COLOR[profitLevel(profit).tone] || PROFIT_TEXT_COLOR.slate;
 const trust = (r) => (r.nES >= 30 ? ['Alta', 'emerald'] : r.nES >= 15 ? ['Media', 'amber'] : ['Baja: pocos anuncios ES', 'rose']);
 
 export default function OpportunitiesView() {
@@ -52,8 +60,9 @@ export default function OpportunitiesView() {
             <Badge tone="sky">{hotHatchRows.length} variantes</Badge>
           </div>
           <p className="text-[11px] text-slate-500 mt-2">
-            Se incluyen también los modelos con margen negativo o muestra corta. Este margen medio/prudente sigue el cálculo REBU del Catálogo,
+            Se incluyen también los modelos con margen negativo o muestra corta. Este margen central/prudente sigue el cálculo REBU del Catálogo,
             {' '}no el criterio empresa de la tabla inferior: compra DE con el descuento supuesto del 8 % y venta ES con la rebaja configurada.
+            {' '}Cada cifra se colorea por separado según su propio margen (verde ≥2.000 €, ámbar 800–1.999 €, rojo &lt;800 €); el prudente es una prueba de estrés: compra DE en techo y venta ES en suelo.
             {' '}La búsqueda de oportunidades también se aplica aquí; los filtros de beneficio y compra de la tabla general no ocultan estos estudios.
           </p>
         </div>
@@ -67,7 +76,7 @@ export default function OpportunitiesView() {
                   <th className="p-2 text-left">Años / generación</th>
                   <th className="p-2 text-right">Compra Alemania</th>
                   <th className="p-2 text-right">Venta España</th>
-                  <th className="p-2 text-right">Margen REBU medio / prudente</th>
+                  <th className="p-2 text-right">Margen REBU central / prudente</th>
                   <th className="p-2 text-center">Muestra DE / ES</th>
                 </tr>
               </thead>
@@ -75,7 +84,6 @@ export default function OpportunitiesView() {
                 {filteredHotHatches.map((row) => {
                   const { profile, vehicle, mean, prudent, status } = row;
                   const isOpen = openHotHatch === profile.variantKey;
-                  const marginTone = (prudent?.profit ?? mean?.profit ?? 0) >= 0 ? 'text-emerald-400' : 'text-rose-400';
                   return (
                     <React.Fragment key={profile.variantKey}>
                       <tr
@@ -100,8 +108,8 @@ export default function OpportunitiesView() {
                           <p className="text-[10px] text-slate-500">{performancePriceSourceLabel(vehicle.priceSource?.es)}</p>
                         </td>
                         <td className="p-2 text-right tabular-nums">
-                          <p className={`font-bold ${marginTone}`}>{mean ? eur(mean.profit) : '—'}</p>
-                          <p className="text-[10px] text-slate-400">prudente {prudent ? eur(prudent.profit) : '—'}</p>
+                          <p className={`font-bold ${profitTextColor(mean?.profit)}`}>central {mean ? eur(mean.profit) : '—'}</p>
+                          <p className={`text-[10px] ${profitTextColor(prudent?.profit)}`}>prudente {prudent ? eur(prudent.profit) : '—'}</p>
                         </td>
                         <td className="p-2 text-center">
                           <Badge tone={status.tone}>{status.label}</Badge>

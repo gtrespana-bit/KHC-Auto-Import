@@ -10,6 +10,13 @@ import VehicleInspectionChecklist from '../components/VehicleInspectionChecklist
 
 const REL_ORDER = { gold: 0, ok: 1, warn: 2, banned: 3 };
 const PERFORMANCE_SEGMENT = 'Hot hatch deportivo';
+const PROFIT_TEXT_COLOR = {
+  emerald: 'text-emerald-400',
+  amber: 'text-amber-300',
+  rose: 'text-rose-400',
+  slate: 'text-slate-300',
+};
+const profitTextColor = (profit) => PROFIT_TEXT_COLOR[profitLevel(profit).tone] || PROFIT_TEXT_COLOR.slate;
 
 /** De dónde sale cada horquilla, en lenguaje claro. */
 const PRICE_ORIGIN = {
@@ -82,7 +89,7 @@ export default function CatalogView({ onSimulate }) {
     if (!empirical) return { qualifies: false, label: 'Precio teórico · validar mercado', tone: 'amber', mean, cautious };
     if (cautious.profit >= 2000) return { qualifies: true, label: 'Oportunidad · margen prudente ≥2.000 €', tone: 'emerald', mean, cautious };
     if (cautious.profit > 0) return { qualifies: false, label: 'Margen prudente positivo, pero estrecho', tone: 'amber', mean, cautious };
-    if (mean.profit > 0) return { qualifies: false, label: 'Media positiva; el escenario prudente pierde', tone: 'amber', mean, cautious };
+    if (mean.profit > 0) return { qualifies: false, label: 'Estimación central positiva; el escenario prudente pierde', tone: 'amber', mean, cautious };
     return { qualifies: false, label: 'No compensa con estos precios', tone: 'rose', mean, cautious };
   }, [est, prudent]);
   const [q, setQ] = useState('');
@@ -182,6 +189,8 @@ export default function CatalogView({ onSimulate }) {
     setPage(0);
   };
 
+  const detailDeal = detail ? opportunity(detail) : null;
+
   const addToFleet = (v) => {
     saveVehicle({
       brand: v.brand, model: v.model, version: v.version, segment: v.segment, body: v.body || '',
@@ -214,17 +223,16 @@ export default function CatalogView({ onSimulate }) {
     { key: 'de', label: 'Compra en Alemania', align: 'right', render: (v) => <span className="text-xs tabular-nums">{v.dePrice ? `${eur0(v.dePrice[0])} – ${eur0(v.dePrice[1])}` : '—'}</span> },
     { key: 'es', label: 'Venta en Galicia', align: 'right', render: (v) => <span className="text-xs tabular-nums">{v.esPrice ? `${eur0(v.esPrice[0])} – ${eur0(v.esPrice[1])}` : '—'}</span> },
     {
-      key: 'profit', label: 'Resultado medio / prudente', align: 'right', render: (v) => {
+      key: 'profit', label: 'Resultado central / prudente', align: 'right', render: (v) => {
         const deal = opportunity(v);
         const e = deal.mean;
         const cautious = deal.cautious;
         if (!e) return <span className="text-xs text-slate-500">—</span>;
-        const lvl = profitLevel(cautious?.profit ?? e.profit);
-        const color = { emerald: 'text-emerald-400', amber: 'text-amber-300', rose: 'text-rose-400' }[lvl.tone];
+        const cautiousProfit = cautious?.profit ?? e.profit;
         return (
-          <div title={`Media: venta ${eur0(e.sell)} − compra ${eur0(e.buy)} − gastos ${eur0(e.expenses)} − tributos estimados ${eur0(e.vat + e.irpf)}. Prudente: compra en el extremo alto de Alemania y venta en el extremo bajo de España.`}>
-            <p className={cx('tabular-nums text-sm font-bold', color)}>{eur0(e.profit)}</p>
-            <p className="text-[10px] text-slate-500">prudente {eur0(cautious?.profit ?? e.profit)}</p>
+          <div title={`Central: venta ${eur0(e.sell)} − compra ${eur0(e.buy)} − gastos ${eur0(e.expenses)} − tributos estimados ${eur0(e.vat + e.irpf)}. Prudente: compra en el extremo alto de Alemania y venta en el extremo bajo de España.`}>
+            <p className={cx('tabular-nums text-sm font-bold', profitTextColor(e.profit))}>{eur0(e.profit)}</p>
+            <p className={cx('text-[10px]', profitTextColor(cautiousProfit))}>prudente {eur0(cautiousProfit)}</p>
           </div>
         );
       },
@@ -261,7 +269,8 @@ export default function CatalogView({ onSimulate }) {
         pero no sustituyen la valoración del coche concreto. El origen de cada precio está marcado como regresión,
         anuncios comparables, evidencia de generación o curva teórica no calibrada. La evidencia elegible contiene {coverage.obs} anuncios;
         {coverage.excluded > 0 ? ` ${coverage.excluded} observaciones están excluidas por variante o calidad y se conservan solo para auditoría.` : ''}
-        {' '}Captura más reciente: {latestEvidenceDate()}. El escenario resta un 8 % supuesto al precio alemán y un 3 % al PVP español (no son datos de cierre).
+        {' '}Captura más reciente: {latestEvidenceDate()}. El escenario central usa el punto medio de cada horquilla; el prudente es una prueba de estrés que combina la compra en el extremo alto de Alemania con la venta en el extremo bajo de España, no una predicción central. Se aplica un 8 % supuesto al precio anunciado alemán y un 3 % de regateo al PVP español (no son datos de cierre).
+        Cada cifra se colorea según su propio beneficio: verde desde 2.000 €, ámbar de 800 a 1.999 € y rojo por debajo de 800 €. Por eso el resultado central puede ser positivo y verde mientras el prudente es negativo y rojo; ese rojo advierte del riesgo del escenario, no de la fiabilidad del motor. «Solo oportunidades» exige además ≥2.000 € en el escenario prudente y evidencia en ambos mercados.
         La estimación no incluye el IVA/ITP de compra, que depende de la factura del vendedor; tampoco financiación ni reparaciones
         superiores a la reserva base. La auditoría <code>npm run prices:check</code> valida fuera de muestra.
         Revisa el origen fiscal, acabado, año, estado, historial y km antes de pagar.
@@ -384,14 +393,15 @@ export default function CatalogView({ onSimulate }) {
                 <p className="text-[11px] text-slate-500 mt-1">Rotación prevista: {detail.rotationDays ? `${detail.rotationDays} días` : '—'}</p>
               </Card>
               <Card className="p-3">
-                <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Resultado estimado</p>
-                <p className={cx('text-xl font-extrabold mt-1', { emerald: 'text-emerald-400', amber: 'text-amber-300', rose: 'text-rose-400', slate: 'text-slate-300' }[profitLevel(opportunity(detail).cautious?.profit ?? opportunity(detail).mean?.profit).tone])}>{opportunity(detail).mean ? eur0(opportunity(detail).mean.profit) : '—'}</p>
-                <p className="text-[11px] text-slate-500 mt-1">Prudente: {opportunity(detail).cautious ? eur0(opportunity(detail).cautious.profit) : '—'} · {regime === 'particular' ? 'incluye IRPF orientativo' : regime === 'general' ? 'IVA de salida estimado, sin deducción de IVA soportado' : 'resta IVA REBU; antes de IRPF/IS'}</p>
+                <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Resultado central estimado</p>
+                <p className={cx('text-xl font-extrabold mt-1', profitTextColor(detailDeal.mean?.profit))}>{detailDeal.mean ? eur0(detailDeal.mean.profit) : '—'}</p>
+                <p className={cx('text-[11px] mt-1', profitTextColor(detailDeal.cautious?.profit ?? detailDeal.mean?.profit))}>Prudente: {detailDeal.cautious ? eur0(detailDeal.cautious.profit) : '—'}</p>
+                <p className="text-[10px] text-slate-500">{regime === 'particular' ? 'Incluye IRPF orientativo' : regime === 'general' ? 'IVA de salida estimado, sin deducción de IVA soportado' : 'Resta IVA REBU; antes de IRPF/IS'}</p>
               </Card>
               <Card className="p-3">
                 <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Veredicto comercial</p>
-                <p className={cx('text-xl font-extrabold mt-1', { emerald: 'text-emerald-400', amber: 'text-amber-300', rose: 'text-rose-400', slate: 'text-slate-300' }[opportunity(detail).tone])}>{opportunity(detail).qualifies ? 'Oportunidad prudente' : 'No priorizar'}</p>
-                <p className="text-[11px] text-slate-500 mt-1">{opportunity(detail).label}</p>
+                <p className={cx('text-xl font-extrabold mt-1', { emerald: 'text-emerald-400', amber: 'text-amber-300', rose: 'text-rose-400', slate: 'text-slate-300' }[detailDeal.tone])}>{detailDeal.qualifies ? 'Oportunidad prudente' : 'No priorizar'}</p>
+                <p className="text-[11px] text-slate-500 mt-1">{detailDeal.label}</p>
               </Card>
             </div>
             {est(detail) && (

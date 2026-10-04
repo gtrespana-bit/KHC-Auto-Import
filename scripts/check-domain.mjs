@@ -17,7 +17,7 @@ import {
 import { DEFAULT_TARIFFS, IVTM_CORUNA_TURISMOS } from '../erp/src/domain/rates.js';
 import { buildTaxCalendar, applyFilingStatus, documentProgress, buildAlerts } from '../erp/src/domain/compliance.js';
 import { financeOffer } from '../erp/src/domain/finance.js';
-import { catalogEstimate } from '../erp/src/domain/catalogEstimate.js';
+import { catalogEstimate, profitLevel } from '../erp/src/domain/catalogEstimate.js';
 import {
   invoiceNumber, invoiceLines, buildAd, followUpMessage, whatsappLink, emailLink,
   buildWebListing, webSlug, webTitle, webFeatures, originLabel,
@@ -621,6 +621,22 @@ check('Catálogo: la ganancia usa precios medios y descuenta gastos e IVA', () =
   assert.equal(e.profit, e.sell - e.buy - e.expenses - e.vat);
   assert.equal(e.expenses, e.lines.reduce((a, l) => a + l.amount, 0));
   assert.ok(e.profit < e.sell - e.buy);
+});
+
+check('Catálogo: GTI 230 distingue resultado central positivo del prudente negativo', () => {
+  const golf = VEHICLE_DB.find((v) => v.variantKey === 'vw-golf-vii-gti-performance-230-dsg');
+  assert.ok(golf, 'falta la variante GTI Performance 230 DSG');
+  const refDate = new Date(2026, 9, 4, 12);
+  const central = catalogEstimate(golf, DEFAULT_TARIFFS, refDate, { regime: 'rebu' });
+  const prudent = catalogEstimate({
+    ...golf,
+    dePrice: [golf.dePrice[1], golf.dePrice[1]],
+    esPrice: [golf.esPrice[0], golf.esPrice[0]],
+  }, DEFAULT_TARIFFS, refDate, { regime: 'rebu' });
+  assert.equal(central.profit, 2622);
+  assert.equal(prudent.profit, -647);
+  assert.equal(profitLevel(central.profit).tone, 'emerald');
+  assert.equal(profitLevel(prudent.profit).tone, 'rose');
 });
 
 check('Catálogo: el coste orientativo incluye IVTM prorrateado y seguro por rotación', () => {
