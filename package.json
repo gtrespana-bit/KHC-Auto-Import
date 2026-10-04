@@ -12,7 +12,7 @@
     "build:web": "next build",
     "start": "next start -H 0.0.0.0 -p 3000",
     "preview:erp": "vite preview --config erp/vite.config.js",
-    "check": "node scripts/check-domain.mjs && node scripts/check-prices.mjs",
+    "check": "node scripts/check-domain.mjs && node scripts/check-prices.mjs && node scripts/check-inspection.mjs",
     "catalog:stats": "node scripts/catalog-stats.mjs",
     "smoke": "node scripts/smoke.mjs",
     "test:trip": "node scripts/test-trip-vehicle.mjs && node scripts/test-trip-map.mjs",

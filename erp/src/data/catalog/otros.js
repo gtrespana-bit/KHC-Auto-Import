@@ -19,6 +19,13 @@ export const OTROS = [
     ],
   },
   {
+    b: 'Ford', m: 'Focus ST', seg: 'Compacto deportivo', dmd: 1.08, body: 'Hatchback 5 puertas',
+    g: [
+      ['Focus III ST 2.0 EcoBoost 250 manual', 2016, 2018, 29250, [['fd20st250', 159, { name: '2.0 EcoBoost 250 CV Focus ST', gear: 'M', variantKey: 'ford-focus-iii-st-250-manual', years: [2016, 2018], newPrice: 29250 }]]],
+      ['Focus IV ST 2.3 EcoBoost 280 manual', 2019, 2022, 35150, [['fd23st280', 188, { name: '2.3 EcoBoost 280 CV Focus ST', gear: 'M', variantKey: 'ford-focus-iv-st-280-manual' }]]],
+    ],
+  },
+  {
     b: 'Ford', m: 'Focus Sportbreak', seg: 'Familiar', dmd: 1.0, body: 'Ranchera',
     g: [
       ['Focus Sportbreak IV', 2018, 2025, 27500, [['fd10eb125', 114], ['fd15eb150', 124], ['fd20ecoblue120', 106]]],

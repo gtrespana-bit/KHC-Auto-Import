@@ -14,14 +14,19 @@
 //   3. Los precios de Alemania son PRECIO DE ANUNCIO (lo que pide el vendedor
 //      alemán). El coste real de compra es inferior: lo descuenta
 //      `PURCHASE_DISCOUNT` en index.js, no se mezcla aquí.
-//   4. Los precios de España son PVP de profesional (con garantía e IVA), que
-//      es exactamente lo que se pide en A Coruña al vender.
+//   4. El objetivo de venta ES es PVP de profesional. Fuentes/URLs que declaran
+//      vendedor particular se excluyen; si el tipo de vendedor no está indicado,
+//      la observación queda provisional, no se presume verificada como profesional.
 //
 //  ⚠ Revisar cada 3-6 meses: el mercado de ocasión se mueve y estas cifras
 //    caducan. `capturedAt` indica cuándo se tomaron.
 // ============================================================================
 
+import { PERFORMANCE_MARKET_OBSERVATIONS } from './performanceEvidence.js';
+
+// Fecha del bloque histórico legado; las observaciones nuevas llevan `observedAt`.
 export const EVIDENCE_CAPTURED_AT = '2026-09-24';
+export const EVIDENCE_LAST_UPDATED_AT = '2026-10-04';
 
 /**
  * Descuento medio entre el precio de anuncio alemán y lo que realmente se
@@ -58,6 +63,7 @@ export const normalizeKm = (price, kmFrom, kmTo) => {
  *  source, url        → procedencia verificable
  */
 export const MARKET_OBSERVATIONS = [
+  ...PERFORMANCE_MARKET_OBSERVATIONS,
   // ---------------------------------------------------------------- GOLF ---
   { brand: 'Volkswagen', model: 'Golf', gen: 'Golf VII.5', market: 'DE', kind: 'anuncio', engine: '2.0 TDI 150 CV', year: 2018, km: 70856, price: 16900, source: 'mobile.de', url: 'https://suchen.mobile.de/auto/volkswagen-golf-vi-tdi.html' },
   { brand: 'Volkswagen', model: 'Golf', gen: 'Golf VII.5', market: 'DE', kind: 'anuncio', engine: '2.0 TDI 150 CV DSG', year: 2018, km: 143776, price: 11950, source: 'mobile.de', url: 'https://suchen.mobile.de/auto/volkswagen-golf-7-tdi.html' },
@@ -2806,7 +2812,7 @@ export const MARKET_OBSERVATIONS = [
   { brand: 'Kia', model: 'Sportage', gen: 'Sportage QL', market: 'ES', kind: 'anuncio', engine: '1.6 GDi 132 CV Edition 7', year: 2017, km: 81000, price: 16700, source: 'milanuncios API (Palma de Mallorca)', url: 'https://www.milanuncios.com/kia-de-segunda-mano/kia-sportage-1-6-gdi-97kw-132cv-basic-4x-582673068.htm' },
   { brand: 'Kia', model: 'Sportage', gen: 'Sportage QL', market: 'ES', kind: 'anuncio', engine: '1.6 GDi 132 CV Edition 7', year: 2017, km: 83702, price: 14000, source: 'milanuncios API (Madrid)', url: 'https://www.milanuncios.com/kia-de-segunda-mano/kia-sportage-1-6-gdi-97kw-132cv-concept-4x2-541917419.htm' },
   { brand: 'Kia', model: 'Sportage', gen: 'Sportage QL', market: 'ES', kind: 'anuncio', engine: '1.6 CRDi 115 CV Business 4x2', year: 2019, km: 168504, price: 17000, source: 'milanuncios API (Murcia)', url: 'https://www.milanuncios.com/kia-de-segunda-mano/kia-sportage-1-6-crdi-85kw-115cv-drive-4-481776185.htm' },
-  { brand: 'Kia', model: 'Sportage', gen: 'Sportage QL', market: 'ES', kind: 'anuncio', engine: '1.6 CRDi 115 CV Business 4x2', year: 2019, km: 20000, price: 8500, source: 'milanuncios API (Málaga, particular)', url: 'https://www.milanuncios.com/kia-de-segunda-mano/kia-sportage-616391320.htm' },
+  { brand: 'Kia', model: 'Sportage', gen: 'Sportage QL', market: 'ES', kind: 'anuncio', engine: '1.6 CRDi 115 CV Business 4x2', year: 2019, km: 20000, price: 8500, source: 'milanuncios API (Málaga, particular)', url: 'https://www.milanuncios.com/kia-de-segunda-mano/kia-sportage-616391320.htm', eligible: false, eligibilityReason: 'Precio extremadamente bajo frente a anuncios comparables del mismo modelo/año y kilometraje; verificar autenticidad y condiciones antes de incluir.' },
   { brand: 'Kia', model: 'Sportage', gen: 'Sportage QL', market: 'ES', kind: 'anuncio', engine: '1.6 CRDi 115 CV Business 4x2', year: 2019, km: 176000, price: 13500, source: 'milanuncios API (Valencia, particular)', url: 'https://www.milanuncios.com/kia-de-segunda-mano/kia-sportage-613790047.htm' },
   { brand: 'Kia', model: 'Sportage', gen: 'Sportage QL', market: 'ES', kind: 'anuncio', engine: '1.6 CRDi 115 CV Business 4x2', year: 2019, km: 121598, price: 14995, source: 'milanuncios API (Sevilla)', url: 'https://www.milanuncios.com/kia-de-segunda-mano/kia-sportage-1-6-crdi-85kw-115cv-concept-616126649.htm' },
   { brand: 'Kia', model: 'Sportage', gen: 'Sportage QL', market: 'ES', kind: 'anuncio', engine: '1.6 CRDi 115 CV Business 4x2', year: 2019, km: 130000, price: 13000, source: 'milanuncios API (Alcalá de Henares, particular)', url: 'https://www.milanuncios.com/kia-de-segunda-mano/kia-sportage-615626571.htm' },
@@ -5666,7 +5672,7 @@ export const MARKET_OBSERVATIONS = [
   { brand: 'Volkswagen', model: 'Touran', gen: 'Touran II', market: 'ES', kind: 'anuncio', engine: '2.0 TDI 150 CV', year: 2016, km: 197000, price: 13600, source: 'milanuncios API (Bonanza, particular)', url: 'https://www.milanuncios.com/volkswagen-de-segunda-mano/volkswagen-touran-613631840.htm' },
   { brand: 'Volkswagen', model: 'Touran', gen: 'Touran II', market: 'ES', kind: 'anuncio', engine: '2.0 TDI 150 CV', year: 2016, km: 223000, price: 16900, source: 'milanuncios API (Ferrol)', url: 'https://www.milanuncios.com/volkswagen-de-segunda-mano/volkswagen-touran-sport-2-0-tdi-110kw150-613414485.htm' },
   { brand: 'Volkswagen', model: 'Touran', gen: 'Touran II', market: 'ES', kind: 'anuncio', engine: '2.0 TDI 150 CV', year: 2016, km: 177000, price: 15000, source: 'milanuncios API (Puertollano, particular)', url: 'https://www.milanuncios.com/volkswagen-de-segunda-mano/volkswagen-touran-606984191.htm' },
-  { brand: 'Volkswagen', model: 'Touran', gen: 'Touran II', market: 'ES', kind: 'anuncio', engine: '2.0 TDI 150 CV', year: 2016, km: 151000, price: 11000, source: 'milanuncios API (Cornella de Llobregat)', url: 'https://www.milanuncios.com/volkswagen-de-segunda-mano/volkswagen-touran-advance-2-0-tdi-110kw1-608342940.htm' },
+  { brand: 'Volkswagen', model: 'Touran', gen: 'Touran II', market: 'ES', kind: 'anuncio', engine: '2.0 TDI 150 CV', year: 2016, km: 151000, price: 11000, source: 'milanuncios API (Cornella de Llobregat)', url: 'https://www.milanuncios.com/volkswagen-de-segunda-mano/volkswagen-touran-advance-2-0-tdi-110kw1-608342940.htm', reviewNote: 'Residuo alto en holdout; Milanuncios bloquea el anuncio con captcha y la fuente no aclara el tipo de vendedor. Se conserva sin excluir solo por precio hasta verificarlo.' },
   { brand: 'Volkswagen', model: 'Touran', gen: 'Touran II', market: 'ES', kind: 'anuncio', engine: '2.0 TDI 150 CV', year: 2016, km: 185000, price: 12900, source: 'milanuncios API (El Bojal, particular)', url: 'https://www.milanuncios.com/volkswagen-de-segunda-mano/volkswagen-touran-605931962.htm' },
   { brand: 'Volkswagen', model: 'Touran', gen: 'Touran II', market: 'ES', kind: 'anuncio', engine: '2.0 TDI 150 CV', year: 2016, km: 185416, price: 11600, source: 'milanuncios API (Toledo, particular)', url: 'https://www.milanuncios.com/volkswagen-de-segunda-mano/volkswagen-touran-611472310.htm' },
   { brand: 'Volkswagen', model: 'Touran', gen: 'Touran II', market: 'ES', kind: 'anuncio', engine: '2.0 TDI 150 CV', year: 2016, km: 135000, price: 18500, source: 'milanuncios API (Vilalba/Villalba, particular)', url: 'https://www.milanuncios.com/volkswagen-de-segunda-mano/volkswagen-touran-606441849.htm' },
@@ -8052,7 +8058,7 @@ export const MARKET_OBSERVATIONS = [
   { brand: 'BMW', model: 'X1', gen: 'X1 F48', market: 'DE', kind: 'anuncio', engine: 'xDrive18d 150 CV diésel', year: 2019, km: 97500, price: 22980, source: 'autoscout24.de (Ansbach)', url: 'https://www.autoscout24.de/angebote/bmw-x1-xdrive18d-xline-xline-navi+shz+apple+hifi+led-diesel-weiss-cat_ma13gr19242ge42mt312tr8506-45e3a2d2-9435-4001-86ef-6e0b6f5c8ed9' },
   { brand: 'BMW', model: 'X1', gen: 'X1 F48', market: 'DE', kind: 'anuncio', engine: 'xDrive18d 150 CV diésel', year: 2019, km: 64000, price: 21400, source: 'autoscout24.de (Melle, Stadt, particular)', url: 'https://www.autoscout24.de/angebote/bmw-x1-x1-diesel-sdrive18d-advantage-diesel-grau-cat_ma13gr19242ge42mt312tr1017-71bf06a2-d6d0-4abd-9747-fe6b40e47b00' },
   { brand: 'BMW', model: 'X1', gen: 'X1 F48', market: 'DE', kind: 'anuncio', engine: 'xDrive18d 150 CV diésel', year: 2019, km: 122870, price: 16900, source: 'autoscout24.de (Chemnitz)', url: 'https://www.autoscout24.de/angebote/bmw-x1-18d-advantage-led-sitzheizung-ahk-17-diesel-schwarz-cat_ma13gr19242ge42mt312tr1017-0be18f03-db56-4f37-b1bc-ef3aadefda13' },
-  { brand: 'BMW', model: 'X1', gen: 'X1 F48', market: 'DE', kind: 'anuncio', engine: 'xDrive18d 150 CV diésel', year: 2019, km: 13500, price: 12900, source: 'autoscout24.de (Memmingen , particular)', url: 'https://www.autoscout24.de/angebote/bmw-x1-sdrive18d-diesel-cat_ma13gr19242ge42mt312tr480001-d35cd8b2-0287-4a35-877d-6a6d085c7100' },
+  { brand: 'BMW', model: 'X1', gen: 'X1 F48', market: 'DE', kind: 'anuncio', engine: 'sDrive18d 150 CV diésel', year: 2019, km: 135000, price: 12900, source: 'AutoScout24.de (Memmingen, particular)', url: 'https://www.autoscout24.de/angebote/bmw-x1-sdrive18d-diesel-cat_ma13gr19242ge42mt312tr480001-d35cd8b2-0287-4a35-877d-6a6d085c7100', eligible: false, eligibilityReason: 'Detalle del anuncio: 135.000 km y daños de granizo en capó y techo; condición no comparable con una unidad estándar.' },
   { brand: 'BMW', model: 'X1', gen: 'X1 F48', market: 'DE', kind: 'anuncio', engine: 'xDrive18d 150 CV diésel', year: 2020, km: 104079, price: 18999, source: 'autoscout24.de (Eisenach)', url: 'https://www.autoscout24.de/angebote/bmw-x1-sdrive18d-advantage-aut-teilleder-klima-ahk-diesel-schwarz-cat_ma13gr19242ge42mt312tr1017-b9b8cb2a-4cd5-4ccb-9b55-55172bb8fdc8' },
   { brand: 'BMW', model: 'X1', gen: 'X1 F48', market: 'DE', kind: 'anuncio', engine: 'xDrive18d 150 CV diésel', year: 2020, km: 83500, price: 23875, source: 'autoscout24.de (Muenchberg)', url: 'https://www.autoscout24.de/angebote/bmw-x1-xdrive-advantage-++-ahk-++-diesel-schwarz-cat_ma13gr19242ge42mt312tr1017-c77e2ccf-467d-4a50-9c4c-26d95d0d330b' },
   { brand: 'BMW', model: 'X1', gen: 'X1 F48', market: 'DE', kind: 'anuncio', engine: 'xDrive18d 150 CV diésel', year: 2020, km: 46000, price: 19900, source: 'autoscout24.de (Dingolfing, St, particular)', url: 'https://www.autoscout24.de/angebote/bmw-x1-x1-sdrive18d-aut-diesel-weiss-cat_ma13gr19242ge42mt312tr480001-b5c3bcab-ebbf-4704-895f-98f71e5189cd' },
@@ -8318,7 +8324,7 @@ export const MARKET_OBSERVATIONS = [
   { brand: 'Mercedes-Benz', model: 'Clase E', gen: 'Clase E W213', market: 'DE', kind: 'anuncio', engine: 'E 220 d 194 CV', year: 2017, km: 105000, price: 29990, source: 'autoscout24.de (Finnentrop)', url: 'https://www.autoscout24.de/angebote/mercedes-benz-e-klasse-e-limousine-e-220-d-4matic-amg-line-led-diesel-grau-cat_ma47gr100061ge35va125mt12717tr1150-7e8b8959-5b1c-40b8-9065-0025f9ecaf4a' },
   { brand: 'Mercedes-Benz', model: 'Clase E', gen: 'Clase E W213', market: 'DE', kind: 'anuncio', engine: 'E 220 d 194 CV', year: 2017, km: 212000, price: 21500, source: 'autoscout24.de (Germering, particular)', url: 'https://www.autoscout24.de/angebote/mercedes-benz-e-klasse-e-220-d-213-004-diesel-blau-cat_ma47gr100061ge35va125mt12717tr480505-272f3f7d-ddda-49ba-b0cb-be61673c5ccc' },
   { brand: 'Mercedes-Benz', model: 'Clase E', gen: 'Clase E W213', market: 'DE', kind: 'anuncio', engine: 'E 220 d 194 CV', year: 2017, km: 160000, price: 29500, source: 'autoscout24.de (Karlsfeld, particular)', url: 'https://www.autoscout24.de/angebote/mercedes-benz-e-klasse-d-9g-tronic-avantgarde-diesel-cat_ma47gr100061ge35va125mt12717tr1295-124c100f-b979-4052-8487-f6b60cadef0d' },
-  { brand: 'Mercedes-Benz', model: 'Clase E', gen: 'Clase E W213', market: 'DE', kind: 'anuncio', engine: 'E 220 d 194 CV', year: 2017, km: 180000, price: 12999, source: 'autoscout24.de (Bayreuth, particular)', url: 'https://www.autoscout24.de/angebote/mercedes-benz-e-klasse-d-9g-tronic-amg-line-motor-laeuft-unruhig-diesel-cat_ma47gr100061ge35va125mt12717tr1150-41f440c7-92f0-4419-aa3f-f9e1fb957e60' },
+  { brand: 'Mercedes-Benz', model: 'Clase E', gen: 'Clase E W213', market: 'DE', kind: 'anuncio', engine: 'E 220 d 194 CV', year: 2017, km: 180000, price: 11999, source: 'AutoScout24.de (Bayreuth, particular)', url: 'https://www.autoscout24.de/angebote/mercedes-benz-e-klasse-d-9g-tronic-amg-line-motor-laeuft-unruhig-diesel-cat_ma47gr100061ge35va125mt12717tr1150-41f440c7-92f0-4419-aa3f-f9e1fb957e60', eligible: false, eligibilityReason: 'El anuncio lo ofrece como vehículo de reparación: motor irregular con ruidos de árbol de levas y posible sustitución de balancines; no es un comparable operativo.' },
   { brand: 'Mercedes-Benz', model: 'Clase E', gen: 'Clase E W213', market: 'DE', kind: 'anuncio', engine: 'E 220 d 194 CV', year: 2017, km: 100000, price: 18990, source: 'autoscout24.de (Cremlingen)', url: 'https://www.autoscout24.de/angebote/mercedes-benz-e-klasse-d-amg-9g-shd-multib-navi-totw-cam-temp-diesel-grau-cat_ma47gr100061ge35va125mt12717tr1150-3dd13a1d-35b3-4921-97b3-8d0737e429d0' },
   { brand: 'Mercedes-Benz', model: 'Clase E', gen: 'Clase E W213', market: 'DE', kind: 'anuncio', engine: 'E 220 d 194 CV', year: 2018, km: 93980, price: 24800, source: 'autoscout24.de (Duisburg)', url: 'https://www.autoscout24.de/angebote/mercedes-benz-e-klasse-e-220-d-9g-tronic-avantgarde-distronic-spur-tot-parkassist-led-diesel-cat_ma47gr100061ge35va125mt12717tr1295-a3c55916-50f1-4697-893d-d7418e871f2a' },
   { brand: 'Mercedes-Benz', model: 'Clase E', gen: 'Clase E W213', market: 'DE', kind: 'anuncio', engine: 'E 220 d 194 CV', year: 2018, km: 43216, price: 24999, source: 'autoscout24.de (Hamburg, Freie und Hansestadt, particular)', url: 'https://www.autoscout24.de/angebote/mercedes-benz-e-klasse-d-9g-tronic-avantgarde-diesel-cat_ma47gr100061ge35va125mt12717tr1295-a3c02c56-cd7e-4a50-a635-b285a86a2a4d' },
@@ -13428,7 +13434,7 @@ export const MARKET_OBSERVATIONS = [
   { brand: 'Audi', model: 'A4 Avant', gen: 'A4 Avant B9', market: 'DE', kind: 'anuncio', engine: '35 TDI 150 CV', year: 2018, km: 156569, price: 16950, source: 'autoscout24.de (Duisburg)', url: 'https://www.autoscout24.de/angebote/audi-a4-avant-design-digital-t-navi-leder-pano-matrix-diesel-weiss-cat_ma9gr1626ge134va134mt169tr115-d0a67a6a-caac-432d-8a18-bdc2cdb35246' },
   { brand: 'Audi', model: 'A4 Avant', gen: 'A4 Avant B9', market: 'DE', kind: 'anuncio', engine: '35 TDI 150 CV', year: 2018, km: 138452, price: 16980, source: 'autoscout24.de (Gochsheim)', url: 'https://www.autoscout24.de/angebote/audi-a4-2-0-tdi-avant-sport-kamera-navi-ahk-tempomat-diesel-grau-cat_ma9gr1626ge134va134mt169tr121-a6026a59-efe5-41ee-8b9f-81e83dfba317' },
   { brand: 'Audi', model: 'A4 Avant', gen: 'A4 Avant B9', market: 'DE', kind: 'anuncio', engine: '35 TDI 150 CV', year: 2018, km: 194794, price: 14150, source: 'autoscout24.de (Rastatt)', url: 'https://www.autoscout24.de/angebote/audi-a4-quattro-tuev-04-27-inspektion-neu-garantie-diesel-weiss-cat_ma9gr1626ge134va134mt169tr121-5a134551-c5de-4a4c-b255-3bb60a09b698' },
-  { brand: 'Audi', model: 'A4 Avant', gen: 'A4 Avant B9', market: 'DE', kind: 'anuncio', engine: '35 TDI 150 CV', year: 2018, km: 150000, price: 9500, source: 'autoscout24.de (Kolbermoor)', url: 'https://www.autoscout24.de/angebote/audi-a4-design-diesel-schwarz-cat_ma9gr1626ge134va134mt169tr115-5c657386-304a-48f6-ab3e-1c4a624ec56f' },
+  { brand: 'Audi', model: 'A4 Avant', gen: 'A4 Avant B9', market: 'DE', kind: 'anuncio', engine: '35 TDI 150 CV', year: 2018, km: 150000, price: 9500, source: 'AutoScout24.de (Kolbermoor)', url: 'https://www.autoscout24.de/angebote/audi-a4-design-diesel-schwarz-cat_ma9gr1626ge134va134mt169tr115-5c657386-304a-48f6-ab3e-1c4a624ec56f', eligible: false, eligibilityReason: 'La ficha del anuncio identifica la unidad como «Unfallfahrzeug» (vehículo accidentado); no es comparable con una unidad estándar.' },
   { brand: 'Audi', model: 'A4 Avant', gen: 'A4 Avant B9', market: 'DE', kind: 'anuncio', engine: '35 TDI 150 CV', year: 2018, km: 216000, price: 14849, source: 'autoscout24.de (Nauheim)', url: 'https://www.autoscout24.de/angebote/audi-a4-sport-s-line-panorama-dach-20-top-zustand-diesel-grau-cat_ma9gr1626ge134va134mt169tr121-4786e485-1bd2-4941-abce-c1575afeae78' },
   { brand: 'Audi', model: 'A4 Avant', gen: 'A4 Avant B9', market: 'DE', kind: 'anuncio', engine: '35 TDI 150 CV', year: 2018, km: 171000, price: 12000, source: 'autoscout24.de (Weil am Rhein, particular)', url: 'https://www.autoscout24.de/angebote/audi-a4-avant-2-0-tdi-s-tronic-diesel-cat_ma9gr1626ge134va134mt169tr479950-89562a3d-a8be-4a45-9e55-8038cb3da463' },
   { brand: 'Audi', model: 'A4 Avant', gen: 'A4 Avant B9', market: 'DE', kind: 'anuncio', engine: '35 TDI 150 CV', year: 2018, km: 101846, price: 15548, source: 'autoscout24.de (Schrobenhausen)', url: 'https://www.autoscout24.de/angebote/audi-a4-avant-2-0-tdi-s-tronic-sport-17-+xenon+navi+v-diesel-schwarz-cat_ma9gr1626ge134va134mt169tr121-325bbb3e-9367-4f82-bd3b-369ccf4dd37a' },
@@ -14186,7 +14192,7 @@ export const MARKET_OBSERVATIONS = [
   { brand: 'BMW', model: 'Serie 1', gen: 'Serie 1 F20 LCI', market: 'DE', kind: 'anuncio', engine: '118d 150 CV M Sport', year: 2019, km: 92350, price: 15999, source: 'autoscout24.de (Cottbus)', url: 'https://www.autoscout24.de/angebote/bmw-1er-118-d-sport-line-sitzheizung-navi-ahk-diesel-blau-cat_ma13gr100037ge192va4087mt520tr7142-dee88f34-d93a-4cc1-9d95-de1bc3b74682' },
   { brand: 'BMW', model: 'Serie 1', gen: 'Serie 1 F20 LCI', market: 'DE', kind: 'anuncio', engine: '118d 150 CV M Sport', year: 2019, km: 149000, price: 12999, source: 'autoscout24.de (Saarlouis)', url: 'https://www.autoscout24.de/angebote/bmw-1er-d-150-ps-xdrive-advantage-led-navi-diesel-silber-cat_ma13gr100037ge192va4087mt520tr1016-6efd9402-08a0-4fe2-9ba1-7cc76f68ee93' },
   { brand: 'BMW', model: 'Serie 1', gen: 'Serie 1 F20 LCI', market: 'DE', kind: 'anuncio', engine: '118d 150 CV M Sport', year: 2019, km: 167500, price: 16000, source: 'autoscout24.de (Herzebrock, particular)', url: 'https://www.autoscout24.de/angebote/bmw-1er-118d-aut-advantage-diesel-grau-cat_ma13gr100037ge192va4087mt520tr1016-ca50962a-a0bc-4953-b6a1-688549c1b61b' },
-  { brand: 'Peugeot', model: '3008', gen: '3008 II', market: 'DE', kind: 'anuncio', engine: '1.5 BlueHDi 130 CV', year: 2018, km: 99900, price: 9900, source: 'autoscout24.de (Villingen Schwenningen)', url: 'https://www.autoscout24.de/angebote/peugeot-3008-1-5-active-kamera-sitzheizug-iso-navi-led-diesel-gruen-cat_ma55gr201151ge1077va3625mt3277tr947-0c0da413-14a1-4295-b4e5-f8965c72b8fa' },
+  { brand: 'Peugeot', model: '3008', gen: '3008 II', market: 'DE', kind: 'anuncio', engine: '1.5 BlueHDi 130 CV', year: 2018, km: 99900, price: 9900, source: 'AutoScout24.de (Villingen Schwenningen)', url: 'https://www.autoscout24.de/angebote/peugeot-3008-1-5-active-kamera-sitzheizug-iso-navi-led-diesel-gruen-cat_ma55gr201151ge1077va3625mt3277tr947-0c0da413-14a1-4295-b4e5-f8965c72b8fa', eligible: false, eligibilityReason: 'El anuncio declara que entra en modo de emergencia cada 50 km por causa desconocida y limita la venta a profesionales/exportación; no es un PVP de unidad operativa.' },
   { brand: 'Peugeot', model: '3008', gen: '3008 II', market: 'DE', kind: 'anuncio', engine: '1.5 BlueHDi 130 CV', year: 2018, km: 71000, price: 13000, source: 'autoscout24.de (Nürnberg, particular)', url: 'https://www.autoscout24.de/angebote/peugeot-3008-3008-diesel-bluehdi-130-stop-diesel-schwarz-cat_ma55gr201151ge1077va3625mt3277tr1069-b6cb99e3-4984-440f-a8c2-e61cae91d201' },
   { brand: 'Peugeot', model: '3008', gen: '3008 II', market: 'DE', kind: 'anuncio', engine: '1.5 BlueHDi 130 CV', year: 2018, km: 189000, price: 10300, source: 'autoscout24.de (Köln, Stadt, particular)', url: 'https://www.autoscout24.de/angebote/peugeot-3008-3008-bluehdi-130-stop-diesel-cat_ma55gr201151ge1077va3625mt3277tr1084-b0566213-b7e2-49ef-a7ba-b0069b94f04e' },
   { brand: 'Peugeot', model: '3008', gen: '3008 II', market: 'DE', kind: 'anuncio', engine: '1.5 BlueHDi 130 CV', year: 2018, km: 137000, price: 13000, source: 'autoscout24.de (Berlin, Stadt, particular)', url: 'https://www.autoscout24.de/angebote/peugeot-3008-active-diesel-schwarz-cat_ma55gr201151ge1077va3625mt3277tr947-5bccd37a-efcf-42ad-b0d4-6a6599baab7a' },
@@ -15394,7 +15400,7 @@ export const MARKET_OBSERVATIONS = [
   { brand: 'Peugeot', model: '5008', gen: '5008 II', market: 'DE', kind: 'anuncio', engine: '1.5 BlueHDi 130 CV', year: 2020, km: 126480, price: 16780, source: 'autoscout24.de (Schöningen)', url: 'https://www.autoscout24.de/angebote/peugeot-5008-allure-1-5d-led-navi-shz-ahk-virtual-diesel-schwarz-cat_ma55gr201155ge1093va3629mt3398tr1070-03fdc214-d130-4cf1-8cac-f7b7d433bdae' },
   { brand: 'Peugeot', model: '5008', gen: '5008 II', market: 'DE', kind: 'anuncio', engine: '1.5 BlueHDi 130 CV', year: 2020, km: 61000, price: 21999, source: 'autoscout24.de (Endingen am Kaiserstuhl)', url: 'https://www.autoscout24.de/angebote/peugeot-5008-1-5-bluehdi-130-allure-ahk-7-sizvorrichtung-diesel-weiss-cat_ma55gr201155ge1093va3629mt3398tr1070-16b77c4f-9602-4d20-ae85-d162ece3d57a' },
   { brand: 'Peugeot', model: '5008', gen: '5008 II', market: 'DE', kind: 'anuncio', engine: '1.5 BlueHDi 130 CV', year: 2020, km: 129383, price: 17990, source: 'autoscout24.de (Bergfelde)', url: 'https://www.autoscout24.de/angebote/peugeot-5008-allure-1-5-bluehdi-130-eat8-led+navi+shz+lm-diesel-schwarz-cat_ma55gr201155ge1093va3629mt3398tr1070-f9842e6f-bab2-4bf6-8be4-5b6fe42fd82c' },
-  { brand: 'Peugeot', model: '5008', gen: '5008 II', market: 'DE', kind: 'anuncio', engine: '1.5 BlueHDi 130 CV', year: 2020, km: 150703, price: 8990, source: 'autoscout24.de (Gyhum/Bockel)', url: 'https://www.autoscout24.de/angebote/peugeot-5008-1-5-bluehdi-130-allure-motorschaden-7-sitze-t-leder-klimaaut-radio-tempo-shz-vc-pdc-ahk-diesel-grau-cat_ma55gr201155ge1093va3629mt3398tr1070-8bffc9da-9cc1-4bd9-a4e0-d41559edd07f' },
+  { brand: 'Peugeot', model: '5008', gen: '5008 II', market: 'DE', kind: 'anuncio', engine: '1.5 BlueHDi 130 CV', year: 2020, km: 150703, price: 8990, source: 'AutoScout24.de (Gyhum/Bockel)', url: 'https://www.autoscout24.de/angebote/peugeot-5008-1-5-bluehdi-130-allure-motorschaden-7-sitze-t-leder-klimaaut-radio-tempo-shz-vc-pdc-ahk-diesel-grau-cat_ma55gr201155ge1093va3629mt3398tr1070-8bffc9da-9cc1-4bd9-a4e0-d41559edd07f', eligible: false, eligibilityReason: 'El título del anuncio declara «Motorschaden» (avería de motor); no es un comparable de un vehículo operativo.' },
   { brand: 'Peugeot', model: '5008', gen: '5008 II', market: 'DE', kind: 'anuncio', engine: '1.5 BlueHDi 130 CV', year: 2021, km: 50344, price: 21190, source: 'autoscout24.de (Mönchengladbach)', url: 'https://www.autoscout24.de/angebote/peugeot-5008-allure-pack-diesel-blau-cat_ma55gr201155ge1093va3629mt3398tr1070-b30ef928-312b-4929-997c-65bffee0dca1' },
   { brand: 'Peugeot', model: '5008', gen: '5008 II', market: 'DE', kind: 'anuncio', engine: '1.5 BlueHDi 130 CV', year: 2021, km: 40000, price: 22450, source: 'autoscout24.de (Norderstedt)', url: 'https://www.autoscout24.de/angebote/peugeot-5008-1-5-bluehdi-allure-automatik-eu6d-7-sitzer-klima-l-diesel-schwarz-cat_ma55gr201155ge1093va3629mt3398tr1070-b2c791a5-1468-4b77-903c-47d48df2b4f1' },
   { brand: 'Peugeot', model: '5008', gen: '5008 II', market: 'DE', kind: 'anuncio', engine: '1.5 BlueHDi 130 CV', year: 2021, km: 76514, price: 21580, source: 'autoscout24.de (Potsdam)', url: 'https://www.autoscout24.de/angebote/peugeot-5008-hdi-autom-navi-sitzh-tempom-7-sitze-diesel-schwarz-cat_ma55gr201155ge1093va3629mt3398tr4241-c53b5298-bafc-4504-a830-dd6d5c3839be' },
@@ -18326,7 +18332,7 @@ export const MARKET_OBSERVATIONS = [
   { brand: 'Volkswagen', model: 'Golf', gen: 'Golf VII.5', market: 'DE', kind: 'anuncio', engine: '1.6 TDI 116 CV IQ.DRIVE Aut', year: 2019, km: 156922, price: 11999, source: 'autoscout24.de (Fürth, particular)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-1-6-tdi-dsg-comfortline-mit-apple-carplay-diesel-cat_ma74gr100101ge7va2820mt428tr562-2df7fb2c-455b-444d-98f8-d6438997b031' },
   { brand: 'Volkswagen', model: 'Golf', gen: 'Golf VII.5', market: 'DE', kind: 'anuncio', engine: '1.6 TDI 116 CV IQ.DRIVE Aut', year: 2019, km: 175000, price: 12900, source: 'autoscout24.de (Karlsruhe, particular)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-join-start-stopp-diesel-cat_ma74gr100101ge7va2820mt428tr480888-0b58f499-1386-41d5-9b93-50f73f336dfe' },
   { brand: 'Volkswagen', model: 'Golf', gen: 'Golf VII.5', market: 'DE', kind: 'anuncio', engine: '1.6 TDI 116 CV IQ.DRIVE Aut', year: 2019, km: 150000, price: 11999, source: 'autoscout24.de (Puchheim-Bahnhof (bei München))', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-vii-lim-join-acc-dsg-led-diesel-grau-cat_ma74gr100101ge7va2820mt428tr480888-790b3049-4961-44d1-8ccb-e6426e719f9d' },
-  { brand: 'Volkswagen', model: 'Golf', gen: 'Golf VII.5', market: 'DE', kind: 'anuncio', engine: '1.6 TDI 116 CV IQ.DRIVE Aut', year: 2019, km: 128500, price: 13000, source: 'autoscout24.de (Bielefeld, particular)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-join-dsg-schaden-bitte-lesen-auto-zerkratzt-diesel-grau-cat_ma74gr100101ge7va2820mt428tr480888-8368e3e0-bdbf-4788-9f45-0002d8507aa8' },
+  { brand: 'Volkswagen', model: 'Golf', gen: 'Golf VII.5', market: 'DE', kind: 'anuncio', engine: '1.6 TDI 116 CV IQ.DRIVE Aut', year: 2019, km: 128500, price: 13000, source: 'AutoScout24.de (Bielefeld, particular)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-join-dsg-schaden-bitte-lesen-auto-zerkratzt-diesel-grau-cat_ma74gr100101ge7va2820mt428tr480888-8368e3e0-bdbf-4788-9f45-0002d8507aa8', eligible: false, eligibilityReason: 'El anuncio declara golpe trasero reparado, arañazos en toda la carrocería y sustitución de caja/mecatrónica; estado y precio no comparables con una unidad estándar.' },
   { brand: 'Volkswagen', model: 'Golf', gen: 'Golf VII.5', market: 'DE', kind: 'anuncio', engine: '1.6 TDI 116 CV IQ.DRIVE Aut', year: 2019, km: 77910, price: 14400, source: 'autoscout24.de (Nürnberg, particular)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-golf-1-6-tdi-scr-trendline-diesel-silber-cat_ma74gr100101ge7va2820mt428tr626-90f5f59c-b850-44cf-9047-d35eb54b6acd' },
   { brand: 'Volkswagen', model: 'Golf', gen: 'Golf VII.5', market: 'DE', kind: 'anuncio', engine: '1.6 TDI 116 CV IQ.DRIVE Aut', year: 2019, km: 109939, price: 12690, source: 'autoscout24.de (Heide)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-vii-1-6-tdi-lim-join-acc-navi-carplay-shz-diesel-silber-cat_ma74gr100101ge7va2820mt428tr626-bcb6e495-22b9-4b8a-b8cd-58a3427e684a' },
   { brand: 'Volkswagen', model: 'Golf', gen: 'Golf VII.5', market: 'DE', kind: 'anuncio', engine: '1.6 TDI 116 CV IQ.DRIVE Aut', year: 2019, km: 53000, price: 15980, source: 'autoscout24.de (Idstein, Hochschulstadt, particular)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-vii-1-6-tdi-iq-drive-53-000-km-tuev-neu-diesel-weiss-cat_ma74gr100101ge7va2820mt428tr480888-848b2580-99f3-4561-9f8e-8e18d96d6ab3' },
@@ -18806,7 +18812,7 @@ export const MARKET_OBSERVATIONS = [
   { brand: 'Volkswagen', model: 'Golf Variant', gen: 'Golf VII Variant', market: 'DE', kind: 'anuncio', engine: '2.0 TDI 150 CV DSG', year: 2014, km: 99700, price: 16980, source: 'autoscout24.de (Haßloch)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-golf-vi-variant-tdi-dsg-highline-navi-xenon-klima-diesel-beige-cat_ma74gr100101ge7va132mt440tr587-450010cb-59e5-47e7-835e-7f0c060aa52d' },
   { brand: 'Volkswagen', model: 'Golf Variant', gen: 'Golf VII Variant', market: 'DE', kind: 'anuncio', engine: '2.0 TDI 150 CV DSG', year: 2014, km: 232327, price: 5800, source: 'autoscout24.de (Güstrow, particular)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-2-0-tdi-bluemotion-technology-highline-diesel-cat_ma74gr100101ge7va132mt440tr587-a25dd621-65e2-4147-a26f-ee2e40fd6cad' },
   { brand: 'Volkswagen', model: 'Golf Variant', gen: 'Golf VII Variant', market: 'DE', kind: 'anuncio', engine: '2.0 TDI 150 CV DSG', year: 2014, km: 170500, price: 8000, source: 'autoscout24.de (Düren, Stadt, particular)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-golf-7-variant-2-0-tdi-highline-pano-ahk-tuev-diesel-cat_ma74gr100101ge7va132mt440tr587-b791aff6-7e56-4cfa-951d-86b9c4e55f63' },
-  { brand: 'Volkswagen', model: 'Golf Variant', gen: 'Golf VII Variant', market: 'DE', kind: 'anuncio', engine: '2.0 TDI 150 CV DSG', year: 2014, km: 148163, price: 5100, source: 'autoscout24.de (Annaberg-Buchholz)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-vii-variant-2-0-tdi-comfortline-4motion-diesel-schwarz-cat_ma74gr100101ge7va132mt440tr562-0677f53f-0ac4-4871-94e4-21f6f56ca041' },
+  { brand: 'Volkswagen', model: 'Golf Variant', gen: 'Golf VII Variant', market: 'DE', kind: 'anuncio', engine: '2.0 TDI 150 CV Manual 4Motion', year: 2014, km: 148163, price: 5100, source: 'autoscout24.de (Annaberg-Buchholz)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-vii-variant-2-0-tdi-comfortline-4motion-diesel-schwarz-cat_ma74gr100101ge7va132mt440tr562-0677f53f-0ac4-4871-94e4-21f6f56ca041', eligible: false, eligibilityReason: 'La ficha directa confirma cambio manual, pero esta generación del catálogo solo ofrece la variante DSG; además el vendedor prioriza venta a profesional/exportación y declara varias marcas de uso.' },
   { brand: 'Volkswagen', model: 'Golf Variant', gen: 'Golf VII Variant', market: 'DE', kind: 'anuncio', engine: '2.0 TDI 150 CV DSG', year: 2015, km: 185000, price: 8950, source: 'autoscout24.de (Sindelfingen/Stuttgart)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-vii-2-0-tdi-dsg-variant-cup-pano-ahk-diesel-grau-cat_ma74gr100101ge7va132mt440tr480888-2e9cbe5e-746d-4dbd-aeb9-516fc2372e65' },
   { brand: 'Volkswagen', model: 'Golf Variant', gen: 'Golf VII Variant', market: 'DE', kind: 'anuncio', engine: '2.0 TDI 150 CV DSG', year: 2015, km: 170100, price: 8400, source: 'autoscout24.de (Obrigheim)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-vii-variant-ahk-navi-tempomat-xenon-shz-pdc-diesel-schwarz-cat_ma74gr100101ge7va132mt440tr562-d71d12fe-0a1a-440f-bae1-50345207336a' },
   { brand: 'Volkswagen', model: 'Golf Variant', gen: 'Golf VII Variant', market: 'DE', kind: 'anuncio', engine: '2.0 TDI 150 CV DSG', year: 2015, km: 208000, price: 8350, source: 'autoscout24.de (Erbach)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-alltrack-bmt-4motion-ahk-navi-kamera-diesel-grau-cat_ma74gr100101ge7va127mt440tr480888-91ff0eea-c5f1-4d07-80af-55be603621a5' },
@@ -18848,7 +18854,7 @@ export const MARKET_OBSERVATIONS = [
   { brand: 'Volkswagen', model: 'Golf Variant', gen: 'Golf VII Variant', market: 'DE', kind: 'anuncio', engine: '2.0 TDI 150 CV DSG', year: 2015, km: 121000, price: 14490, source: 'autoscout24.de (Emmendingen, Stadt, particular)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-golf-vii-variant-diesel-2-0-tdi-bluemotion-technology-highline-diesel-schwarz-cat_ma74gr100101ge7va132mt440tr587-8d64edd3-eb22-47cf-8e29-8a5ef414c031' },
   { brand: 'Volkswagen', model: 'Golf Variant', gen: 'Golf VII Variant', market: 'DE', kind: 'anuncio', engine: '2.0 TDI 150 CV DSG', year: 2015, km: 285000, price: 5800, source: 'autoscout24.de (Lüder, particular)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-highline-bmt-diesel-schwarz-cat_ma74gr100101ge7va132mt440tr587-92cc2bdb-5b14-4566-9777-39e337e217a4' },
   { brand: 'Volkswagen', model: 'Golf Variant', gen: 'Golf VII Variant', market: 'DE', kind: 'anuncio', engine: '2.0 TDI 150 CV DSG', year: 2015, km: 162000, price: 9490, source: 'autoscout24.de (Bad Mergentheim)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-vii-r-line-4motion-bmt-navi-pano-xenon-diesel-blau-cat_ma74gr100101ge7va132mt440tr562-7267980c-efdb-4cc8-a104-bee7dc58e4e0' },
-  { brand: 'Volkswagen', model: 'Golf Variant', gen: 'Golf VII Variant', market: 'DE', kind: 'anuncio', engine: '2.0 TDI 150 CV DSG', year: 2016, km: 178500, price: 6880, source: 'autoscout24.de (Petersberg OT Sennewitz)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-vii-variant-2-0-tdi-lounge-bmt-verkauf-nur-an-haen-diesel-weiss-cat_ma74gr100101ge7va132mt440tr480888-b21401ca-2a83-48de-ae61-ad93079f4a10' },
+  { brand: 'Volkswagen', model: 'Golf Variant', gen: 'Golf VII Variant', market: 'DE', kind: 'anuncio', engine: '2.0 TDI 150 CV DSG', year: 2016, km: 178500, price: 6880, source: 'AutoScout24.de (Petersberg OT Sennewitz)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-vii-variant-2-0-tdi-lounge-bmt-verkauf-nur-an-haen-diesel-weiss-cat_ma74gr100101ge7va132mt440tr480888-b21401ca-2a83-48de-ae61-ad93079f4a10', eligible: false, eligibilityReason: 'La ficha original confirma cambio manual, no DSG como quedó transcrito; se excluye para no mezclar transmisiones. Además, se ofrecía solo a comerciantes.' },
   { brand: 'Volkswagen', model: 'Golf Variant', gen: 'Golf VII Variant', market: 'DE', kind: 'anuncio', engine: '2.0 TDI 150 CV DSG', year: 2016, km: 250000, price: 6500, source: 'autoscout24.de (Puchheim)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-2-0-tdi-allstar-navi-klima-1-hand-euro-6-diesel-weiss-cat_ma74gr100101ge7va132mt440tr480888-172a99a4-c621-42ea-aec6-6de11ac9d5d8' },
   { brand: 'Volkswagen', model: 'Golf Variant', gen: 'Golf VII Variant', market: 'DE', kind: 'anuncio', engine: '2.0 TDI 150 CV DSG', year: 2016, km: 227000, price: 8990, source: 'autoscout24.de (Bad Toelz)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-vii-variant-comfort-bmt-+sthzg-+ergo-+led-+-diesel-weiss-cat_ma74gr100101ge7va132mt440tr562-866ed845-f22c-402a-80b9-4aeebdef9dd2' },
   { brand: 'Volkswagen', model: 'Golf Variant', gen: 'Golf VII Variant', market: 'DE', kind: 'anuncio', engine: '2.0 TDI 150 CV DSG', year: 2016, km: 174000, price: 9200, source: 'autoscout24.de (Bremen , particular)', url: 'https://www.autoscout24.de/angebote/volkswagen-golf-2-0-tdi-bluemotion-technology-dsg-comfortline-diesel-grau-cat_ma74gr100101ge7va2820mt440tr562-3e2f3b38-477f-44ea-851f-5fad6186087d' },
@@ -21477,7 +21483,7 @@ export const MARKET_OBSERVATIONS = [
   { brand: 'Volkswagen', model: 'Caddy', gen: 'Caddy 5', market: 'DE', kind: 'anuncio', engine: '1.5 TSI 114 CV Style', year: 2022, km: 101000, price: 24780, source: 'autoscout24.de (Würzburg)', url: 'https://www.autoscout24.de/angebote/volkswagen-caddy-california-1-5-tsi-bett-ahk-rfk-benzin-grau-cat_ma74gr15734ge385va339mt749tr480881-66942ff2-cab0-4d1f-b98b-e3ce2b94838b' },
   { brand: 'Volkswagen', model: 'Caddy', gen: 'Caddy 5', market: 'DE', kind: 'anuncio', engine: '1.5 TSI 114 CV Style', year: 2022, km: 1208, price: 36890, source: 'autoscout24.de (Schwerin)', url: 'https://www.autoscout24.de/angebote/volkswagen-caddy-kuehlausbau-kerstner-frischdienst-1-5-benzin-weiss-cat_ma74gr15734ge385va340mt749tr5764-edb6afe5-f147-41ae-a9ab-f263cbbc0c80' },
   { brand: 'Volkswagen', model: 'Caddy', gen: 'Caddy 5', market: 'DE', kind: 'anuncio', engine: '1.5 TSI 114 CV Style', year: 2022, km: 30839, price: 29570, source: 'autoscout24.de (Hildesheim)', url: 'https://www.autoscout24.de/angebote/volkswagen-caddy-1-5-tsi-panamericana-allwetter-kamera-fron-benzin-weiss-cat_ma74gr15734ge385va3215mt749tr5764-31f22cf7-5a6f-4b3d-a84d-ebda2b9e48b5' },
-  { brand: 'Volkswagen', model: 'Caddy', gen: 'Caddy 5', market: 'DE', kind: 'anuncio', engine: '1.5 TSI 114 CV Style', year: 2022, km: 69700, price: 45980, source: 'autoscout24.de (Neukirchen-Vluyn)', url: 'https://www.autoscout24.de/angebote/volkswagen-caddy-rollstuhlgerecht-dsg-style-eu6d-benzin-schwarz-cat_ma74gr15734ge385va3215mt749tr7469-f8e7a6e7-2327-439f-b909-b0f9a421556d' },
+  { brand: 'Volkswagen', model: 'Caddy', gen: 'Caddy 5', market: 'DE', kind: 'anuncio', engine: '1.5 TSI 114 CV Style', year: 2022, km: 69700, price: 45980, source: 'AutoScout24.de (Neukirchen-Vluyn)', url: 'https://www.autoscout24.de/angebote/volkswagen-caddy-rollstuhlgerecht-dsg-style-eu6d-benzin-schwarz-cat_ma74gr15734ge385va3215mt749tr7469-f8e7a6e7-2327-439f-b909-b0f9a421556d', eligible: false, eligibilityReason: 'La unidad tiene una adaptación específica para silla de ruedas (rampa, anclajes y configuración de plazas); no es comparable con un Caddy estándar.' },
   { brand: 'Skoda', model: 'Kodiaq', gen: 'Kodiaq I', market: 'DE', kind: 'anuncio', engine: '2.0 TDI 240 CV RS DSG 4x4', year: 2019, km: 77800, price: 29990, source: 'autoscout24.de (Datteln)', url: 'https://www.autoscout24.de/angebote/skoda-kodiaq-2-0-bi-tdi-rs-4x4-canton-acc-360-panod-diesel-schwarz-cat_ma65gr74375ge531va423mt900tr6513-6a0a5144-4aac-4acb-8a10-6b7a0a1134c1' },
   { brand: 'Skoda', model: 'Kodiaq', gen: 'Kodiaq I', market: 'DE', kind: 'anuncio', engine: '2.0 TDI 240 CV RS DSG 4x4', year: 2019, km: 98940, price: 28565, source: 'autoscout24.de (Gera)', url: 'https://www.autoscout24.de/angebote/skoda-kodiaq-rs-2-0-tdi-led-panosd-spurass-360-4xsitzh-diesel-blau-cat_ma65gr74375ge531va423mt900tr6513-88cbfb8d-9a36-4dd1-a94a-8924c3d767aa' },
   { brand: 'Skoda', model: 'Kodiaq', gen: 'Kodiaq I', market: 'DE', kind: 'anuncio', engine: '2.0 TDI 240 CV RS DSG 4x4', year: 2019, km: 127000, price: 28990, source: 'autoscout24.de (Unstrut-Hainich OT Schönstedt)', url: 'https://www.autoscout24.de/angebote/skoda-kodiaq-rs-4x4-diesel-schwarz-cat_ma65gr74375ge531va423mt900tr6513-489d14ba-70f4-45e9-afa5-b27d0b22fd9a' },
@@ -21603,6 +21609,52 @@ const quantile = (sorted, q) => {
 
 const key = (brand, model, gen, market) => `${brand}|${model}|${gen}|${market}`;
 
+/**
+ * Observación utilizable en cálculos. Las exclusiones quedan guardadas para
+ * trazabilidad/auditoría, pero nunca entran en las bandas ni en el ajuste.
+ * El combustible también debe poder identificarse; los agregados «todas» se
+ * dejan fuera para no mezclar gasolina, diésel e híbridos.
+ */
+export const isEligibleObservation = (obs) => Boolean(obs)
+  && obs.eligible !== false
+  && Number.isFinite(Number(obs.price)) && Number(obs.price) > 0
+  && Number.isFinite(Number(obs.year)) && Number(obs.year) > 0
+  && Number.isFinite(Number(obs.km)) && Number(obs.km) >= 0
+  && ['DE', 'ES'].includes(obs.market)
+  // En ES se busca PVP minorista de profesional; el vendedor puede aparecer
+  // en el campo `note` aunque la plataforma y la URL no lo indiquen.
+  && !(obs.market === 'ES' && /\bparticular(?:es)?\b|\bprivad[oa]s?\b|\bprivate\b/i.test(`${obs.source || ''} ${obs.url || ''} ${obs.note || ''} ${obs.seller || ''}`))
+  // Las adaptaciones de silla de ruedas constituyen otro mercado que no debe
+  // distorsionar las referencias de vehículos de serie.
+  && !/rollstuhl|behindert|wheelchair/i.test(`${obs.source || ''} ${obs.url || ''} ${obs.note || ''} ${obs.seller || ''}`)
+  // Una observación agregada «todas» no puede compararse por variante/motor.
+  && fuelOf(obs) !== null;
+
+const facet = (value) => String(value ?? '').trim().toLocaleLowerCase('es')
+  .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ');
+
+/** Coincidencia estricta para los perfiles deportivos que declaran variantKey. */
+export function matchesVariant(obs, profile) {
+  if (!profile) return true;
+  const variantKey = profile.variantKey || profile.key;
+  if (variantKey && obs.variantKey !== variantKey) return false;
+  for (const name of ['trim', 'body', 'transmission']) {
+    if (profile[name] != null && facet(obs[name]) !== facet(profile[name])) return false;
+  }
+  const expectedCv = profile.cv ?? profile.hp;
+  if (expectedCv != null && cvOf(obs) !== Number(expectedCv)) return false;
+  if (profile.fuel != null && facet(fuelOf(obs)) !== facet(profile.fuel)) return false;
+  return true;
+}
+
+/** Fecha efectiva de un registro; lo legado conserva la fecha de su captura. */
+export const observedAtOf = (obs) => obs?.observedAt || EVIDENCE_CAPTURED_AT;
+
+/** Última fecha presente en la evidencia, no una fecha escrita en la vista. */
+export function latestEvidenceDate(observations = MARKET_OBSERVATIONS) {
+  return observations.map(observedAtOf).filter(Boolean).sort().at(-1) || EVIDENCE_CAPTURED_AT;
+}
+
 /** Potencia declarada en el texto del motor; null si la fuente dice «todas». */
 /**
  * Potencia declarada en el texto del motor. Acepta «150 CV», «150 PS» y las
@@ -21653,16 +21705,38 @@ export const fuelOf = (obs) => {
  * @param cv si se indica, se descartan los anuncios de otra potencia
  *           (un GTD de 184 CV no vale lo que un TDI de 150 CV).
  */
-export function evidenceStats(brand, model, gen, market, kmRef = 120000, cv = null) {
-  const all = MARKET_OBSERVATIONS.filter((o) => key(o.brand, o.model, o.gen, o.market) === key(brand, model, gen, market));
-  // Con `cv` indicado se exigen anuncios DE ESA POTENCIA. Las medias de portal
-  // («todas») no sirven aquí: mezclan motores y falsearían la variante.
-  const rows = cv
-    ? all.filter((o) => { const c = cvOf(o); return c !== null && Math.abs(c - cv) <= Math.max(10, cv * 0.1); })
-    : all;
-  const used = rows;
+export function evidenceStats(brand, model, gen, market, kmRef = 120000, cv = null, variant = null, options = {}) {
+  const source = options.observations || MARKET_OBSERVATIONS;
+  const all = source.filter((o) => key(o.brand, o.model, o.gen, o.market) === key(brand, model, gen, market));
+  const eligible = all.filter(isEligibleObservation);
+  const profile = typeof variant === 'string' ? { variantKey: variant, cv } : variant;
+  // Un perfil declara la identidad comercial completa y siempre se exige
+  // coincidencia exacta; sin perfil se conserva el filtro CV histórico.
+  const used = profile
+    ? eligible.filter((o) => matchesVariant(o, profile))
+    : cv != null
+      ? eligible.filter((o) => cvOf(o) === Number(cv))
+      : eligible;
   if (!used.length) return null;
-  const normalized = used.map((o) => normalizeKm(o.price, o.km, kmRef));
+  const yearRef = Number(options.yearRef);
+  const yearCoef = Number(options.yearCoef);
+  const kmCoef = Number(options.kmCoef);
+  // Con menos de cuatro anuncios exactos de una variante deportiva no hay una
+  // curva temporal propia; aplicar la pendiente año/km del mercado mezclado
+  // puede fabricar margen. En ese caso solo se lleva el km a referencia y se
+  // conserva la diferencia de año visible en `yearRange`.
+  const sparseExactVariant = Boolean(profile?.variantKey) && used.length < 4;
+  const usesMarketYearKmFit = !sparseExactVariant
+    && Number.isFinite(yearRef) && Number.isFinite(yearCoef) && Number.isFinite(kmCoef);
+  const normalized = used.map((o) => {
+    if (usesMarketYearKmFit) {
+      return Number(o.price) * Math.exp(
+        yearCoef * (yearRef - Number(o.year))
+        + kmCoef * ((Number(kmRef) - Number(o.km)) / 1000),
+      );
+    }
+    return normalizeKm(o.price, o.km, kmRef);
+  });
   const sorted = [...normalized].sort((a, b) => a - b);
   const few = used.length < 4;
   const med = quantile(sorted, 0.5);
@@ -21672,7 +21746,12 @@ export function evidenceStats(brand, model, gen, market, kmRef = 120000, cv = nu
   return {
     n: used.length,
     nTotal: all.length,
-    capturedAt: EVIDENCE_CAPTURED_AT,
+    nEligible: eligible.length,
+    nExcluded: all.length - eligible.length,
+    capturedAt: latestEvidenceDate(used),
+    variantKey: profile?.variantKey || profile?.key || null,
+    yearRange: [Math.min(...used.map((o) => Number(o.year))), Math.max(...used.map((o) => Number(o.year)))],
+    normalization: sparseExactVariant ? 'km-only; year kept in observed sample' : usesMarketYearKmFit ? 'market year/km fit' : 'km-only',
     min: Math.round(sorted[0]),
     p25: Math.round(Math.min(few ? sorted[0] : quantile(sorted, 0.25), med * (1 - minSpread))),
     median: Math.round(med),
@@ -21685,10 +21764,10 @@ export function evidenceStats(brand, model, gen, market, kmRef = 120000, cv = nu
   };
 }
 
-/** Índice rápido: cuántas generaciones del catálogo tienen evidencia real. */
+/** Índice rápido: generaciones con al menos una observación elegible. */
 export function evidenceCoverage() {
   const gens = new Map();
-  MARKET_OBSERVATIONS.forEach((o) => {
+  MARKET_OBSERVATIONS.filter(isEligibleObservation).forEach((o) => {
     const k = `${o.brand} ${o.model} ${o.gen}`;
     if (!gens.has(k)) gens.set(k, { DE: 0, ES: 0 });
     gens.get(k)[o.market] += 1;

@@ -187,10 +187,14 @@ export default function InspectionView() {
   }, [selectionMode, selectedFleetVehicle, vehicleChanges, draftVehicle, mileageReadings]);
   const guide = useMemo(() => getVehicleInspectionGuide(activeVehicle || {}), [activeVehicle]);
   const progress = inspectionProgress(guide.items, checks);
+  const specificProgress = inspectionProgress(guide.specificItems, checks);
+  const generalProgress = inspectionProgress(guide.generalItems, checks);
   const writable = can('vehicles');
   const hasSavedInspection = Boolean(activeVehicle?.inspectionUpdatedAt || Object.keys(activeVehicle?.inspectionChecks || {}).length);
   const criticalIssues = guide.items.filter((entry) => entry.priority === 'critical' && checks[entry.id]?.status === 'issue');
-  const criticalPending = guide.items.filter((entry) => entry.priority === 'critical' && (!checks[entry.id]?.status || checks[entry.id]?.status === 'pending'));
+  const criticalSpecificPending = guide.specificItems.filter((entry) => entry.priority === 'critical' && (!checks[entry.id]?.status || checks[entry.id]?.status === 'pending'));
+  const criticalGeneralPending = guide.generalItems.filter((entry) => entry.priority === 'critical' && (!checks[entry.id]?.status || checks[entry.id]?.status === 'pending'));
+  const criticalPending = [...criticalSpecificPending, ...criticalGeneralPending];
   const mileage = mileageContext(activeVehicle || {});
   const mileageAudit = auditMileageHistory(activeVehicle?.km, mileageReadings);
   const hasCurrentKm = hasNumber(activeVehicle?.km);
@@ -388,7 +392,7 @@ export default function InspectionView() {
         <SectionTitle
           icon={ClipboardCheck}
           title="Inspección precompra"
-          subtitle="Un recorrido ordenado por zonas, con controles específicos según modelo/motor, auditoría del kilometraje y registro de incidencias antes de comprometer la compra."
+          subtitle="Primero, puntos de atención propios del modelo, motor y transmisión con instrucciones para detectarlos. Kilometraje, diagnosis y comprobaciones universales quedan en un bloque secundario."
           right={(
             <>
               <Button variant="secondary" icon={Printer} onClick={printChecklist} disabled={!activeVehicle}>
@@ -424,7 +428,7 @@ export default function InspectionView() {
 
           {selectionMode === 'catalog' && (
             <div className="space-y-3">
-              <Field label="Buscar una variante del catálogo" hint="La guía añade puntos por modelo, motor y caja cuando la configuración se puede identificar. Confirma la versión exacta por VIN.">
+              <Field label="Buscar una variante del catálogo" hint="La guía prioriza puntos débiles documentados de motor, modelo y caja. Confirma la variante por VIN; los controles rutinarios se muestran aparte.">
                 <SearchInput
                   value={catalogQuery}
                   onChange={setCatalogQuery}
@@ -517,85 +521,89 @@ export default function InspectionView() {
       {activeVehicle ? (
         <>
           <div className="space-y-4 print-only-hide">
-            <Card className="p-4">
-              <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-amber-300">Datos base para esta inspección</p>
-                  <h3 className="mt-0.5 text-sm font-bold text-white">{describeVehicle(activeVehicle) || 'Unidad sin identificar'}</h3>
-                  <p className="mt-0.5 text-[11px] text-slate-400">Confirma el odómetro antes de empezar; la lectura y el historial se guardan en la ficha del vehículo.</p>
+            <details className="inspection-reference-details rounded-xl border border-slate-800 bg-slate-950/35">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3">
+                <span className="min-w-0">
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Rutina universal · se repite en todas las unidades</span>
+                  <span className="mt-0.5 block text-sm font-semibold text-white">Datos y contraste del kilometraje</span>
+                  <span className="mt-0.5 block truncate text-[11px] text-slate-400">
+                    {describeVehicle(activeVehicle) || 'Unidad sin identificar'} · {exactYear} · cuadro {formatKm(mileage.km)}
+                  </span>
+                </span>
+                <span className="flex shrink-0 items-center gap-2">
+                  <Badge tone={!hasCurrentKm || mileageAudit.hasConflict ? 'amber' : 'slate'}>
+                    {!hasCurrentKm ? 'KM pendiente' : mileageAudit.hasConflict ? 'Verificar lecturas' : 'Datos de apoyo'}
+                  </Badge>
+                  <ChevronDown className="h-4 w-4 text-slate-500 transition-transform" />
+                </span>
+              </summary>
+
+              <Card className="mt-2 p-4">
+                <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-amber-300">Control común, fuera del foco técnico del modelo</p>
+                    <h3 className="mt-0.5 text-sm font-bold text-white">{describeVehicle(activeVehicle) || 'Unidad sin identificar'}</h3>
+                    <p className="mt-0.5 text-[11px] text-slate-400">El análisis de puntos débiles aparece primero. Aquí quedan el odómetro, su contraste y las lecturas documentales.</p>
+                  </div>
+                  <Badge tone={guide.hasSpecificGuidance ? 'emerald' : 'amber'}>{guide.hasSpecificGuidance ? `${specificProgress.total} puntos específicos` : 'Completar variante / VIN'}</Badge>
                 </div>
-                <Badge tone={guide.hasSpecificGuidance ? 'emerald' : 'amber'}>{guide.hasSpecificGuidance ? 'Guía específica disponible' : 'Completar motor / caja por VIN'}</Badge>
-              </div>
 
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(14rem,1.1fr)]">
-                <Field label="Kilometraje que marca el cuadro (km)" hint="Lectura actual al inspeccionar; no la estimación del anuncio.">
-                  <Input type="number" min="0" step="1" value={activeVehicle.km ?? ''} onChange={(value) => updateManualData('km', value)} placeholder="Ej. 118000" />
-                </Field>
-                <Field label="Kilometraje anunciado / declarado (km)" hint="Opcional. Permite comparar el dato de venta con el odómetro actual.">
-                  <Input type="number" min="0" step="1" value={activeVehicle.advertisedKm ?? ''} onChange={(value) => updateManualData('advertisedKm', value)} placeholder="Ej. 116000" />
-                </Field>
-                <div className="rounded-xl border border-slate-800 bg-slate-950/50 px-3 py-2.5">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Contexto del kilometraje</p>
-                  {mileage.averageKmPerYear !== null && Number(activeVehicle.km) > 0 ? (
-                    <>
-                      <p className="mt-1 text-sm font-bold tabular-nums text-white">≈ {mileage.averageKmPerYear.toLocaleString('es-ES')} km/año</p>
-                      <p className="mt-0.5 text-[10px] leading-relaxed text-slate-500">Media orientativa desde el año/fecha de matriculación; no diagnostica desgaste ni acredita el odómetro.</p>
-                    </>
-                  ) : (
-                    <p className="mt-1 text-[11px] leading-relaxed text-slate-400">Anota una lectura actual y un año de matriculación para mostrar una media orientativa; siempre contrasta documentos y estado real.</p>
-                  )}
-                  {advertisedDelta !== null && (
-                    <p className={cx('mt-1.5 text-[10px] font-semibold', advertisedDelta === 0 ? 'text-emerald-300' : 'text-amber-300')}>
-                      {advertisedDelta === 0 ? 'Coincide con el kilometraje declarado.' : `Diferencia cuadro/anuncio: ${advertisedDelta > 0 ? '+' : ''}${advertisedDelta.toLocaleString('es-ES')} km · confirmar fecha y fuente.`}
-                    </p>
-                  )}
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(14rem,1.1fr)]">
+                  <Field label="Kilometraje que marca el cuadro (km)" hint="Lectura actual; no la cifra estimada del anuncio.">
+                    <Input type="number" min="0" step="1" value={activeVehicle.km ?? ''} onChange={(value) => updateManualData('km', value)} placeholder="Ej. 118000" />
+                  </Field>
+                  <Field label="Kilometraje anunciado / declarado (km)" hint="Dato opcional para dejar registrada la diferencia.">
+                    <Input type="number" min="0" step="1" value={activeVehicle.advertisedKm ?? ''} onChange={(value) => updateManualData('advertisedKm', value)} placeholder="Ej. 116000" />
+                  </Field>
+                  <div className="rounded-xl border border-slate-800 bg-slate-950/50 px-3 py-2.5">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Contexto del kilometraje</p>
+                    {mileage.averageKmPerYear !== null && Number(activeVehicle.km) > 0 ? (
+                      <>
+                        <p className="mt-1 text-sm font-bold tabular-nums text-white">≈ {mileage.averageKmPerYear.toLocaleString('es-ES')} km/año</p>
+                        <p className="mt-0.5 text-[10px] leading-relaxed text-slate-500">Media orientativa; no acredita el odómetro ni diagnostica desgaste.</p>
+                      </>
+                    ) : (
+                      <p className="mt-1 text-[11px] leading-relaxed text-slate-400">Se calcula al introducir km y año/fecha de matriculación. Contrasta siempre con documentos y estado real.</p>
+                    )}
+                    {advertisedDelta !== null && (
+                      <p className={cx('mt-1.5 text-[10px] font-semibold', advertisedDelta === 0 ? 'text-emerald-300' : 'text-amber-300')}>
+                        {advertisedDelta === 0 ? 'Coincide con el dato declarado.' : `Diferencia cuadro/anuncio: ${advertisedDelta > 0 ? '+' : ''}${advertisedDelta.toLocaleString('es-ES')} km · contrastar fuente.`}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              {!hasCurrentKm && (
-                <Alert tone="warn" className="mt-3" title="Falta anotar la lectura actual del odómetro">
-                  Regístrala antes de marcar como revisado el punto de kilometraje; si no se puede comprobar, deja constancia en la nota del control.
-                </Alert>
-              )}
-              {mileageAudit.hasConflict && (
-                <Alert tone="danger" className="mt-3" title="Hay lecturas que requieren verificación">
-                  {mileageConflictText}. No es una conclusión automática: comprueba las fechas, el VIN y los documentos originales antes de continuar con la compra.
-                </Alert>
-              )}
+                {!hasCurrentKm && (
+                  <Alert tone="warn" className="mt-3" title="Falta anotar la lectura actual del odómetro">
+                    Regístrala antes de cerrar el control universal de kilometraje; si no se puede comprobar, deja constancia en la nota.
+                  </Alert>
+                )}
+                {mileageAudit.hasConflict && (
+                  <Alert tone="danger" className="mt-3" title="Hay lecturas que requieren verificación">
+                    {mileageConflictText}. No es una conclusión automática: comprueba las fechas, el VIN y los documentos originales.
+                  </Alert>
+                )}
 
-              <div className="mt-3">
-                <MileageHistoryPanel
-                  readings={mileageReadings}
-                  audit={mileageAudit}
-                  onChange={updateMileageReading}
-                  onAdd={addMileageReading}
-                  onRemove={removeMileageReading}
-                />
-              </div>
-            </Card>
-
-            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-              <Card className="p-3"><p className="text-[10px] uppercase tracking-wider text-slate-500">Unidad / km actuales</p><p className="mt-1 text-sm font-bold text-white">{describeVehicle(activeVehicle) || 'Sin identificar'}</p><p className="mt-0.5 text-[11px] text-slate-400">{exactYear} · {formatKm(mileage.km)}</p></Card>
-              <Card className="p-3"><p className="text-[10px] uppercase tracking-wider text-slate-500">Progreso</p><p className="mt-1 text-sm font-bold text-white">{progress.reviewed} / {progress.total} revisados</p><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-800"><div className={cx('h-full transition-all', progress.issues ? 'bg-rose-400' : progress.percent === 100 ? 'bg-emerald-400' : 'bg-amber-400')} style={{ width: `${progress.percent}%` }} /></div></Card>
-              <Card className="p-3"><p className="text-[10px] uppercase tracking-wider text-slate-500">Incidencias</p><p className={cx('mt-1 text-sm font-bold', progress.issues ? 'text-rose-300' : 'text-emerald-300')}>{progress.issues} {progress.issues === 1 ? 'marcada' : 'marcadas'}</p><p className="mt-0.5 text-[11px] text-slate-500">{criticalIssues.length} de riesgo elevado</p></Card>
-              <Card className="p-3"><p className="text-[10px] uppercase tracking-wider text-slate-500">Estado de la revisión</p><div className="mt-1"><Badge tone={dirty ? 'amber' : hasSavedInspection ? 'emerald' : 'slate'}>{dirty ? 'Cambios sin guardar' : hasSavedInspection ? 'Guardada' : 'Aún no guardada'}</Badge></div><p className="mt-1 text-[11px] text-slate-500">{selectionMode === 'fleet' ? 'Ficha de flota' : 'Nueva prospección al guardar'}</p></Card>
-            </div>
-
-            {criticalIssues.length > 0 && (
-              <Alert tone="danger" title="Detén la compra hasta aclarar estas incidencias críticas">
-                {criticalIssueText}. Solicita pruebas, documentación y valoración independiente; no reserves ni transfieras dinero hasta resolverlas satisfactoriamente.
-              </Alert>
-            )}
-            {criticalIssues.length === 0 && criticalPending.length > 0 && (
-              <Alert tone="warn" title="Todavía hay comprobaciones críticas pendientes">
-                Completa los controles de identidad y kilometraje, diagnosis, sistemas de seguridad y emisiones aplicables antes de decidir.
-              </Alert>
-            )}
+                <div className="mt-3">
+                  <MileageHistoryPanel
+                    readings={mileageReadings}
+                    audit={mileageAudit}
+                    onChange={updateMileageReading}
+                    onAdd={addMileageReading}
+                    onRemove={removeMileageReading}
+                  />
+                </div>
+              </Card>
+            </details>
 
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <h3 className="text-sm font-bold text-white">Recorrido de inspección</h3>
-                <p className="mt-0.5 text-[11px] text-slate-400">Sigue las zonas en orden. En el vano motor se agrupan seguidas las comprobaciones generales y las específicas de esta variante.</p>
+                <h3 className="text-base font-bold text-white">Puntos débiles de esta variante</h3>
+                <p className="mt-0.5 text-[11px] text-slate-400">
+                  {guide.hasSpecificGuidance
+                    ? 'Primero, qué suele fallar en esta configuración y cómo comprobarlo. La rutina estándar está separada arriba.'
+                    : 'La guía se ajustará cuando se identifiquen el motor, la transmisión y el año exactos.'}
+                </p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button variant="secondary" icon={Printer} onClick={printChecklist}>Imprimir / guardar PDF</Button>
@@ -610,8 +618,49 @@ export default function InspectionView() {
               onChange={updateChecks}
               readOnly={!writable}
             />
-          </div>
 
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              <Card className="p-3">
+                <p className="text-[10px] uppercase tracking-wider text-slate-500">Puntos específicos</p>
+                <p className="mt-1 text-sm font-bold text-white">{specificProgress.reviewed} / {specificProgress.total} revisados</p>
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-800"><div className="h-full bg-sky-400 transition-all" style={{ width: `${specificProgress.percent}%` }} /></div>
+              </Card>
+              <Card className="p-3">
+                <p className="text-[10px] uppercase tracking-wider text-slate-500">Controles comunes</p>
+                <p className="mt-1 text-sm font-bold text-white">{generalProgress.reviewed} / {generalProgress.total} registrados</p>
+                <p className="mt-1 text-[11px] text-slate-500">Rutina secundaria</p>
+              </Card>
+              <Card className="p-3">
+                <p className="text-[10px] uppercase tracking-wider text-slate-500">Incidencias</p>
+                <p className={cx('mt-1 text-sm font-bold', progress.issues ? 'text-rose-300' : 'text-emerald-300')}>{progress.issues} {progress.issues === 1 ? 'marcada' : 'marcadas'}</p>
+                <p className="mt-1 text-[11px] text-slate-500">{criticalIssues.length} con prioridad crítica</p>
+              </Card>
+              <Card className="p-3">
+                <p className="text-[10px] uppercase tracking-wider text-slate-500">Estado de la revisión</p>
+                <div className="mt-1"><Badge tone={dirty ? 'amber' : hasSavedInspection ? 'emerald' : 'slate'}>{dirty ? 'Cambios sin guardar' : hasSavedInspection ? 'Guardada' : 'Aún no guardada'}</Badge></div>
+                <p className="mt-1 text-[11px] text-slate-500">{selectionMode === 'fleet' ? 'Ficha de flota' : 'Nueva prospección al guardar'}</p>
+              </Card>
+            </div>
+
+            {criticalIssues.length > 0 && (
+              <Alert tone="danger" title="Detén la compra hasta aclarar estas incidencias críticas">
+                {criticalIssueText}. Solicita pruebas, documentación y valoración independiente; no reserves ni transfieras dinero hasta resolverlas satisfactoriamente.
+              </Alert>
+            )}
+            {criticalIssues.length === 0 && criticalSpecificPending.length > 0 && (
+              <Alert tone="warn" title="Quedan puntos específicos de riesgo elevado por revisar">
+                {criticalSpecificPending.map((entry) => entry.title).join(' · ')}. Confirma su aplicabilidad por VIN y deja constancia del resultado antes de cerrar la compra.
+              </Alert>
+            )}
+            {criticalIssues.length === 0 && criticalSpecificPending.length === 0 && criticalGeneralPending.length > 0 && (
+              <details className="rounded-xl border border-slate-800 bg-slate-950/35 px-3.5 py-2.5">
+                <summary className="cursor-pointer text-xs font-semibold text-slate-400">Recordatorio de controles estándar pendientes ({criticalGeneralPending.length})</summary>
+                <p className="mt-2 border-t border-slate-800 pt-2 text-[11px] leading-relaxed text-slate-500">
+                  {criticalGeneralPending.map((entry) => entry.title).join(' · ')}. Se mantienen como controles comunes de compra, no como defectos particulares de este modelo.
+                </p>
+              </details>
+            )}
+          </div>
           <div className="inspection-print-area">
             <header className="inspection-print-header">
               <p className="inspection-print-brand">{state.company.name || 'KHC Auto Import'} · Hoja de inspección precompra</p>
@@ -650,10 +699,12 @@ export default function InspectionView() {
               {issueTitles.length > 0 && <p><strong>Incidencias anotadas:</strong> {issueTitles.join(' · ')}</p>}
             </section>
 
+            <VehicleInspectionChecklist vehicle={activeVehicle} checks={checks} readOnly printMode />
+
             <section className="inspection-print-mileage-history">
               <div className="inspection-print-section-title">
-                <h2>Contraste documental del kilometraje</h2>
-                <p>La secuencia debe verificarse contra las fuentes originales; una incoherencia es un aviso para investigar, no un diagnóstico automático.</p>
+                <h2>Contraste documental del kilometraje · control universal</h2>
+                <p>La secuencia se verifica contra las fuentes originales. Este control es común a todas las unidades; una incoherencia requiere investigar y no constituye un diagnóstico automático.</p>
               </div>
               {mileageAudit.entries.length > 0 ? (
                 <table>
@@ -676,8 +727,6 @@ export default function InspectionView() {
                 <p className="inspection-print-mileage-alert">Hay {mileageAudit.incompleteReadings.length} registro(s) sin fecha o km; no se incluyen como prueba hasta completarlos.</p>
               )}
             </section>
-
-            <VehicleInspectionChecklist vehicle={activeVehicle} checks={checks} readOnly printMode />
 
             <div className="inspection-print-signatures">
               <span>Inspector / empresa: __________________________________</span>
