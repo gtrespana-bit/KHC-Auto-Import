@@ -21,10 +21,17 @@ const item = (id, title, priority, why, how, appliesWhen = '') => ({ id, title, 
 const GENERAL_ITEMS = [
   item(
     'base-identity-history',
-    'VIN, documentación e historial de kilómetros',
-    'essential',
-    'En una unidad importada, una discrepancia entre bastidor, papeles, fechas o kilometraje puede cambiar por completo la operación.',
-    'Compara el VIN grabado en el coche con permiso, factura y COC. Pide facturas y registros de ITV/HU/TÜV; ordena los kilómetros por fecha y busca saltos, lagunas o mantenimientos que no cuadren.',
+    'Identidad del vehículo y VIN',
+    'critical',
+    'Un VIN que no coincide o una variante distinta de la anunciada puede invalidar la compra, la homologación o la documentación.',
+    'Compara el VIN visible en el vehículo (parabrisas, carrocería y/o vano motor) con los documentos originales, factura y COC. Confirma marca, modelo, fecha de fabricación, motor, caja y equipamiento por VIN; anota cualquier diferencia y no pagues hasta aclararla.',
+  ),
+  item(
+    'base-mileage',
+    'Odómetro y cronología documental de kilometraje',
+    'critical',
+    'El kilometraje actual solo es fiable si encaja con las lecturas fechadas, el mantenimiento, la diagnosis y el desgaste; una lectura aislada no acredita el recorrido real.',
+    'Anota los km que muestra el cuadro en la ficha de la inspección. Ordénalos por fecha junto a facturas, ITV/HU/TÜV, lecturas de centralitas e historial oficial. Comprueba que ninguna lectura anterior supere la actual, que no haya retrocesos ni lagunas inexplicadas y que volante, pedales, asiento y mantenimiento sean coherentes. Una discrepancia exige verificar documentos originales; la media anual por sí sola no demuestra fraude.',
   ),
   item(
     'base-seller-documents',
@@ -42,10 +49,10 @@ const GENERAL_ITEMS = [
   ),
   item(
     'base-service-history',
-    'Facturas de mantenimiento y cronología de kilometraje',
+    'Mantenimiento vencido o próximo según km y tiempo',
     'high',
-    'Un libro sellado sin facturas puede no demostrar los trabajos realizados ni las piezas utilizadas.',
-    'Ordena las facturas por fecha y kilómetros; compara con HU/TÜV, ITV, lecturas disponibles de centralitas y etiquetas de servicio. Confirma aceite/especificación, distribución, campañas y reparaciones con factura que indique piezas, fecha y km.',
+    'El intervalo correcto depende del motor, la caja, el mercado y el uso. Con muchos o pocos kilómetros también puede haber tareas vencidas por tiempo.',
+    'Con el VIN/código exacto, contrasta el plan oficial y cada factura con la lectura actual del odómetro. Verifica aceite y especificación, distribución (correa/cadena según aplique), caja, bujías/filtros y trabajos próximos por km o fecha. Si falta prueba documental, pide presupuesto y trátalo como coste pendiente; no apliques intervalos genéricos.',
   ),
   item(
     'base-recalls',
@@ -148,10 +155,17 @@ const GENERAL_ITEMS = [
   ),
   item(
     'base-structure',
-    'Carrocería, bajos y posibles daños estructurales',
+    'Carrocería, pintura y reparaciones de chapa',
     'high',
-    'Un acabado brillante no prueba que el coche no haya sufrido un golpe; también importa el óxido en bajos de unidades procedentes de zonas con sal.',
-    'Inspecciona holguras, diferencias de tono, tornillos movidos, soldaduras y selladores; mide pintura si es posible. En elevador, mira corrosión, deformaciones, reparaciones y daños en puntos estructurales.',
+    'Un acabado brillante no demuestra que la carrocería conserve su estado original; una reparación mal documentada puede ocultar daños importantes.',
+    'Recorre el coche con buena luz. Compara holguras, tono y textura entre paneles; revisa tornillos movidos, juntas, cristales y selladores. Usa medidor de pintura si está disponible y fotografía cualquier reparación o diferencia que el vendedor no haya explicado.',
+  ),
+  item(
+    'base-underbody-structure',
+    'Bajos, corrosión y puntos estructurales en elevador',
+    'high',
+    'La corrosión, deformación o soldadura en zonas portantes puede afectar a la seguridad, ITV y coste de reparación, sobre todo en vehículos procedentes de zonas con sal.',
+    'Con el coche apoyado de forma segura en elevador, revisa largueros, travesaños, subchasis, puntos de anclaje, suelo, pasos de rueda y líneas de freno/combustible. Distingue óxido superficial de perforación o reparación estructural; pide valoración independiente si hay deformaciones, soldaduras o corrosión seria.',
   ),
   item(
     'base-tyres',
@@ -162,10 +176,17 @@ const GENERAL_ITEMS = [
   ),
   item(
     'base-wear',
-    'Frenos, suspensión y desgaste del habitáculo',
+    'Frenos, suspensión y holguras del tren rodante',
     'essential',
-    'El desgaste irregular de frenos y suspensión afecta a la seguridad y puede anticipar gastos; el volante, pedales y asiento ayudan a contrastar el uso declarado.',
-    'Mide discos y pastillas frente al mínimo del fabricante; busca fugas en amortiguadores, holguras y ruidos en brazos/rótulas. Compara volante, pedales y asiento con los kilómetros y las facturas; registra cualquier reparación o presupuesto pendiente.',
+    'El desgaste desigual de frenos, amortiguadores, rótulas y silentblocks afecta a la seguridad y puede anticipar reparaciones.',
+    'En elevador, mide discos y pastillas frente al mínimo del fabricante; revisa fugas en amortiguadores, holguras en brazos/rótulas, guardapolvos, rodamientos y muelles. Anota medidas y presupuesto de las piezas próximas a sustituir.',
+  ),
+  item(
+    'base-interior-wear',
+    'Desgaste interior coherente con el kilometraje y uso',
+    'medium',
+    'El estado del volante, pedales, asiento y mandos ayuda a contrastar el uso declarado, aunque ninguna pieza por sí sola confirma o descarta el kilometraje.',
+    'Compara volante, goma de pedales, lateral del asiento del conductor, cinturones y botones con los km actuales, la edad y las facturas. Ten en cuenta uso urbano, taxi/flota y sustituciones documentadas; fotografía diferencias que deban explicarse.',
   ),
   item(
     'base-after-test',
@@ -175,6 +196,148 @@ const GENERAL_ITEMS = [
     'Déjalo al ralentí unos minutos, vuelve a mirar niveles y bajos, busca olores/humos y repite la diagnosis. Guarda el informe y las fotos antes de negociar.',
   ),
 ];
+
+// Orden de trabajo presencial: primero documentación/km, después una vuelta
+// exterior, vano motor en frío, interior, elevador, diagnosis, carretera y cierre.
+export const INSPECTION_STAGES = [
+  {
+    id: 'documents',
+    title: 'Identidad, historial y kilometraje',
+    shortTitle: 'Datos y km',
+    description: 'Empieza por el VIN, la titularidad y los documentos. Registra la lectura del cuadro y contrástala con fuentes fechadas antes de valorar la mecánica.',
+  },
+  {
+    id: 'exterior',
+    title: 'Exterior, carrocería y ruedas',
+    shortTitle: 'Exterior',
+    description: 'Haz una vuelta completa con buena luz y anota daños, repintados, medidas y desgaste de cada neumático.',
+  },
+  {
+    id: 'engine',
+    title: 'Vano motor y arranque en frío',
+    shortTitle: 'Motor',
+    description: 'Revisa el coche antes de arrancar y mantén juntas las comprobaciones del motor y de su código concreto. No abras circuitos calientes ni manipules alta tensión.',
+  },
+  {
+    id: 'interior',
+    title: 'Habitáculo y equipamiento',
+    shortTitle: 'Interior',
+    description: 'Comprueba humedad, desgaste, mandos y climatización desde el puesto del conductor y el maletero.',
+  },
+  {
+    id: 'undercarriage',
+    title: 'Elevador, bajos y tren rodante',
+    shortTitle: 'Elevador',
+    description: 'Con medios seguros, revisa estructura, corrosión, frenos, suspensión y los puntos específicos de chasis del modelo.',
+  },
+  {
+    id: 'diagnostics',
+    title: 'Diagnosis, seguridad y emisiones',
+    shortTitle: 'Diagnosis',
+    description: 'Escanea todas las centralitas sin borrar errores y contrasta sistemas de seguridad, emisiones e híbridos según el equipamiento real.',
+  },
+  {
+    id: 'road',
+    title: 'Prueba dinámica y transmisión',
+    shortTitle: 'Carretera',
+    description: 'Prueba en un recorrido seguro. Comprueba motor, caja, tracción y ayudas en frío y una vez a temperatura de servicio.',
+  },
+  {
+    id: 'closing',
+    title: 'Revisión final y decisión de compra',
+    shortTitle: 'Cierre',
+    description: 'Al volver, busca fugas o errores nuevos, estima el coste real y detén la operación si quedan riesgos críticos sin aclarar.',
+  },
+];
+
+const ITEM_STAGE = {
+  'base-identity-history': 'documents',
+  'base-mileage': 'documents',
+  'b47-campaign-egr': 'documents',
+  'h5ft-campaign-history': 'documents',
+  'base-seller-documents': 'documents',
+  'base-import-paperwork': 'documents',
+  'base-service-history': 'documents',
+  'base-recalls': 'documents',
+  'base-use-history': 'documents',
+  'golf-gti-identification': 'documents',
+  'hsd-campaign-service': 'documents',
+
+  'base-structure': 'exterior',
+  'base-tyres': 'exterior',
+
+  'base-cold-start': 'engine',
+  'base-leaks-cooling': 'engine',
+  'base-battery-12v': 'engine',
+  'golf-gti-modifications': 'engine',
+
+  'base-electrical-equipment': 'interior',
+  'base-climate-hvac': 'interior',
+  'base-water-ingress': 'interior',
+  'base-interior-wear': 'interior',
+
+  'base-underbody-structure': 'undercarriage',
+  'base-wear': 'undercarriage',
+  'golf-gti-suspension-dcc': 'undercarriage',
+
+  'base-diagnostics': 'diagnostics',
+  'base-safety-systems': 'diagnostics',
+  'base-emissions-integrity': 'diagnostics',
+  'hsd-battery-health': 'diagnostics',
+
+  'base-road-test': 'road',
+  'golf-gti-vaq': 'road',
+  'hsd-hybrid-operation': 'road',
+  'drivetrain-awd': 'road',
+  'gearbox-dual-clutch': 'road',
+  'gearbox-cvt': 'road',
+  'gearbox-manual-clutch': 'road',
+  'gearbox-automatic': 'road',
+  'powershift-cold-hot-test': 'road',
+  'powershift-repair-history': 'road',
+
+  'base-after-test': 'closing',
+  'base-independent-inspection': 'closing',
+  'base-repair-budget': 'closing',
+};
+
+const ITEM_ORDER = {
+  'base-identity-history': 10,
+  'golf-gti-identification': 15,
+  'base-seller-documents': 20,
+  'base-import-paperwork': 30,
+  'base-mileage': 40,
+  'base-service-history': 50,
+  'base-use-history': 60,
+  'base-recalls': 70,
+  'hsd-campaign-service': 80,
+
+  'base-structure': 10,
+  'base-tyres': 20,
+
+  'base-cold-start': 10,
+  'base-leaks-cooling': 20,
+  'base-battery-12v': 30,
+
+  'base-water-ingress': 10,
+  'base-electrical-equipment': 20,
+  'base-climate-hvac': 30,
+  'base-interior-wear': 40,
+
+  'base-underbody-structure': 10,
+  'base-wear': 20,
+  'golf-gti-suspension-dcc': 30,
+
+  'base-diagnostics': 10,
+  'base-safety-systems': 20,
+  'base-emissions-integrity': 30,
+  'hsd-battery-health': 40,
+
+  'base-road-test': 10,
+  'base-after-test': 10,
+  'base-independent-inspection': 20,
+  'base-repair-budget': 30,
+};
 
 const MODEL_PROFILES = [
   {
@@ -792,8 +955,8 @@ function getModelProfile(vehicle, text, year) {
   return MODEL_PROFILES.find((profile) => profile.matches(vehicle, text, year)) || null;
 }
 
-function getEngineProfile(vehicle, text) {
-  return ENGINE_PROFILES.find((profile) => profile.matches(vehicle, text)) || null;
+function getEngineProfiles(vehicle, text) {
+  return ENGINE_PROFILES.filter((profile) => profile.matches(vehicle, text));
 }
 
 function getTransmissionProfile(text) {
@@ -811,40 +974,66 @@ export function getVehicleInspectionGuide(vehicle = {}) {
   const text = inspectionText(vehicle);
   const year = vehicleYear(vehicle);
   const modelProfile = getModelProfile(vehicle, text, year);
-  const engineProfile = getEngineProfile(vehicle, text);
+  const engineProfiles = getEngineProfiles(vehicle, text);
   const transmissionProfile = getTransmissionProfile(text);
   const awd = includesAny(text, '4motion', 'quattro', 'xdrive', '4matic', '4x4', 'awd', 'all wheel drive');
 
-  const groups = [];
-  if (modelProfile) groups.push({ id: 'model', title: 'Puntos específicos del modelo', note: modelProfile.note, items: modelProfile.items });
-  if (engineProfile) groups.push({ id: 'engine', title: `Puntos del motor: ${engineProfile.label}`, note: engineProfile.note, items: engineProfile.items });
-  if (transmissionProfile) groups.push({ id: 'transmission', title: `Puntos de transmisión: ${transmissionProfile.label}`, note: transmissionProfile.note, items: transmissionProfile.items });
-  if (awd) groups.push({ id: 'drivetrain', title: 'Tracción total', note: '', items: [AWD_ITEM] });
-  groups.push({ id: 'general', title: 'Comprobaciones que haría siempre', note: '', items: GENERAL_ITEMS });
+  const profiles = [
+    ...(modelProfile ? [{ type: 'Modelo', profile: modelProfile, defaultStage: 'engine' }] : []),
+    ...engineProfiles.map((profile) => ({ type: 'Motor', profile, defaultStage: 'engine' })),
+    ...(transmissionProfile ? [{ type: 'Transmisión', profile: transmissionProfile, defaultStage: 'road' }] : []),
+    ...(awd ? [{ type: 'Tracción', profile: { label: 'Tracción total', note: '', items: [AWD_ITEM] }, defaultStage: 'road' }] : []),
+  ];
 
-  // Evita repetir un punto si coinciden dos reglas/familias.
   const seen = new Set();
-  const uniqueGroups = groups.map((group) => ({
-    ...group,
-    items: group.items.filter((entry) => {
-      if (seen.has(entry.id)) return false;
-      seen.add(entry.id);
-      return true;
-    }),
-  })).filter((group) => group.items.length);
-  const items = uniqueGroups.flatMap((group) => group.items);
+  let sequence = 0;
+  const candidates = [
+    ...profiles.flatMap(({ type, profile, defaultStage }) => profile.items.map((entry) => ({
+      ...entry,
+      specific: true,
+      profileType: type,
+      profileLabel: profile.label,
+      defaultStage,
+      sequence: sequence++,
+    }))),
+    ...GENERAL_ITEMS.map((entry) => ({
+      ...entry,
+      specific: false,
+      profileType: 'General',
+      profileLabel: 'Comprobación general',
+      defaultStage: 'closing',
+      sequence: sequence++,
+    })),
+  ].filter((entry) => {
+    if (seen.has(entry.id)) return false;
+    seen.add(entry.id);
+    return true;
+  });
+
+  const groups = INSPECTION_STAGES.map((stage) => {
+    const stageItems = candidates
+      .filter((entry) => (ITEM_STAGE[entry.id] || entry.defaultStage) === stage.id)
+      .sort((a, b) => (ITEM_ORDER[a.id] ?? 1000 + a.sequence) - (ITEM_ORDER[b.id] ?? 1000 + b.sequence))
+      .map((entry) => ({ ...entry, stageId: stage.id }));
+    return { ...stage, items: stageItems };
+  }).filter((stage) => stage.items.length > 0);
+  const items = groups.flatMap((group) => group.items);
   const title = [vehicle.brand, vehicle.model, displayYear(vehicle)].filter(Boolean).join(' ').trim();
   const engineName = vehicle.engine || vehicle.engineCode || vehicle.version || '';
+  const engineProfile = engineProfiles[0] || null;
+  const profileNotes = profiles
+    .filter(({ profile }) => profile.note)
+    .map(({ type, profile }) => ({ type, label: profile.label, note: profile.note }));
 
   let confidence;
-  if (modelProfile && engineProfile) confidence = { label: 'Modelo y motor identificados', tone: 'emerald' };
+  if (modelProfile && engineProfiles.length) confidence = { label: 'Modelo y motor identificados', tone: 'emerald' };
   else if (modelProfile) confidence = { label: 'Modelo identificado · confirmar motor', tone: 'amber' };
-  else if (engineProfile) confidence = { label: 'Familia de motor identificada', tone: 'sky' };
+  else if (engineProfiles.length) confidence = { label: 'Familia de motor identificada', tone: 'sky' };
   else confidence = { label: 'Guía general · falta identificar motor', tone: 'amber' };
 
   const profileKey = [
     modelProfile?.id || 'modelo-general',
-    engineProfile?.id || 'motor-general',
+    engineProfiles.length ? engineProfiles.map((profile) => profile.id).join('+') : 'motor-general',
     transmissionProfile?.id || 'transmision-general',
     awd ? 'awd' : 'sin-awd',
   ].join(':');
@@ -855,15 +1044,81 @@ export function getVehicleInspectionGuide(vehicle = {}) {
     confidence,
     modelProfile,
     engineProfile,
+    engineProfiles,
     transmissionProfile,
-    groups: uniqueGroups,
+    profileNotes,
+    groups,
     items,
     profileKey,
-    hasSpecificGuidance: Boolean(modelProfile || engineProfile || transmissionProfile),
+    hasSpecificGuidance: Boolean(modelProfile || engineProfiles.length || transmissionProfile),
     note: modelProfile?.note || engineProfile?.note || 'No hay una guía específica identificada para esta combinación. Completa modelo, motor/código y transmisión para afinar los puntos de revisión.',
     reliability: vehicle.reliability,
     reliabilityTitle: vehicle.reliabilityTitle,
     reliabilityNote: vehicle.reliabilityNote,
+  };
+}
+
+/** Devuelve un resumen neutral de la lectura actual y de la media anual orientativa. */
+export function mileageContext(vehicle = {}, now = new Date()) {
+  const rawKm = vehicle.km;
+  const km = rawKm === '' || rawKm === null || rawKm === undefined ? null : Number(rawKm);
+  const currentKm = Number.isFinite(km) && km >= 0 ? km : null;
+  const year = vehicleYear(vehicle);
+  const date = String(vehicle.firstRegDate || '').slice(0, 10);
+  const firstRegistration = date ? new Date(`${date}T00:00:00`) : null;
+  const elapsedYears = firstRegistration && !Number.isNaN(firstRegistration.getTime())
+    ? (now.getTime() - firstRegistration.getTime()) / (365.25 * 24 * 60 * 60 * 1000)
+    : year ? now.getFullYear() - year + 1 : null;
+  const averageKmPerYear = currentKm !== null && elapsedYears > 0.5
+    ? Math.round(currentKm / elapsedYears)
+    : null;
+
+  return {
+    km: currentKm,
+    year,
+    elapsedYears: elapsedYears && elapsedYears > 0 ? elapsedYears : null,
+    averageKmPerYear,
+  };
+}
+
+/**
+ * Audita lecturas históricas introducidas desde documentos o diagnosis.
+ * Las alertas solo señalan una incoherencia que se debe verificar: no prueban
+ * por sí solas manipulación del odómetro.
+ */
+export function auditMileageHistory(currentKm, readings = []) {
+  const rawCurrent = currentKm;
+  const parsedCurrent = rawCurrent === '' || rawCurrent === null || rawCurrent === undefined ? null : Number(rawCurrent);
+  const current = Number.isFinite(parsedCurrent) && parsedCurrent >= 0 ? parsedCurrent : null;
+  const normalizedReadings = (readings || []).map((reading, index) => ({
+    ...reading,
+    km: reading.km === '' || reading.km === null || reading.km === undefined ? null : Number(reading.km),
+    index,
+  }));
+  const incompleteReadings = normalizedReadings.filter((reading) => (
+    !reading.date || reading.km === null || !Number.isFinite(reading.km) || reading.km < 0
+  ));
+  const entries = normalizedReadings
+    .filter((reading) => reading.date && reading.km !== null && Number.isFinite(reading.km) && reading.km >= 0)
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)) || a.index - b.index);
+
+  const regressions = [];
+  for (let index = 1; index < entries.length; index += 1) {
+    const previous = entries[index - 1];
+    const next = entries[index];
+    if (previous.date && next.date && previous.date <= next.date && next.km < previous.km) {
+      regressions.push({ previous, next });
+    }
+  }
+  const readingsAboveCurrent = current === null ? [] : entries.filter((reading) => reading.km > current);
+  return {
+    currentKm: current,
+    entries,
+    incompleteReadings,
+    regressions,
+    readingsAboveCurrent,
+    hasConflict: regressions.length > 0 || readingsAboveCurrent.length > 0,
+    maxDocumentedKm: entries.length ? Math.max(...entries.map((reading) => reading.km)) : null,
   };
 }
 
