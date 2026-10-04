@@ -25,7 +25,14 @@ import {
 import { publicationStatusForVehicle, PUBLICATION_STATUS } from '../erp/src/lib/web.js';
 import { VEHICLE_DB, CURATED_DB, RELIABILITY_META } from '../erp/src/data/vehicleDatabase.js';
 import { GENERATED_DB } from '../erp/src/data/catalog/index.js';
-import { getVehicleInspectionGuide, inspectionProgress, searchInspectionPresets } from '../erp/src/data/vehicleInspection.js';
+import {
+  auditMileageHistory,
+  getVehicleInspectionGuide,
+  INSPECTION_STAGES,
+  inspectionProgress,
+  mileageContext,
+  searchInspectionPresets,
+} from '../erp/src/data/vehicleInspection.js';
 
 let passed = 0;
 const checks = [];
@@ -469,6 +476,10 @@ check('Inspección: Golf GTI 2017 identifica modelo, EA888 y DSG sin inventar fa
     assert.ok(guide.items.some((entry) => entry.id === id), `falta el punto ${id}`);
   }
   assert.ok(guide.items.some((entry) => entry.id === 'golf-gti-vaq' && /solo/i.test(entry.appliesWhen)));
+  const engineZone = guide.groups.find((group) => group.id === 'engine');
+  assert.deepEqual(engineZone.items.slice(0, 3).map((entry) => entry.id), ['base-cold-start', 'base-leaks-cooling', 'base-battery-12v']);
+  assert.ok(engineZone.items.findIndex((entry) => entry.id === 'ea888-cooling') > engineZone.items.findIndex((entry) => entry.id === 'base-battery-12v'));
+  assert.ok(guide.groups.find((group) => group.id === 'road').items.some((entry) => entry.id === 'gearbox-dual-clutch'));
   const golf8 = getVehicleInspectionGuide({ brand: 'Volkswagen', model: 'Golf VIII GTI', year: 2020, engine: '2.0 TSI EA888' });
   assert.notEqual(golf8.modelProfile?.id, 'vw-golf-gti-mk7', 'no mezclar Golf VIII con la guía del VII/VII.5');
   assert.equal(golf8.engineProfile?.id, 'vag-ea888', 'se conserva la guía común del motor cuando coincide');
@@ -481,16 +492,43 @@ check('Inspección: reconoce el motor de una ficha curada ya existente', () => {
   assert.ok(guide.items.some((entry) => entry.id === 'ea288-emissions'));
 });
 
-check('Inspección: modelo desconocido recibe checklist general, orden de seguridad y explica qué falta', () => {
+check('Inspección: modelo desconocido recibe checklist general ordenada por zonas', () => {
   const guide = getVehicleInspectionGuide({ brand: 'Marca', model: 'Modelo', year: 2020 });
   assert.equal(guide.hasSpecificGuidance, false);
-  assert.equal(guide.groups.length, 1);
+  assert.deepEqual(guide.groups.map((group) => group.id), INSPECTION_STAGES.map((stage) => stage.id));
   assert.ok(guide.items.length > 8, 'la guía general debe cubrir los controles ampliados');
-  const diagnosticsIndex = guide.items.findIndex((entry) => entry.id === 'base-diagnostics');
-  assert.ok(diagnosticsIndex >= 0, 'falta la diagnosis general');
-  assert.equal(guide.items[diagnosticsIndex + 1]?.id, 'base-safety-systems', 'la revisión de seguridad debe ir justo después de la diagnosis');
-  assert.match(guide.items[diagnosticsIndex + 1].how, /SRS|ABS|ESP/i);
+  assert.ok(guide.items.some((entry) => entry.id === 'base-mileage'), 'debe incluir el control específico de odómetro');
+  const diagnostics = guide.groups.find((group) => group.id === 'diagnostics');
+  assert.deepEqual(diagnostics.items.slice(0, 2).map((entry) => entry.id), ['base-diagnostics', 'base-safety-systems'], 'diagnosis y seguridad deben quedar juntas');
+  assert.match(diagnostics.items[1].how, /SRS|ABS|ESP/i);
   assert.match(guide.note, /No hay una guía específica/i);
+});
+
+check('Inspección: combina los perfiles aplicables de motor y caja', () => {
+  const guide = getVehicleInspectionGuide({
+    brand: 'Ford', model: 'Focus', year: 2018,
+    engine: '1.0 EcoBoost', transmission: 'Powershift',
+  });
+  const ids = new Set(guide.items.map((entry) => entry.id));
+  assert.ok(ids.has('ecoboost10-cooling'), 'faltan puntos del motor');
+  assert.ok(ids.has('powershift-cold-hot-test'), 'faltan puntos específicos de la caja');
+  assert.ok(guide.profileKey.includes('ford-ecoboost-10+ford-powershift'));
+});
+
+check('Inspección: la auditoría de km señala retrocesos sin declarar fraude', () => {
+  const audit = auditMileageHistory(101000, [
+    { id: 'one', date: '2022-01-01', km: 60000, source: 'ITV' },
+    { id: 'two', date: '2023-01-01', km: 84000, source: 'Factura' },
+    { id: 'three', date: '2024-01-01', km: 79000, source: 'TÜV' },
+    { id: 'four', date: '2025-01-01', km: 102000, source: 'ITV' },
+  ]);
+  assert.equal(audit.regressions.length, 1);
+  assert.equal(audit.readingsAboveCurrent.length, 1);
+  assert.equal(audit.hasConflict, true);
+  const incomplete = auditMileageHistory(100000, [{ date: '', km: 50000 }, { date: '2024-01-01', km: '' }]);
+  assert.equal(incomplete.entries.length, 0);
+  assert.equal(incomplete.incompleteReadings.length, 2);
+  assert.equal(mileageContext({ year: 2020, km: 90000 }, new Date('2026-10-04T00:00:00Z')).averageKmPerYear, 12857);
 });
 
 check('Inspección: la plantilla Golf GTI se puede buscar sin contaminar los precios', () => {

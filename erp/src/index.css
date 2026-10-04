@@ -57,50 +57,244 @@
   filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(1.08) saturate(0.85);
 }
 
+/* La hoja de inspección existe en el DOM para imprimir, no se duplica en pantalla. */
+.inspection-print-area {
+  display: none;
+}
+
+.inspection-step-nav {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(71 85 105 / 70%) transparent;
+  scroll-snap-type: x proximity;
+}
+
+.inspection-step-nav > button {
+  scroll-snap-align: start;
+}
+
+.inspection-item-why[open] > summary > svg {
+  transform: rotate(180deg);
+}
+
+.inspection-mileage-history > summary::-webkit-details-marker {
+  display: none;
+}
+
+.inspection-mileage-history[open] > summary > svg {
+  transform: rotate(180deg);
+}
+
 .inspection-print-header {
-  border: 1px solid rgb(51 65 85 / 85%);
-  border-radius: 1rem;
-  background: rgb(15 23 42 / 55%);
-  padding: 1rem 1.25rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8pt;
+  padding: 10pt 12pt;
 }
 
 .inspection-print-brand {
-  color: #fbbf24;
-  font-size: 0.68rem;
+  color: #475569;
+  font-size: 8pt;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .inspection-print-header h1 {
-  margin-top: 0.25rem;
-  color: #fff;
-  font-size: 1.2rem;
+  margin-top: 3pt;
+  color: #111827;
+  font-size: 17pt;
   font-weight: 800;
+  line-height: 1.2;
 }
 
 .inspection-print-vehicle-meta {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-  gap: 0.35rem 0.8rem;
-  margin-top: 0.75rem;
-  color: #cbd5e1;
-  font-size: 0.72rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3pt 12pt;
+  margin-top: 7pt;
+  color: #334155;
+  font-size: 8pt;
 }
 
 .inspection-print-date {
-  margin-top: 0.75rem;
-  color: #94a3b8;
-  font-size: 0.68rem;
+  margin-top: 6pt;
+  color: #475569;
+  font-size: 7.5pt;
+}
+
+.inspection-print-section-title {
+  margin-bottom: 5pt;
+}
+
+.inspection-print-section-title h2 {
+  color: #111827;
+  font-size: 10pt;
+  font-weight: 700;
+}
+
+.inspection-print-section-title p,
+.inspection-print-no-history {
+  margin-top: 2pt;
+  color: #475569;
+  font-size: 7.5pt;
+}
+
+.inspection-print-overview {
+  margin: 7pt 0;
+  padding: 6pt 8pt;
+  border: 0.7pt solid #cbd5e1;
+  border-radius: 5pt;
+  color: #334155;
+}
+
+.inspection-print-overview h2 {
+  color: #111827;
+  font-size: 10pt;
+  font-weight: 700;
+}
+
+.inspection-print-overview-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 3pt 8pt;
+  margin: 4pt 0;
+  color: #334155;
+  font-size: 7pt;
+}
+
+.inspection-print-overview p {
+  margin-top: 3pt;
+  color: #475569;
+  font-size: 7.3pt;
+  line-height: 1.35;
+}
+
+.inspection-print-overview .inspection-print-overview-alert {
+  color: #9f1239;
+  font-weight: 700;
+}
+
+.inspection-print-mileage-history {
+  margin: 8pt 0;
+  padding: 7pt 8pt;
+  border: 0.7pt solid #cbd5e1;
+  border-radius: 5pt;
+}
+
+.inspection-print-mileage-history table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 7.5pt;
+}
+
+.inspection-print-mileage-history th,
+.inspection-print-mileage-history td {
+  padding: 3pt 5pt;
+  border-bottom: 0.5pt solid #cbd5e1;
+  text-align: left;
+}
+
+.inspection-print-mileage-history th {
+  color: #334155;
+  font-weight: 700;
+}
+
+.inspection-print-mileage-alert {
+  margin-top: 5pt;
+  color: #9f1239;
+  font-size: 7.5pt;
+  font-weight: 700;
+}
+
+.inspection-print-stage-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 7pt;
+  margin: 9pt 0 5pt;
+  padding: 0 0 4pt;
+  border-bottom: 1pt solid #64748b;
+  break-after: avoid-page;
+}
+
+.inspection-print-stage-number {
+  display: inline-flex;
+  width: 20pt;
+  height: 20pt;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border: 0.7pt solid #64748b;
+  border-radius: 4pt;
+  color: #334155;
+  font-size: 8pt;
+  font-weight: 700;
+}
+
+.inspection-print-stage-heading h4 {
+  color: #111827;
+  font-size: 10pt;
+  font-weight: 700;
+}
+
+.inspection-print-stage-heading p {
+  margin-top: 2pt;
+  color: #475569;
+  font-size: 7pt;
+  line-height: 1.3;
+}
+
+.inspection-print-stage-count {
+  margin-left: auto;
+  color: #475569;
+  font-size: 7pt;
+  white-space: nowrap;
+}
+
+.inspection-print-status {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 3pt 6pt;
+  min-width: 154pt;
+  color: #334155;
+  font-size: 6.8pt;
+}
+
+.inspection-print-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 2pt;
+  white-space: nowrap;
+}
+
+.inspection-print-box {
+  display: inline-flex;
+  width: 9pt;
+  height: 9pt;
+  align-items: center;
+  justify-content: center;
+  border: 0.7pt solid #475569;
+  color: #111827;
+  font-size: 7pt;
+  line-height: 1;
+}
+
+.inspection-print-signatures {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12pt 16pt;
+  margin-top: 13pt;
+  color: #334155;
+  font-size: 8pt;
+  break-inside: avoid-page;
 }
 
 .inspection-print-footer {
-  margin-top: 1rem;
-  padding-top: 0.65rem;
-  border-top: 1px solid rgb(100 116 139 / 40%);
-  color: #94a3b8;
-  font-size: 0.68rem;
-  line-height: 1.45;
+  margin-top: 9pt;
+  padding-top: 6pt;
+  border-top: 0.7pt solid #94a3b8;
+  color: #475569;
+  font-size: 7pt;
+  line-height: 1.4;
 }
 
 @media print {
@@ -113,6 +307,7 @@
   body {
     min-width: 0 !important;
     min-height: 0 !important;
+    margin: 0 !important;
     overflow: visible !important;
     background: #fff !important;
   }
@@ -125,6 +320,7 @@
     text-shadow: none !important;
   }
 
+  /* Oculta la aplicación completa y deja una única hoja imprimible visible. */
   body.print-inspection #root * {
     visibility: hidden !important;
   }
@@ -135,6 +331,7 @@
   }
 
   body.print-inspection #root .inspection-print-area {
+    display: block !important;
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
@@ -144,8 +341,8 @@
     padding: 0 !important;
     color: #111827 !important;
     font-family: Arial, Helvetica, sans-serif !important;
-    font-size: 9pt !important;
-    line-height: 1.35 !important;
+    font-size: 8pt !important;
+    line-height: 1.3 !important;
   }
 
   body.print-inspection .print-only-hide {
@@ -153,94 +350,165 @@
   }
 
   body.print-inspection .inspection-print-header {
-    margin: 0 0 8pt !important;
-    padding: 0 0 7pt !important;
-    border: 0 !important;
-    border-bottom: 1.5pt solid #334155 !important;
-    border-radius: 0 !important;
+    margin: 0 0 7pt !important;
+    padding: 8pt 9pt !important;
+    border: 0.8pt solid #94a3b8 !important;
+    border-radius: 5pt !important;
     break-inside: avoid-page;
   }
 
   body.print-inspection .inspection-print-brand {
     color: #334155 !important;
-    font-size: 8pt !important;
+    font-size: 7pt !important;
   }
 
   body.print-inspection .inspection-print-header h1 {
     margin: 2pt 0 0 !important;
-    font-size: 17pt !important;
+    font-size: 15pt !important;
   }
 
   body.print-inspection .inspection-print-vehicle-meta {
     grid-template-columns: 1fr 1fr !important;
-    gap: 3pt 12pt !important;
-    margin-top: 6pt !important;
-    font-size: 8pt !important;
-  }
-
-  body.print-inspection .inspection-print-date {
+    gap: 3pt 10pt !important;
     margin-top: 6pt !important;
     font-size: 7.5pt !important;
   }
 
-  body.print-inspection .inspection-checklist {
-    gap: 7pt !important;
+  body.print-inspection .inspection-print-date {
+    margin-top: 5pt !important;
+    font-size: 7pt !important;
   }
 
-  body.print-inspection .inspection-checklist-header,
-  body.print-inspection .inspection-checklist-group,
-  body.print-inspection .inspection-check-item {
-    backdrop-filter: none !important;
+  body.print-inspection .inspection-print-overview {
+    margin: 5pt 0 !important;
+    padding: 5pt 6pt !important;
+  }
+
+  body.print-inspection .inspection-print-overview h2 {
+    font-size: 9pt !important;
+  }
+
+  body.print-inspection .inspection-print-overview-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 2pt 6pt !important;
+    margin: 3pt 0 !important;
+  }
+
+  body.print-inspection .inspection-print-overview p {
+    margin-top: 2pt !important;
+    font-size: 7pt !important;
+  }
+
+  body.print-inspection #root .inspection-print-overview .inspection-print-overview-alert {
+    color: #9f1239 !important;
+  }
+
+  body.print-inspection .inspection-print-mileage-history {
+    margin: 6pt 0 !important;
+    padding: 5pt 6pt !important;
     break-inside: avoid-page;
   }
 
+  body.print-inspection .inspection-print-mileage-history table {
+    font-size: 7pt !important;
+  }
+
+  body.print-inspection #root .inspection-print-mileage-alert {
+    color: #9f1239 !important;
+    font-weight: 700 !important;
+  }
+
+  body.print-inspection .inspection-print-mileage-history th,
+  body.print-inspection .inspection-print-mileage-history td {
+    padding: 2pt 4pt !important;
+  }
+
+  body.print-inspection .inspection-checklist {
+    gap: 4pt !important;
+  }
+
   body.print-inspection .inspection-checklist-header {
-    padding: 7pt !important;
-    border: 1pt solid #94a3b8 !important;
+    margin-bottom: 6pt !important;
+    padding: 6pt !important;
+    border: 0.7pt solid #94a3b8 !important;
     border-radius: 4pt !important;
+    break-inside: avoid-page;
+  }
+
+  body.print-inspection .inspection-checklist-header h3 {
+    font-size: 10pt !important;
+  }
+
+  body.print-inspection .inspection-checklist-header p,
+  body.print-inspection .inspection-checklist-header span {
+    font-size: 7pt !important;
   }
 
   body.print-inspection .inspection-checklist-group {
-    margin-top: 8pt !important;
+    margin-top: 4pt !important;
   }
 
   body.print-inspection .inspection-checklist-grid {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) !important;
-    gap: 5pt !important;
+    display: block !important;
   }
 
   body.print-inspection .inspection-check-item {
-    padding: 7pt !important;
-    border: 0.7pt solid #cbd5e1 !important;
-    border-radius: 4pt !important;
+    margin: 0 0 4pt !important;
+    padding: 6pt !important;
+    border: 0.6pt solid #cbd5e1 !important;
+    border-radius: 3pt !important;
+    break-inside: avoid-page;
   }
 
   body.print-inspection .inspection-check-item h5,
   body.print-inspection .inspection-checklist-group h4 {
-    font-size: 9.5pt !important;
+    font-size: 8.5pt !important;
   }
 
+  body.print-inspection .inspection-check-item .inspection-item-how,
+  body.print-inspection .inspection-check-item .inspection-item-why,
   body.print-inspection .inspection-check-item .text-xs,
   body.print-inspection .inspection-check-item .text-\[11px\] {
-    font-size: 8pt !important;
-    line-height: 1.35 !important;
+    font-size: 7pt !important;
+    line-height: 1.28 !important;
   }
 
-  body.print-inspection .inspection-checklist .text-\[10px\] {
-    font-size: 7pt !important;
+  body.print-inspection .inspection-check-item .inspection-item-why {
+    margin-top: 3pt !important;
   }
 
-  body.print-inspection .inspection-check-item .rounded-md {
-    border: 0.5pt solid #64748b !important;
-    padding: 1pt 4pt !important;
-    font-size: 7pt !important;
+  body.print-inspection .inspection-check-item .inspection-print-status {
+    min-width: 152pt !important;
+  }
+
+  body.print-inspection .inspection-checklist .inspection-print-stage-heading {
+    margin: 7pt 0 4pt !important;
+    padding-bottom: 3pt !important;
+  }
+
+  body.print-inspection .inspection-checklist .inspection-profile-notes {
+    margin: 5pt 0 !important;
+    padding: 5pt !important;
+    border: 0.5pt solid #cbd5e1 !important;
+    break-inside: avoid-page;
+  }
+
+  body.print-inspection .inspection-checklist-disclaimer {
+    margin-top: 5pt !important;
+    padding: 5pt !important;
+    border: 0.5pt solid #cbd5e1 !important;
+    break-inside: avoid-page;
+  }
+
+  body.print-inspection .inspection-print-signatures {
+    margin-top: 10pt !important;
+    font-size: 7.5pt !important;
   }
 
   body.print-inspection .inspection-print-footer {
     margin-top: 7pt !important;
     padding-top: 5pt !important;
     border-color: #94a3b8 !important;
-    font-size: 7pt !important;
+    font-size: 6.5pt !important;
   }
 }
