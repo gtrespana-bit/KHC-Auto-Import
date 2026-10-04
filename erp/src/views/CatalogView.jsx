@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Database, Download, Calculator, Plus, X, ShieldCheck, AlertTriangle, TrendingUp, Search } from 'lucide-react';
+import { Database, Download, Calculator, Plus, X, ShieldCheck, AlertTriangle, TrendingUp, Search, Zap } from 'lucide-react';
 import { Card, Button, Field, Input, Select, Stat, SectionTitle, Badge, Table, Row, SearchInput, EmptyState, Alert, KeyValueGrid, Modal, cx } from '../components/ui.jsx';
 import { useStore } from '../lib/store.jsx';
 import { eur, eur0, numEs, todayISO, download, toCsv } from '../lib/format.js';
@@ -9,6 +9,7 @@ import { latestEvidenceDate, isEligibleObservation, MARKET_OBSERVATIONS } from '
 import VehicleInspectionChecklist from '../components/VehicleInspectionChecklist.jsx';
 
 const REL_ORDER = { gold: 0, ok: 1, warn: 2, banned: 3 };
+const PERFORMANCE_SEGMENT = 'Hot hatch deportivo';
 
 /** De dónde sale cada horquilla, en lenguaje claro. */
 const PRICE_ORIGIN = {
@@ -103,6 +104,7 @@ export default function CatalogView({ onSimulate }) {
     excluded: MARKET_OBSERVATIONS.filter((v) => !isEligibleObservation(v)).length,
   }), []);
   const PER_PAGE = 25;
+  const performanceCount = useMemo(() => VEHICLE_DB.filter((v) => v.segment === PERFORMANCE_SEGMENT).length, []);
 
   const brands = useMemo(() => [...new Set(VEHICLE_DB.map((v) => v.brand))].sort(), []);
   const segments = useMemo(() => [...new Set(VEHICLE_DB.map((v) => v.segment))].sort(), []);
@@ -169,6 +171,17 @@ export default function CatalogView({ onSimulate }) {
     toast(`${results.length} variantes exportadas`);
   };
 
+  const showPerformanceModels = () => {
+    setQ('');
+    setBrand('');
+    setSegment(PERFORMANCE_SEGMENT);
+    setFuel('');
+    setRel('');
+    setMaxPrice('');
+    setOnlyWinners(false);
+    setPage(0);
+  };
+
   const addToFleet = (v) => {
     saveVehicle({
       brand: v.brand, model: v.model, version: v.version, segment: v.segment, body: v.body || '',
@@ -232,8 +245,15 @@ export default function CatalogView({ onSimulate }) {
       <SectionTitle
         icon={Database}
         title="Catálogo de vehículos"
-        subtitle={`${VEHICLE_DB.length.toLocaleString('es-ES')} variantes de ${brands.length} marcas con fiabilidad de motor, precio de compra en Alemania y precio de venta en Galicia. Cada ficha indica de dónde sale su precio.`}
-        right={<Button variant="secondary" icon={Download} onClick={exportCsv}>Exportar CSV</Button>}
+        subtitle={`${VEHICLE_DB.length.toLocaleString('es-ES')} variantes de ${brands.length} marcas con fiabilidad de motor, precio de compra en Alemania y precio de venta en Galicia. Incluye ${performanceCount} hot hatches investigados con precios y margen.`}
+        right={(
+          <>
+            <Button variant={segment === PERFORMANCE_SEGMENT ? 'primary' : 'secondary'} icon={Zap} onClick={showPerformanceModels}>
+              Ver hot hatches ({performanceCount})
+            </Button>
+            <Button variant="secondary" icon={Download} onClick={exportCsv}>Exportar CSV</Button>
+          </>
+        )}
       />
 
       <Alert tone="warn">
@@ -245,6 +265,7 @@ export default function CatalogView({ onSimulate }) {
         La estimación no incluye el IVA/ITP de compra, que depende de la factura del vendedor; tampoco financiación ni reparaciones
         superiores a la reserva base. La auditoría <code>npm run prices:check</code> valida fuera de muestra.
         Revisa el origen fiscal, acabado, año, estado, historial y km antes de pagar.
+        {' '}El botón <b>Ver hot hatches</b> reúne las variantes deportivas investigadas; las cifras siguen señaladas según la calidad y el tamaño de su muestra.
       </Alert>
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">

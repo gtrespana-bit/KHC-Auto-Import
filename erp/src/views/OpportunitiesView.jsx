@@ -1,6 +1,9 @@
 import React, { useMemo, useState } from 'react';
-import { TrendingUp, ExternalLink, ChevronDown, ChevronRight } from 'lucide-react';
+import { TrendingUp, ExternalLink, ChevronDown, ChevronRight, Zap } from 'lucide-react';
 import { Card, SectionTitle, Badge } from '../components/ui.jsx';
+import { useStore } from '../lib/store.jsx';
+import { VEHICLE_DB } from '../data/vehicleDatabase.js';
+import { buildPerformanceOpportunityRows, performancePriceSourceLabel } from '../domain/performanceOpportunities.js';
 import { EMPRESA_RANKING, EMPRESA_META } from '../data/catalog/empresaRanking.js';
 
 const eur = (x) => `${Math.round(x).toLocaleString('es-ES')} €`;
@@ -9,16 +12,25 @@ const TONE = { '🟢': 'emerald', '🟡': 'amber', '🟠': 'sky', '🔴': 'rose'
 const trust = (r) => (r.nES >= 30 ? ['Alta', 'emerald'] : r.nES >= 15 ? ['Media', 'amber'] : ['Baja: pocos anuncios ES', 'rose']);
 
 export default function OpportunitiesView() {
+  const { tariffs } = useStore();
   const [q, setQ] = useState('');
   const [minProfit, setMinProfit] = useState(1500);
   const [maxBuy, setMaxBuy] = useState(60000);
   const [sort, setSort] = useState('pEmp');
   const [open, setOpen] = useState(null);
+  const [openHotHatch, setOpenHotHatch] = useState(null);
 
   const rows = useMemo(() => EMPRESA_RANKING
     .filter((r) => `${r.brand} ${r.model} ${r.gen} ${r.fuel}`.toLowerCase().includes(q.toLowerCase()))
     .filter((r) => r.pEmp >= minProfit && r.buyEmp <= maxBuy)
     .sort((a, b) => b[sort] - a[sort]), [q, minProfit, maxBuy, sort]);
+  const hotHatchRows = useMemo(() => buildPerformanceOpportunityRows(VEHICLE_DB, tariffs), [tariffs]);
+  const filteredHotHatches = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    if (!term) return hotHatchRows;
+    return hotHatchRows.filter(({ profile, vehicle }) =>
+      `${vehicle.brand} ${vehicle.model} ${vehicle.version} ${vehicle.engine} ${profile.gen}`.toLowerCase().includes(term));
+  }, [hotHatchRows, q]);
 
   return (
     <div className="space-y-4">
@@ -28,6 +40,124 @@ export default function OpportunitiesView() {
         <p><b>Compra:</b> el 10 % más barato de Alemania para ese año y km (versiones económicas, aunque tengan algún detalle; sin siniestros) con un <b>{Math.round(EMPRESA_META.neg * 100)} % negociado</b> por volumen o proveedor habitual.</p>
         <p><b>Venta:</b> precio <b>mediano</b> en España, menos un 3 % de regateo. Nunca el más barato.</p>
         <p><b>Beneficio neto</b> después de logística (1 rodando + 2 en camión), imprevistos, ITV, impuesto de matriculación, DGT, gestoría, preparación, garantía, anuncios e IVA del margen (REBU).</p>
+      </Card>
+
+      <Card className="overflow-hidden">
+        <div className="p-4 border-b border-slate-800">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h3 className="flex items-center gap-2 text-sm font-bold text-white"><Zap className="w-4 h-4 text-amber-400" />Hot hatches deportivos investigados</h3>
+              <p className="text-xs text-slate-400 mt-1">{filteredHotHatches.length} de {hotHatchRows.length} variantes con precios DE/ES y margen estimado.</p>
+            </div>
+            <Badge tone="sky">{hotHatchRows.length} variantes</Badge>
+          </div>
+          <p className="text-[11px] text-slate-500 mt-2">
+            Se incluyen también los modelos con margen negativo o muestra corta. Este margen medio/prudente sigue el cálculo REBU del Catálogo,
+            {' '}no el criterio empresa de la tabla inferior: compra DE con el descuento supuesto del 8 % y venta ES con la rebaja configurada.
+            {' '}La búsqueda de oportunidades también se aplica aquí; los filtros de beneficio y compra de la tabla general no ocultan estos estudios.
+          </p>
+        </div>
+        {filteredHotHatches.length ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[980px]">
+              <thead className="text-slate-400 text-[10px] uppercase">
+                <tr className="border-b border-slate-800">
+                  <th className="p-2 w-8" />
+                  <th className="p-2 text-left">Modelo / versión</th>
+                  <th className="p-2 text-left">Años / generación</th>
+                  <th className="p-2 text-right">Compra Alemania</th>
+                  <th className="p-2 text-right">Venta España</th>
+                  <th className="p-2 text-right">Margen REBU medio / prudente</th>
+                  <th className="p-2 text-center">Muestra DE / ES</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredHotHatches.map((row) => {
+                  const { profile, vehicle, mean, prudent, status } = row;
+                  const isOpen = openHotHatch === profile.variantKey;
+                  const marginTone = (prudent?.profit ?? mean?.profit ?? 0) >= 0 ? 'text-emerald-400' : 'text-rose-400';
+                  return (
+                    <React.Fragment key={profile.variantKey}>
+                      <tr
+                        className="border-b border-slate-800/60 hover:bg-slate-800/40 cursor-pointer"
+                        onClick={() => setOpenHotHatch(isOpen ? null : profile.variantKey)}
+                      >
+                        <td className="p-2 text-slate-500">{isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}</td>
+                        <td className="p-2">
+                          <p className="font-semibold text-slate-100">{vehicle.brand} {vehicle.model}</p>
+                          <p className="text-[11px] text-slate-400">{profile.variantLabel} · {vehicle.cv} CV</p>
+                        </td>
+                        <td className="p-2 text-xs text-slate-300">
+                          <p>{profile.years.join('–')}</p>
+                          <p className="text-[10px] text-slate-500">{profile.gen}</p>
+                        </td>
+                        <td className="p-2 text-right tabular-nums">
+                          <p>{eur(vehicle.dePrice[0])} – {eur(vehicle.dePrice[1])}</p>
+                          <p className="text-[10px] text-slate-500">{performancePriceSourceLabel(vehicle.priceSource?.de)}</p>
+                        </td>
+                        <td className="p-2 text-right tabular-nums">
+                          <p>{eur(vehicle.esPrice[0])} – {eur(vehicle.esPrice[1])}</p>
+                          <p className="text-[10px] text-slate-500">{performancePriceSourceLabel(vehicle.priceSource?.es)}</p>
+                        </td>
+                        <td className="p-2 text-right tabular-nums">
+                          <p className={`font-bold ${marginTone}`}>{mean ? eur(mean.profit) : '—'}</p>
+                          <p className="text-[10px] text-slate-400">prudente {prudent ? eur(prudent.profit) : '—'}</p>
+                        </td>
+                        <td className="p-2 text-center">
+                          <Badge tone={status.tone}>{status.label}</Badge>
+                          <p className="text-[10px] text-slate-500 mt-1">{row.deEvidenceCount} DE / {row.esEvidenceCount} ES</p>
+                        </td>
+                      </tr>
+                      {isOpen && (
+                        <tr className="bg-slate-950/50">
+                          <td colSpan={7} className="p-4">
+                            <p className="text-xs text-slate-400 mb-3">{status.note} Los precios enlazados son precios pedidos del anuncio; las horquillas de la tabla se normalizan al año/km de referencia y el cálculo aplica las hipótesis del Catálogo.</p>
+                            <div className="grid md:grid-cols-2 gap-4">
+                              {[
+                                ['DE', 'Anuncios alemanes usados para compra'],
+                                ['ES', 'Anuncios españoles usados para venta'],
+                              ].map(([market, title]) => {
+                                const ads = row.eligibleObservations.filter((ad) => ad.market === market);
+                                return (
+                                  <div key={market}>
+                                    <p className="font-semibold text-slate-200 text-xs mb-2">{title} ({ads.length})</p>
+                                    {ads.length ? (
+                                      <div className="space-y-1">
+                                        {ads.map((ad, index) => (
+                                          <a
+                                            key={ad.listingId || ad.url || `${market}-${index}`}
+                                            href={ad.url}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="flex items-center justify-between gap-3 text-[11px] text-slate-300 hover:text-amber-300"
+                                          >
+                                            <span className="min-w-0 truncate">{ad.year} · {Math.round(ad.km / 1000)}k km · {ad.source}</span>
+                                            <span className="shrink-0 tabular-nums flex items-center gap-1">{eur(ad.price)}<ExternalLink className="w-3 h-3" /></span>
+                                          </a>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <p className="text-[11px] text-slate-500">Sin anuncios elegibles directos; el precio indicado es orientativo.</p>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            {row.excludedEvidenceCount > 0 && (
+                              <p className="text-[10px] text-slate-500 mt-3">{row.excludedEvidenceCount} anuncio(s) excluido(s) por particularidad, modificaciones, acabado o calidad; no entran en precios ni márgenes.</p>
+                            )}
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="p-4 text-sm text-slate-400">No hay estudios deportivos que coincidan con la búsqueda.</p>
+        )}
       </Card>
 
       <Card className="p-4 flex flex-wrap gap-4 items-end text-sm">
