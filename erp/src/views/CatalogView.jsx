@@ -7,6 +7,7 @@ import { catalogEstimate, profitLevel } from '../domain/catalogEstimate.js';
 import { VEHICLE_DB, RELIABILITY_META, CURATED_COUNT, searchVehicles } from '../data/vehicleDatabase.js';
 import { EVIDENCE_CAPTURED_AT, MARKET_OBSERVATIONS } from '../data/catalog/marketEvidence.js';
 import { calibrationFactors } from '../data/catalog/index.js';
+import VehicleInspectionChecklist from '../components/VehicleInspectionChecklist.jsx';
 
 const REL_ORDER = { gold: 0, ok: 1, warn: 2, banned: 3 };
 
@@ -127,11 +128,12 @@ export default function CatalogView({ onSimulate }) {
   const addToFleet = (v) => {
     saveVehicle({
       brand: v.brand, model: v.model, version: v.version, segment: v.segment, body: v.body || '',
-      year: v.years?.[1] ?? v.years?.[0], engine: v.engine, engineCode: v.engineCode || '', fuel: v.fuel,
+      year: v.years?.[1] ?? v.years?.[0], engine: v.engine, engineCode: v.engineCode || '', catalogId: v.id, fuel: v.fuel,
       transmission: v.transmission, cv: v.cv, cc: v.cc, cyl: v.cyl, co2: v.co2, cvf: v.cvf, badge: v.badge,
       newPrice: v.newPrice, dePrice: v.dePrice, esPrice: v.esPrice, gen: v.gen, origin: v.origin,
       demand: v.demand, rotationDays: v.rotationDays, winner: v.winner,
       reliability: v.reliability, reliabilityTitle: v.reliabilityTitle, reliabilityNote: v.reliabilityNote,
+      inspectionChecks: {},
       km: v.kmRef || 120000, costs: { purchase: v.dePrice?.[0] ?? 0 }, purchaseDate: todayISO(),
       status: 'prospeccion', source: v.source || 'catalog',
     });
@@ -344,6 +346,7 @@ export default function CatalogView({ onSimulate }) {
                 <p className="text-[11px] text-slate-500 mt-2">Precios medios de mercado a {detail.kmRef ? `${detail.kmRef.toLocaleString('es-ES')} km` : 'su km de referencia'} (no el más barato ni el más caro). Los gastos salen de Ajustes → Tarifas.</p>
               </Card>
             )}
+            <VehicleInspectionChecklist vehicle={{ ...detail, year: detail.years?.[0] || detail.years?.[1] }} readOnly />
             <Alert tone="info">
               Para cerrar la operación, abre el <b>simulador</b>: calculará el IEDMT exacto según el CO₂, el ITP o el IVA según quién te venda, las tasas de la DGT, el IVTM de A Coruña y el precio mínimo al que debes vender para ganar lo que quieres.
             </Alert>

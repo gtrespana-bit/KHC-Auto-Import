@@ -25,6 +25,7 @@ import {
 import { publicationStatusForVehicle, PUBLICATION_STATUS } from '../erp/src/lib/web.js';
 import { VEHICLE_DB, CURATED_DB, RELIABILITY_META } from '../erp/src/data/vehicleDatabase.js';
 import { GENERATED_DB } from '../erp/src/data/catalog/index.js';
+import { getVehicleInspectionGuide, inspectionProgress, searchInspectionPresets } from '../erp/src/data/vehicleInspection.js';
 
 let passed = 0;
 const checks = [];
@@ -452,6 +453,57 @@ check('Catálogo: horquillas de precio coherentes (DE ≤ ES y rango ordenado)',
 check('Catálogo: la potencia fiscal cuadra con la cilindrada', () => {
   const bad = VEHICLE_DB.filter((v) => Math.abs(v.cvf - computeCvf(v.cc, v.cyl || 4)) > 0.02);
   assert.equal(bad.length, 0, `CVF incoherente en: ${bad.slice(0, 3).map((v) => v.id).join(', ')}`);
+});
+
+// --- Guía de inspección precompra ------------------------------------------
+check('Inspección: Golf GTI 2017 identifica modelo, EA888 y DSG sin inventar fallos', () => {
+  const guide = getVehicleInspectionGuide({
+    brand: 'Volkswagen', model: 'Golf GTI VII / VII.5', year: 2017,
+    version: '2.0 TSI GTI Performance', engine: '2.0 TSI EA888 Gen 3',
+    transmission: 'Automático doble embrague',
+  });
+  assert.equal(guide.modelProfile?.id, 'vw-golf-gti-mk7');
+  assert.equal(guide.engineProfile?.id, 'vag-ea888');
+  assert.equal(guide.transmissionProfile?.id, 'dual-clutch');
+  for (const id of ['golf-gti-identification', 'golf-gti-vaq', 'ea888-cooling', 'gearbox-dual-clutch', 'base-identity-history']) {
+    assert.ok(guide.items.some((entry) => entry.id === id), `falta el punto ${id}`);
+  }
+  assert.ok(guide.items.some((entry) => entry.id === 'golf-gti-vaq' && /solo/i.test(entry.appliesWhen)));
+  const golf8 = getVehicleInspectionGuide({ brand: 'Volkswagen', model: 'Golf VIII GTI', year: 2020, engine: '2.0 TSI EA888' });
+  assert.notEqual(golf8.modelProfile?.id, 'vw-golf-gti-mk7', 'no mezclar Golf VIII con la guía del VII/VII.5');
+  assert.equal(golf8.engineProfile?.id, 'vag-ea888', 'se conserva la guía común del motor cuando coincide');
+});
+
+check('Inspección: reconoce el motor de una ficha curada ya existente', () => {
+  const golfTdi = VEHICLE_DB.find((vehicle) => vehicle.id === 'vw-golf75-20tdi');
+  const guide = getVehicleInspectionGuide({ ...golfTdi, year: 2017 });
+  assert.equal(guide.engineProfile?.id, 'vag-ea288-20-tdi');
+  assert.ok(guide.items.some((entry) => entry.id === 'ea288-emissions'));
+});
+
+check('Inspección: modelo desconocido recibe checklist general, orden de seguridad y explica qué falta', () => {
+  const guide = getVehicleInspectionGuide({ brand: 'Marca', model: 'Modelo', year: 2020 });
+  assert.equal(guide.hasSpecificGuidance, false);
+  assert.equal(guide.groups.length, 1);
+  assert.ok(guide.items.length > 8, 'la guía general debe cubrir los controles ampliados');
+  const diagnosticsIndex = guide.items.findIndex((entry) => entry.id === 'base-diagnostics');
+  assert.ok(diagnosticsIndex >= 0, 'falta la diagnosis general');
+  assert.equal(guide.items[diagnosticsIndex + 1]?.id, 'base-safety-systems', 'la revisión de seguridad debe ir justo después de la diagnosis');
+  assert.match(guide.items[diagnosticsIndex + 1].how, /SRS|ABS|ESP/i);
+  assert.match(guide.note, /No hay una guía específica/i);
+});
+
+check('Inspección: la plantilla Golf GTI se puede buscar sin contaminar los precios', () => {
+  const presets = searchInspectionPresets('golf gti 2017');
+  assert.equal(presets.length, 1);
+  assert.equal(presets[0].year, 2017);
+  assert.equal(presets[0].dePrice, undefined);
+});
+
+check('Inspección: progreso distingue revisado, incidencia y pendiente', () => {
+  const items = [{ id: 'a' }, { id: 'b' }, { id: 'c' }];
+  const progress = inspectionProgress(items, { a: { status: 'ok' }, b: { status: 'issue' } });
+  assert.deepEqual(progress, { total: 3, reviewed: 2, issues: 1, percent: 67 });
 });
 
 // --- Web pública ------------------------------------------------------------

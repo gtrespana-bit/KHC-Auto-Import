@@ -57,3 +57,190 @@
   filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(1.08) saturate(0.85);
 }
 
+.inspection-print-header {
+  border: 1px solid rgb(51 65 85 / 85%);
+  border-radius: 1rem;
+  background: rgb(15 23 42 / 55%);
+  padding: 1rem 1.25rem;
+}
+
+.inspection-print-brand {
+  color: #fbbf24;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.inspection-print-header h1 {
+  margin-top: 0.25rem;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.inspection-print-vehicle-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.35rem 0.8rem;
+  margin-top: 0.75rem;
+  color: #cbd5e1;
+  font-size: 0.72rem;
+}
+
+.inspection-print-date {
+  margin-top: 0.75rem;
+  color: #94a3b8;
+  font-size: 0.68rem;
+}
+
+.inspection-print-footer {
+  margin-top: 1rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgb(100 116 139 / 40%);
+  color: #94a3b8;
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  html,
+  body {
+    min-width: 0 !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  body.print-inspection #root,
+  body.print-inspection #root * {
+    color: #111827 !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  body.print-inspection #root * {
+    visibility: hidden !important;
+  }
+
+  body.print-inspection #root .inspection-print-area,
+  body.print-inspection #root .inspection-print-area * {
+    visibility: visible !important;
+  }
+
+  body.print-inspection #root .inspection-print-area {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #111827 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 9pt !important;
+    line-height: 1.35 !important;
+  }
+
+  body.print-inspection .print-only-hide {
+    display: none !important;
+  }
+
+  body.print-inspection .inspection-print-header {
+    margin: 0 0 8pt !important;
+    padding: 0 0 7pt !important;
+    border: 0 !important;
+    border-bottom: 1.5pt solid #334155 !important;
+    border-radius: 0 !important;
+    break-inside: avoid-page;
+  }
+
+  body.print-inspection .inspection-print-brand {
+    color: #334155 !important;
+    font-size: 8pt !important;
+  }
+
+  body.print-inspection .inspection-print-header h1 {
+    margin: 2pt 0 0 !important;
+    font-size: 17pt !important;
+  }
+
+  body.print-inspection .inspection-print-vehicle-meta {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 3pt 12pt !important;
+    margin-top: 6pt !important;
+    font-size: 8pt !important;
+  }
+
+  body.print-inspection .inspection-print-date {
+    margin-top: 6pt !important;
+    font-size: 7.5pt !important;
+  }
+
+  body.print-inspection .inspection-checklist {
+    gap: 7pt !important;
+  }
+
+  body.print-inspection .inspection-checklist-header,
+  body.print-inspection .inspection-checklist-group,
+  body.print-inspection .inspection-check-item {
+    backdrop-filter: none !important;
+    break-inside: avoid-page;
+  }
+
+  body.print-inspection .inspection-checklist-header {
+    padding: 7pt !important;
+    border: 1pt solid #94a3b8 !important;
+    border-radius: 4pt !important;
+  }
+
+  body.print-inspection .inspection-checklist-group {
+    margin-top: 8pt !important;
+  }
+
+  body.print-inspection .inspection-checklist-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 5pt !important;
+  }
+
+  body.print-inspection .inspection-check-item {
+    padding: 7pt !important;
+    border: 0.7pt solid #cbd5e1 !important;
+    border-radius: 4pt !important;
+  }
+
+  body.print-inspection .inspection-check-item h5,
+  body.print-inspection .inspection-checklist-group h4 {
+    font-size: 9.5pt !important;
+  }
+
+  body.print-inspection .inspection-check-item .text-xs,
+  body.print-inspection .inspection-check-item .text-\[11px\] {
+    font-size: 8pt !important;
+    line-height: 1.35 !important;
+  }
+
+  body.print-inspection .inspection-checklist .text-\[10px\] {
+    font-size: 7pt !important;
+  }
+
+  body.print-inspection .inspection-check-item .rounded-md {
+    border: 0.5pt solid #64748b !important;
+    padding: 1pt 4pt !important;
+    font-size: 7pt !important;
+  }
+
+  body.print-inspection .inspection-print-footer {
+    margin-top: 7pt !important;
+    padding-top: 5pt !important;
+    border-color: #94a3b8 !important;
+    font-size: 7pt !important;
+  }
+}

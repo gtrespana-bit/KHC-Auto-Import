@@ -1,11 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { Calculator, Download, Car as CarIcon } from 'lucide-react';
-import { Card, Button, Field, Input, Money, Select, Stat, SectionTitle, Tabs, Badge, KeyValueGrid, Alert, cx } from '../components/ui.jsx';
+import { Calculator, Download, Car as CarIcon, ClipboardCheck } from 'lucide-react';
+import { Card, Button, Field, Input, Money, Select, Stat, SectionTitle, Tabs, Badge, KeyValueGrid, Alert, Modal, cx } from '../components/ui.jsx';
 import { useStore } from '../lib/store.jsx';
 import { eur, eur0, num, numEs, todayISO, download } from '../lib/format.js';
 import { recalcVehicleTaxes, landingCost, breakEvenPrice, calcSaleVat } from '../domain/taxes.js';
 import { suggestedPrice, vehiclePnl } from '../domain/finance.js';
 import { searchVehicles } from '../data/vehicleDatabase.js';
+import { getVehicleInspectionGuide } from '../data/vehicleInspection.js';
+import VehicleInspectionChecklist from '../components/VehicleInspectionChecklist.jsx';
 
 /** Traduce una ficha del catálogo (o de la flota) a los campos del formulario. */
 function fromSeed(v = {}) {
@@ -45,6 +47,7 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
   const [tab, setTab] = useState(initialTab);
   const [q, setQ] = useState('');
   const [picked, setPicked] = useState(seed || null);
+  const [inspectionOpen, setInspectionOpen] = useState(false);
   const [form, setForm] = useState(() => ({
     brand: '', model: '', version: '', year: new Date().getFullYear() - 4, km: 120000, cc: 1600, co2: 118,
     fuel: 'Diésel', newPrice: 32000, purchase: 9000, origen: 'subaler',
@@ -132,6 +135,32 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
     if (term.length < 3) return [];
     return searchVehicles(term, 24).filter((v) => v.source === 'catalog').slice(0, 8);
   }, [q]);
+  const pickedMatches = Boolean(picked
+    && picked.brand === form.brand
+    && picked.model === form.model
+    && picked.version === form.version);
+  const inspectionVehicle = {
+    brand: form.brand,
+    model: form.model,
+    version: form.version,
+    engine: pickedMatches ? picked.engine : form.version,
+    engineCode: pickedMatches ? picked.engineCode : '',
+    year: Number(form.year),
+    fuel: form.fuel,
+    transmission: pickedMatches ? picked.transmission : '',
+    reliability: pickedMatches ? picked.reliability : '',
+    reliabilityTitle: pickedMatches ? picked.reliabilityTitle : '',
+    reliabilityNote: pickedMatches ? picked.reliabilityNote : '',
+  };
+  const inspectionGuide = useMemo(() => getVehicleInspectionGuide(inspectionVehicle), [
+    inspectionVehicle.brand, inspectionVehicle.model, inspectionVehicle.version, inspectionVehicle.engine,
+    inspectionVehicle.engineCode, inspectionVehicle.year, inspectionVehicle.fuel, inspectionVehicle.transmission,
+    inspectionVehicle.reliability, inspectionVehicle.reliabilityTitle, inspectionVehicle.reliabilityNote,
+  ]);
+  const inspectionHighlights = inspectionGuide.groups
+    .filter((group) => ['model', 'engine', 'transmission'].includes(group.id))
+    .flatMap((group) => group.items)
+    .slice(0, 3);
 
   const applyCatalog = (v) => {
     update({
@@ -164,12 +193,22 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
   const createVehicle = () => {
     saveVehicle({
       brand: form.brand, model: form.model, version: form.version, year: Number(form.year), km: Number(form.km),
-      segment: picked?.segment || 'C', body: picked?.body || '', engine: picked?.engine || '', engineCode: picked?.engineCode || '',
-      cc: Number(form.cc), cv: picked?.cv || 0, cyl: picked?.cyl, co2: form.co2 === '' ? null : Number(form.co2), fuel: form.fuel,
+      segment: pickedMatches ? picked.segment || 'C' : 'C', body: pickedMatches ? picked.body || '' : '',
+      engine: pickedMatches ? picked.engine || '' : form.version, engineCode: pickedMatches ? picked.engineCode || '' : '',
+      catalogId: pickedMatches ? picked.id : '',
+      cc: Number(form.cc), cv: pickedMatches ? picked.cv || 0 : 0, cyl: pickedMatches ? picked.cyl : undefined,
+      co2: form.co2 === '' ? null : Number(form.co2), fuel: form.fuel,
       cvf: taxes.cvf, newPrice: Number(form.newPrice),
-      badge: picked?.badge || '', reliability: picked?.reliability || 'ok', reliabilityLabel: picked?.reliabilityLabel || '',
-      dePrice: picked?.dePrice, esPrice: picked?.esPrice, origin: picked?.origin,
-      demand: picked?.demand, rotationDays: picked?.rotationDays, winner: picked?.winner,
+      badge: pickedMatches ? picked.badge || '' : '',
+      reliability: pickedMatches ? picked.reliability || 'ok' : 'ok',
+      reliabilityTitle: pickedMatches ? picked.reliabilityTitle || '' : '',
+      reliabilityNote: pickedMatches ? picked.reliabilityNote || '' : '',
+      dePrice: pickedMatches ? picked.dePrice : undefined, esPrice: pickedMatches ? picked.esPrice : undefined,
+      origin: pickedMatches ? picked.origin : undefined,
+      demand: pickedMatches ? picked.demand : undefined,
+      rotationDays: pickedMatches ? picked.rotationDays : undefined,
+      winner: pickedMatches ? picked.winner : undefined,
+      inspectionChecks: {}, inspectionProfileKey: inspectionGuide.profileKey,
       costs: veh.costs, purchaseDate: todayISO(), sellerType: veh.sellerType, status: 'prospeccion', source: 'simulator',
       sale: form.salePrice ? { price: Number(form.salePrice), date: todayISO(), regime: form.saleRegime } : undefined,
     });
@@ -221,6 +260,27 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
                   </button>
                 ))}
               </div>
+            )}
+            {form.brand && form.model && (
+              <Card className="mb-3 p-3 border-amber-500/25 bg-amber-500/5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <p className="text-xs font-semibold text-white">¿Qué revisar antes de comprar?</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">
+                      {inspectionGuide.confidence.label} · {inspectionGuide.items.length} puntos de inspección
+                    </p>
+                  </div>
+                  <Button size="sm" variant="secondary" icon={ClipboardCheck} onClick={() => setInspectionOpen(true)}>
+                    Ver checklist
+                  </Button>
+                </div>
+                {inspectionHighlights.length > 0 && (
+                  <ul className="mt-2 space-y-1 text-[11px] text-slate-300">
+                    {inspectionHighlights.map((entry) => <li key={entry.id}>· {entry.title}</li>)}
+                  </ul>
+                )}
+                <p className="text-[10px] text-slate-500 mt-2">Son puntos a comprobar, no averías confirmadas.</p>
+              </Card>
             )}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <Field label="Marca"><Input value={form.brand} onChange={(v) => update({ brand: v })} /></Field>
@@ -398,6 +458,16 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
           </Card>
         </div>
       )}
+
+      <Modal
+        open={inspectionOpen}
+        onClose={() => setInspectionOpen(false)}
+        wide
+        title="Checklist de inspección precompra"
+        subtitle={inspectionGuide.title}
+      >
+        <VehicleInspectionChecklist vehicle={inspectionVehicle} readOnly />
+      </Modal>
     </div>
   );
 }

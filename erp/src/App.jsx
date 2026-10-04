@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import {
   Gauge, TrendingUp, Car, Database, Calculator, Users, Wallet, FileWarning, FileCheck2, BarChart3,
   BookOpen, Settings as SettingsIcon, Menu, X, Building2, HardDrive, MapPin, ShieldCheck,
-  ReceiptText, Cloud, CloudOff, LogOut, UserRound, Upload, Globe, Navigation,
+  ReceiptText, Cloud, CloudOff, LogOut, UserRound, Upload, Globe, Navigation, ClipboardCheck,
 } from 'lucide-react';
 import { StoreProvider, useStore } from './lib/store.jsx';
 import { AuthProvider, useOptionalAuth } from './lib/auth.jsx';
@@ -17,6 +17,7 @@ import FleetView from './views/FleetView.jsx';
 import CatalogView from './views/CatalogView.jsx';
 import OpportunitiesView from './views/OpportunitiesView.jsx';
 import ImportSimulatorView from './views/ImportSimulatorView.jsx';
+import InspectionView from './views/InspectionView.jsx';
 import TripCalculatorView from './views/TripCalculatorView.jsx';
 import CrmView from './views/CrmView.jsx';
 import AccountingView from './views/AccountingView.jsx';
@@ -32,6 +33,7 @@ const NAV = [
   { group: 'Operativa', items: [
     { id: 'dashboard', label: 'Cuadro de mando', icon: Gauge },
     { id: 'fleet', label: 'Flota y stock', icon: Car },
+    { id: 'inspection', label: 'Inspección precompra', icon: ClipboardCheck },
     { id: 'opportunities', label: 'Oportunidades', icon: TrendingUp },
     { id: 'catalog', label: 'Catálogo', icon: Database },
     { id: 'simulator', label: 'Simulador', icon: Calculator },
@@ -201,6 +203,7 @@ function Shell() {
           )}
           {view === 'dashboard' && <DashboardView go={go} editVehicle={editVehicle} />}
           {view === 'fleet' && <FleetView autoOpenId={openVehicleId} onAutoOpened={() => setOpenVehicleId(null)} />}
+          {view === 'inspection' && <InspectionView />}
           {view === 'opportunities' && <OpportunitiesView />}
           {view === 'catalog' && <CatalogView onSimulate={openSimulator} />}
           {view === 'simulator' && <ImportSimulatorView key={simSeed ? simSeed.at : 'sim'} seed={simSeed} />}
