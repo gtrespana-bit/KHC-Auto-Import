@@ -341,7 +341,7 @@ export function buildCatalog(models = MODEL_DATA, currentYear = new Date().getFu
           brand: m.b,
           model: m.m,
           gen: genName,
-          segment: m.seg,
+          segment: performanceProfile ? 'Hot hatch deportivo' : m.seg,
           body: performanceProfile?.body || m.body || m.seg,
           trim: performanceProfile?.trim || ov.trim || '',
           variantKey: performanceProfile?.variantKey || ov.variantKey || null,

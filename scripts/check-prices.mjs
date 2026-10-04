@@ -31,8 +31,9 @@ import {
   KM_HALFLIFE,
 } from '../erp/src/data/catalog/marketEvidence.js';
 import { PERFORMANCE_MARKET_OBSERVATIONS, PERFORMANCE_VARIANT_PROFILES } from '../erp/src/data/catalog/performanceEvidence.js';
-import { CURATED_DB, CURATED_RECONCILED } from '../erp/src/data/vehicleDatabase.js';
+import { VEHICLE_DB, CURATED_DB, CURATED_RECONCILED } from '../erp/src/data/vehicleDatabase.js';
 import { catalogEstimate } from '../erp/src/domain/catalogEstimate.js';
+import { buildPerformanceOpportunityRows } from '../erp/src/domain/performanceOpportunities.js';
 import { DEFAULT_TARIFFS } from '../erp/src/domain/rates.js';
 
 const eur = (n) => `${Math.round(n).toLocaleString('es-ES')} €`;
@@ -210,6 +211,8 @@ section('1. La evidencia está bien formada');
       continue;
     }
     const catalogRow = rows[0];
+    if (catalogRow.segment !== 'Hot hatch deportivo') profileFailures.push(`${profile.variantKey}: no está clasificado en Hot hatch deportivo`);
+    if (!catalogRow.dePrice?.length || !catalogRow.esPrice?.length) profileFailures.push(`${profile.variantKey}: falta horquilla DE/ES`);
     const observations = MARKET_OBSERVATIONS.filter((o) => o.variantKey === profile.variantKey);
     if (!observations.length) profileFailures.push(`${profile.variantKey}: sin anuncios trazados`);
     for (const o of observations) {
@@ -222,6 +225,14 @@ section('1. La evidencia está bien formada');
   }
   if (profileFailures.length) fail(`${profileFailures.length} incoherencias en perfiles deportivos: ${profileFailures.slice(0, 4).join('; ')}`);
   else ok(`${Object.keys(PERFORMANCE_VARIANT_PROFILES).length} perfiles deportivos aparecen una sola vez y respetan año/acabado/carrocería/cambio/potencia`);
+
+  const performanceRows = buildPerformanceOpportunityRows(VEHICLE_DB, DEFAULT_TARIFFS, new Date('2026-10-04T12:00:00Z'));
+  const missingMargins = performanceRows.filter((row) => !row.mean || !row.prudent || !row.vehicle.dePrice?.length || !row.vehicle.esPrice?.length);
+  if (performanceRows.length !== Object.keys(PERFORMANCE_VARIANT_PROFILES).length || missingMargins.length) {
+    fail(`la vista de oportunidades integra ${performanceRows.length}/${Object.keys(PERFORMANCE_VARIANT_PROFILES).length} perfiles deportivos con horquillas y márgenes`);
+  } else {
+    ok(`los ${performanceRows.length} perfiles deportivos aparecen en Oportunidades con precios, margen medio/prudente y tamaño de muestra`);
+  }
 
   // La normalización por kilometraje tiene que ir en la dirección correcta:
   // llevar un coche de 70.000 km a 135.000 km le RESTA valor.
