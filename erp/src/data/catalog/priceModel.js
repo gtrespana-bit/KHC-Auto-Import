@@ -16,7 +16,7 @@
 //
 //  Todo lo que devuelve este fichero se comprueba en scripts/check-prices.mjs.
 // ============================================================================
-import { MARKET_OBSERVATIONS, cvOf, fuelOf } from './marketEvidence.js';
+import { MARKET_OBSERVATIONS, cvOf, fuelOf, isEligibleObservation } from './marketEvidence.js';
 
 /** Potencias agrupadas en franjas de 25 CV: 150 y 155 son el mismo mercado. */
 export const CV_BUCKET = 25;
@@ -38,6 +38,17 @@ const levels = (o) => {
   const b = cvOf(o);
   const f = fuelOf(o) || 'na';
   const cvPart = b ? cvBucket(b) : 'na';
+  if (o.variantKey) {
+    // Una variante deportiva verificada no se fusiona con el acabado base ni
+    // con otra potencia: si la muestra es pequeña, no hay regresión para ella.
+    const exact = `${o.brand}|${o.model}|${o.gen}|variant:${o.variantKey}`;
+    return [
+      `${exact}|${f}|${cvPart}`,
+      `${exact}|${f}`,
+      `${exact}|${cvPart}`,
+      exact,
+    ];
+  }
   return [
     `${o.brand}|${o.model}|${o.gen}|${f}|${cvPart}`,
     `${o.brand}|${o.model}|${o.gen}|${f}`,
@@ -72,8 +83,9 @@ function solveRidge(X, y, lambda = 1e-4) {
   return A.map((row, i) => row[p] / row[i]);
 }
 
-function fitMarket(market) {
-  const obs = MARKET_OBSERVATIONS.filter((o) => o.market === market);
+export function fitMarket(market, observations = MARKET_OBSERVATIONS) {
+  const all = observations.filter((o) => o.market === market);
+  const obs = all.filter(isEligibleObservation);
   if (obs.length < MIN_OBS_PER_GROUP) return null;
 
   // Recuento por nivel para decidir el grupo de cada anuncio.
@@ -110,19 +122,33 @@ function fitMarket(market) {
   const mean = residuals.reduce((a, r) => a + r, 0) / residuals.length;
   const sd = Math.sqrt(residuals.reduce((a, r) => a + (r - mean) ** 2, 0) / Math.max(1, residuals.length - 1));
 
-  // Rango observado: fuera de él no se extrapola (ver predictPrice).
+  // Rango observado por grupo: no extrapolar una variante hasta los límites
+  // de otro modelo/potencia del mismo mercado.
   const years = used.map((o) => o.year);
   const kms = used.map((o) => o.km);
   const envelope = {
     yearMin: Math.min(...years), yearMax: Math.max(...years),
     kmMin: Math.min(...kms), kmMax: Math.max(...kms),
   };
+  const groupEnvelope = new Map();
+  used.forEach((o) => {
+    const group = groupOf(o);
+    const current = groupEnvelope.get(group) || { yearMin: Infinity, yearMax: -Infinity, kmMin: Infinity, kmMax: -Infinity };
+    current.yearMin = Math.min(current.yearMin, o.year);
+    current.yearMax = Math.max(current.yearMax, o.year);
+    current.kmMin = Math.min(current.kmMin, o.km);
+    current.kmMax = Math.max(current.kmMax, o.km);
+    groupEnvelope.set(group, current);
+  });
 
   return {
     market,
     envelope,
+    groupEnvelope,
     n: used.length,
-    nTotal: obs.length,
+    nTotal: all.length,
+    nEligible: obs.length,
+    nExcluded: all.length - obs.length,
     nPooled: pooled.length,
     groups,
     beta,
@@ -153,39 +179,24 @@ const FITS = {
 export const priceFit = (market) => FITS[market] || null;
 
 /** Índice del grupo dentro del ajuste; null si no hay datos para ese coche. */
-function groupIndexFor(fit, brand, model, gen, cv, fuel) {
+function groupIndexFor(fit, brand, model, gen, cv, fuel, variantKey = null) {
   if (!fit) return null;
-  const probe = { brand, model, gen, fuel, engine: cv ? `${cv} CV` : 'todas' };
+  const probe = { brand, model, gen, fuel, variantKey, engine: cv ? `${cv} CV` : 'todas' };
   const g = fit.groupOf(probe);
   if (!g) return null;
   const idx = fit.groups.indexOf(g);
   return idx < 0 ? null : idx;
 }
 
-/**
- * Precio esperado para un coche concreto.
- * Devuelve null cuando no hay anuncios de esa marca/modelo: quien llama decide
- * entonces si usa el modelo de depreciación.
- */
-/**
- * Año y km están fuertemente correlacionados en los anuncios, así que el
- * reparto del efecto entre ambos no es identificable con esta muestra: las
- * PREDICCIONES dentro del rango observado son fiables (R² ≈ 0,75), pero
- * extrapolar no lo es. Por eso fuera del rango observado se devuelve null y
- * quien llama usa el modelo de depreciación.
- */
-export function predictPrice({ market, brand, model, gen, cv, fuel, year, km }) {
-  const fit = FITS[market];
-  if (!fit) return null;
-  let gi = groupIndexFor(fit, brand, model, gen, cv, fuel);
+/** Predice con un ajuste dado; permite validación cruzada sin fuga de datos. */
+export function predictPriceWithFit(fit, { market, brand, model, gen, cv, fuel, year, km, variantKey = null }) {
+  if (!fit || fit.market !== market) return null;
+  let gi = groupIndexFor(fit, brand, model, gen, cv, fuel, variantKey);
   if (gi === null) return null;
   let borrowed = false;
-  // Si esta potencia no tiene grupo propio, el grupo genérico se ajusta sólo
-  // con los anuncios «sobrantes» (p. ej. un GTD de 184 CV y filas sin motor), y
-  // tasaba un Golf 1.6 TDI 116 CV por encima del 2.0 TDI 150 CV. Se parte del
-  // grupo de potencia MÁS CERCANA de la misma generación y combustible, y el
-  // llamador aplica el diferencial de potencia desde ahí.
-  if (!/\|\d+$/.test(fit.groups[gi]) && Number.isFinite(Number(cv)) && fuel) {
+  // Sólo los grupos generales pueden tomar prestada otra potencia. Una
+  // varianteKey deportiva nunca cae en el GTI/ST/Civic genérico.
+  if (!variantKey && !/\|\d+$/.test(fit.groups[gi]) && Number.isFinite(Number(cv)) && fuel) {
     const pref = `${brand}|${model}|${gen}|${fuel}|`;
     let best = null;
     fit.groups.forEach((g, i) => {
@@ -200,26 +211,35 @@ export function predictPrice({ market, brand, model, gen, cv, fuel, year, km }) 
   const k = Number(km);
   // Sin año o km válidos no se puede tasar: mejor null que un número inventado.
   if (!Number.isFinite(y) || !Number.isFinite(k)) return null;
-  const e = fit.envelope;
+  const group = fit.groups[gi];
+  const e = fit.groupEnvelope?.get(group) || fit.envelope;
   if (y < e.yearMin - 2 || y > e.yearMax + 2) return null;
   if (k < e.kmMin * 0.65 || k > e.kmMax * 1.35) return null;
   const lp = fit.intercept + fit.beta[1 + gi]
     + fit.yearCoef * (y - YEAR_REF)
     + fit.kmCoef * (k / 1000);
-  const group = fit.groups[gi];
-  // Si el grupo no distingue potencia, se aplica el diferencial por CV para
-  // que un 184 CV no valga lo mismo que un 105 CV dentro del mismo modelo.
+  // El sufijo CV distingue potencia; el grupo de variante lleva ese dato al
+  // final, mientras la llave separada impide mezclar acabados/generaciones.
   const distinguishesCv = !borrowed && /\|\d+$/.test(group);
   const distinguishesFuel = /\|(Diésel|Gasolina|Híbrido|Eléctrico|Microhíbrido|GLP|GNC)\|/.test(`${group}|`);
   return {
     price: Math.exp(lp), sigma: fit.sigma, group, r2: fit.r2, n: fit.n,
     distinguishesCv, distinguishesFuel, groupCvRef: fit.groupCvRef.get(group) || 0,
+    variantKey: variantKey || null,
   };
 }
 
-/** ¿Hay anuncios suficientes de esta marca/modelo/generación en ese mercado? */
-export function hasEvidence(market, brand, model, gen, cv, fuel) {
-  return groupIndexFor(FITS[market], brand, model, gen, cv, fuel) !== null;
+/**
+ * Precio esperado para un coche concreto. Fuera del rango de datos la persona
+ * que llama decide si recurre a evidencia directa o al modelo teórico.
+ */
+export function predictPrice(params) {
+  return predictPriceWithFit(FITS[params.market], params);
+}
+
+/** ¿Hay anuncios suficientes de esta variante/generación en ese mercado? */
+export function hasEvidence(market, brand, model, gen, cv, fuel, variantKey = null) {
+  return groupIndexFor(FITS[market], brand, model, gen, cv, fuel, variantKey) !== null;
 }
 
 /**

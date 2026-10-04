@@ -9,9 +9,9 @@
 //   • 'evidencia' → la horquilla sale de anuncios reales contrastados en
 //     marketEvidence.js (mobile.de, AutoScout24.de, coches.net, Autocasión,
 //     Wallapop, Milanuncios…), normalizados al kilometraje de referencia.
-//   • 'modelo'    → no hay anuncios verificados para esa generación: se estima
-//     con la curva de depreciación, RECALIBRADA contra la evidencia existente
-//     (calibrationFactors) para que no invente un nivel de precios propio.
+//   • 'modelo'    → no hay anuncios comparables para esa variante: se estima
+//     con la curva de depreciación y factores de mercado orientativos. No se
+//     presenta como precio observado ni como calibración validada.
 //
 //  Sirven para presupuestar, nunca para liquidar impuestos (para eso está el
 //  valor venal de Hacienda). Verifica el precio del coche concreto antes de
@@ -20,8 +20,9 @@
 import { computeCvf } from '../../utils/calculations.js';
 import { reliabilityOf } from './reliability.js';
 import { ENGINES } from './engines.js';
-import { evidenceStats, cvOf, PURCHASE_DISCOUNT, EVIDENCE_CAPTURED_AT } from './marketEvidence.js';
-import { predictPrice, priceFit } from './priceModel.js';
+import { evidenceStats, cvOf, PURCHASE_DISCOUNT, isEligibleObservation } from './marketEvidence.js';
+import { PERFORMANCE_MARKET_OBSERVATIONS, PERFORMANCE_VARIANT_PROFILES } from './performanceEvidence.js';
+import { predictPrice, predictPriceWithFit, priceFit } from './priceModel.js';
 import { VAG } from './vag.js';
 import { PREMIUM } from './premium.js';
 import { FRANCESES } from './franceses.js';
@@ -147,6 +148,23 @@ export const EXCLUDED_BRANDS = ['Seat', 'Cupra'];
 export const MODEL_DATA = [...VAG, ...PREMIUM, ...FRANCESES, ...ASIATICOS, ...OTROS]
   .filter((m) => !EXCLUDED_BRANDS.includes(m.brand ?? m.b));
 
+const PERFORMANCE_PROFILE_LIST = Object.values(PERFORMANCE_VARIANT_PROFILES);
+const PERFORMANCE_PROFILE_BY_ROW = new Map(PERFORMANCE_PROFILE_LIST.map((profile) => [
+  `${profile.brand}|${profile.model}|${profile.gen}|${profile.engineCode}`,
+  profile,
+]));
+const PERFORMANCE_REFERENCE = new Map(PERFORMANCE_PROFILE_LIST.map((profile) => {
+  const rows = PERFORMANCE_MARKET_OBSERVATIONS.filter((o) => o.variantKey === profile.variantKey && isEligibleObservation(o));
+  return [profile.variantKey, {
+    yearRef: Math.round(median(rows.map((o) => o.year))),
+    kmRef: Math.round(median(rows.map((o) => o.km))),
+  }];
+}));
+
+function performanceProfileFor(brand, model, gen, engineCode) {
+  return PERFORMANCE_PROFILE_BY_ROW.get(`${brand}|${model}|${gen}|${engineCode}`) || null;
+}
+
 /** Rangos teóricos de una generación (sin evidencia), a su km de referencia. */
 function modelRanges(pvp, from, to, demand, currentYear) {
   const ageNewest = Math.max(1, currentYear - to);
@@ -169,35 +187,13 @@ function modelRanges(pvp, from, to, demand, currentYear) {
 }
 
 /**
- * Calibración del modelo contra la evidencia real.
- * Para cada generación con anuncios observados se calcula
- * (mediana observada / mediana del modelo); el factor de calibración es la
- * mediana de esos cocientes. Así, donde no hay datos el modelo no inventa un
- * nivel de precios propio: reproduce el nivel que sí está verificado.
+ * Multipliers for the fallback curve. There is deliberately no market-level
+ * calibration yet: a generation-wide mix of trims/fuels is not a safe anchor
+ * for an exact imported variant. `1` means “unadjusted”, not “validated”.
+ * Keep the shape for consumers while reporting zero calibration samples.
  */
-/**
- * OJO: aquí se calibra el NIVEL de precios de cada mercado por separado. No se
- * corrige el diferencial ES/DE resultante, y es deliberado.
- *
- * Se intentó (24-09-2026) multiplicar la venta por un factor que la alineara con
- * el diferencial medido entre anuncios alemanes y españoles. El resultado fue
- * que el 94 % del catálogo pasaba a dar pérdidas, en contra de lo que se observa
- * comprando y vendiendo de verdad. La causa: las dos medidas del diferencial no
- * coinciden (la regresión da ~+5 %, emparejar anuncios sueltos da ~-4 %) porque
- * las muestras de cada país no tienen los mismos acabados, y recortar la venta
- * un 10-15 % sobre el 86 % de las fichas sin anuncios propios no se sostiene con
- * esa evidencia. Mientras no haya pares del MISMO acabado en los dos mercados,
- * el diferencial se deja como sale del modelo y la discrepancia se informa en
- * `npm run prices:check` (§4) en vez de aplicarse a los precios.
- */
-export function calibrationFactors(models = MODEL_DATA, currentYear = new Date().getFullYear()) {
-  const ratios = { DE: [], ES: [] };
-  return {
-    DE: median(ratios.DE) || 1,
-    ES: median(ratios.ES) || 1,
-    nDE: ratios.DE.length,
-    nES: ratios.ES.length,
-  };
+export function calibrationFactors(_models = MODEL_DATA, _currentYear = new Date().getFullYear()) {
+  return { DE: 1, ES: 1, nDE: 0, nES: 0 };
 }
 
 export function buildCatalog(models = MODEL_DATA, currentYear = new Date().getFullYear()) {
@@ -223,13 +219,20 @@ export function buildCatalog(models = MODEL_DATA, currentYear = new Date().getFu
       }).filter(Boolean);
       const cvRef = median(cvs);
 
-      // Evidencia a nivel de GENERACIÓN (sin filtrar por motor). Sirve para
-      // dar precio a los motores de los que no hay anuncios sin romper la
-      // coherencia interna: un 115 CV no puede salir más caro que el 150 CV.
+      // Evidencia a nivel de generación. Sólo sirve para motores normales sin
+      // comparable propio; los perfiles deportivos nunca caen a este grupo.
       const genRows = [];
+      const normalizeOptions = (market, targetYear = yearRef) => {
+        const fit = priceFit(market);
+        return {
+          yearRef: targetYear,
+          yearCoef: fit?.yearCoef,
+          kmCoef: fit?.kmCoef,
+        };
+      };
       const genEv = {
-        DE: evidenceStats(m.b, m.m, genName, 'DE', kmRef),
-        ES: evidenceStats(m.b, m.m, genName, 'ES', kmRef),
+        DE: evidenceStats(m.b, m.m, genName, 'DE', kmRef, null, null, normalizeOptions('DE')),
+        ES: evidenceStats(m.b, m.m, genName, 'ES', kmRef, null, null, normalizeOptions('ES')),
       };
       const genEvCvRef = {
         DE: median(genEv.DE ? genEv.DE.observations.map(cvOf).filter(Boolean) : []),
@@ -253,17 +256,27 @@ export function buildCatalog(models = MODEL_DATA, currentYear = new Date().getFu
         const gear = ov.gear || gearCode;
         const rel = reliabilityOf(ov.rel || relCode);
         const midYear = Math.round((from + to) / 2);
+        const performanceProfile = performanceProfileFor(m.b, m.m, genName, code);
+        const profileReference = performanceProfile
+          ? PERFORMANCE_REFERENCE.get(performanceProfile.variantKey)
+          : null;
+        const rowKmRef = profileReference?.kmRef || kmRef;
+        const rowYearRef = profileReference?.yearRef || yearRef;
+        const profileYears = performanceProfile?.years || ov.years || [from, to];
+        const profileModel = performanceProfile
+          ? modelRanges(ov.newPrice || pvp, profileYears[0], profileYears[1], demand, currentYear)
+          : null;
 
         // --- Precios: manda la evidencia; el modelo sólo cubre huecos -------
-        const evDe = evidenceStats(m.b, m.m, genName, 'DE', kmRef, cv);
-        const evEs = evidenceStats(m.b, m.m, genName, 'ES', kmRef, cv);
+        const evDe = evidenceStats(m.b, m.m, genName, 'DE', rowKmRef, cv, performanceProfile, normalizeOptions('DE', rowYearRef));
+        const evEs = evidenceStats(m.b, m.m, genName, 'ES', rowKmRef, cv, performanceProfile, normalizeOptions('ES', rowYearRef));
 
         /**
          * Tres niveles, de más a menos fiable:
          *  1. 'evidencia'            → anuncios reales de ESA motorización.
          *  2. 'evidencia_generacion' → anuncios de la generación, ajustados por
          *     potencia (mantiene coherente la familia de motores).
-         *  3. 'modelo'               → curva de depreciación recalibrada.
+         *  3. 'modelo'               → curva de depreciación orientativa sin calibración global.
          */
         const band = (market, ev, discount = 1) => {
           const g = genEv[market];
@@ -272,7 +285,8 @@ export function buildCatalog(models = MODEL_DATA, currentYear = new Date().getFu
           // 0. Regresión ajustada a los anuncios: usa año y motor de verdad.
           const pred = predictPrice({
             market, brand: m.b, model: m.m, gen: genName, cv,
-            fuel: FUEL_LABEL[fuel] || fuel, year: yearRef, km: kmRef,
+            fuel: FUEL_LABEL[fuel] || fuel, year: rowYearRef, km: rowKmRef,
+            variantKey: performanceProfile?.variantKey || null,
           });
           if (pred) {
             const w = Math.min(0.30, Math.max(0.10, pred.sigma));
@@ -282,13 +296,21 @@ export function buildCatalog(models = MODEL_DATA, currentYear = new Date().getFu
           } else if (ev) {
             src = [ev.p25, ev.p75];
             kind = 'evidencia';
-          } else if (g) {
+          } else if (g && !performanceProfile) {
             const f = powerFactor(cv, genEvCvRef[market]);
             src = [g.p25 * f, g.p75 * f];
             kind = 'evidencia_generacion';
           } else {
             const f = powerFactor(cv, cvRef);
-            const v = (market === 'DE' ? deMid * calib.DE : esMid * calib.ES) * f;
+            const baseRange = profileModel || { deMid, esMid, kmRef, ageMid };
+            const fallbackFit = priceFit(market);
+            const fallbackYearRef = currentYear - baseRange.ageMid;
+            const yearKmAdjustment = Number.isFinite(rowYearRef) && Number.isFinite(rowKmRef) && fallbackFit
+              ? Math.exp(fallbackFit.yearCoef * (rowYearRef - fallbackYearRef)
+                + fallbackFit.kmCoef * ((rowKmRef - baseRange.kmRef) / 1000))
+              : 1;
+            const base = market === 'DE' ? baseRange.deMid * calib.DE : baseRange.esMid * calib.ES;
+            const v = base * yearKmAdjustment * f;
             src = [v * (1 - MODEL_SPREAD), v * (1 + MODEL_SPREAD)];
             kind = 'modelo';
           }
@@ -297,19 +319,10 @@ export function buildCatalog(models = MODEL_DATA, currentYear = new Date().getFu
         const de = band('DE', evDe, 1 - PURCHASE_DISCOUNT);
         const es = band('ES', evEs);
         const dePrice = de.range;
-        let esPrice = es.range;
-        // Nunca se puede vender por menos de lo que cuesta comprarlo. Si los
-        // dos mercados no cuadran, se sube la venta al mínimo coherente y se
-        // marca la ficha: el beneficio saldrá ~0 y se verá que no compensa.
-        const buyMid = (dePrice[0] + dePrice[1]) / 2;
-        const sellMid = (esPrice[0] + esPrice[1]) / 2;
-        const thinMargin = sellMid < buyMid * 1.02;
-        if (thinMargin) {
-          const k = (buyMid * 1.02) / (sellMid || 1);
-          esPrice = esPrice.map((v) => round50(v * k)).sort((a, b) => a - b);
-        }
-        // El mínimo de venta no puede quedar por debajo del mínimo de compra.
-        if (esPrice[0] < dePrice[0]) esPrice = [dePrice[0], Math.max(esPrice[1], dePrice[1])];
+        const esPrice = es.range;
+        // No se impone que la venta española supere la compra alemana. Si los
+        // comparables no dejan margen, la ficha debe mostrar una oportunidad
+        // negativa y no subir artificialmente el precio de reventa.
 
         const id = `${m.b}-${m.m}-${genName}-${code}-${cv}-${from}`
           .toLowerCase()
@@ -319,6 +332,8 @@ export function buildCatalog(models = MODEL_DATA, currentYear = new Date().getFu
           .replace(/(^-|-$)/g, '');
         if (seen.has(id)) continue;
         seen.add(id);
+        const deEvidence = evDe || (performanceProfile ? null : genEv.DE);
+        const esEvidence = evEs || (performanceProfile ? null : genEv.ES);
 
         genRows.push({ cv, push: {
           id,
@@ -327,24 +342,27 @@ export function buildCatalog(models = MODEL_DATA, currentYear = new Date().getFu
           model: m.m,
           gen: genName,
           segment: m.seg,
-          body: m.body || m.seg,
-          version: `${engineName}${gear === 'M' ? ' Manual' : ` ${GEAR_LABEL[gear] || ''}`.trimEnd()}`,
+          body: performanceProfile?.body || m.body || m.seg,
+          trim: performanceProfile?.trim || ov.trim || '',
+          variantKey: performanceProfile?.variantKey || ov.variantKey || null,
+          version: performanceProfile?.variantLabel
+            || `${engineName}${gear === 'M' ? ' Manual' : ` ${GEAR_LABEL[gear] || ''}`.trimEnd()}`,
           engine: engineName,
           engineCode: code,
           fuel: ov.fuelLabel || FUEL_LABEL[fuel] || fuel,
           transmission: GEAR_LABEL[gear] || 'Manual',
           gearCode: gear,
-          years: [from, to],
+          years: ov.years || performanceProfile?.years || [from, to],
           cv,
           cc,
           cyl,
-          co2,
+          co2: performanceProfile?.co2 ?? co2,
           badge: ov.badge || badgeFor(fuel, midYear),
-          newPrice: pvp,
+          newPrice: ov.newPrice || pvp,
           cvf: Number(computeCvf(cc, cyl || 4).toFixed(2)),
           dePrice,
           esPrice,
-          kmRef,
+          kmRef: rowKmRef,
           origin: BRAND_ORIGIN[m.b] || 'UE',
           demand,
           rotationDays: Math.max(25, Math.min(120, Math.round(58 / demand))),
@@ -353,12 +371,13 @@ export function buildCatalog(models = MODEL_DATA, currentYear = new Date().getFu
           priceSource: {
             de: de.kind,
             es: es.kind,
-            deEvidence: (evDe || genEv.DE) && { n: (evDe || genEv.DE).n, capturedAt: EVIDENCE_CAPTURED_AT, sources: (evDe || genEv.DE).sources, wide: (evDe || genEv.DE).wide },
-            esEvidence: (evEs || genEv.ES) && { n: (evEs || genEv.ES).n, capturedAt: EVIDENCE_CAPTURED_AT, sources: (evEs || genEv.ES).sources, wide: (evEs || genEv.ES).wide },
-            kmRef,
-            calibrated: { DE: Number(calib.DE.toFixed(3)), ES: Number(calib.ES.toFixed(3)) },
+            variantKey: performanceProfile?.variantKey || null,
+            deEvidence: deEvidence && { n: deEvidence.n, capturedAt: deEvidence.capturedAt, sources: deEvidence.sources, wide: deEvidence.wide, yearRange: deEvidence.yearRange, normalization: deEvidence.normalization },
+            esEvidence: esEvidence && { n: esEvidence.n, capturedAt: esEvidence.capturedAt, sources: esEvidence.sources, wide: esEvidence.wide, yearRange: esEvidence.yearRange, normalization: esEvidence.normalization },
+            kmRef: rowKmRef,
+            fallbackMultiplier: { DE: Number(calib.DE.toFixed(3)), ES: Number(calib.ES.toFixed(3)) },
             regression: { DE: fitInfo.DE, ES: fitInfo.ES },
-            yearRef,
+            yearRef: rowYearRef,
           },
           ...rel,
         } });
@@ -381,20 +400,7 @@ export function buildCatalog(models = MODEL_DATA, currentYear = new Date().getFu
           const k = maxEs / eMid;
           row.push.esPrice = ep.map((v) => round50(v * k)).sort((a, b) => a - b);
         } else maxEs = eMid;
-        // Tras subir la compra puede romperse el suelo de venta: se revisa.
-        const nd = (row.push.dePrice[0] + row.push.dePrice[1]) / 2;
-        const ne = (row.push.esPrice[0] + row.push.esPrice[1]) / 2;
-        if (ne < nd * 1.02) {
-          const k = (nd * 1.02) / ne;
-          row.push.esPrice = row.push.esPrice.map((v) => round50(v * k)).sort((a, b) => a - b);
-          maxEs = nd * 1.02;
-        }
-        // Revisar sólo las medias no basta: subir la compra puede dejar su
-        // MÍNIMO por encima del mínimo de venta, y la horquilla se cruza.
-        if (row.push.esPrice[0] < row.push.dePrice[0]) {
-          row.push.esPrice = [row.push.dePrice[0],
-            Math.max(row.push.esPrice[1], row.push.dePrice[1])];
-        }
+        // El margen puede ser negativo: se conserva el mercado observado.
         out.push(row.push);
       }
     }
@@ -403,45 +409,69 @@ export function buildCatalog(models = MODEL_DATA, currentYear = new Date().getFu
   return out;
 }
 
-/**
- * Precio estimado para un coche CONCRETO (año y km reales), con la misma
- * lógica de prioridades que el catálogo: regresión sobre anuncios → cuantiles
- * de la generación → modelo calibrado. Es lo que usa la auditoría para
- * comprobar anuncio por anuncio, y lo que debería usar cualquiera que tenga
- * delante un vehículo con su matrícula y su contador.
- */
-export function priceAt({ brand, model, gen, cv, fuel, market, year, km }, { purchase = false } = {}) {
-  const pred = predictPrice({ market, brand, model, gen, cv, fuel, year, km });
+/** Precio de un coche concreto. El ajuste/evidencia pueden ser de validación holdout. */
+export function priceAt(params, { purchase = false, fit = null, observations = null } = {}) {
+  const { brand, model, gen, cv, fuel, market, year, km, variantKey = null } = params || {};
+  const activeFit = fit || priceFit(market);
+  const pred = fit
+    ? predictPriceWithFit(fit, params)
+    : predictPrice(params);
+  const purchaseFactor = purchase ? 1 - PURCHASE_DISCOUNT : 1;
   if (pred) {
-    const w = Math.min(0.30, Math.max(0.10, pred.sigma));
-    const factor = purchase ? 1 - PURCHASE_DISCOUNT : 1;
-    const pf = pred.distinguishesCv ? 1 : powerFactor(cv, pred.groupCvRef);
+    const width = Math.min(0.30, Math.max(0.10, pred.sigma));
+    const power = pred.distinguishesCv ? 1 : powerFactor(cv, pred.groupCvRef);
     return {
-      min: Math.round(pred.price * pf * Math.exp(-w) * factor),
-      mid: Math.round(pred.price * pf * factor),
-      max: Math.round(pred.price * pf * Math.exp(w) * factor),
+      min: Math.round(pred.price * power * Math.exp(-width) * purchaseFactor),
+      mid: Math.round(pred.price * power * purchaseFactor),
+      max: Math.round(pred.price * power * Math.exp(width) * purchaseFactor),
       source: 'regresion',
+      n: pred.n,
+      variantKey: pred.variantKey,
     };
   }
+
+  // Si no hay suficientes anuncios para ajustar una regresión, sólo se usan
+  // comparables de la misma potencia y, para deporte, de la misma variantKey.
+  if (Number.isFinite(Number(cv)) && cv != null) {
+    const evidence = evidenceStats(
+      brand, model, gen, market, Number(km), Number(cv),
+      variantKey ? { variantKey, cv: Number(cv) } : null,
+      {
+        observations,
+        yearRef: Number(year),
+        yearCoef: activeFit?.yearCoef,
+        kmCoef: activeFit?.kmCoef,
+      },
+    );
+    if (evidence) {
+      return {
+        min: Math.round(evidence.p25 * purchaseFactor),
+        mid: Math.round(evidence.median * purchaseFactor),
+        max: Math.round(evidence.p75 * purchaseFactor),
+        source: variantKey ? 'evidencia_variante' : 'evidencia',
+        n: evidence.n,
+        variantKey: variantKey || null,
+      };
+    }
+  }
+  // Una variante estricta no se puede valorar con el promedio genérico de otra.
+  if (variantKey) return null;
+
   const gen0 = MODEL_DATA.find((m) => m.b === brand && m.m === model);
   const g = gen0 && gen0.g.find((x) => x[0] === gen);
   if (gen0 && g) {
     const demand = gen0.dmd || 1;
     const currentYear = new Date().getFullYear();
-    const { deMid, esMid, kmRef, ageMid } = modelRanges(g[3], g[1], g[2], demand, currentYear);
+    const { deMid, esMid, kmRef: modelKmRef, ageMid } = modelRanges(g[3], g[1], g[2], demand, currentYear);
     const calib = calibrationFactors();
-    // La curva da el precio de un coche «medio» de la generación (año y km de
-    // referencia). Antes se devolvía tal cual, así que un Golf de 2015 con
-    // 127.000 km valía lo mismo que otro con 210.000 km. Se lleva al año y km
-    // reales con los coeficientes ajustados sobre los anuncios.
-    const fit = priceFit(market);
     const y = Number(year); const k = Number(km);
     let adj = 1;
-    if (fit && Number.isFinite(y) && Number.isFinite(k)) {
-      adj = Math.exp(fit.yearCoef * (y - (currentYear - ageMid)) + fit.kmCoef * ((k - kmRef) / 1000));
+    if (activeFit && Number.isFinite(y) && Number.isFinite(k)) {
+      adj = Math.exp(activeFit.yearCoef * (y - (currentYear - ageMid))
+        + activeFit.kmCoef * ((k - modelKmRef) / 1000));
     }
-    const v = (market === 'DE' ? deMid * calib.DE : esMid * calib.ES) * adj * (purchase ? 1 - PURCHASE_DISCOUNT : 1);
-    return { min: Math.round(v * 0.87), mid: Math.round(v), max: Math.round(v * 1.13), source: 'modelo' };
+    const base = (market === 'DE' ? deMid * calib.DE : esMid * calib.ES) * adj * purchaseFactor;
+    return { min: Math.round(base * 0.87), mid: Math.round(base), max: Math.round(base * 1.13), source: 'modelo' };
   }
   return null;
 }

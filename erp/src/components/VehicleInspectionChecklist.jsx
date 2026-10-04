@@ -109,6 +109,7 @@ function ChecklistItem({
       tone={tone}
       className={cx(
         'p-3.5 sm:p-4 inspection-check-item transition-colors',
+        entry.specific && 'border-sky-500/25 bg-sky-500/[0.025]',
         focused && !printMode && 'inspection-check-item--focused ring-1 ring-amber-400/50',
         status === 'pending' && 'border-slate-700/90',
       )}
@@ -176,7 +177,7 @@ function ChecklistItem({
 
       <div className="mt-3 grid gap-2 border-t border-slate-700/50 pt-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
         <div className="inspection-item-how text-xs leading-relaxed text-slate-300">
-          <strong className="text-slate-100">Cómo comprobarlo: </strong>{entry.how}
+          <strong className="text-slate-100">Qué observar y cómo comprobarlo: </strong>{entry.how}
         </div>
         {entry.appliesWhen && (
           <p className="text-[11px] leading-relaxed text-amber-200/90 sm:max-w-xs">
@@ -227,22 +228,50 @@ function ChecklistItem({
 export default function VehicleInspectionChecklist({ vehicle = {}, checks = {}, onChange, readOnly = false, printMode = false }) {
   const guide = getVehicleInspectionGuide(vehicle);
   const progress = inspectionProgress(guide.items, checks);
+  const specificProgress = inspectionProgress(guide.specificItems, checks);
+  const generalProgress = inspectionProgress(guide.generalItems, checks);
   const editable = !readOnly && !printMode && typeof onChange === 'function';
-  const [activeStageId, setActiveStageId] = useState(guide.groups[0]?.id || '');
+  const [activeSection, setActiveSection] = useState(guide.specificItems.length ? 'specific' : 'general');
+  const firstGeneralGroup = guide.groups.find((group) => group.items.some((entry) => !entry.specific)) || guide.groups[0];
+  const [activeStageId, setActiveStageId] = useState(firstGeneralGroup?.id || '');
   const [focusedItemId, setFocusedItemId] = useState('');
-  const activeGroup = guide.groups.find((group) => group.id === activeStageId) || guide.groups[0];
-  const currentStageIndex = guide.groups.findIndex((group) => group.id === activeGroup?.id);
-  const pendingItems = guide.items.filter((entry) => !isComplete(checks[entry.id]?.status));
-  const currentItemIndex = guide.items.findIndex((entry) => entry.id === focusedItemId);
+
+  const specificGroups = useMemo(() => guide.groups
+    .map((group) => ({
+      ...group,
+      items: group.items
+        .filter((entry) => entry.specific)
+        .sort((a, b) => (
+          ({ critical: 0, high: 1, essential: 1, medium: 2 }[a.priority] ?? 3)
+          - ({ critical: 0, high: 1, essential: 1, medium: 2 }[b.priority] ?? 3)
+        )),
+    }))
+    .filter((group) => group.items.length > 0), [guide.groups]);
+  const generalGroups = useMemo(() => guide.groups
+    .map((group) => ({ ...group, items: group.items.filter((entry) => !entry.specific) }))
+    .filter((group) => group.items.length > 0), [guide.groups]);
+  const activeGroup = generalGroups.find((group) => group.id === activeStageId) || generalGroups[0];
+  const currentItems = activeSection === 'specific' ? guide.specificItems : guide.generalItems;
+  const currentProgress = activeSection === 'specific' ? specificProgress : generalProgress;
+  const pendingItems = currentItems.filter((entry) => !isComplete(checks[entry.id]?.status));
+  const currentItemIndex = currentItems.findIndex((entry) => entry.id === focusedItemId);
+  const currentStageIndex = generalGroups.findIndex((group) => group.id === activeGroup?.id);
   const nextStageIndex = currentStageIndex + 1;
   const previousStageIndex = currentStageIndex - 1;
+  const visibleGroups = printMode
+    ? [...specificGroups, ...generalGroups]
+    : activeSection === 'specific'
+      ? specificGroups
+      : activeGroup ? [activeGroup] : [];
 
-  const stageProgress = useMemo(() => new Map(
-    guide.groups.map((group) => [group.id, inspectionProgress(group.items, checks)]),
-  ), [guide.groups, checks]);
+  const generalStageProgress = useMemo(() => new Map(
+    generalGroups.map((group) => [group.id, inspectionProgress(group.items, checks)]),
+  ), [generalGroups, checks]);
 
   useEffect(() => {
-    setActiveStageId(guide.groups[0]?.id || '');
+    const nextGeneralGroup = guide.groups.find((group) => group.items.some((entry) => !entry.specific)) || guide.groups[0];
+    setActiveSection(guide.specificItems.length ? 'specific' : 'general');
+    setActiveStageId(nextGeneralGroup?.id || '');
     setFocusedItemId('');
   }, [guide.profileKey]);
 
@@ -252,7 +281,7 @@ export default function VehicleInspectionChecklist({ vehicle = {}, checks = {}, 
       document.getElementById(`inspection-item-${focusedItemId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [focusedItemId, activeStageId, printMode]);
+  }, [focusedItemId, activeStageId, activeSection, printMode]);
 
   const updateCheck = (id, patch) => {
     if (!editable) return;
@@ -263,6 +292,7 @@ export default function VehicleInspectionChecklist({ vehicle = {}, checks = {}, 
   };
 
   const selectStage = (group) => {
+    setActiveSection('general');
     setActiveStageId(group.id);
     const firstPending = group.items.find((entry) => !isComplete(checks[entry.id]?.status));
     setFocusedItemId(firstPending?.id || group.items[0]?.id || '');
@@ -270,33 +300,40 @@ export default function VehicleInspectionChecklist({ vehicle = {}, checks = {}, 
 
   const moveToPending = () => {
     if (!pendingItems.length) return;
-    const pendingAfterCurrent = pendingItems.find((entry) => guide.items.findIndex((item) => item.id === entry.id) > currentItemIndex);
+    const pendingAfterCurrent = pendingItems.find((entry) => currentItems.findIndex((item) => item.id === entry.id) > currentItemIndex);
     const next = pendingAfterCurrent || pendingItems[0];
     const group = guide.groups.find((entry) => entry.id === next.stageId);
-    if (group) setActiveStageId(group.id);
+    if (next.specific) {
+      setActiveSection('specific');
+    } else {
+      setActiveSection('general');
+      if (group) setActiveStageId(group.id);
+    }
     setFocusedItemId(next.id);
   };
 
   const moveStage = (index) => {
-    const group = guide.groups[index];
+    const group = generalGroups[index];
     if (group) selectStage(group);
   };
 
-  const profileSummary = guide.profileNotes.map((profile) => `${profile.type}: ${profile.label}`).join(' · ');
-  const visibleGroups = printMode ? guide.groups : activeGroup ? [activeGroup] : [];
+  const profileSummary = [...new Set(guide.specificItems.map((entry) => `${entry.profileType}: ${entry.profileLabel}`))].join(' · ');
+  const visibleProgress = printMode ? progress : currentProgress;
+  const specificTone = specificProgress.issues ? 'rose' : specificProgress.total && specificProgress.percent === 100 ? 'emerald' : 'sky';
+  const generalTone = generalProgress.issues ? 'rose' : generalProgress.total && generalProgress.percent === 100 ? 'emerald' : 'slate';
 
   return (
     <div className={cx('space-y-4 inspection-checklist', printMode && 'inspection-checklist--print')}>
       <Card className="p-4 inspection-checklist-header" tone={guide.hasSpecificGuidance ? 'sky' : 'amber'}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Inspección profesional por zonas</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Guía técnica por variante</p>
             <h3 className="mt-1 text-lg font-bold text-white">{guide.title}</h3>
             <p className="mt-1 text-xs text-slate-300">
               {guide.engineName ? `Motor / versión indicada: ${guide.engineName}` : 'Motor/código todavía sin identificar'}
               {vehicle.transmission ? ` · Caja indicada: ${vehicle.transmission}` : ''}
             </p>
-            {profileSummary && <p className="mt-1.5 text-[11px] text-sky-200/80">Guía adaptada: {profileSummary}</p>}
+            {profileSummary && <p className="mt-1.5 text-[11px] leading-relaxed text-sky-200/90">Perfiles aplicados: {profileSummary}</p>}
           </div>
           <div className="flex shrink-0 flex-wrap items-center gap-2">
             <Badge tone={guide.confidence.tone}>{guide.confidence.label}</Badge>
@@ -304,20 +341,59 @@ export default function VehicleInspectionChecklist({ vehicle = {}, checks = {}, 
           </div>
         </div>
 
+        {!printMode && (
+          <div className="mt-4 grid gap-2 sm:grid-cols-2" role="group" aria-label="Tipo de comprobaciones">
+            <button
+              type="button"
+              aria-pressed={activeSection === 'specific'}
+              disabled={!guide.specificItems.length}
+              onClick={() => { setActiveSection('specific'); setFocusedItemId(''); }}
+              className={cx(
+                'flex min-h-[4.5rem] items-start justify-between gap-3 rounded-xl border px-3.5 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70 disabled:cursor-not-allowed disabled:opacity-50',
+                activeSection === 'specific' ? 'border-sky-400/50 bg-sky-500/10' : 'border-slate-800 bg-slate-950/40 hover:border-slate-600',
+              )}
+            >
+              <span className="min-w-0">
+                <span className="block text-xs font-bold text-white">Puntos débiles de esta variante</span>
+                <span className="mt-1 block text-[10px] leading-relaxed text-slate-400">Modelo, motor, caja o tracción identificados</span>
+              </span>
+              <Badge tone={specificTone}>{specificProgress.reviewed}/{specificProgress.total}</Badge>
+            </button>
+            <button
+              type="button"
+              aria-pressed={activeSection === 'general'}
+              onClick={() => { setActiveSection('general'); setFocusedItemId(''); }}
+              className={cx(
+                'flex min-h-[4.5rem] items-start justify-between gap-3 rounded-xl border px-3.5 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/70',
+                activeSection === 'general' ? 'border-amber-400/50 bg-amber-500/10' : 'border-slate-800 bg-slate-950/40 hover:border-slate-600',
+              )}
+            >
+              <span className="min-w-0">
+                <span className="block text-xs font-bold text-white">Controles comunes</span>
+                <span className="mt-1 block text-[10px] leading-relaxed text-slate-400">Rutina estándar que se repite en todos los coches</span>
+              </span>
+              <Badge tone={generalTone}>{generalProgress.reviewed}/{generalProgress.total}</Badge>
+            </button>
+          </div>
+        )}
+
         <div className="mt-4 space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-[11px]">
-            <span className="font-semibold text-slate-200">{progress.reviewed} de {progress.total} puntos revisados</span>
-            <span className={progress.issues ? 'font-semibold text-rose-300' : 'text-slate-400'}>
-              {progress.issues} {progress.issues === 1 ? 'incidencia' : 'incidencias'}
-              {pendingItems.length > 0 ? ` · ${pendingItems.length} pendientes` : ' · revisión completa'}
+            <span className="font-semibold text-slate-200">
+              {printMode ? 'Progreso total de inspección' : activeSection === 'specific' ? 'Progreso de puntos específicos' : 'Progreso de controles comunes'}
+              {' · '}{visibleProgress.reviewed}/{visibleProgress.total} revisados
+            </span>
+            <span className={visibleProgress.issues ? 'font-semibold text-rose-300' : 'text-slate-400'}>
+              {visibleProgress.issues} {visibleProgress.issues === 1 ? 'incidencia' : 'incidencias'}
+              {visibleProgress.total - visibleProgress.reviewed > 0 ? ` · ${visibleProgress.total - visibleProgress.reviewed} pendientes` : ' · completo'}
             </span>
           </div>
-          <Progress value={progress.percent} tone={progress.issues ? 'rose' : progress.percent === 100 ? 'emerald' : 'amber'} />
+          <Progress value={visibleProgress.percent} tone={visibleProgress.issues ? 'rose' : visibleProgress.percent === 100 ? 'emerald' : activeSection === 'specific' ? 'sky' : 'amber'} />
         </div>
 
         {editable && (
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-            <p className="text-[10px] text-slate-500">Marca cada control como correcto, incidencia o no aplica. Las notas guardan medidas, síntomas y presupuestos.</p>
+            <p className="text-[10px] text-slate-500">Registra resultado y evidencia. En las incidencias, anota síntoma, medición, código o presupuesto.</p>
             <Button
               size="sm"
               variant={pendingItems.length ? 'secondary' : 'ghost'}
@@ -326,22 +402,28 @@ export default function VehicleInspectionChecklist({ vehicle = {}, checks = {}, 
               disabled={!pendingItems.length}
               className="inspection-next-pending"
             >
-              {pendingItems.length ? `Siguiente pendiente · ${pendingItems.length}` : 'Todo revisado'}
+              {pendingItems.length ? `Siguiente pendiente · ${pendingItems.length}` : 'Apartado revisado'}
             </Button>
           </div>
         )}
       </Card>
 
       {!guide.hasSpecificGuidance && (
-        <Alert tone="warn" title="Guía general: falta confirmar la variante">
-          La checklist incluye controles comunes, pero no se ha identificado una ficha específica de modelo/motor/caja. Añade año, código de motor y transmisión y confirma la configuración por VIN antes de considerar aplicables los puntos condicionales.
+        <Alert tone="warn" title="Aún no hay puntos débiles asociados a esta variante">
+          No se ha identificado una guía de modelo, motor o transmisión con los datos actuales. Completa el código de motor y la caja (o selecciona una variante del catálogo) y confirma ambos por VIN. No se atribuyen fallos por el nombre comercial únicamente.
+        </Alert>
+      )}
+
+      {!printMode && activeSection === 'specific' && !specificGroups.length && (
+        <Alert tone="info" title="Sin incidencias recurrentes documentadas para esta configuración">
+          La guía específica aparecerá cuando se reconozca el modelo, la familia de motor, la caja o la tracción. Mientras tanto, puedes consultar el control común sin convertirlo en un diagnóstico del modelo.
         </Alert>
       )}
 
       {guide.profileNotes.length > 0 && (
         <details className="rounded-xl border border-sky-500/20 bg-sky-500/[0.03] px-3.5 py-2.5 inspection-profile-notes" open={printMode}>
           <summary className="cursor-pointer text-xs font-semibold text-sky-200">
-            Criterio de aplicación de los puntos específicos · confirma por VIN
+            Alcance y condiciones de aplicación · confirmar por VIN
           </summary>
           <div className="mt-2 space-y-2 border-t border-sky-500/15 pt-2">
             {guide.profileNotes.map((profile) => (
@@ -354,16 +436,23 @@ export default function VehicleInspectionChecklist({ vehicle = {}, checks = {}, 
       )}
 
       {guide.reliability && guide.reliability !== 'ok' && guide.reliabilityNote && (
-        <Alert tone={RELIABILITY_TONE[guide.reliability] || 'info'} title={guide.reliabilityTitle || 'Aviso de fiabilidad del catálogo'}>
-          {guide.reliabilityNote}
-        </Alert>
+        <details className="rounded-xl border border-slate-800 bg-slate-950/35 px-3.5 py-2.5 inspection-catalog-reliability" open={printMode}>
+          <summary className="cursor-pointer text-xs font-semibold text-slate-300">
+            Contexto complementario del catálogo de fiabilidad
+          </summary>
+          <div className="mt-2 border-t border-slate-800 pt-2">
+            <Alert tone={RELIABILITY_TONE[guide.reliability] || 'info'} title={guide.reliabilityTitle || 'Aviso de fiabilidad del catálogo'}>
+              {guide.reliabilityNote}
+            </Alert>
+          </div>
+        </details>
       )}
 
-      {!printMode && guide.groups.length > 0 && (
-        <nav aria-label="Fases de la inspección" className="inspection-step-nav -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-          {guide.groups.map((group, index) => {
+      {!printMode && activeSection === 'general' && generalGroups.length > 0 && (
+        <nav aria-label="Fases de controles comunes" className="inspection-step-nav -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+          {generalGroups.map((group, index) => {
             const Icon = STAGE_ICONS[group.id] || ClipboardCheck;
-            const groupProgress = stageProgress.get(group.id);
+            const groupProgress = generalStageProgress.get(group.id);
             const active = group.id === activeGroup?.id;
             return (
               <button
@@ -387,34 +476,40 @@ export default function VehicleInspectionChecklist({ vehicle = {}, checks = {}, 
         </nav>
       )}
 
-      {visibleGroups.map((group) => {
+      {visibleGroups.map((group, visibleGroupIndex) => {
         const groupIndex = guide.groups.findIndex((entry) => entry.id === group.id);
-        const groupState = stageProgress.get(group.id) || inspectionProgress(group.items, checks);
+        const groupIsSpecific = group.items.every((entry) => entry.specific);
+        const groupState = inspectionProgress(group.items, checks);
         const Icon = STAGE_ICONS[group.id] || ClipboardCheck;
         return (
-          <section key={group.id} className="space-y-3 inspection-checklist-group" aria-label={group.title}>
+          <section key={`${groupIsSpecific ? 'specific' : 'general'}-${group.id}`} className="space-y-3 inspection-checklist-group" aria-label={group.title}>
             {!printMode && (
-              <div className="flex flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-900/50 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className={cx(
+                'flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between',
+                activeSection === 'specific' ? 'border-sky-500/20 bg-sky-500/[0.04]' : 'border-slate-800 bg-slate-900/50',
+              )}>
                 <div className="flex items-start gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-700 bg-slate-950 text-amber-300">
                     <Icon className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-amber-300">Zona {groupIndex + 1} de {guide.groups.length}</p>
+                    <p className={cx('text-[10px] font-bold uppercase tracking-wider', activeSection === 'specific' ? 'text-sky-300' : 'text-amber-300')}>
+                      {activeSection === 'specific' ? 'Punto débil por zona' : `Control común · zona ${groupIndex + 1}`}
+                    </p>
                     <h4 className="mt-0.5 text-base font-bold text-white">{group.title}</h4>
                     <p className="mt-1 max-w-3xl text-[11px] leading-relaxed text-slate-400">{group.description}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 sm:shrink-0">
-                  <Badge tone={groupState.issues ? 'rose' : groupState.percent === 100 ? 'emerald' : 'slate'}>
-                    {groupState.reviewed}/{groupState.total} · {groupState.issues} incidencias
+                  <Badge tone={groupState.issues ? 'rose' : groupState.percent === 100 ? 'emerald' : activeSection === 'specific' ? 'sky' : 'slate'}>
+                    {groupState.reviewed}/{groupState.total} revisados · {groupState.issues} incidencias
                   </Badge>
                 </div>
               </div>
             )}
             {printMode && (
               <div className="inspection-print-stage-heading">
-                <span className="inspection-print-stage-number">{String(groupIndex + 1).padStart(2, '0')}</span>
+                <span className="inspection-print-stage-number">{String(visibleGroupIndex + 1).padStart(2, '0')}</span>
                 <div>
                   <h4>{group.title}</h4>
                   <p>{group.description}</p>
@@ -442,7 +537,7 @@ export default function VehicleInspectionChecklist({ vehicle = {}, checks = {}, 
               })}
             </div>
 
-            {!printMode && (
+            {!printMode && activeSection === 'general' && (
               <div className="flex items-center justify-between gap-2 pt-1">
                 <Button
                   size="sm"
@@ -453,12 +548,12 @@ export default function VehicleInspectionChecklist({ vehicle = {}, checks = {}, 
                 >
                   Zona anterior
                 </Button>
-                <p className="hidden text-[10px] text-slate-500 sm:block">Avanza en orden para no volver a la misma zona.</p>
+                <p className="hidden text-[10px] text-slate-500 sm:block">Estos controles se repiten en todas las unidades.</p>
                 <Button
                   size="sm"
                   variant="secondary"
                   onClick={() => moveStage(nextStageIndex)}
-                  disabled={nextStageIndex >= guide.groups.length}
+                  disabled={nextStageIndex >= generalGroups.length}
                 >
                   Siguiente zona <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
@@ -468,7 +563,7 @@ export default function VehicleInspectionChecklist({ vehicle = {}, checks = {}, 
         );
       })}
 
-      {!printMode && editable && progress.reviewed > 0 && (
+      {!printMode && editable && currentProgress.reviewed > 0 && (
         <div className="flex justify-end">
           <Button
             size="sm"
@@ -487,7 +582,7 @@ export default function VehicleInspectionChecklist({ vehicle = {}, checks = {}, 
       )}
 
       <Alert tone="info" className="text-xs inspection-checklist-disclaimer" title="Orientación técnica, no diagnóstico">
-        Las comprobaciones concretas dependen del VIN, código de motor, caja y equipamiento. Esta guía no confirma que la unidad tenga una avería ni sustituye a un elevador, diagnosis compatible o técnico independiente. En híbridos/eléctricos, la alta tensión solo debe revisarla personal cualificado.
+        Los puntos específicos son fallos o elementos que conviene vigilar, no un diagnóstico de esta unidad. Confirma motor, caja, equipamiento y campañas con VIN/código exacto; si aparece una señal, valida con diagnosis y un profesional independiente. En híbridos/eléctricos, la alta tensión solo debe revisarla personal cualificado.
       </Alert>
     </div>
   );

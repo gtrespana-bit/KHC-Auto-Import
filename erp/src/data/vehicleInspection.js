@@ -154,6 +154,14 @@ const GENERAL_ITEMS = [
     'Pide presupuestos por escrito de cada trabajo pendiente. Suma reparación inmediata, mantenimiento próximo, transporte, impuestos y homologación al precio ofertado; deja una reserva acorde al riesgo y compra solo si el margen aguanta un escenario prudente.',
   ),
   item(
+    'gearbox-manual-clutch',
+    'Embrague y volante bimasa si equipa',
+    'medium',
+    'El desgaste se puede manifestar como patinamiento, vibración al salir o golpes al arrancar/apagar.',
+    'Prueba salidas suaves, marcha atrás y aceleración moderada en una marcha larga; escucha golpes al arrancar y apagar. Identifica por VIN si esa versión lleva volante bimasa y pide facturas de sustitución.',
+    'Solo aplica a unidades con cambio manual.',
+  ),
+  item(
     'base-structure',
     'Carrocería, pintura y reparaciones de chapa',
     'high',
@@ -261,6 +269,10 @@ const ITEM_STAGE = {
   'base-recalls': 'documents',
   'base-use-history': 'documents',
   'golf-gti-identification': 'documents',
+  'golf-mk8-identification': 'documents',
+  'focus-st-identification': 'documents',
+  'focus-st-mk3-identification': 'documents',
+  'civic-type-r-identification': 'documents',
   'hsd-campaign-service': 'documents',
 
   'base-structure': 'exterior',
@@ -270,6 +282,11 @@ const ITEM_STAGE = {
   'base-leaks-cooling': 'engine',
   'base-battery-12v': 'engine',
   'golf-gti-modifications': 'engine',
+  'focus-st-turbo-cooling': 'engine',
+  'focus-st-mk3-coolant-misfire': 'engine',
+  'focus-st-mk3-cold-misfire': 'engine',
+  'civic-type-r-engine-cooling': 'engine',
+  'k20c1-service-oil': 'engine',
 
   'base-electrical-equipment': 'interior',
   'base-climate-hvac': 'interior',
@@ -279,14 +296,28 @@ const ITEM_STAGE = {
   'base-underbody-structure': 'undercarriage',
   'base-wear': 'undercarriage',
   'golf-gti-suspension-dcc': 'undercarriage',
+  'golf-mk8-sport-wear': 'undercarriage',
+  'focus-st-brakes-tyres': 'undercarriage',
+  'focus-st-mk3-brakes-tyres': 'undercarriage',
+  'civic-type-r-brakes-chassis': 'undercarriage',
 
   'base-diagnostics': 'diagnostics',
   'base-safety-systems': 'diagnostics',
   'base-emissions-integrity': 'diagnostics',
+  'golf-mk8-modifications': 'diagnostics',
+  'focus-st-tuning-track-use': 'diagnostics',
+  'focus-st-mk3-tuning-modifications': 'diagnostics',
+  'civic-type-r-modifications': 'diagnostics',
+  'k20c1-boost-ignition': 'diagnostics',
   'hsd-battery-health': 'diagnostics',
 
   'base-road-test': 'road',
   'golf-gti-vaq': 'road',
+  'golf-mk8-dsg-service': 'road',
+  'golf-mk8-vaq': 'road',
+  'focus-st-clutch-gearbox': 'road',
+  'focus-st-mk3-clutch-gearbox': 'road',
+  'civic-type-r-clutch-lsd': 'road',
   'hsd-hybrid-operation': 'road',
   'drivetrain-awd': 'road',
   'gearbox-dual-clutch': 'road',
@@ -304,6 +335,10 @@ const ITEM_STAGE = {
 const ITEM_ORDER = {
   'base-identity-history': 10,
   'golf-gti-identification': 15,
+  'golf-mk8-identification': 15,
+  'focus-st-identification': 15,
+  'focus-st-mk3-identification': 15,
+  'civic-type-r-identification': 15,
   'base-seller-documents': 20,
   'base-import-paperwork': 30,
   'base-mileage': 40,
@@ -318,6 +353,11 @@ const ITEM_ORDER = {
   'base-cold-start': 10,
   'base-leaks-cooling': 20,
   'base-battery-12v': 30,
+  'focus-st-mk3-coolant-misfire': 30,
+  'focus-st-mk3-cold-misfire': 35,
+  'focus-st-turbo-cooling': 40,
+  'civic-type-r-engine-cooling': 40,
+  'k20c1-service-oil': 50,
 
   'base-water-ingress': 10,
   'base-electrical-equipment': 20,
@@ -327,13 +367,27 @@ const ITEM_ORDER = {
   'base-underbody-structure': 10,
   'base-wear': 20,
   'golf-gti-suspension-dcc': 30,
+  'golf-mk8-sport-wear': 40,
+  'focus-st-brakes-tyres': 40,
+  'focus-st-mk3-brakes-tyres': 45,
+  'civic-type-r-brakes-chassis': 40,
 
   'base-diagnostics': 10,
   'base-safety-systems': 20,
   'base-emissions-integrity': 30,
-  'hsd-battery-health': 40,
+  'golf-mk8-modifications': 40,
+  'focus-st-tuning-track-use': 40,
+  'focus-st-mk3-tuning-modifications': 40,
+  'civic-type-r-modifications': 40,
+  'k20c1-boost-ignition': 50,
+  'hsd-battery-health': 60,
 
   'base-road-test': 10,
+  'golf-mk8-dsg-service': 20,
+  'golf-mk8-vaq': 30,
+  'focus-st-clutch-gearbox': 20,
+  'focus-st-mk3-clutch-gearbox': 25,
+  'civic-type-r-clutch-lsd': 20,
   'base-after-test': 10,
   'base-independent-inspection': 20,
   'base-repair-budget': 30,
@@ -383,6 +437,231 @@ const MODEL_PROFILES = [
         'La potencia y el uso pueden acelerar el desgaste de silentblocks, soportes y amortiguadores; el DCC es opcional según versión.',
         'En baches y maniobras escucha golpes delanteros; en elevador revisa brazos, rótulas y soportes. Si lleva DCC, cambia entre modos y lee errores de amortiguadores/cableado.',
         'Comprobar DCC únicamente si aparece en el equipamiento de fábrica.',
+      ),
+    ],
+  },
+  {
+    id: 'vw-golf-gti-mk8',
+    label: 'Volkswagen Golf VIII GTI 245/265 y GTI Clubsport 300',
+    matches: (vehicle, text) => {
+      const brand = normalize(vehicle.brand);
+      const volkswagen = brand.includes('volkswagen') || brand === 'vw';
+      const key = normalize(vehicle.variantKey);
+      const golf = includesAny(text, 'golf');
+      const gti = /\bgti\b/.test(text) || includesAny(text, 'clubsport');
+      const mk8 = /golf viii|golf 8|mk8|mk 8/.test(text) || key.startsWith('vw golf viii ');
+      return volkswagen && golf && gti && mk8;
+    },
+    note: 'El Golf VIII GTI 245, el facelift de 265 CV y el Clubsport de 300 CV no son intercambiables. Confirma potencia, caja y equipamiento por VIN/CoC; GTI y Clubsport pueden llevar diferencial y calibraciones distintas.',
+    items: [
+      item(
+        'golf-mk8-identification',
+        'Distinguir GTI 245, GTI facelift 265 y Clubsport 300 por VIN',
+        'high',
+        'Año y emblemas no bastan: el facelift eleva potencia y cambia detalles; Clubsport es otra variante. Una potencia o CO₂ incorrectos alteran valor, impuestos y piezas.',
+        'Contrasta VIN, código de motor/caja, potencia en kW, fecha de fabricación y CoC. Confirma si es GTI 245 pre-facelift, GTI 265 facelift o Clubsport 300; registra código PR y emisiones que figuran en la documentación.',
+      ),
+      item(
+        'golf-mk8-modifications',
+        'Repro, escape, admisión y uso en circuito',
+        'high',
+        'Una preparación puede cambiar potencia/emisiones, homologación y carga del motor, caja, frenos y neumáticos; no se deduce solo por ser un GTI.',
+        'Compara piezas y software con la configuración de fábrica. Pide facturas de repro/escape/suspensión, revisa catalizador/OPF y readiness OBD, desgaste de frenos y neumáticos y coherencia con el historial. Si hay dudas, diagnosis especializada antes de valorar.',
+      ),
+      item(
+        'golf-mk8-dsg-service',
+        'DSG: identificar código y acreditar su mantenimiento',
+        'high',
+        'La caja y su intervalo se deben confirmar por VIN; el uso en tráfico, salidas fuertes o repro puede acelerar el desgaste.',
+        'Pide el plan y las facturas de servicio del código DSG exacto. Prueba D/R, maniobras, cambios a baja carga y aceleración progresiva en frío y caliente; lee el módulo de caja sin borrar adaptaciones ni errores.',
+        'La ficha declara DSG; verificar el código y el plan aplicable a esa unidad.',
+      ),
+      item(
+        'golf-mk8-vaq',
+        'Diferencial delantero electrónico y refrigeración si equipado',
+        'medium',
+        'El diferencial y su hardware dependen de la versión; no se debe asumir que todo GTI tiene el mismo conjunto que un Clubsport.',
+        'Confirma el equipo por VIN/PR. En maniobras cerradas y aceleración suave no debe haber golpes, vibración ni tirones; consulta diagnosis y pauta de aceite del diferencial según el código real.',
+        'Comprobar el diferencial/autoblocante únicamente si lo equipa esa variante.',
+      ),
+      item(
+        'golf-mk8-sport-wear',
+        'Frenos, neumáticos y suspensión bajo uso deportivo',
+        'high',
+        'Discos, pastillas, llantas, silentblocks y amortiguadores pueden tener desgaste acelerado; modificaciones o tandas se comprueban, no se presuponen.',
+        'Mide discos y pastillas frente a especificación, verifica medidas/índices y desgaste interior de neumáticos, y revisa geometría, bajos y soportes en elevador. Presupuesta piezas próximas a vencer antes de negociar.',
+      ),
+    ],
+  },
+  {
+    id: 'ford-focus-st-mk3',
+    label: 'Ford Focus III ST 2.0 EcoBoost 250 manual (2016–2018)',
+    matches: (vehicle, text, year) => {
+      const key = normalize(vehicle.variantKey);
+      const detail = normalize([vehicle.version, vehicle.engine, vehicle.transmission, vehicle.body].filter(Boolean).join(' '));
+      const exactVariant = key === 'ford focus iii st 250 manual';
+      const explicitMk3 = /focus iii|focus 3|mk 3/.test(text);
+      const manual250Hatch = /\b250\b/.test(detail)
+        && /2 0 ecoboost/.test(detail)
+        && /\bmanual\b/.test(detail)
+        && /hatch|5 puertas|5 door/.test(normalize(vehicle.body))
+        && !/automatic|automatik|sportbreak|estate|wagon|turnier/.test(detail);
+      const isSt = /focus (?:iii|3) st|\bfocus st\b|\bst 250\b/.test(text) || exactVariant;
+      return normalize(vehicle.brand).includes('ford')
+        && includesAny(text, 'focus')
+        && !/st[ -]?line/.test(text)
+        && isSt
+        && (exactVariant || (manual250Hatch && (explicitMk3 || (year >= 2016 && year <= 2018))));
+    },
+    note: 'No mezclar con el Focus IV ST 2.3 280, el ST-Line, el diésel de 185 CV ni la carrocería Turnier. El ST Mk3 del catálogo es hatchback 2.0 EcoBoost 250 manual; confirma código, transmisión, carrocería y mercado por VIN/CoC.',
+    items: [
+      item(
+        'focus-st-mk3-identification',
+        'Confirmar Focus III ST 250 manual, no ST-Line ni Focus IV',
+        'high',
+        'La etiqueta ST aparece también en ST-Line y la generación cambia mecánica, potencia y valor; un 2.3 ST automático o un Turnier no es comparable con este hatchback 2.0 de 250 CV.',
+        'Contrasta VIN y CoC: generación Mk3, código 2.0 EcoBoost, potencia homologada, cinco puertas y caja manual. Revisa además recalls/campañas por VIN y no aceptes potencia, emisiones o carrocería discrepantes con la ficha.',
+      ),
+      item(
+        'focus-st-mk3-coolant-misfire',
+        'Pérdida de refrigerante, humo blanco y fallos de combustión',
+        'high',
+        'El SSM Ford 47462 describe estos síntomas en ciertos Focus 2015–2018 2.0 EcoBoost; es una guía de diagnóstico, no una tasa de fallo ni prueba de que toda unidad europea esté afectada.',
+        'Pide historial de rellenos/cambios de refrigerante y comprueba el nivel con motor frío. Busca humo blanco persistente, arranque irregular y P0300–P0304/P0316; si falta refrigerante sin fuga visible, solicita prueba de presión prolongada, comprobación de gases y boroscopia según procedimiento Ford. Confirma aplicabilidad por VIN/mercado antes de atribuir la causa.',
+        'Aplica como cribado si hay consumo de refrigerante, humo, misfire o códigos. SSM 47462: Focus 2015–2018 2.0 EcoBoost (mercado EE. UU.); confirmar si corresponde a la unidad europea.',
+      ),
+      item(
+        'focus-st-mk3-cold-misfire',
+        'Misfire al arrancar en frío: bujías, códigos y calibración PCM',
+        'medium',
+        'El TSB Ford 18-2093 describe P0300/P0316 en algunos Focus ST 2015–2018 con refrigerante por debajo de 49 °C; no todo tirón en frío implica avería interna.',
+        'No borres fallos antes de guardar códigos y datos congelados. Si aparecen P0300/P0316 en frío, verifica por VIN el boletín/calibración aplicable e inspecciona bujías y separación según especificación; vuelve a probar completamente frío después de la corrección.',
+        'Condicional: verificar año, mercado y TSB 18-2093 por VIN; la reparación publicada incluye inspección/ajuste o cambio de bujías y reprogramación PCM.',
+      ),
+      item(
+        'focus-st-mk3-tuning-modifications',
+        'Reprogramación, sobrealimentación y piezas no originales',
+        'high',
+        'Una repro o escape/downpipe puede aumentar carga térmica y alterar emisiones, garantía y homologación; su presencia no se deduce por el emblema ST.',
+        'Compara admisión, downpipe/escape, intercooler, suspensión y software con especificación de fábrica. Guarda facturas y homologaciones; pide diagnosis con presión de turbo/misfires y revisión especializada si hay piezas, cableado o calibración no originales.',
+      ),
+      item(
+        'focus-st-mk3-clutch-gearbox',
+        'Embrague, sincronizadores y transmisión manual',
+        'high',
+        'Lanzadas y cambios rápidos pueden acelerar el desgaste; kilometraje bajo no certifica el estado del conjunto.',
+        'Prueba todas las marchas en frío y caliente, sin rascar ni saltar; comprueba que el embrague no patine con carga moderada. Revisa vibraciones de soportes, palieres y guardapolvos en elevador, y pide facturas de embrague si hay ruido o tacto irregular.',
+        'Solo para la variante 2.0 EcoBoost ST manual.',
+      ),
+      item(
+        'focus-st-mk3-brakes-tyres',
+        'Frenos, neumáticos y geometría tras uso deportivo',
+        'high',
+        'El desgaste desigual o excesivo afecta coste y seguridad, pero no demuestra por sí solo que el coche se haya usado en circuito.',
+        'Mide discos/pastillas, comprueba medida e índices homologados, DOT y desgaste interior de las cuatro ruedas. Inspecciona llantas, alineación, silentblocks y bajos; solicita presupuesto antes de convertir consumibles pendientes en margen de compra.',
+      ),
+    ],
+  },
+  {
+    id: 'ford-focus-st-mk4',
+    label: 'Ford Focus IV ST 2.3 EcoBoost 280 manual',
+    matches: (vehicle, text) => {
+      const key = normalize(vehicle.variantKey);
+      const detail = normalize([vehicle.version, vehicle.engine, vehicle.transmission, vehicle.body].filter(Boolean).join(' '));
+      const exactVariant = key === 'ford focus iv st 280 manual';
+      const manual280Hatch = /\b280\b/.test(detail)
+        && /\bmanual\b/.test(detail)
+        && /hatch|5 puertas|5 door/.test(normalize(vehicle.body))
+        && !/automatic|automatik|sportbreak|estate|wagon|turnier/.test(detail);
+      const isSt = /\bfocus st\b|\bst 280\b/.test(text) || exactVariant;
+      return normalize(vehicle.brand).includes('ford')
+        && includesAny(text, 'focus')
+        && !/st[ -]?line/.test(text)
+        && isSt
+        && (exactVariant || manual280Hatch);
+    },
+    note: 'No mezclar Focus ST 280 con ST-Line, Sportbreak ST o ST automáticos. Identifica carrocería, potencia y transmisión por VIN antes de comparar el precio o aplicar la guía.',
+    items: [
+      item(
+        'focus-st-identification',
+        'Confirmar Focus ST hatchback 280 manual (no ST-Line)',
+        'high',
+        'ST y ST-Line tienen mecánicas, potencia y valor muy distintos; también existe Focus ST con caja automática y carrocería Sportbreak.',
+        'Comprueba VIN/CoC, código de motor 2.3 EcoBoost, potencia homologada, cinco puertas, caja manual y código de equipamiento. Contrasta el anuncio con los documentos y revisa campañas abiertas por VIN.',
+      ),
+      item(
+        'focus-st-tuning-track-use',
+        'Reprogramación, escape, admisión y posible uso en circuito',
+        'high',
+        'Un motor turbo modificado puede exigir más a turbo, embrague, transmisión y emisiones, además de afectar homologación y seguro.',
+        'Busca ECU/PCM no original, downpipe/escape, admisión, suspensión rebajada y tornillería manipulada. Revisa readiness/errores, facturas y desgaste anómalo; ante modificaciones, confirma homologación y encarga diagnosis a un especialista Ford.',
+      ),
+      item(
+        'focus-st-clutch-gearbox',
+        'Embrague, sincronizadores y diferencial delantero',
+        'high',
+        'Salidas fuertes o conducción exigente pueden acelerar desgaste; el estado no se infiere por el kilometraje solamente.',
+        'Prueba el embrague sin forzarlo, verifica que no patine bajo carga moderada y que las marchas entren sin rascar en frío/caliente. Confirma por VIN el diferencial/equipamiento; escucha ruidos en giros y pide valoración si hay vibración o golpes.',
+        'Comprobar caja manual y diferencial según el equipo de fábrica.',
+      ),
+      item(
+        'focus-st-turbo-cooling',
+        'Refrigeración, turbo y encendido con el motor frío y caliente',
+        'high',
+        'La pérdida de refrigerante, fallos de encendido o desviaciones de sobrealimentación pueden aparecer solo con carga o temperatura.',
+        'Revisa niveles y restos de fuga en frío, pide arranque sin precalentar, lee fallos/misfires y compara presión solicitada/real en una prueba segura. No aceptes que borren códigos antes de la inspección; si hay síntomas, prueba de presión y revisión especializada.',
+      ),
+      item(
+        'focus-st-brakes-tyres',
+        'Desgaste de frenos, neumáticos y geometría del tren delantero',
+        'high',
+        'Una unidad de conducción rápida puede consumir antes neumáticos, discos y silentblocks; las marcas de pista son indicios para investigar, no una conclusión.',
+        'Mide frenos, compara los cuatro neumáticos por medida/DOT/desgaste, revisa golpes en llantas y busca reparaciones de bajos o geometría. Solicita alineación y presupuesto si el coche tira o vibra.',
+      ),
+    ],
+  },
+  {
+    id: 'honda-civic-type-r',
+    label: 'Honda Civic Type R FK2 / FK8 / FL5',
+    matches: (vehicle, text) => normalize(vehicle.brand).includes('honda')
+      && includesAny(text, 'civic')
+      && (includesAny(text, 'type r', 'fk2', 'fk8', 'fl5') || normalize(vehicle.variantKey).startsWith('honda civic type r ')),
+    note: 'FK2 310 CV, FK8 320 CV y FL5 329 CV son generaciones distintas y deben tasarse/inspeccionarse por separado. Confirma generación, caja manual, potencia, emisiones y cualquier edición por VIN/CoC.',
+    items: [
+      item(
+        'civic-type-r-identification',
+        'Distinguir FK2, FK8 y FL5; verificar potencia y edición',
+        'high',
+        'Las carrocerías y componentes cambian por generación; Type R estándar, GT y ediciones especiales no deben confundirse.',
+        'Verifica VIN/CoC, código de motor, potencia en kW (FK2 310, FK8 320, FL5 329 CV según homologación), caja manual, puertas, emisiones y edición. Contrasta número de piezas y equipamiento con fábrica, no solo las insignias.',
+      ),
+      item(
+        'civic-type-r-modifications',
+        'Preparación, repro y posible uso en circuito',
+        'high',
+        'Escape, admisión, software y uso intensivo afectan fiabilidad, homologación, emisiones y valor de reventa.',
+        'Busca downpipe/escape, admisión, intercooler, repro, suspensión, jaula o arneses; contrasta factura, legalización y configuración ECU. Comprueba catalizador/OPF y readiness. Si hay modificaciones o marcas de pista, exige inspección de especialista y presupuesto prudente.',
+      ),
+      item(
+        'civic-type-r-engine-cooling',
+        'Motor turbo, refrigeración y registros de mantenimiento',
+        'high',
+        'Un motor de altas prestaciones puede ocultar síntomas con una prueba corta o después de borrar errores.',
+        'Haz arranque en frío; revisa niveles, fugas, humo y ruidos. Escanea misfires y presión del turbo; prueba a temperatura de servicio sin aceleraciones abusivas. Contrasta aceite y mantenimiento por VIN/código y pide revisión de compresión si hay señales de sobrepresión o uso severo.',
+      ),
+      item(
+        'civic-type-r-clutch-lsd',
+        'Embrague, sincronizadores y diferencial autoblocante',
+        'high',
+        'El embrague y el diferencial pueden soportar cargas elevadas; los ruidos, vibraciones o una caja que rasca necesitan una valoración, no una suposición.',
+        'Prueba todas las marchas con cambios suaves en frío y caliente; verifica que el embrague no patine en carga moderada. Confirma por VIN el diferencial y escucha golpes/ruidos al girar o acelerar. Revisa facturas y consulta a un taller Honda si hay anomalías.',
+      ),
+      item(
+        'civic-type-r-brakes-chassis',
+        'Frenos, neumáticos, suspensión y bajos',
+        'high',
+        'El desgaste concentrado o daños bajo el coche pueden revelar uso en circuito, bordillos o una reparación anterior.',
+        'Mide discos/pastillas, comprueba llantas y cuatro neumáticos, revisa interior de pasos de rueda, bajos, geometría, soportes y fugas en elevador. Compara DOT/desgaste y pide presupuestos escritos de cualquier reparación inmediata.',
       ),
     ],
   },
@@ -464,6 +743,28 @@ const ENGINE_PROFILES = [
     ],
   },
   {
+    id: 'vag-20-bitdi',
+    label: 'VAG 2.0 BiTDI (CFCA / CXEB y variantes)',
+    matches: (vehicle, text) => includesAny(text, 'bitdi', 'bi tdi', 'cfca', 'cxeb'),
+    note: 'El nombre BiTDI agrupa códigos y generaciones. Confirma código de motor y aplicación por VIN; no extrapoles estos puntos al 2.0 TDI monoturbo.',
+    items: [
+      item(
+        'bitdi-egr-engine-wear',
+        'Enfriador EGR y posible desgaste interno',
+        'critical',
+        'En algunas aplicaciones BiTDI se han documentado problemas en el sistema EGR asociados a un desgaste interno costoso. La variante exacta y las reparaciones previas cambian el riesgo.',
+        'Confirma código de motor por VIN y pide facturas de intervenciones en enfriador EGR/motor. Busca consumo de aceite, humo azulado, pérdida de potencia o refrigerante; si hay indicios, solicita compresión/leak-down y boroscopia a un especialista. La ausencia de humo en parado no descarta desgaste.',
+      ),
+      item(
+        'bitdi-twin-turbo',
+        'Dos turbos y control de sobrealimentación',
+        'high',
+        'La configuración biturbo añade actuadores, conductos y estrategias de carga que no lleva el monoturbo.',
+        'Durante una prueba progresiva bajo carga, comprueba entrega de potencia sin cortes, silbidos anómalos ni modo de emergencia. Si aparece un síntoma, registra códigos y compara presión solicitada/real con equipo compatible; no condenes el turbo solo por un ruido aislado.',
+      ),
+    ],
+  },
+  {
     id: 'vag-ea288-16-tdi',
     label: 'VAG 1.6 TDI EA288',
     matches: (vehicle, text) => includesAny(text, 'ea288 16', '1.6 tdi ea288', '1.6 tdi (ea288)')
@@ -541,7 +842,14 @@ const ENGINE_PROFILES = [
   {
     id: 'bmw-n47',
     label: 'BMW 2.0 diésel N47',
-    matches: (vehicle, text) => includesAny(text, 'n47', 'n47d20') || (normalize(vehicle.brand).includes('bmw') && /\b2 0 d\b|\b320d\b|\b118d\b/.test(text) && /\b201[0-5]\b/.test(text)),
+    matches: (vehicle, text) => {
+      const engineIdentity = normalize([vehicle.engineCode, vehicle.engine].filter(Boolean).join(' '));
+      if (includesAny(engineIdentity, 'n47', 'n47d20')) return true;
+      if (includesAny(engineIdentity, 'b47', 'b47d20')) return false;
+      return normalize(vehicle.brand).includes('bmw')
+        && /\b2 0 d\b|\b320d\b|\b118d\b/.test(text)
+        && /\b201[0-5]\b/.test(text);
+    },
     note: 'Perfil de precaución elevado. La identificación del motor por modelo/año puede fallar: verifica el código del bloque por VIN antes de decidir.',
     items: [
       item(
@@ -586,6 +894,50 @@ const ENGINE_PROFILES = [
         'medium',
         'El B47 es una familia distinta del N47, pero una compra de segunda mano sigue requiriendo escuchar el motor y revisar datos; no se debe declarar “sin riesgo” por la etiqueta.',
         'Escucha en frío ruidos metálicos persistentes y pide evaluación si hay un traqueteo que acompaña a las revoluciones. Contrasta con un especialista y con el historial.',
+      ),
+    ],
+  },
+  {
+    id: 'mercedes-om651',
+    label: 'Mercedes 2.1 diésel OM651',
+    matches: (vehicle, text) => {
+      const engineIdentity = normalize([vehicle.engineCode, vehicle.engine].filter(Boolean).join(' '));
+      if (includesAny(engineIdentity, 'om626')) return includesAny(normalize(vehicle.engineCode), 'om651');
+      return includesAny(engineIdentity, 'om651') || includesAny(text, 'om651');
+    },
+    note: 'El OM651 se ofreció en distintas potencias y aplicaciones. Los puntos de inyección más señalados afectan sobre todo a primeras series; confirma el código y fecha de fabricación exactos.',
+    items: [
+      item(
+        'om651-injection-cold-start',
+        'Inyectores y arranque en frío (primeras series)',
+        'high',
+        'En algunas unidades tempranas se han reportado fallos de inyección; un arranque en caliente puede ocultar síntomas de arranque difícil o combustión irregular.',
+        'Pide arranque tras varias horas parado. Observa tiempo de arranque, ralentí, humo y golpeteo; con síntomas, lee correcciones de inyectores y presión de rail y solicita prueba de retorno. Pide factura si se sustituyeron inyectores.',
+        'Prioridad especial en unidades de primeras series (aprox. 2009–2011); confirmar fecha/código por VIN.',
+      ),
+      item(
+        'om651-chain-noise',
+        'Ruido de distribución en frío',
+        'medium',
+        'La ubicación y el acceso a la distribución pueden hacer costosa una reparación; un ruido persistente requiere evaluación, no un diagnóstico por oído a distancia.',
+        'Escucha el primer arranque en frío y observa si el ruido metálico persiste o acompaña a las revoluciones. Si ocurre, pide valoración de un especialista Mercedes y contrasta el historial; no lo des por normal sin identificar motor.',
+        'Aplicar solo si el código/fecha de esta unidad figura afectado según documentación técnica.',
+      ),
+    ],
+  },
+  {
+    id: 'mercedes-om654',
+    label: 'Mercedes 2.0 diésel OM654 / OM654q',
+    matches: (vehicle, text) => includesAny(text, 'om654', 'om654q'),
+    note: 'Confirma OM654/OM654q, variante y mercado por VIN: cajas y sistemas de emisiones no son iguales en todas las aplicaciones.',
+    items: [
+      item(
+        'om654-scr-nox',
+        'SCR/AdBlue y sensores NOx si equipa',
+        'high',
+        'En diésel modernos, un fallo de SCR/NOx puede activar una cuenta atrás de arranque y generar un coste alto; no todas las variantes llevan el mismo sistema.',
+        'Confirma el equipamiento por VIN. Lee errores de NOx/SCR/AdBlue, historial de avisos y campañas; busca cuenta atrás, cristalización o rellenos frecuentes y pide factura de cualquier reparación.',
+        'Solo aplica a las variantes equipadas con SCR/AdBlue.',
       ),
     ],
   },
@@ -648,6 +1000,28 @@ const ENGINE_PROFILES = [
     ],
   },
   {
+    id: 'psa-dw10-diesel',
+    label: 'PSA/Ford/Toyota 2.0 HDi / BlueHDi DW10',
+    matches: (vehicle, text) => includesAny(text, 'dw10', '2.0 hdi', '2.0 bluehdi', '2.0 blue hdi'),
+    note: 'DW10 cubre varias generaciones, códigos y sistemas de emisiones. Confirma por VIN el motor exacto, distribución y si equipa SCR/AdBlue.',
+    items: [
+      item(
+        'dw10-belt-service',
+        'Distribución: intervalo y sustitución acreditada',
+        'high',
+        'El calendario de la correa cambia según variante y año; una etiqueta no acredita qué piezas se instalaron.',
+        'Pide factura con fecha, km y kit montado. Contrasta por VIN el intervalo de tiempo/km y el alcance (tensor, rodillos y bomba cuando corresponda); presupuesta el cambio si no hay prueba verificable.',
+      ),
+      item(
+        'dw10-dpf-scr',
+        'DPF, EGR y SCR/AdBlue según equipamiento',
+        'high',
+        'En diésel modernos, trayectos cortos y regeneraciones interrumpidas pueden afectar al DPF; SCR/AdBlue no está presente en todas las evoluciones.',
+        'Confirma qué sistemas equipa por VIN. Lee carga y presión diferencial del DPF, regeneraciones y errores de EGR/NOx/AdBlue; busca cuenta atrás de arranque, humo o pérdida de potencia y verifica que no haya anulaciones.',
+      ),
+    ],
+  },
+  {
     id: 'renault-h5ft-12tce',
     label: 'Renault/Nissan 1.2 TCe / DIG-T H5Ft',
     matches: (vehicle, text) => includesAny(text, 'h5ft', '1.2 tce', '1.2tce', '1.2 dig t', '1.2 dig-t', '12 tce'),
@@ -673,6 +1047,83 @@ const ENGINE_PROFILES = [
         'high',
         'Los nombres comerciales se parecen entre generaciones con riesgos distintos; la confirmación de H5Ft es clave.',
         'Verifica código de motor y mercado de origen mediante VIN. Pide facturas de intervenciones de motor y consulta campañas/acciones en la marca antes de valorar el coche.',
+      ),
+    ],
+  },
+  {
+    id: 'ford-ecoboost-15',
+    label: 'Ford 1.5 EcoBoost gasolina',
+    matches: (vehicle, text) => normalize(vehicle.brand).includes('ford') && includesAny(text, '1.5 ecoboost', '15 ecoboost'),
+    note: 'En determinadas unidades 1.5 EcoBoost, años y mercados se han documentado pérdidas de refrigerante internas. Confirma código, fabricación y cualquier intervención por VIN; no generalices a toda la gama.',
+    items: [
+      item(
+        'ecoboost15-coolant-loss',
+        'Pérdida de refrigerante y posible comunicación con cilindros',
+        'critical',
+        'En algunas aplicaciones/años, una pérdida inexplicada de refrigerante puede preceder a daños internos; el nivel correcto en la visita no descarta consumo entre servicios.',
+        'Pide historial de rellenos y reparaciones de culata/bloque. Busca descenso de nivel, humo blanco persistente o fallos de encendido en frío; si hay indicios, solicita prueba de presión y compresión/leak-down antes de comprar.',
+        'Prioridad en ciertas unidades de 2013–2018; verificar código, fecha de fabricación y alcance por VIN.',
+      ),
+      item(
+        'ecoboost15-turbo-ignition',
+        'Turbo, encendido y respuesta bajo carga',
+        'medium',
+        'Tirones o pérdida de potencia pueden proceder de encendido, sobrealimentación u otra causa; no se diagnostica solo por una vuelta corta.',
+        'Prueba aceleración progresiva con motor caliente y revisa fallos de encendido/presión de turbo si aparecen tirones, humo o testigo. Pide diagnosis y presupuesto por escrito ante cualquier desviación.',
+      ),
+    ],
+  },
+  {
+    id: 'ford-ecoblue-20',
+    label: 'Ford 2.0 EcoBlue diésel',
+    matches: (vehicle, text) => normalize(vehicle.brand).includes('ford')
+      && includesAny(text, '2.0 ecoblue', '2.0 ecoblue biturbo', '2.0 ecoblue bi turbo', '20 ecoblue'),
+    note: 'La correa y sus intervalos dependen del modelo, mercado, uso y VIN. Las revisiones de calendario publicadas para algunas Transit/Tourneo no se trasladan automáticamente a toda unidad 2.0 EcoBlue.',
+    items: [
+      item(
+        'ecoblue20-belt-oil',
+        'Correa de distribución y pauta de aceite por VIN',
+        'critical',
+        'En ciertas aplicaciones 2.0 EcoBlue hay correas que trabajan en aceite y Ford ha ajustado calendarios para modelos/mercados concretos; el año por sí solo no determina el intervalo.',
+        'Solicita a Ford el plan de mantenimiento por VIN y contrasta aceite especificado, frecuencia y calendario de la correa. Pide factura detallada de una sustitución previa; si no se acredita el estado o la pauta venció, solicita revisión y presupuesto de especialista.',
+      ),
+      item(
+        'ecoblue20-aftertreatment',
+        'DPF, EGR y SCR/AdBlue según versión',
+        'high',
+        'Uso urbano, regeneraciones incompletas o fallos SCR pueden causar avisos y costes altos en diésel comerciales y SUV.',
+        'Identifica equipamiento por VIN y lee carga/regeneraciones de DPF, errores EGR/NOx/AdBlue y cuenta atrás de arranque. Comprueba respuesta bajo carga y que no haya sistemas anulados.',
+      ),
+      item(
+        'ecoblue20-biturbo',
+        'Segundo turbo y actuadores en versiones BiTurbo',
+        'high',
+        'Las variantes BiTurbo añaden un turbo y actuadores; una pérdida de presión puede activar modo de emergencia.',
+        'Aplica solo si el código confirma BiTurbo. Prueba la transición de carga en frío y caliente y lee códigos/presión solicitada-real si hay humo, silbidos o cortes; pide diagnóstico especializado antes de presupuestar.',
+        'Solo para versiones 2.0 EcoBlue BiTurbo.',
+      ),
+    ],
+  },
+  {
+    id: 'ford-15-tdci-ecoblue',
+    label: 'Ford 1.5 TDCi / EcoBlue',
+    matches: (vehicle, text) => normalize(vehicle.brand).includes('ford')
+      && includesAny(text, '1.5 tdci', '15 tdci', '1.5 ecoblue', '15 ecoblue'),
+    note: 'En esta familia hay variaciones de distribución y emisiones por código/año. Confirma VIN, mercado y calendario; no extrapoles una campaña o síntoma de otra aplicación.',
+    items: [
+      item(
+        'ford15-layout-service',
+        'Identificar distribución y mantenimiento del código exacto',
+        'high',
+        'La denominación 1.5 TDCi/EcoBlue no basta para decidir el diseño de la distribución ni el intervalo.',
+        'Pide plan Ford por VIN, código de motor y facturas de aceite/distribución. Comprueba campañas abiertas y trabajos hechos; si no hay documentación, trata la intervención vencida como coste pendiente.',
+      ),
+      item(
+        'ford15-emissions',
+        'EGR, DPF y AdBlue/NOx si equipa',
+        'medium',
+        'Los sistemas de emisiones cambian según generación y uso previo; un testigo apagado no descarta fallos registrados.',
+        'Comprueba equipamiento por VIN y revisa diagnosis, carga/regeneraciones de DPF y errores EGR/SCR. En unidades urbanas, confirma que no haya regeneraciones frecuentes ni anulaciones.',
       ),
     ],
   },
@@ -731,7 +1182,7 @@ const ENGINE_PROFILES = [
   {
     id: 'ford-powershift',
     label: 'Ford Powershift (código de caja por confirmar)',
-    matches: (vehicle, text) => includesAny(text, 'powershift', '6dct250'),
+    matches: (vehicle, engineText, fullText = '') => includesAny(`${engineText} ${fullText} ${transmissionInspectionText(vehicle)}`, 'powershift', '6dct250'),
     note: '“Powershift” abarca más de una caja. Confirma el código y tipo de embrague por VIN; los síntomas y el riesgo no son iguales en todas.',
     items: [
       item(
@@ -780,6 +1231,50 @@ const ENGINE_PROFILES = [
     ],
   },
   {
+    id: 'jeep-multiair-14',
+    label: 'Fiat/Jeep 1.4 MultiAir gasolina',
+    matches: (vehicle, text) => includesAny(text, '1.4 multiair', '14 multiair', 'multiair turbo', 'multiair ii'),
+    note: 'El módulo MultiAir solo corresponde a ciertas versiones gasolina 1.4. No aplicar al 1.6 MultiJet diésel ni confundirlo con el DDCT.',
+    items: [
+      item(
+        'multiair-module-oil',
+        'Módulo electrohidráulico MultiAir y calidad del aceite',
+        'high',
+        'El accionamiento MultiAir depende del circuito de aceite y puede generar fallos de funcionamiento si el módulo o su alimentación se deterioran.',
+        'Exige historial de cambios de aceite con la especificación indicada para ese motor. En arranque en frío y ralentí, busca fallos de encendido, funcionamiento irregular o testigo motor; escanea códigos y, si aparecen, pide pruebas de actuadores/presión a un especialista antes de sustituir piezas.',
+      ),
+      item(
+        'multiair-turbo-load',
+        'Turbo y respuesta bajo carga',
+        'medium',
+        'Una pérdida de potencia o presión irregular puede proceder del turbo, admisión o encendido y no del módulo MultiAir por sí solo.',
+        'Prueba aceleración progresiva con el motor caliente, observa tirones/humo y lee fallos de encendido y presión solicitada/real si hay síntomas. Revisa facturas de bujías, bobinas y turbo; pide diagnóstico antes de presupuestar.',
+      ),
+    ],
+  },
+  {
+    id: 'renault-r9m-biturbo',
+    label: 'Renault/Nissan 1.6 dCi R9M BiTurbo',
+    matches: (vehicle, text) => includesAny(text, 'r9m') && includesAny(text, 'biturbo', 'twin turbo', 'bi turbo', '160 cv'),
+    note: 'No mezclar R9M BiTurbo con el 1.6 dCi monoturbo. Confirma la versión y potencia por VIN antes de aplicar esta guía.',
+    items: [
+      item(
+        'r9m-biturbo-low-pressure-turbo',
+        'Turbo de baja presión y transición entre turbos',
+        'critical',
+        'En la versión BiTurbo, una pérdida de carga, humo o modo de emergencia puede implicar el turbo de baja presión o su control; el diagnóstico exige revisar el conjunto.',
+        'Prueba aceleración progresiva desde bajas revoluciones hasta carga media/alta, en frío y caliente. Busca silbidos anómalos, humo y cortes; si aparece un síntoma, lee códigos y compara presiones solicitadas/reales y actuadores en un taller especialista. Pide facturas de reparación de los turbos.',
+      ),
+      item(
+        'r9m-biturbo-thermal-history',
+        'Historial térmico y circuito de refrigeración',
+        'high',
+        'Un episodio de sobretemperatura puede dejar daños que no se ven en una comprobación visual breve.',
+        'Comprueba nivel, restos de fuga y temperatura estable tras la prueba. Si hay pérdida de refrigerante, burbujeo o historial de calentón, solicita prueba de presión y valoración de compresión antes de comprar.',
+      ),
+    ],
+  },
+  {
     id: 'renault-k9k',
     label: 'Renault/Nissan 1.5 dCi K9K',
     matches: (vehicle, text) => includesAny(text, 'k9k', '1.5 dci', '1.5 blue dci', '15 dci'),
@@ -809,9 +1304,100 @@ const ENGINE_PROFILES = [
     ],
   },
   {
+    id: 'honda-k20c1-turbo',
+    label: 'Honda 2.0 VTEC Turbo K20C1 (Civic Type R)',
+    matches: (vehicle, text) => normalize(vehicle.brand).includes('honda')
+      && includesAny(text, 'k20c1', '2.0 vtec turbo', '20 vtec turbo'),
+    note: 'K20C1 y las calibraciones/equipos cambian entre FK2, FK8 y FL5. Confirma el código de motor y la especificación de mantenimiento por VIN; los puntos de esta guía son comprobaciones, no fallos atribuidos a todas las unidades.',
+    items: [
+      item(
+        'k20c1-service-oil',
+        'Aceite, intervalos y facturas del motor turbo',
+        'high',
+        'Un historial incompleto o aceite/especificación incorrectos dificultan valorar un motor turbo de altas prestaciones, en especial si se usó con cargas o temperaturas elevadas.',
+        'Contrasta viscosidad/especificación e intervalo con el plan Honda por VIN y mercado. Revisa facturas fechadas, consumo/rellenos declarados y cualquier aviso de presión; si faltan pruebas, incluye mantenimiento preventivo en el coste de compra.',
+      ),
+      item(
+        'k20c1-boost-ignition',
+        'Encendido, admisión y presión de turbo bajo carga',
+        'medium',
+        'Tirones, misfires o presión real distinta de la solicitada pueden tener varias causas y no se detectan necesariamente al ralentí.',
+        'Con diagnosis compatible, lee fallos y contadores de misfire sin borrar códigos. Inspecciona manguitos/uniones de admisión y contrasta presión solicitada/real durante una prueba legal y segura; ante desviaciones, pide valoración Honda antes de fijar el coste.',
+      ),
+    ],
+  },
+  {
+    id: 'hyundai-kia-crdi-u2-u3',
+    label: 'Hyundai/Kia 1.6–1.7 CRDi (U2/U3)',
+    matches: (vehicle, text) => ['hyundai', 'kia'].some((brand) => normalize(vehicle.brand).includes(brand))
+      && includesAny(text, 'u2', 'u3', '1.6 crdi', '1.7 crdi', '16 crdi', '17 crdi'),
+    note: 'U2/U3 y las variantes mild-hybrid 48 V no comparten exactamente equipamiento ni postratamiento. Confirma código, mercado y sistemas presentes por VIN.',
+    items: [
+      item(
+        'hk-crdi-dpf-egr',
+        'DPF, EGR y SCR/AdBlue según generación',
+        'high',
+        'El uso urbano puede dejar regeneraciones incompletas; AdBlue y sensores varían según la versión.',
+        'Lee presión diferencial/carga de DPF, historial de regeneraciones y errores EGR/NOx/AdBlue con diagnosis compatible. Pregunta por tipo de trayecto y revisa que no haya humo, avisos o modificaciones de emisiones.',
+      ),
+      item(
+        'hk-crdi-48v',
+        'Sistema mild-hybrid de 48 V si equipa',
+        'medium',
+        'Una etiqueta ECO no confirma por sí sola el estado de batería, motor-generador o sistema de 48 V.',
+        'Confirma que la unidad sea MHEV por VIN. Escanea BMS/BSG, revisa avisos de carga y prueba arranque/parada y recuperación de energía; no manipules componentes eléctricos sin cualificación.',
+        'Solo para versiones 48 V / MHEV.',
+      ),
+    ],
+  },
+  {
+    id: 'toyota-gd-diesel',
+    label: 'Toyota 1GD / 2GD D-4D diésel',
+    matches: (vehicle, text) => normalize(vehicle.brand).includes('toyota') && includesAny(text, '1gd', '2gd', '1gd ftv', '2gd ftv'),
+    note: 'El 1GD/2GD se monta en vehículos y mercados distintos. DPF, EGR y SCR cambian por año y homologación; confirma el equipamiento y el plan de servicio por VIN.',
+    items: [
+      item(
+        'toyota-gd-dpf-egr',
+        'DPF, EGR y regeneraciones en uso urbano o de trabajo',
+        'high',
+        'Los ciclos cortos y el ralentí prolongado pueden interrumpir regeneraciones; el uso previo importa especialmente en pick-up y SUV diésel.',
+        'Lee carga de hollín/ceniza, presión diferencial, historial de regeneraciones y errores de EGR/SCR. Pregunta por remolque, ralentí y trabajo; revisa que no haya avisos, humo o anulaciones.',
+      ),
+      item(
+        'toyota-gd-service',
+        'Mantenimiento de distribución y sistema de combustible por código',
+        'medium',
+        'La pauta y los componentes auxiliares dependen del motor exacto y el mercado de origen.',
+        'Contrasta por VIN los intervalos de distribución, filtros y combustible. Pide facturas con fecha/km y consulta campañas del mercado correspondiente antes de dar por correcto un historial parcial.',
+      ),
+    ],
+  },
+  {
+    id: 'mazda-skyactiv-d',
+    label: 'Mazda 2.2 Skyactiv-D',
+    matches: (vehicle, text) => normalize(vehicle.brand).includes('mazda') && includesAny(text, '2.2 skyactiv d', '22 skyactiv d', 'skyactiv-d', 'skyactiv diesel'),
+    note: 'La generación y el código cambian el sistema de emisiones y las intervenciones aplicables. Confirma código/mercado y usa un taller Mazda para evaluar valores fuera de rango.',
+    items: [
+      item(
+        'skyactivd-oil-level-dpf',
+        'Nivel de aceite, dilución y regeneraciones DPF',
+        'high',
+        'Regeneraciones frecuentes/interrumpidas pueden diluir el aceite; un nivel anormalmente alto requiere investigar la causa antes de circular o comprar.',
+        'Compara nivel con la marca máxima, olor y fecha/km del último cambio. Solicita diagnosis de carga, presión diferencial y frecuencia de regeneraciones; si el nivel sube o hay avisos, pide análisis de aceite y revisión especializada.',
+      ),
+      item(
+        'skyactivd-intake-egr',
+        'Carbonilla en admisión y funcionamiento EGR',
+        'high',
+        'La acumulación de hollín puede afectar respuesta y emisiones, sobre todo con recorridos cortos.',
+        'Busca ralentí irregular, pérdida de empuje y testigos. Lee valores/errores de EGR, caudal de aire y presión de sobrealimentación; si hay desviaciones, solicita inspección de admisión y presupuesto antes de comprar.',
+      ),
+    ],
+  },
+  {
     id: 'toyota-hsd',
     label: 'Toyota/Lexus híbrido HSD',
-    matches: (vehicle, text) => (includesAny(text, 'toyota', 'lexus') && includesAny(text, 'hybrid', 'hibrido', 'hsd', 'hybrid synergy')),
+    matches: (vehicle, text) => (includesAny(normalize(vehicle.brand), 'toyota', 'lexus') && includesAny(text, 'hybrid', 'hibrido', 'hsd', 'hybrid synergy')),
     note: 'En un híbrido, las comprobaciones de alta tensión deben realizarlas técnicos cualificados; no manipules conectores naranjas ni abras la batería.',
     items: [
       item(
@@ -856,6 +1442,28 @@ const TRANSMISSION_PROFILES = [
     ],
   },
   {
+    id: 'nissan-xtronic',
+    matches: (text) => includesAny(text, 'xtronic', 'x tronic', 'jatco'),
+    label: 'Nissan X-Tronic / CVT Jatco',
+    note: 'X-Tronic no es una caja única: confirma el código de transmisión y el fluido exacto por VIN. No extrapoles la prueba de una CVT a la e-CVT híbrida Toyota/Lexus.',
+    items: [
+      item(
+        'xtronic-fluid-history',
+        'Fluido correcto, historial y temperatura de la CVT',
+        'high',
+        'En una CVT, un fluido fuera de especificación o un servicio omitido puede acelerar el desgaste; la pauta cambia según el código de caja.',
+        'Identifica la transmisión Jatco por VIN y pide factura con fluido especificado, fecha y km. Prueba desde frío hasta temperatura de servicio: aceleración suave y sostenida, marcha atrás y maniobras; busca zumbido, vibración, tirón o revoluciones que suben sin avance proporcional.',
+      ),
+      item(
+        'xtronic-diagnosis',
+        'Diagnosis del módulo de transmisión y prueba en caliente',
+        'high',
+        'Un testigo apagado no descarta códigos guardados ni sobretemperatura registrada en la caja.',
+        'Escanea TCM antes de borrar nada, revisa datos de temperatura/adaptación disponibles y repite la prueba en caliente. Ante zumbidos, tirones o retraso al engranar, solicita informe de especialista CVT y presupuesto previo a la compra.',
+      ),
+    ],
+  },
+  {
     id: 'cvt',
     matches: (text) => includesAny(text, 'cvt', 'x tronic', 'x-tronic', 'multitronic'),
     label: 'Transmisión CVT',
@@ -871,23 +1479,8 @@ const TRANSMISSION_PROFILES = [
     ],
   },
   {
-    id: 'manual',
-    matches: (text) => includesAny(text, 'manual'),
-    label: 'Cambio manual',
-    note: '',
-    items: [
-      item(
-        'gearbox-manual-clutch',
-        'Embrague y volante bimasa si equipa',
-        'medium',
-        'El desgaste se puede manifestar como patinamiento, vibración al salir o golpes al arrancar/apagar.',
-        'Prueba salidas suaves, marcha atrás y aceleración moderada en una marcha larga; escucha golpes al arrancar y apagar. Identifica por VIN si esa versión lleva volante bimasa y pide facturas de sustitución.',
-      ),
-    ],
-  },
-  {
     id: 'automatic',
-    matches: (text) => includesAny(text, 'automatico', 'automatic', 'steptronic', 'tiptronic', '9g tronic', '9g-tronic', '8hp', 'zf'),
+    matches: (text) => includesAny(text, 'steptronic', 'tiptronic', '9g tronic', '9g-tronic', '8hp', 'zf', 'aisin'),
     label: 'Cambio automático',
     note: '“Automático” engloba varias arquitecturas: identifica fabricante/código de caja y pauta de servicio antes de evaluarlo.',
     items: [
@@ -924,11 +1517,12 @@ function vehicleYear(vehicle = {}) {
 
 function inspectionText(vehicle = {}) {
   return normalize([
-    vehicle.id,
-    vehicle.catalogId,
-    vehicle.inspectionPresetId,
     vehicle.brand,
     vehicle.model,
+    vehicle.gen,
+    vehicle.variantKey,
+    vehicle.trim,
+    vehicle.body,
     vehicle.version,
     vehicle.engine,
     vehicle.engineCode,
@@ -937,9 +1531,40 @@ function inspectionText(vehicle = {}) {
     vehicle.year,
     vehicle.firstRegDate,
     vehicle.years?.join(' '),
-    vehicle.reliabilityTitle,
-    vehicle.reliabilityNote,
   ].filter(Boolean).join(' '));
+}
+
+function engineInspectionText(vehicle = {}) {
+  return normalize([
+    vehicle.engineCode,
+    vehicle.engine,
+    vehicle.version,
+  ].filter(Boolean).join(' '));
+}
+
+function transmissionInspectionText(vehicle = {}) {
+  return normalize([
+    vehicle.transmission,
+    vehicle.version,
+    // Some catalogue variants include the gearbox alongside the engine code.
+    vehicle.engine,
+    vehicle.engineCode,
+  ].filter(Boolean).join(' '));
+}
+
+function transmissionMode(vehicle = {}) {
+  const declared = normalize(vehicle.transmission || '');
+  if (includesAny(declared, 'manual', 'cambio manual')) return 'manual';
+  if (includesAny(declared, 'automatic', 'automatico', 'automático', 'dsg', 's tronic', 'cvt', 'ecvt', 'e cvt', 'xtronic', 'steptronic', 'tiptronic', 'powershift', 'dct', 'zf', 'aisin')) return 'automatic';
+  const inferred = transmissionInspectionText(vehicle);
+  if (includesAny(inferred, 'manual', 'cambio manual')) return 'manual';
+  if (includesAny(inferred, 'dsg', 's tronic', 'cvt', 'ecvt', 'e cvt', 'xtronic', 'steptronic', 'tiptronic', 'powershift', 'dct', 'zf', 'aisin')) return 'automatic';
+  return 'unknown';
+}
+
+function appliesToVariant(entry, vehicle = {}) {
+  if (!['gearbox-manual-clutch', 'ea288-dual-mass'].includes(entry.id)) return true;
+  return transmissionMode(vehicle) !== 'automatic';
 }
 
 function displayYear(vehicle = {}) {
@@ -956,13 +1581,22 @@ function getModelProfile(vehicle, text, year) {
 }
 
 function getEngineProfiles(vehicle, text) {
-  return ENGINE_PROFILES.filter((profile) => profile.matches(vehicle, text));
+  const engineText = engineInspectionText(vehicle);
+  return ENGINE_PROFILES.filter((profile) => profile.matches(vehicle, engineText, text));
 }
 
-function getTransmissionProfile(text) {
-  // Priorizar cajas con comprobaciones específicas antes del selector automático.
-  if (includesAny(text, 'powershift', '6dct250')) return null; // tiene guía propia en ENGINE_PROFILES
-  return TRANSMISSION_PROFILES.find((profile) => profile.matches(text)) || null;
+function getTransmissionProfile(vehicle) {
+  const text = transmissionInspectionText(vehicle);
+  // La e-CVT híbrida de Toyota/Lexus es un tren epicicloidal, no una CVT de correa.
+  if (includesAny(text, 'ecvt', 'e cvt', 'e-cvt', 'electric cvt')
+    || (includesAny(normalize(`${vehicle.brand || ''} ${vehicle.fuel || ''}`), 'toyota', 'lexus')
+      && includesAny(text, 'hybrid', 'hibrido', 'hsd'))) return null;
+  // La Powershift dispone de su propia guía de caja.
+  if (includesAny(text, 'powershift', '6dct250')) return null;
+  const profiles = includesAny(text, 'xtronic', 'x tronic', 'jatco')
+    ? TRANSMISSION_PROFILES.filter((profile) => profile.id === 'nissan-xtronic')
+    : TRANSMISSION_PROFILES;
+  return profiles.find((profile) => profile.matches(text)) || null;
 }
 
 /**
@@ -975,8 +1609,15 @@ export function getVehicleInspectionGuide(vehicle = {}) {
   const year = vehicleYear(vehicle);
   const modelProfile = getModelProfile(vehicle, text, year);
   const engineProfiles = getEngineProfiles(vehicle, text);
-  const transmissionProfile = getTransmissionProfile(text);
-  const awd = includesAny(text, '4motion', 'quattro', 'xdrive', '4matic', '4x4', 'awd', 'all wheel drive');
+  const transmissionProfile = getTransmissionProfile(vehicle);
+  const drivetrainText = normalize([
+    vehicle.model,
+    vehicle.version,
+    vehicle.engine,
+    vehicle.engineCode,
+    vehicle.transmission,
+  ].filter(Boolean).join(' '));
+  const awd = includesAny(drivetrainText, '4motion', 'quattro', 'xdrive', '4matic', '4x4', 'awd', 'all wheel drive');
 
   const profiles = [
     ...(modelProfile ? [{ type: 'Modelo', profile: modelProfile, defaultStage: 'engine' }] : []),
@@ -988,15 +1629,17 @@ export function getVehicleInspectionGuide(vehicle = {}) {
   const seen = new Set();
   let sequence = 0;
   const candidates = [
-    ...profiles.flatMap(({ type, profile, defaultStage }) => profile.items.map((entry) => ({
-      ...entry,
-      specific: true,
-      profileType: type,
-      profileLabel: profile.label,
-      defaultStage,
-      sequence: sequence++,
-    }))),
-    ...GENERAL_ITEMS.map((entry) => ({
+    ...profiles.flatMap(({ type, profile, defaultStage }) => profile.items
+      .filter((entry) => appliesToVariant(entry, vehicle))
+      .map((entry) => ({
+        ...entry,
+        specific: true,
+        profileType: type,
+        profileLabel: profile.label,
+        defaultStage,
+        sequence: sequence++,
+      }))),
+    ...GENERAL_ITEMS.filter((entry) => appliesToVariant(entry, vehicle)).map((entry) => ({
       ...entry,
       specific: false,
       profileType: 'General',
@@ -1018,6 +1661,8 @@ export function getVehicleInspectionGuide(vehicle = {}) {
     return { ...stage, items: stageItems };
   }).filter((stage) => stage.items.length > 0);
   const items = groups.flatMap((group) => group.items);
+  const specificItems = items.filter((entry) => entry.specific);
+  const generalItems = items.filter((entry) => !entry.specific);
   const title = [vehicle.brand, vehicle.model, displayYear(vehicle)].filter(Boolean).join(' ').trim();
   const engineName = vehicle.engine || vehicle.engineCode || vehicle.version || '';
   const engineProfile = engineProfiles[0] || null;
@@ -1029,7 +1674,8 @@ export function getVehicleInspectionGuide(vehicle = {}) {
   if (modelProfile && engineProfiles.length) confidence = { label: 'Modelo y motor identificados', tone: 'emerald' };
   else if (modelProfile) confidence = { label: 'Modelo identificado · confirmar motor', tone: 'amber' };
   else if (engineProfiles.length) confidence = { label: 'Familia de motor identificada', tone: 'sky' };
-  else confidence = { label: 'Guía general · falta identificar motor', tone: 'amber' };
+  else if (transmissionProfile || awd) confidence = { label: 'Caja / tracción identificada', tone: 'sky' };
+  else confidence = { label: 'Guía general · falta identificar variante', tone: 'amber' };
 
   const profileKey = [
     modelProfile?.id || 'modelo-general',
@@ -1049,8 +1695,10 @@ export function getVehicleInspectionGuide(vehicle = {}) {
     profileNotes,
     groups,
     items,
+    specificItems,
+    generalItems,
     profileKey,
-    hasSpecificGuidance: Boolean(modelProfile || engineProfiles.length || transmissionProfile),
+    hasSpecificGuidance: specificItems.length > 0,
     note: modelProfile?.note || engineProfile?.note || 'No hay una guía específica identificada para esta combinación. Completa modelo, motor/código y transmisión para afinar los puntos de revisión.',
     reliability: vehicle.reliability,
     reliabilityTitle: vehicle.reliabilityTitle,

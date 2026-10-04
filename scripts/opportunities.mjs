@@ -2,12 +2,18 @@
 // Para cada grupo modelo+generación+combustible+potencia se llevan todos los
 // anuncios al mismo año y km con los coeficientes ajustados, y se calcula el
 // beneficio neto con los gastos reales de importación.
-import { MARKET_OBSERVATIONS, cvOf, fuelOf } from '../erp/src/data/catalog/marketEvidence.js';
+import { MARKET_OBSERVATIONS, cvOf, fuelOf, isEligibleObservation } from '../erp/src/data/catalog/marketEvidence.js';
 import { CANDIDATE_OBSERVATIONS } from '../erp/src/data/catalog/candidateEvidence.js';
 import { existsSync, readFileSync } from 'node:fs';
 // mobile.de (data/mobilede/rows.json, capturado con scripts/mobilede-scrape.mjs): el mayor portal alemán.
 // Se quitan los que ya estaban por autoscout (mismo modelo, año, km y precio).
-const BASE = [...MARKET_OBSERVATIONS, ...CANDIDATE_OBSERVATIONS];
+const RAW_BASE = [...MARKET_OBSERVATIONS, ...CANDIDATE_OBSERVATIONS];
+// Respeta los mismos criterios del catálogo: vendedores particulares ES no son
+// comparables del PVP profesional; en DE sí siguen siendo fuentes válidas de compra.
+const BASE = RAW_BASE.filter(isEligibleObservation);
+const privateSpainPattern = /\bparticular(?:es)?\b|\bprivad[oa]s?\b|\bprivate\b/i;
+const excludedPrivateES = RAW_BASE.filter((o) => o.market === 'ES'
+  && privateSpainPattern.test(`${o.source || ''} ${o.url || ''}`)).length;
 const dupKey = (o) => [o.market, o.gen, o.year, o.km, o.price].join('|');
 const have = new Set(BASE.map(dupKey));
 // Capturas completas hechas en el PC del usuario (cada fila con su URL individual):
@@ -17,6 +23,7 @@ const FILES = process.argv.includes('--sin-mobile') ? [] : ['data/mobilede/rows.
 const MOBILE = FILES.filter((f) => existsSync(f)).flatMap((f) => JSON.parse(readFileSync(f, 'utf8')))
   .filter((r) => !['Seat', 'Cupra'].includes(r[0]))
   .map(([brand, model, gen, market, engine, year, km, price, source, url]) => ({ brand, model, gen, market, kind: 'anuncio', engine, year, km, price, source, url }))
+  .filter(isEligibleObservation)
   .filter((o) => !have.has(dupKey(o)) && (have.add(dupKey(o)), true));
 const O = [...BASE, ...MOBILE];
 import { priceFit } from '../erp/src/data/catalog/priceModel.js';
@@ -115,7 +122,8 @@ const pct = (x) => `${(x * 100).toFixed(0)} %`;
 const verdict = (r) => r.nES < 15 ? '⚪ Faltan ventas ES' : r.pEmp > 2500 && r.pReal > 1000 ? '🟢 Muy rentable' : r.pEmp > 1500 ? '🟡 Rentable' : r.pEmp > 500 ? '🟠 Justo' : '🔴 No compensa';
 
 let md = `# Oportunidades de importación medidas con anuncios reales\n\n`;
-md += `Generado por \`node scripts/opportunities.mjs\` sobre ${O.length} anuncios (${O.filter((o) => o.market === 'DE').length} DE / ${O.filter((o) => o.market === 'ES').length} ES).\n`;
+md += `Generado por \`node scripts/opportunities.mjs\` sobre ${O.length} anuncios elegibles (${O.filter((o) => o.market === 'DE').length} DE / ${O.filter((o) => o.market === 'ES').length} ES).\n`;
+md += `La base contiene ${excludedPrivateES} anuncios ES etiquetados como particulares, excluidos del PVP profesional; en DE se mantienen particulares para estimar oportunidades de compra.\n`;
 md += `Todos los anuncios de cada grupo se llevan al mismo año y km. Beneficio neto en **REBU** tras transporte, ITV, impuesto de matriculación (según CO₂), DGT, gestoría, preparación, garantía e IVA del margen.\n\n`;
 md += `- **Empresa (orden de la tabla):** compras en el 10 % más barato de Alemania (versiones económicas, aunque tengan algún detalle) con un ${Math.round(NEG * 100)} % de descuento negociado por volumen/proveedor habitual, y vendes al precio **mediano** español (menos un 3 % de regateo).\n- **Realista:** compras en el 25 % más barato de Alemania, vendes al precio mediano español.\n- **Medio:** mediana contra mediana.\n- **Prudente:** compras barato y vendes en el 25 % más barato de España (venta rápida).\n- **Fiabilidad** (anuncios de milanuncios/wallapop): ✅ alta ≥ ${HIGH_MIL} · ⚠️ media ${MIN_MIL}-${HIGH_MIL - 1} · ❌ insuficiente < ${MIN_MIL} (no se muestra beneficio).\n\n`;
 md += `| Veredicto | Grupo | Anuncios DE/ES | Año · km | Compra empresa | **Beneficio empresa** | Rentab. empresa | Compra DE (ganga / mediana) | Venta ES (mediana) | ES sobre DE | Realista | Medio | Prudente | Como particular | Rentab. | Milanuncios+Wallapop (n · venta · realista) | Fiabilidad |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n`;

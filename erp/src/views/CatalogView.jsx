@@ -1,51 +1,89 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Database, Download, Calculator, Plus, X, ShieldCheck, AlertTriangle, TrendingUp, Search } from 'lucide-react';
 import { Card, Button, Field, Input, Select, Stat, SectionTitle, Badge, Table, Row, SearchInput, EmptyState, Alert, KeyValueGrid, Modal, cx } from '../components/ui.jsx';
 import { useStore } from '../lib/store.jsx';
 import { eur, eur0, numEs, todayISO, download, toCsv } from '../lib/format.js';
 import { catalogEstimate, profitLevel } from '../domain/catalogEstimate.js';
 import { VEHICLE_DB, RELIABILITY_META, CURATED_COUNT, searchVehicles } from '../data/vehicleDatabase.js';
-import { EVIDENCE_CAPTURED_AT, MARKET_OBSERVATIONS } from '../data/catalog/marketEvidence.js';
-import { calibrationFactors } from '../data/catalog/index.js';
+import { latestEvidenceDate, isEligibleObservation, MARKET_OBSERVATIONS } from '../data/catalog/marketEvidence.js';
 import VehicleInspectionChecklist from '../components/VehicleInspectionChecklist.jsx';
 
 const REL_ORDER = { gold: 0, ok: 1, warn: 2, banned: 3 };
 
 /** De dónde sale cada horquilla, en lenguaje claro. */
 const PRICE_ORIGIN = {
-  regresion: { label: 'Ajustado a anuncios (año, motor y combustible)', tone: 'emerald' },
-  evidencia: { label: 'Contrastado con anuncios', tone: 'emerald' },
-  evidencia_generacion: { label: 'Anuncios de la generación', tone: 'sky' },
-  modelo: { label: 'Estimación del modelo', tone: 'amber' },
+  regresion: { label: 'Regresión de mercado (año, km y motor)', tone: 'emerald' },
+  evidencia: { label: 'Anuncios comparables', tone: 'emerald' },
+  evidencia_generacion: { label: 'Evidencia de la generación', tone: 'sky' },
+  modelo: { label: 'Curva teórica no calibrada', tone: 'amber' },
   manual: { label: 'Sin contrastar', tone: 'rose' },
 };
 
-/** Pie explicativo de cada horquilla: origen, nº de anuncios y km de referencia. */
+/** Pie explicativo de cada horquilla: origen, año/km y tamaño de muestra. */
 function priceHint(v, market) {
   const src = v.priceSource?.[market];
   if (!src) return undefined;
   const meta = PRICE_ORIGIN[src] || PRICE_ORIGIN.modelo;
   const ev = market === 'de' ? v.priceSource?.deEvidence : v.priceSource?.esEvidence;
-  const km = v.kmRef ? ` a ${(v.kmRef / 1000).toFixed(0)}k km` : '';
+  const ref = `ref. ${v.priceSource?.yearRef || '—'} · ${(v.kmRef || 0).toLocaleString('es-ES')} km`;
+  const sample = ev?.n ? `${ev.n} anuncio(s) ${v.variantKey ? 'de la variante' : 'compatibles por generación/motor'}` : 'sin anuncios directos identificados';
+  const caution = ev?.wide ? ' · muestra corta, banda ampliada' : '';
   if (src === 'regresion') {
     const r = v.priceSource?.regression?.[market.toUpperCase()];
-    return `${meta.label}: ${r?.n ?? 0} anuncios, R² ${r?.r2 ?? '—'} · ${EVIDENCE_CAPTURED_AT}`;
+    return `${meta.label}: ajuste conjunto de ${r?.n?.toLocaleString('es-ES') ?? 0} anuncios del mercado · ${sample}${caution} · ${ref}`;
   }
-  if (src === 'evidencia' || src === 'evidencia_generacion') return `${meta.label}: ${ev?.n ?? 0} anuncio(s)${km} · ${EVIDENCE_CAPTURED_AT}`;
+  if (src === 'evidencia' || src === 'evidencia_generacion') {
+    return `${meta.label}: ${sample}${caution} · ${ev?.capturedAt || latestEvidenceDate()} · ${ref}`;
+  }
   if (src === 'manual') return 'Cifra manual, sin anuncios que la respalden';
-  return `${meta.label}${km} (sin anuncios verificados de esta versión)`;
+  return `${meta.label} · ${ref} (sin anuncios verificados de esta variante)`;
 }
 
 export default function CatalogView({ onSimulate }) {
-  const { saveVehicle, toast, tariffs, company } = useStore();
-  // Fase 1 se opera como particular (sin IVA en la venta, IRPF sobre la
-  // ganancia). Se puede cambiar aquí mismo para ver las cuentas de la Fase 2.
-  const [regime, setRegime] = useState(company?.vatRegime === 'general' ? 'general' : 'particular');
+  const { saveVehicle, toast, tariffs, company, ready } = useStore();
+  // Respetar el régimen del perfil: particular usa IRPF; empresa/autónomo usa
+  // su IVA configurado. El selector permite comparar escenarios manualmente.
+  const defaultRegime = company?.legalForm === 'particular'
+    ? 'particular'
+    : company?.vatRegime === 'general' ? 'general' : 'rebu';
+  const [regime, setRegime] = useState(defaultRegime);
+  const [regimeTouched, setRegimeTouched] = useState(false);
+  useEffect(() => {
+    if (ready && !regimeTouched) {
+      setRegime(company?.legalForm === 'particular'
+        ? 'particular'
+        : company?.vatRegime === 'general' ? 'general' : 'rebu');
+    }
+  }, [company?.legalForm, company?.vatRegime, ready, regimeTouched]);
   const est = useMemo(() => {
     const m = new Map();
     return (v) => { if (!m.has(v.id)) m.set(v.id, catalogEstimate(v, tariffs, new Date(), { regime })); return m.get(v.id); };
   }, [tariffs, regime]);
-  const profitOf = (v) => est(v)?.profit ?? -1e9;
+  const prudent = useMemo(() => {
+    const m = new Map();
+    return (v) => {
+      if (!m.has(v.id)) {
+        const stressed = v.dePrice?.length && v.esPrice?.length
+          ? { ...v, dePrice: [v.dePrice[1], v.dePrice[1]], esPrice: [v.esPrice[0], v.esPrice[0]] }
+          : v;
+        m.set(v.id, catalogEstimate(stressed, tariffs, new Date(), { regime }));
+      }
+      return m.get(v.id);
+    };
+  }, [tariffs, regime]);
+  const opportunity = useMemo(() => (v) => {
+    const supported = ['regresion', 'evidencia', 'evidencia_generacion'];
+    const empirical = supported.includes(v.priceSource?.de) && supported.includes(v.priceSource?.es);
+    const mean = est(v);
+    const cautious = prudent(v);
+    if (v.reliability === 'banned') return { qualifies: false, label: 'No recomendable', tone: 'rose', mean, cautious };
+    if (!mean || !cautious) return { qualifies: false, label: 'Sin datos suficientes', tone: 'slate', mean, cautious };
+    if (!empirical) return { qualifies: false, label: 'Precio teórico · validar mercado', tone: 'amber', mean, cautious };
+    if (cautious.profit >= 2000) return { qualifies: true, label: 'Oportunidad · margen prudente ≥2.000 €', tone: 'emerald', mean, cautious };
+    if (cautious.profit > 0) return { qualifies: false, label: 'Margen prudente positivo, pero estrecho', tone: 'amber', mean, cautious };
+    if (mean.profit > 0) return { qualifies: false, label: 'Media positiva; el escenario prudente pierde', tone: 'amber', mean, cautious };
+    return { qualifies: false, label: 'No compensa con estos precios', tone: 'rose', mean, cautious };
+  }, [est, prudent]);
   const [q, setQ] = useState('');
   const [brand, setBrand] = useState('');
   const [segment, setSegment] = useState('');
@@ -53,7 +91,7 @@ export default function CatalogView({ onSimulate }) {
   const [rel, setRel] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [onlyWinners, setOnlyWinners] = useState(false);
-  const [sort, setSort] = useState('relevancia');
+  const [sort, setSort] = useState('margen');
   const [page, setPage] = useState(0);
   const [detail, setDetail] = useState(null);
   const coverage = useMemo(() => ({
@@ -61,10 +99,9 @@ export default function CatalogView({ onSimulate }) {
     evidencia: VEHICLE_DB.filter((v) => v.priceSource?.de === 'evidencia' || v.priceSource?.es === 'evidencia').length,
     generacion: VEHICLE_DB.filter((v) => v.priceSource && ['evidencia_generacion'].includes(v.priceSource.de)).length,
     modelo: VEHICLE_DB.filter((v) => v.priceSource?.de === 'modelo').length,
-    obs: MARKET_OBSERVATIONS.length,
+    obs: MARKET_OBSERVATIONS.filter(isEligibleObservation).length,
+    excluded: MARKET_OBSERVATIONS.filter((v) => !isEligibleObservation(v)).length,
   }), []);
-  const calib = useMemo(() => ({ DE: calibrationFactors().DE.toFixed(3), ES: calibrationFactors().ES.toFixed(3) }), []);
-
   const PER_PAGE = 25;
 
   const brands = useMemo(() => [...new Set(VEHICLE_DB.map((v) => v.brand))].sort(), []);
@@ -78,17 +115,24 @@ export default function CatalogView({ onSimulate }) {
     if (segment) list = list.filter((v) => v.segment === segment);
     if (fuel) list = list.filter((v) => v.fuel === fuel);
     if (rel) list = list.filter((v) => v.reliability === rel);
-    if (onlyWinners) list = list.filter((v) => v.winner);
+    if (onlyWinners) list = list.filter((v) => opportunity(v).qualifies);
     const max = Number(maxPrice);
-    if (max > 0) list = list.filter((v) => (v.dePrice?.[0] ?? 0) <= max);
+    if (max > 0) list = list.filter((v) => (v.dePrice?.[1] ?? Infinity) <= max);
     const sorted = [...list];
     if (sort === 'precio_asc') sorted.sort((a, b) => (a.dePrice?.[0] ?? 1e9) - (b.dePrice?.[0] ?? 1e9));
     else if (sort === 'precio_desc') sorted.sort((a, b) => (b.dePrice?.[1] ?? 0) - (a.dePrice?.[1] ?? 0));
     else if (sort === 'rotacion') sorted.sort((a, b) => (a.rotationDays ?? 999) - (b.rotationDays ?? 999));
-    else if (sort === 'margen') sorted.sort((a, b) => profitOf(b) - profitOf(a));
+    else if (sort === 'margen') sorted.sort((a, b) => {
+      const rank = (v) => {
+        const empirical = ['regresion', 'evidencia', 'evidencia_generacion'].includes(v.priceSource?.de)
+          && ['regresion', 'evidencia', 'evidencia_generacion'].includes(v.priceSource?.es);
+        return empirical ? (prudent(v)?.profit ?? -Infinity) : -Infinity;
+      };
+      return rank(b) - rank(a);
+    });
     else sorted.sort((a, b) => (REL_ORDER[a.reliability] ?? 9) - (REL_ORDER[b.reliability] ?? 9) || (a.brand > b.brand ? 1 : -1));
     return sorted;
-  }, [q, brand, segment, fuel, rel, onlyWinners, maxPrice, sort, est]);
+  }, [q, brand, segment, fuel, rel, onlyWinners, maxPrice, sort, est, prudent, opportunity]);
 
   const pageRows = results.slice(page * PER_PAGE, page * PER_PAGE + PER_PAGE);
   const totalPages = Math.max(1, Math.ceil(results.length / PER_PAGE));
@@ -99,9 +143,9 @@ export default function CatalogView({ onSimulate }) {
     const avgDe = results.length ? results.reduce((a, v) => a + (v.dePrice?.[0] ?? 0), 0) / results.length : 0;
     const withData = results.map((v) => est(v)).filter(Boolean);
     const avgProfit = withData.length ? withData.reduce((a, e) => a + e.profit, 0) / withData.length : 0;
-    const good = withData.filter((e) => e.profit >= 2000).length;
+    const good = results.filter((v) => opportunity(v).qualifies).length;
     return { gold, banned, avgDe, avgProfit, good, count: results.length };
-  }, [results, est]);
+  }, [results, est, opportunity]);
 
   const exportCsv = () => {
     download(`catalogo_${todayISO()}.csv`, toCsv(results, [
@@ -134,7 +178,9 @@ export default function CatalogView({ onSimulate }) {
       demand: v.demand, rotationDays: v.rotationDays, winner: v.winner,
       reliability: v.reliability, reliabilityTitle: v.reliabilityTitle, reliabilityNote: v.reliabilityNote,
       inspectionChecks: {},
-      km: v.kmRef || 120000, costs: { purchase: v.dePrice?.[0] ?? 0 }, purchaseDate: todayISO(),
+      km: v.kmRef || 120000,
+      costs: { purchase: v.dePrice ? Math.round((v.dePrice[0] + v.dePrice[1]) / 2) : 0 },
+      purchaseDate: todayISO(),
       status: 'prospeccion', source: v.source || 'catalog',
     });
     toast(`${v.brand} ${v.model} añadido a la flota como prospección`);
@@ -155,15 +201,17 @@ export default function CatalogView({ onSimulate }) {
     { key: 'de', label: 'Compra en Alemania', align: 'right', render: (v) => <span className="text-xs tabular-nums">{v.dePrice ? `${eur0(v.dePrice[0])} – ${eur0(v.dePrice[1])}` : '—'}</span> },
     { key: 'es', label: 'Venta en Galicia', align: 'right', render: (v) => <span className="text-xs tabular-nums">{v.esPrice ? `${eur0(v.esPrice[0])} – ${eur0(v.esPrice[1])}` : '—'}</span> },
     {
-      key: 'profit', label: 'Ganarías aprox.', align: 'right', render: (v) => {
-        const e = est(v);
+      key: 'profit', label: 'Resultado medio / prudente', align: 'right', render: (v) => {
+        const deal = opportunity(v);
+        const e = deal.mean;
+        const cautious = deal.cautious;
         if (!e) return <span className="text-xs text-slate-500">—</span>;
-        const lvl = profitLevel(e.profit);
+        const lvl = profitLevel(cautious?.profit ?? e.profit);
         const color = { emerald: 'text-emerald-400', amber: 'text-amber-300', rose: 'text-rose-400' }[lvl.tone];
         return (
-          <div title={`Venta media ${eur0(e.sell)} − compra media ${eur0(e.buy)} − gastos ${eur0(e.expenses)} − IVA ${eur0(e.vat)}`}>
+          <div title={`Media: venta ${eur0(e.sell)} − compra ${eur0(e.buy)} − gastos ${eur0(e.expenses)} − tributos estimados ${eur0(e.vat + e.irpf)}. Prudente: compra en el extremo alto de Alemania y venta en el extremo bajo de España.`}>
             <p className={cx('tabular-nums text-sm font-bold', color)}>{eur0(e.profit)}</p>
-            <p className="text-[10px] text-slate-500">{lvl.label}</p>
+            <p className="text-[10px] text-slate-500">prudente {eur0(cautious?.profit ?? e.profit)}</p>
           </div>
         );
       },
@@ -189,15 +237,14 @@ export default function CatalogView({ onSimulate }) {
       />
 
       <Alert tone="warn">
-        <b>Cómo leer los precios.</b> Todas las horquillas están expresadas al <b>kilometraje de referencia</b> de cada
-        generación (se indica en la ficha), no al km del coche que tengas delante. Su origen se declara en cada caso:
-        {' '}<b>ajustado a anuncios</b> ({coverage.regresion} variantes, por regresión sobre {coverage.obs} anuncios
-        reales de Mobile.de, AutoScout24, coches.net, Autocasión, Milanuncios y Kleinanzeigen capturados
-        el {EVIDENCE_CAPTURED_AT}, usando año, motor y km), <b>contrastado directamente</b> ({coverage.evidencia}),
-        {' '}<b>extrapolado de su generación</b> ({coverage.generacion}) o <b>estimado por el modelo</b> ({coverage.modelo}).
-        La auditoría <code>npm run prices:check</code> reproduce los {coverage.obs} anuncios uno a uno: error mediano
-        del 5,5 % y 9 de cada 10 por debajo del 16 %. Aun así, el acabado, el estado y el km real mandan:
-        comprueba siempre el coche concreto antes de pagar.
+        <b>Cómo leer los precios.</b> Las horquillas se normalizan por año y kilometraje de referencia (indicados en cada ficha),
+        pero no sustituyen la valoración del coche concreto. El origen de cada precio está marcado como regresión,
+        anuncios comparables, evidencia de generación o curva teórica no calibrada. La evidencia elegible contiene {coverage.obs} anuncios;
+        {coverage.excluded > 0 ? ` ${coverage.excluded} observaciones están excluidas por variante o calidad y se conservan solo para auditoría.` : ''}
+        {' '}Captura más reciente: {latestEvidenceDate()}. El escenario resta un 8 % supuesto al precio alemán y un 3 % al PVP español (no son datos de cierre).
+        La estimación no incluye el IVA/ITP de compra, que depende de la factura del vendedor; tampoco financiación ni reparaciones
+        superiores a la reserva base. La auditoría <code>npm run prices:check</code> valida fuera de muestra.
+        Revisa el origen fiscal, acabado, año, estado, historial y km antes de pagar.
       </Alert>
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
@@ -205,7 +252,7 @@ export default function CatalogView({ onSimulate }) {
         <Stat label="Motores roca" value={stats.gold} tone="emerald" icon={ShieldCheck} />
         <Stat label="Motores prohibidos" value={stats.banned} tone="rose" icon={AlertTriangle} />
         <Stat label="Compra media (Alemania)" value={eur0(stats.avgDe)} tone="sky" />
-        <Stat label="Ganancia media por coche" value={eur0(stats.avgProfit)} tone="amber" icon={TrendingUp} hint={`${stats.good} modelos dejan más de 2.000 € limpios`} />
+        <Stat label="Resultado medio estimado" value={eur0(stats.avgProfit)} tone="amber" icon={TrendingUp} hint={`${stats.good} oportunidades con evidencia dejan ≥2.000 € en escenario prudente`} />
       </div>
 
       <Card className="p-3">
@@ -217,7 +264,7 @@ export default function CatalogView({ onSimulate }) {
           <Select value={rel} onChange={(v) => { setRel(v); setPage(0); }} placeholder="Toda fiabilidad" options={Object.entries(RELIABILITY_META).map(([k, m]) => ({ value: k, label: m.label }))} />
           <Select
             value={regime}
-            onChange={setRegime}
+            onChange={(value) => { setRegime(value); setRegimeTouched(true); }}
             options={[
               { value: 'particular', label: 'Ganancia: como particular (IRPF)' },
               { value: 'rebu', label: 'Ganancia: REBU (IVA del margen)' },
@@ -231,14 +278,14 @@ export default function CatalogView({ onSimulate }) {
               { value: 'relevancia', label: 'Orden: fiabilidad' },
               { value: 'precio_asc', label: 'Orden: precio ↑' },
               { value: 'precio_desc', label: 'Orden: precio ↓' },
-              { value: 'margen', label: 'Orden: más ganancia' },
+              { value: 'margen', label: 'Orden: margen prudente con evidencia' },
               { value: 'rotacion', label: 'Orden: venta más rápida' },
             ]}
           />
           <Field label="Compra máxima en Alemania"><Input type="number" step="1000" value={maxPrice} onChange={(v) => { setMaxPrice(v); setPage(0); }} placeholder="Sin límite" /></Field>
           <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer self-end pb-2">
             <input type="checkbox" checked={onlyWinners} onChange={(e) => { setOnlyWinners(e.target.checked); setPage(0); }} className="w-4 h-4 rounded border-slate-600 bg-slate-900 text-amber-500" />
-            Solo oportunidades (alta demanda y motor fiable)
+            Solo oportunidades (evidencia DE/ES y margen prudente ≥2.000 €)
           </label>
         </div>
       </Card>
@@ -296,7 +343,7 @@ export default function CatalogView({ onSimulate }) {
                 { label: 'CO₂', value: `${detail.co2 ?? '—'} g/km`, hint: detail.co2 <= 120 ? 'Exento de IEDMT' : undefined },
                 { label: 'Etiqueta DGT', value: detail.badge || 'Sin etiqueta' },
                 { label: 'Cambio', value: detail.transmission || '—' },
-                { label: 'Precio nuevo (tablas)', value: detail.newPrice ? eur0(detail.newPrice) : '—' },
+                { label: 'PVP nuevo de referencia', value: detail.newPrice ? eur0(detail.newPrice) : '—', hint: 'Dato orientativo del catálogo; confirma el valor de tablas por variante/VIN para el Modelo 576.' },
                 {
                   label: 'Compra Alemania',
                   value: detail.dePrice ? `${eur0(detail.dePrice[0])} – ${eur0(detail.dePrice[1])}` : '—',
@@ -316,14 +363,14 @@ export default function CatalogView({ onSimulate }) {
                 <p className="text-[11px] text-slate-500 mt-1">Rotación prevista: {detail.rotationDays ? `${detail.rotationDays} días` : '—'}</p>
               </Card>
               <Card className="p-3">
-                <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Ganarías aprox.</p>
-                <p className={cx('text-xl font-extrabold mt-1', { emerald: 'text-emerald-400', amber: 'text-amber-300', rose: 'text-rose-400', slate: 'text-slate-300' }[profitLevel(est(detail)?.profit).tone])}>{est(detail) ? eur0(est(detail).profit) : '—'}</p>
-                <p className="text-[11px] text-slate-500 mt-1">Limpio, con gastos e impuestos descontados ({regime === 'particular' ? 'particular: IRPF' : regime === 'general' ? 'régimen general: IVA 21 %' : 'REBU: IVA sobre el margen'})</p>
+                <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Resultado estimado</p>
+                <p className={cx('text-xl font-extrabold mt-1', { emerald: 'text-emerald-400', amber: 'text-amber-300', rose: 'text-rose-400', slate: 'text-slate-300' }[profitLevel(opportunity(detail).cautious?.profit ?? opportunity(detail).mean?.profit).tone])}>{opportunity(detail).mean ? eur0(opportunity(detail).mean.profit) : '—'}</p>
+                <p className="text-[11px] text-slate-500 mt-1">Prudente: {opportunity(detail).cautious ? eur0(opportunity(detail).cautious.profit) : '—'} · {regime === 'particular' ? 'incluye IRPF orientativo' : regime === 'general' ? 'IVA de salida estimado, sin deducción de IVA soportado' : 'resta IVA REBU; antes de IRPF/IS'}</p>
               </Card>
               <Card className="p-3">
-                <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Veredicto</p>
-                <p className={cx('text-xl font-extrabold mt-1', detail.winner ? 'text-emerald-400' : 'text-slate-300')}>{detail.winner ? 'Oportunidad' : 'Normal'}</p>
-                <p className="text-[11px] text-slate-500 mt-1">{detail.winner ? 'Alta demanda y motor fiable' : detail.reliability === 'banned' ? 'Motor problemático: no importar' : 'Analiza caso por caso'}</p>
+                <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Veredicto comercial</p>
+                <p className={cx('text-xl font-extrabold mt-1', { emerald: 'text-emerald-400', amber: 'text-amber-300', rose: 'text-rose-400', slate: 'text-slate-300' }[opportunity(detail).tone])}>{opportunity(detail).qualifies ? 'Oportunidad prudente' : 'No priorizar'}</p>
+                <p className="text-[11px] text-slate-500 mt-1">{opportunity(detail).label}</p>
               </Card>
             </div>
             {est(detail) && (
@@ -343,12 +390,15 @@ export default function CatalogView({ onSimulate }) {
                   )}
                   <div className="flex justify-between border-t border-slate-700 pt-1 font-bold"><span>= Te queda limpio</span><span>{eur0(est(detail).profit)}</span></div>
                 </div>
-                <p className="text-[11px] text-slate-500 mt-2">Precios medios de mercado a {detail.kmRef ? `${detail.kmRef.toLocaleString('es-ES')} km` : 'su km de referencia'} (no el más barato ni el más caro). Los gastos salen de Ajustes → Tarifas.</p>
+                <p className="text-[11px] text-slate-500 mt-2">Precios medios de mercado a {detail.kmRef ? `${detail.kmRef.toLocaleString('es-ES')} km` : 'su km de referencia'} (no el más barato ni el más caro). Incluye logística, reserva base, ITV/ficha, IEDMT, DGT, IVTM prorrateado, seguro de stock por rotación, preparación, garantía y anuncio, según Ajustes → Tarifas.</p>
               </Card>
             )}
+            <Alert tone="warn">
+              No se incluye el impuesto de compra: ITP, IVA intracomunitario o tratamiento del vendedor privado/REBU dependen de la factura y de quién compra. En régimen general, este resumen tampoco estima el IVA soportado deducible; no incluye financiación ni averías por encima de la reserva base. Confirma todo en el simulador y con asesoría antes de comprometer la compra.
+            </Alert>
             <VehicleInspectionChecklist vehicle={{ ...detail, year: detail.years?.[0] || detail.years?.[1] }} readOnly />
             <Alert tone="info">
-              Para cerrar la operación, abre el <b>simulador</b>: calculará el IEDMT exacto según el CO₂, el ITP o el IVA según quién te venda, las tasas de la DGT, el IVTM de A Coruña y el precio mínimo al que debes vender para ganar lo que quieres.
+              Para cerrar la operación, abre el <b>simulador</b>: recalcula IEDMT según CO₂ y valor de referencia introducido, ITP o IVA según el vendedor, tasas DGT, IVTM de A Coruña y precio mínimo de venta. Confirma los datos por VIN/factura y con asesoría fiscal.
             </Alert>
           </div>
         )}

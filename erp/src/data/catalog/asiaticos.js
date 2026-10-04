@@ -315,6 +315,14 @@ export const ASIATICOS = [
     ],
   },
   {
+    b: 'Honda', m: 'Civic Type R', seg: 'Compacto deportivo', dmd: 1.12, body: 'Hatchback 5 puertas',
+    g: [
+      ['Civic Type R FK2 310 manual', 2016, 2017, 37000, [['hn20vtec310', 170, { name: '2.0 VTEC Turbo 310 CV Type R GT', variantKey: 'honda-civic-type-r-fk2-310-manual', years: [2016, 2017] }]]],
+      ['Civic Type R FK8 320 manual', 2017, 2021, 41600, [['hn20vtec320', 177, { name: '2.0 VTEC Turbo 320 CV Type R GT', variantKey: 'honda-civic-type-r-fk8-320-manual' }]]],
+      ['Civic Type R FL5 329 manual', 2023, 2026, 58850, [['hn20vtec329', 186, { name: '2.0 VTEC Turbo 329 CV Type R', variantKey: 'honda-civic-type-r-fl5-329-manual', years: [2023, 2026] }]]],
+    ],
+  },
+  {
     b: 'Honda', m: 'HR-V', seg: 'B-SUV', dmd: 1.02,
     g: [
       ['HR-V III', 2021, 2025, 32500, [['hn15hev131', 112]]],

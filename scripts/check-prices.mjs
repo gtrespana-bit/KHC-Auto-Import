@@ -16,23 +16,28 @@ import {
   powerFactor,
   priceAt,
 } from '../erp/src/data/catalog/index.js';
-import { predictPrice } from '../erp/src/data/catalog/priceModel.js';
+import { fitMarket, predictPrice } from '../erp/src/data/catalog/priceModel.js';
 import { priceFit } from '../erp/src/data/catalog/priceModel.js';
 import {
   MARKET_OBSERVATIONS,
   evidenceStats,
   cvOf,
   fuelOf,
+  isEligibleObservation,
+  matchesVariant,
   normalizeKm,
-  EVIDENCE_CAPTURED_AT,
+  latestEvidenceDate,
   PURCHASE_DISCOUNT,
   KM_HALFLIFE,
 } from '../erp/src/data/catalog/marketEvidence.js';
+import { PERFORMANCE_MARKET_OBSERVATIONS, PERFORMANCE_VARIANT_PROFILES } from '../erp/src/data/catalog/performanceEvidence.js';
 import { CURATED_DB, CURATED_RECONCILED } from '../erp/src/data/vehicleDatabase.js';
 import { catalogEstimate } from '../erp/src/domain/catalogEstimate.js';
+import { DEFAULT_TARIFFS } from '../erp/src/domain/rates.js';
 
 const eur = (n) => `${Math.round(n).toLocaleString('es-ES')} €`;
 const pct = (n) => `${(n * 100).toFixed(1).replace('.', ',')} %`;
+const SALE_DISCOUNT_PCT = Number(DEFAULT_TARIFFS.rebaja_venta_pct) || 0;
 
 let failures = 0;
 let warnings = 0;
@@ -52,21 +57,71 @@ const mediana = (xs) => {
  * modelo, generación, año, combustible y potencia, con km parecidos, y toma la
  * mediana del cociente. Es la referencia contra la que se contrasta el modelo.
  */
-function measuredEsDe() {
-  const de = MARKET_OBSERVATIONS.filter((o) => o.market === 'DE' && o.kind === 'anuncio');
-  const es = MARKET_OBSERVATIONS.filter((o) => o.market === 'ES' && o.kind === 'anuncio');
+function measuredEsDe(observations = MARKET_OBSERVATIONS) {
+  const de = observations.filter((o) => o.market === 'DE' && o.kind === 'anuncio' && isEligibleObservation(o));
+  const es = observations.filter((o) => o.market === 'ES' && o.kind === 'anuncio' && isEligibleObservation(o));
   const ratios = [];
   for (const e of es) {
-    for (const d of de) {
-      if (d.brand !== e.brand || d.model !== e.model || d.gen !== e.gen) continue;
-      if (d.year !== e.year || Math.abs(d.km - e.km) > 15000) continue;
-      if ((fuelOf(d) || 'x') !== (fuelOf(e) || 'x')) continue;
+    const matches = de.filter((d) => {
+      if (d.brand !== e.brand || d.model !== e.model || d.gen !== e.gen) return false;
+      if (d.year !== e.year || Math.abs(d.km - e.km) > 15000) return false;
+      // Sólo identidad exacta: los datos legacy sin acabado/carrocería/caja no
+      // se presentan como pares del mismo coche.
+      if (e.variantKey || d.variantKey) {
+        if (!e.variantKey || d.variantKey !== e.variantKey) return false;
+      } else if (!e.trim || !d.trim || !e.body || !d.body || !e.transmission || !d.transmission) return false;
+      if (d.trim !== e.trim || d.body !== e.body || d.transmission !== e.transmission) return false;
+      if ((fuelOf(d) || 'x') !== (fuelOf(e) || 'x')) return false;
       const cd = cvOf(d); const ce = cvOf(e);
-      if (cd && ce && Math.abs(cd - ce) > 25) continue;
-      ratios.push(e.price / d.price);
-    }
+      return cd !== null && ce !== null && cd === ce;
+    });
+    if (!matches.length) continue;
+    const deAtSpanishKm = matches.map((d) => normalizeKm(d.price, d.km, e.km));
+    ratios.push(e.price / mediana(deAtSpanishKm));
   }
   return { ratio: mediana(ratios), n: ratios.length };
+}
+
+/**
+ * Contrastes observados sin curva temporal global: cada PVP profesional ES se
+ * compara con todos los anuncios DE compatibles del mismo año y a ≤25.000 km.
+ * La mediana DE evita que elegir solo el anuncio con km más próximos sesgue el
+ * resultado; las puntas DE conservan la sensibilidad de compra visible.
+ */
+function matchedPerformancePairs(profile, maxKmGap = 25000) {
+  const rows = PERFORMANCE_MARKET_OBSERVATIONS.filter((o) => o.variantKey === profile.variantKey
+    && o.kind === 'anuncio' && isEligibleObservation(o) && matchesVariant(o, profile));
+  const de = rows.filter((o) => o.market === 'DE');
+  const es = rows.filter((o) => o.market === 'ES');
+  const pairs = [];
+  for (const e of es) {
+    const matches = de.filter((d) => d.year === e.year && Math.abs(d.km - e.km) <= maxKmGap
+      && d.variantKey === e.variantKey && (fuelOf(d) || 'x') === (fuelOf(e) || 'x'));
+    if (!matches.length) continue;
+    const prices = matches.map((d) => d.price);
+    const kmGaps = matches.map((d) => Math.abs(d.km - e.km));
+    pairs.push({
+      es: e,
+      deMatches: matches,
+      dePrice: mediana(prices),
+      dePriceMin: Math.min(...prices),
+      dePriceMax: Math.max(...prices),
+      kmGap: mediana(kmGaps),
+    });
+  }
+  return pairs.sort((a, b) => a.es.year - b.es.year || a.es.km - b.es.km || a.es.price - b.es.price);
+}
+
+function estimateMatchedPerformancePair(vehicle, pair, buyPrice = pair.dePrice, buyDiscount = PURCHASE_DISCOUNT) {
+  const negotiatedBuy = Math.round(buyPrice * (1 - buyDiscount));
+  return catalogEstimate({
+    ...vehicle,
+    dePrice: [negotiatedBuy, negotiatedBuy],
+    esPrice: [pair.es.price, pair.es.price],
+    // Impuestos por año de la pareja observada; no se extrapola al año medio
+    // de la generación ni se reajustan precios por edad/km.
+    priceSource: { ...vehicle.priceSource, yearRef: pair.es.year },
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -93,6 +148,80 @@ section('1. La evidencia está bien formada');
   });
   if (unknown.length) fail(`evidencia apuntando a generaciones inexistentes: ${unknown.join(', ')}`);
   else ok('toda la evidencia encaja con una generación real del catálogo');
+
+  const duplicateListings = [...new Set(MARKET_OBSERVATIONS.map((o) => o.listingId).filter(Boolean))]
+    .filter((id) => MARKET_OBSERVATIONS.filter((o) => o.listingId === id).length > 1);
+  if (duplicateListings.length) fail(`${duplicateListings.length} UUID de anuncio repetidos: ${duplicateListings.slice(0, 3).join(', ')}`);
+  else ok('no hay anuncios AutoScout24 repetidos por UUID');
+
+  const exclusionsWithoutReason = MARKET_OBSERVATIONS.filter((o) => o.eligible === false && !o.eligibilityReason);
+  if (exclusionsWithoutReason.length) fail(`${exclusionsWithoutReason.length} observaciones excluidas sin motivo documentado`);
+  else ok('todas las exclusiones guardan el motivo de calidad/variante');
+  const abnormalCondition = /(motorschaden|engine[-_ ]damage|unfallwagen|unfallfahrzeug|schaden-bitte-lesen|zerkratzt|hagelschaden|hail[-_ ]damage|defekt|beschädigt|beschadigt|not[-_ ]?lauf|notlauf|laeuft-unruhig|bastlerfahrzeug|teileträger|teiletraeger|rollstuhl|behindert|wheelchair)/i;
+  const adapted = MARKET_OBSERVATIONS.filter((o) => /rollstuhl|behindert|wheelchair/i.test(`${o.source || ''} ${o.url || ''}`));
+  const adaptedIncluded = adapted.filter(isEligibleObservation);
+  if (adaptedIncluded.length) fail(`${adaptedIncluded.length} vehículos con adaptación de movilidad mezclados en las referencias estándar`);
+  else if (adapted.length) ok(`${adapted.length} vehículos con adaptación de movilidad excluidos de las referencias estándar`);
+  const visibleDamage = MARKET_OBSERVATIONS.filter((o) => isEligibleObservation(o)
+    && abnormalCondition.test(`${o.url || ''} ${o.note || ''}`));
+  if (visibleDamage.length) fail(`${visibleDamage.length} anuncios activos indican avería, daño o adaptación especial: ${visibleDamage.slice(0, 3).map((o) => o.url).join('; ')}`);
+  else ok('no quedan anuncios activos con indicios textuales de daños, averías o adaptaciones especiales');
+
+  const privateEs = MARKET_OBSERVATIONS.filter((o) => o.market === 'ES'
+    && /\bparticular(?:es)?\b|\bprivad[oa]s?\b|\bprivate\b/i.test(`${o.source || ''} ${o.url || ''} ${o.note || ''} ${o.seller || ''}`));
+  const privateEsIncluded = privateEs.filter(isEligibleObservation);
+  if (privateEsIncluded.length) fail(`${privateEsIncluded.length} anuncios ES de particulares contaminan el PVP profesional`);
+  else if (privateEs.length) ok(`${privateEs.length} anuncios ES identificados como particulares quedan fuera del PVP profesional`);
+  const germanPrivateProbe = { market: 'DE', price: 10000, year: 2018, km: 120000, engine: '2.0 TDI 150 CV', source: 'prueba (particular)' };
+  if (isEligibleObservation(germanPrivateProbe)) ok('los anuncios de particulares DE siguen disponibles para el coste de compra');
+  else fail('la exclusión de vendedores particulares debe aplicarse solo al PVP ES');
+  const spanishPrivateNoteProbe = { market: 'ES', price: 10000, year: 2018, km: 120000, engine: '2.0 TSI 200 CV', source: 'AutoScout24.es', note: 'Particular; vendedor no profesional' };
+  if (!isEligibleObservation(spanishPrivateNoteProbe)) ok('un vendedor particular detectado solo en note queda fuera del PVP ES');
+  else fail('isEligibleObservation debe leer note al filtrar vendedores particulares ES');
+
+  const sparseProfile = PERFORMANCE_VARIANT_PROFILES.golf230;
+  const sparseObservation = {
+    ...sparseProfile, market: 'DE', kind: 'anuncio', listingId: 'synthetic-sparse-year-probe',
+    year: 2016, km: 80000, price: 20000, source: 'prueba sintética', url: 'https://example.invalid/listing',
+    observedAt: '2026-10-04', eligible: true,
+  };
+  const sparseStats = evidenceStats(sparseProfile.brand, sparseProfile.model, sparseProfile.gen, 'DE', 100000,
+    sparseProfile.cv, sparseProfile, { observations: [sparseObservation], yearRef: 2026, yearCoef: 1, kmCoef: 0 });
+  const expectedSparsePrice = Math.round(normalizeKm(20000, 80000, 100000));
+  if (sparseStats?.normalization === 'km-only; year kept in observed sample'
+    && sparseStats.median === expectedSparsePrice) ok('una muestra exacta de 1 anuncio normaliza solo km e ignora el ajuste de año global');
+  else fail('las muestras deportivas escasas deben conservar el año y normalizar solo km');
+
+  for (const market of ['DE', 'ES']) {
+    const fit = priceFit(market);
+    const expected = MARKET_OBSERVATIONS.filter((o) => o.market === market && isEligibleObservation(o)).length;
+    if (!fit || fit.nEligible !== expected) fail(`el ajuste ${market} usa ${fit?.nEligible ?? 0}/${expected} observaciones elegibles`);
+    else ok(`el ajuste ${market} excluye correctamente las filas no elegibles (${expected} válidas)`);
+  }
+
+  const profileFailures = [];
+  for (const profile of Object.values(PERFORMANCE_VARIANT_PROFILES)) {
+    if (profile.years?.[0] < 2016 || profile.years?.[1] > 2026) {
+      profileFailures.push(`${profile.variantKey}: ventana deportiva fuera de 2016–2026`);
+    }
+    const rows = GENERATED_DB.filter((v) => v.variantKey === profile.variantKey);
+    if (rows.length !== 1) {
+      profileFailures.push(`${profile.variantKey}: ${rows.length} fichas del catálogo`);
+      continue;
+    }
+    const catalogRow = rows[0];
+    const observations = MARKET_OBSERVATIONS.filter((o) => o.variantKey === profile.variantKey);
+    if (!observations.length) profileFailures.push(`${profile.variantKey}: sin anuncios trazados`);
+    for (const o of observations) {
+      if (!matchesVariant(o, profile)) profileFailures.push(`${o.listingId}: no cumple perfil ${profile.variantKey}`);
+      if (o.year < catalogRow.years[0] || o.year > catalogRow.years[1]) profileFailures.push(`${o.listingId}: año fuera de ${catalogRow.years.join('-')}`);
+      if (profile.variantKey === 'honda-civic-type-r-fk2-310-manual' && o.year < 2016) {
+        profileFailures.push(`${o.listingId}: FK2 2015 fuera de la ventana de diez años`);
+      }
+    }
+  }
+  if (profileFailures.length) fail(`${profileFailures.length} incoherencias en perfiles deportivos: ${profileFailures.slice(0, 4).join('; ')}`);
+  else ok(`${Object.keys(PERFORMANCE_VARIANT_PROFILES).length} perfiles deportivos aparecen una sola vez y respetan año/acabado/carrocería/cambio/potencia`);
 
   // La normalización por kilometraje tiene que ir en la dirección correcta:
   // llevar un coche de 70.000 km a 135.000 km le RESTA valor.
@@ -125,9 +254,9 @@ section('1. La evidencia está bien formada');
       + outOfRange.slice(0, 4).map((o) => `${o.brand} ${o.model} ${o.year} (${o.gen})`).join(', '));
   } else ok('todos los anuncios caen dentro de los años de su generación');
 
-  // Si fuelOf() no reconoce la nomenclatura del anuncio, la observación se
-  // agrupa aparte y ninguna sonda del catálogo la encuentra: el modelo cae a
-  // la curva teórica sin avisar. Dos casos reales ya pasaron («T-GDi», «GLP»).
+  // Si fuelOf() no reconoce combustible, el anuncio queda fuera de los ajustes
+  // y comparaciones para no mezclar motores. Se informa la pérdida de cobertura;
+  // los casos recuperables se normalizan con reglas específicas (T-GDi, GLP).
   const fuelMismatch = MARKET_OBSERVATIONS.filter((o) => {
     const f = fuelOf(o);
     const set = genFuels.get(`${o.brand}|${o.model}|${o.gen}`);
@@ -139,7 +268,7 @@ section('1. La evidencia está bien formada');
   } else ok('el combustible detectado en cada anuncio existe en su generación');
 
   const sinFuel = MARKET_OBSERVATIONS.filter((o) => !fuelOf(o));
-  if (sinFuel.length) warn(`${sinFuel.length} anuncios sin combustible reconocible (se agrupan aparte): `
+  if (sinFuel.length) warn(`${sinFuel.length} observaciones sin combustible reconocible quedan excluidas de bandas y ajustes: `
     + sinFuel.slice(0, 3).map((o) => o.engine).join(', '));
 
   // Un anuncio fuera del sobre del ajuste no se puede reproducir: priceAt()
@@ -160,15 +289,15 @@ section('2. Coherencia interna del catálogo generado');
   const broken = GENERATED_DB.filter((v) => {
     const [d0, d1] = v.dePrice;
     const [e0, e1] = v.esPrice;
-    return !(d0 > 0 && d0 <= d1 && e0 > 0 && e0 <= e1 && e0 >= d0);
+    return !(d0 > 0 && d0 <= d1 && e0 > 0 && e0 <= e1);
   });
-  if (broken.length) fail(`${broken.length} fichas con horquillas incoherentes: ${broken.slice(0, 3).map((v) => v.id).join(', ')}`);
-  else ok(`${GENERATED_DB.length} fichas con horquillas ordenadas y DE ≤ ES`);
+  if (broken.length) fail(`${broken.length} fichas con horquillas inválidas: ${broken.slice(0, 3).map((v) => v.id).join(', ')}`);
+  else ok(`${GENERATED_DB.length} fichas con horquillas positivas y ordenadas`);
 
-  // Comprar más caro de lo que se vende no tiene sentido.
-  const loss = GENERATED_DB.filter((v) => (v.dePrice[0] + v.dePrice[1]) / 2 >= (v.esPrice[0] + v.esPrice[1]) / 2);
-  if (loss.length) fail(`${loss.length} fichas donde el precio medio de compra ≥ el de venta: ${loss.slice(0, 3).map((v) => v.id).join(', ')}`);
-  else ok('ninguna ficha se compra por encima de su precio de venta');
+  // Que el precio de venta sea menor que el de compra puede ser real. No se
+  // altera ni se convierte en fallo: es una operación que no conviene importar.
+  const noSpread = GENERATED_DB.filter((v) => (v.dePrice[0] + v.dePrice[1]) / 2 >= (v.esPrice[0] + v.esPrice[1]) / 2);
+  console.log(`    ${noSpread.length} fichas con venta media ≤ compra media (sin arbitraje antes de gastos)`);
 
   // Dentro de una generación, más potencia no puede valer menos.
   let inversions = 0;
@@ -200,44 +329,80 @@ section('2. Coherencia interna del catálogo generado');
 }
 
 // ---------------------------------------------------------------------------
-section('3. Contraste anuncio por anuncio');
+section('3. Validación cruzada por anuncio (5 pliegues, sin fuga de datos)');
 // ---------------------------------------------------------------------------
 {
-  // La prueba de verdad: para cada anuncio real, ¿qué precio daría el sistema
-  // para ESE coche (su año y sus km)? No se comparan agregados, se comparan
-  // los 139 coches uno a uno.
-  const errs = [];
-  for (const o of MARKET_OBSERVATIONS) {
-    const p = priceAt({ brand: o.brand, model: o.model, gen: o.gen, cv: cvOf(o), fuel: fuelOf(o), market: o.market, year: o.year, km: o.km });
-    if (!p) continue;
-    const target = o.market === 'DE' ? o.price * (1 - PURCHASE_DISCOUNT) : o.price;
-    // En compra se compara contra el precio de anuncio menos el descuento,
-    // porque eso es lo que el catálogo considera coste de compra.
-    const ref = o.market === 'DE' ? o.price : o.price;
-    const dev = (p.mid - ref) / ref;
-    errs.push({ id: `${o.brand} ${o.model} ${o.year} ${o.km} km`, market: o.market, dev, mid: p.mid, ref, source: p.source });
+  const eligibleRows = MARKET_OBSERVATIONS.filter(isEligibleObservation);
+  const FOLDS = 5;
+  const stableFold = (o) => {
+    // Agrupa UUID distintos con mismo modelo/mercado/año y kilometraje casi
+    // idéntico (posibles anuncios replicados del mismo stock) en un solo pliegue.
+    const identity = [o.brand, o.model, o.gen, o.market, o.year, Math.round(o.km / 1000)].join('|');
+    let hash = 2166136261;
+    for (let i = 0; i < identity.length; i += 1) hash = Math.imul(hash ^ identity.charCodeAt(i), 16777619);
+    return (hash >>> 0) % FOLDS;
+  };
+  const folds = Array.from({ length: FOLDS }, (_, fold) => ({
+    rows: eligibleRows.filter((o) => stableFold(o) !== fold),
+    fits: {},
+  }));
+  for (const fold of folds) {
+    for (const market of ['DE', 'ES']) fold.fits[market] = fitMarket(market, fold.rows);
   }
-  if (errs.length < MARKET_OBSERVATIONS.length * 0.8) {
-    fail(`sólo ${errs.length} de ${MARKET_OBSERVATIONS.length} anuncios tienen precio calculable`);
-  } else ok(`${errs.length} de ${MARKET_OBSERVATIONS.length} anuncios contrastados individualmente`);
+
+  const errs = [];
+  let unpriced = 0;
+  for (const o of eligibleRows) {
+    const foldIndex = stableFold(o);
+    const fold = folds[foldIndex];
+    const fit = fold.fits[o.market];
+    const prediction = priceAt({
+      brand: o.brand, model: o.model, gen: o.gen, cv: cvOf(o), fuel: fuelOf(o),
+      market: o.market, year: o.year, km: o.km, variantKey: o.variantKey || null,
+    }, {
+      purchase: o.market === 'DE',
+      fit,
+      observations: fold.rows,
+    });
+    if (!prediction) { unpriced += 1; continue; }
+    const ref = o.market === 'DE' ? o.price * (1 - PURCHASE_DISCOUNT) : o.price;
+    const dev = (prediction.mid - ref) / ref;
+    errs.push({
+      id: `${o.brand} ${o.model} ${o.year} ${o.km} km`, market: o.market,
+      dev, mid: prediction.mid, ref, source: prediction.source,
+    });
+  }
+
+  console.log(`    holdout evaluados: ${errs.length}/${eligibleRows.length}; sin comparable estricto: ${unpriced}`);
+  if (errs.length < eligibleRows.length * 0.80) {
+    fail(`sólo ${errs.length} de ${eligibleRows.length} anuncios elegibles tienen predicción holdout`);
+  } else ok(`${errs.length} anuncios comparados fuera del pliegue de entrenamiento`);
 
   const abs = errs.map((e) => Math.abs(e.dev)).sort((a, b) => a - b);
-  const mediana = abs[Math.floor(abs.length / 2)];
-  const p90 = abs[Math.floor(abs.length * 0.9)];
-  const peor = [...errs].sort((a, b) => Math.abs(b.dev) - Math.abs(a.dev))[0];
-  console.log(`    error medio absoluto: ${pct(abs.reduce((a, b) => a + b, 0) / abs.length)}`);
-  console.log(`    error mediano: ${pct(mediana)} · percentil 90: ${pct(p90)}`);
-  console.log(`    peor caso: ${peor.id} (${peor.market}) catálogo ${eur(peor.mid)} vs anuncio ${eur(peor.ref)} → ${pct(peor.dev)}`);
-  if (mediana > 0.10) fail(`el error mediano frente a los anuncios es ${pct(mediana)} (límite 10 %)`);
-  else ok(`el catálogo reproduce los anuncios con un error mediano del ${pct(mediana)}`);
-  if (p90 > 0.25) fail(`el percentil 90 del error es ${pct(p90)} (límite 25 %): demasiados coches mal tasados`);
-  else ok(`9 de cada 10 anuncios se tasan con menos del ${pct(p90)} de error`);
+  const medianError = abs.length ? abs[Math.floor(abs.length / 2)] : Infinity;
+  const p90 = abs.length ? abs[Math.min(abs.length - 1, Math.floor(abs.length * 0.9))] : Infinity;
+  const worst = [...errs].sort((a, b) => Math.abs(b.dev) - Math.abs(a.dev))[0];
+  if (abs.length) {
+    console.log(`    error absoluto medio: ${pct(abs.reduce((a, b) => a + b, 0) / abs.length)}`);
+    console.log(`    error mediano: ${pct(medianError)} · percentil 90: ${pct(p90)}`);
+    console.log(`    peor caso: ${worst.id} (${worst.market}) modelo ${eur(worst.mid)} vs referencia ${eur(worst.ref)} → ${pct(worst.dev)}`);
+  }
+  if (medianError > 0.15) fail(`el error mediano holdout es ${pct(medianError)} (límite 15 %)`);
+  else ok(`error mediano holdout ${pct(medianError)}`);
+  if (p90 > 0.35) fail(`el percentil 90 holdout es ${pct(p90)} (límite 35 %)`);
+  else ok(`percentil 90 holdout ${pct(p90)}`);
 
-  // Comparación independiente por cuantiles (no usa la regresión).
+  // Contraste de cuantiles a las referencias de año/km declaradas en ficha.
   let q = 0; let qBad = 0;
   for (const v of GENERATED_DB) {
     for (const market of ['DE', 'ES']) {
-      const ev = evidenceStats(v.brand, v.model, v.gen, market, v.kmRef, v.cv);
+      const fit = priceFit(market);
+      const profile = v.variantKey ? { variantKey: v.variantKey, cv: v.cv } : null;
+      const ev = evidenceStats(v.brand, v.model, v.gen, market, v.kmRef, v.cv, profile, {
+        yearRef: v.priceSource.yearRef,
+        yearCoef: fit?.yearCoef,
+        kmCoef: fit?.kmCoef,
+      });
       if (!ev) continue;
       const band = market === 'DE' ? v.dePrice : v.esPrice;
       const target = ev.median * (market === 'DE' ? 1 - PURCHASE_DISCOUNT : 1);
@@ -246,7 +411,7 @@ section('3. Contraste anuncio por anuncio');
       if (dev > 0.40) qBad += 1;
     }
   }
-  console.log(`    contraste alternativo por cuartiles: ${q} pares, ${qBad} con desviación > 40 %`);
+  console.log(`    contraste cuantiles comparable año/km/variante: ${q} pares, ${qBad} con desviación > 40 %`);
 }
 
 // ---------------------------------------------------------------------------
@@ -261,7 +426,7 @@ section('4. Trazabilidad de cada precio');
   console.log(`    ajustadas por regresión sobre anuncios: ${count('regresion')} fichas`);
   console.log(`    con cuantiles de anuncios propios:      ${count('evidencia')} fichas`);
   console.log(`    extrapoladas de la generación:          ${count('evidencia_generacion')} fichas`);
-  console.log(`    estimadas por el modelo calibrado:      ${count('modelo')} fichas`);
+    console.log(`    estimadas por curva fallback (orientativa): ${count('modelo')} fichas`);
   for (const mk of ['DE', 'ES']) {
     const f = priceFit(mk);
     if (!f) { warn(`sin ajuste de precios para el mercado ${mk}`); continue; }
@@ -272,29 +437,26 @@ section('4. Trazabilidad de cada precio');
   }
 
   const calib = calibrationFactors();
-  console.log(`    calibración del modelo → DE ×${calib.DE.toFixed(3)} (${calib.nDE} generaciones), ES ×${calib.ES.toFixed(3)} (${calib.nES} generaciones)`);
-  if (calib.DE < 0.7 || calib.DE > 1.5) fail(`factor de calibración DE fuera de rango: ${calib.DE.toFixed(3)}`);
-  if (calib.ES < 0.7 || calib.ES > 1.5) fail(`factor de calibración ES fuera de rango: ${calib.ES.toFixed(3)}`);
+  console.log(`    factores de curva fallback (no calibrados): DE ×${calib.DE.toFixed(3)} (n=${calib.nDE}), ES ×${calib.ES.toFixed(3)} (n=${calib.nES})`);
+  if (calib.DE !== 1 || calib.ES !== 1) fail('multiplicador fallback cambió sin una calibración auditable');
+  if (!calib.nDE && !calib.nES) warn('las fichas de origen “modelo” son orientativas; aún no hay calibración común por variante exacta');
 
-  // El modelo sin evidencia tiene que quedar cerca del nivel verificado.
+  // Se informa el diferencial de la curva fallback frente a pares estrictos; no se sobreescribe su nivel sin muestras comparables suficientes.
   const modelo = GENERATED_DB.filter((v) => v.priceSource.de === 'modelo' && v.priceSource.es === 'modelo');
   const spreads = modelo.map((v) => ((v.esPrice[0] + v.esPrice[1]) / 2) / ((v.dePrice[0] + v.dePrice[1]) / 2));
   const medSpread = spreads.sort((a, b) => a - b)[Math.floor(spreads.length / 2)] || 0;
   const md = measuredEsDe();
-  console.log(`    diferencial medio ES/DE en fichas sin evidencia: ${pct(medSpread - 1)}`);
-  console.log(`    diferencial ES/DE MEDIDO en anuncios emparejables (n=${md.n}): ${pct(md.ratio - 1)}`);
-  // Antes se exigía que España fuese al menos un 5 % más cara: eso era la
-  // hipótesis del negocio, no un dato. Medido sobre los anuncios el arbitraje
-  // ronda el 0 %, así que lo que se audita ahora es que el modelo reproduzca la
-  // medición, no que reproduzca la hipótesis.
-  // CUESTIÓN ABIERTA, no un fallo: las dos medidas del diferencial discrepan
-  // ~20 puntos y ninguna es fiable todavía (las muestras de cada país no tienen
-  // los mismos acabados). Se informa en cada ejecución y NO se aplica a los
-  // precios; ver el comentario en calibrationFactors().
-  if (md.n < 20) warn(`sólo ${md.n} pares emparejables: el diferencial ES/DE se apoya en poca evidencia`);
-  if (Math.abs(medSpread - md.ratio) > 0.08) {
-    warn(`DISCREPANCIA SIN RESOLVER: el modelo implica un diferencial ES/DE del ${pct(medSpread - 1)} y emparejar anuncios sueltos mide ${pct(md.ratio - 1)}. El catálogo conserva el del modelo.`);
-  } else ok(`el diferencial ES/DE del modelo coincide con el medido (${pct(md.ratio - 1)})`);
+  console.log(`    diferencial ES/DE teórico en fichas sin evidencia: ${pct(medSpread - 1)}`);
+  if (md.n) console.log(`    diferencial medido solo en pares de variante/año/CV/acabado/caja exactos (n=${md.n} unidades ES): ${pct(md.ratio - 1)}`);
+  else console.log('    diferencial medido: todavía no hay pares exactos de la misma variante en ambos mercados');
+  // La hipótesis histórica de que España fuese siempre bastante más cara no es
+  // una calibración. Solo se compara cuando hay al menos 20 unidades ES con
+  // una variante exacta emparejada; las tarjetas genéricas no se cuentan.
+  if (md.n < 20) {
+    warn(`sólo ${md.n} unidades con comparables estrictos DE/ES: el diferencial no permite calibrar el modelo general`);
+  } else if (Math.abs(medSpread - md.ratio) > 0.08) {
+    warn(`el modelo sin evidencia implica ${pct(medSpread - 1)} ES/DE; los pares estrictos miden ${pct(md.ratio - 1)}. No se aplica esa diferencia sin más datos de variantes familiares.`);
+  } else ok(`el diferencial teórico y el medido quedan próximos (${pct(md.ratio - 1)})`);
 }
 
 // ---------------------------------------------------------------------------
@@ -340,6 +502,7 @@ section('5. Fichas curadas a mano vs. evidencia');
 
 // ---------------------------------------------------------------------------
 section('6. El beneficio se calcula con los precios del catálogo');
+console.log('    Supuesto fiscal orientativo: REBU, antes de IRPF/IS y financiación; validar vendedor/régimen en la factura UE. Los costes de importación se calculan con tarifas configuradas.');
 // ---------------------------------------------------------------------------
 {
   const sample = GENERATED_DB.filter((v) => v.priceSource.de === 'evidencia').slice(0, 40);
@@ -353,11 +516,67 @@ section('6. El beneficio se calcula con los precios del catálogo');
   if (bad) fail(`${bad} de ${sample.length} cálculos de beneficio no cuadran con sus precios`);
   else ok(`${sample.length} cálculos de beneficio cuadran con la horquilla del catálogo`);
 
-  const profits = GENERATED_DB.map((v) => catalogEstimate(v)).filter(Boolean).map((e) => e.profit);
+  const estimates = GENERATED_DB.map((v) => ({ vehicle: v, mean: catalogEstimate(v) })).filter((row) => row.mean);
+  const profits = estimates.map(({ mean }) => mean.profit);
   const neg = profits.filter((p) => p < 0).length;
   const sorted = [...profits].sort((a, b) => a - b);
   console.log(`    beneficio estimado: mínimo ${eur(sorted[0])}, mediana ${eur(sorted[Math.floor(sorted.length / 2)])}, máximo ${eur(sorted[sorted.length - 1])}`);
   console.log(`    variantes sin beneficio (REBU, antes de IRPF/IS): ${neg} de ${profits.length} (${pct(neg / profits.length)})`);
+
+  const empiricalOrigins = new Set(['regresion', 'evidencia', 'evidencia_generacion']);
+  const conservative = estimates.map(({ vehicle, mean }) => {
+    const stressedVehicle = { ...vehicle, dePrice: [vehicle.dePrice[1], vehicle.dePrice[1]], esPrice: [vehicle.esPrice[0], vehicle.esPrice[0]] };
+    return { vehicle, mean, prudent: catalogEstimate(stressedVehicle) };
+  });
+  const supported = conservative.filter(({ vehicle }) => empiricalOrigins.has(vehicle.priceSource?.de) && empiricalOrigins.has(vehicle.priceSource?.es));
+  const positivePrudent = supported.filter(({ prudent }) => prudent?.profit > 0);
+  const broadPrudent = supported.filter(({ vehicle, prudent }) => prudent?.profit >= 2000 && vehicle.reliability !== 'banned');
+  console.log(`    escenario prudente (compra DE en techo / venta ES en suelo): ${positivePrudent.length}/${supported.length} fichas con margen > 0`);
+  console.log(`    candidatas ≥2.000 € prudentes con evidencia en ambos mercados: ${broadPrudent.length}`);
+  for (const { vehicle, mean, prudent } of conservative.filter(({ vehicle }) => vehicle.variantKey)) {
+    const deEvidence = vehicle.priceSource?.deEvidence;
+    const esEvidence = vehicle.priceSource?.esEvidence;
+    const deN = deEvidence?.n ?? 0;
+    const esN = esEvidence?.n ?? 0;
+    const deBand = vehicle.dePrice?.length === 2 ? `${eur(vehicle.dePrice[0])}–${eur(vehicle.dePrice[1])}` : 'sin dato';
+    const esBand = vehicle.esPrice?.length === 2 ? `${eur(vehicle.esPrice[0])}–${eur(vehicle.esPrice[1])}` : 'sin dato';
+    console.log(`      ${vehicle.variantKey}: beneficio central/probable ${eur(mean.profit)} · escenario prudente ${eur(prudent?.profit ?? 0)} · compra DE neta ${deBand} (${vehicle.priceSource?.de}) · PVP ES ${esBand} (${vehicle.priceSource?.es}) · evidencia DE/ES ${deN}/${esN} · año/km ref ${vehicle.priceSource?.yearRef}/${vehicle.kmRef}`);
+    if (deEvidence?.normalization === 'km-only; year kept in observed sample'
+      || esEvidence?.normalization === 'km-only; year kept in observed sample') {
+      console.log(`        muestra exacta escasa; normalización: DE ${deEvidence?.normalization || 'no disponible'} ${deEvidence?.yearRange?.join('-') || ''}, ES ${esEvidence?.normalization || 'no disponible'} ${esEvidence?.yearRange?.join('-') || ''}`);
+    }
+  }
+
+  // Contraste económico independiente del ajuste: pares reales de la misma
+  // variante y año, con kilometraje próximo. No se aplican pendientes globales
+  // de edad/km; la rebaja DE y costes son los mismos que en catalogEstimate.
+  console.log(`    contraste directo (misma variante/año, ≤25.000 km): probable compra DE mediana −${Math.round(PURCHASE_DISCOUNT * 100)} %; conservador, anuncio DE más caro sin descuento; venta ES −${SALE_DISCOUNT_PCT} % y gastos de importación incluidos:`);
+  console.log('    El beneficio usa régimen REBU orientativo y no descuenta IRPF/IS; si el vendedor DE factura IVA normal, recalcular compra AIB y régimen general.');
+  let exactPairCount = 0;
+  for (const profile of Object.values(PERFORMANCE_VARIANT_PROFILES)) {
+    const vehicle = GENERATED_DB.find((v) => v.variantKey === profile.variantKey);
+    if (!vehicle) continue;
+    const pairs = matchedPerformancePairs(profile);
+    const estimatesForPairs = pairs.map((pair) => ({ pair, estimate: estimateMatchedPerformancePair(vehicle, pair) }))
+      .filter((row) => row.estimate);
+    if (!estimatesForPairs.length) {
+      console.log(`      ${profile.variantKey}: sin PVP ES con comparables DE del mismo año/≤25.000 km; margen no validable por pares.`);
+      continue;
+    }
+    exactPairCount += estimatesForPairs.length;
+    const pairProfits = estimatesForPairs.map(({ estimate }) => estimate.profit);
+    const lowBuyProfits = estimatesForPairs.map(({ pair }) => estimateMatchedPerformancePair(vehicle, pair, pair.dePriceMin).profit);
+    const highBuyProfits = estimatesForPairs.map(({ pair }) => estimateMatchedPerformancePair(vehicle, pair, pair.dePriceMax).profit);
+    const conservativePairProfits = estimatesForPairs.map(({ pair }) => estimateMatchedPerformancePair(vehicle, pair, pair.dePriceMax, 0).profit);
+    const meanPairProfit = pairProfits.reduce((sum, profit) => sum + profit, 0) / pairProfits.length;
+    const kmGaps = estimatesForPairs.map(({ pair }) => pair.kmGap);
+    const deCount = estimatesForPairs.reduce((sum, { pair }) => sum + pair.deMatches.length, 0);
+    const medianDePrice = mediana(estimatesForPairs.map(({ pair }) => pair.dePrice));
+    const deLow = Math.min(...estimatesForPairs.map(({ pair }) => pair.dePriceMin));
+    const deHigh = Math.max(...estimatesForPairs.map(({ pair }) => pair.dePriceMax));
+    console.log(`      ${profile.variantKey}: anclas PVP ES=${pairProfits.length}, ofertas DE compatibles=${deCount}; margen probable medio/mediano ${eur(meanPairProfit)}/${eur(mediana(pairProfits))} · conservador mediano ${eur(mediana(conservativePairProfits))} (DE más caro sin descuento) · rango probable ${eur(Math.min(...pairProfits))}–${eur(Math.max(...pairProfits))} · compra DE mediana ${eur(medianDePrice)} (rango anuncios ${eur(deLow)}–${eur(deHigh)}) · margen con compra barata/cara y −${Math.round(PURCHASE_DISCOUNT * 100)} % ${eur(mediana(lowBuyProfits))}/${eur(mediana(highBuyProfits))} · brecha km mediana ${Math.round(mediana(kmGaps)).toLocaleString('es-ES')}`);
+  }
+  if (!exactPairCount) warn('ningún contraste deportivo cumple mismo año y ≤25.000 km; los márgenes por variante no quedan validados por pares');
   // Que la mitad del catálogo no dé margen es un RESULTADO de negocio, no un
   // defecto del código: se informa. Sólo se aborta si prácticamente nada es
   // rentable, que es lo que indicaría precios rotos.
@@ -366,10 +585,8 @@ section('6. El beneficio se calcula con los precios del catálogo');
   // cubren transporte, ITV, transferencia, garantía e impuestos. Se informa.
   warn(`${pct(neg / profits.length)} del catálogo no cubre los costes según el catálogo`);
 
-  // Invariante de coherencia: las fichas con anuncios propios y las que sólo
-  // tienen el modelo calibrado no pueden dar resultados opuestos. Si las
-  // segundas pierden dinero de forma masiva mientras las primeras lo ganan, es
-  // el modelo el que está desalineado, no el negocio.
+  // Diagnóstico descriptivo: compara resultados de fichas con evidencia y de
+  // la curva fallback no calibrada. No se fuerza rentabilidad en ninguna.
   const conEv = []; const sinEv = [];
   for (const v of GENERATED_DB) {
     const e = catalogEstimate(v);
@@ -378,37 +595,29 @@ section('6. El beneficio se calcula con los precios del catálogo');
   }
   if (conEv.length >= 20 && sinEv.length >= 20) {
     const a = mediana(conEv); const b = mediana(sinEv);
-    console.log(`    beneficio mediano con anuncios propios (n=${conEv.length}): ${eur(a)} · sólo modelo calibrado (n=${sinEv.length}): ${eur(b)}`);
-    if (a > 0 && b < -500) fail(`las fichas con anuncios dan ${eur(a)} y las estimadas ${eur(b)}: el modelo de depreciación está desalineado`);
-    else ok('las fichas estimadas no contradicen a las contrastadas con anuncios');
+    console.log(`    beneficio mediano con evidencia (n=${conEv.length}): ${eur(a)} · curva fallback orientativa (n=${sinEv.length}): ${eur(b)}`);
   } else warn('pocas fichas en algún grupo para contrastar el beneficio');
 
   // 6b. El diferencial ES/DE es la base de TODO el negocio: si comprar en
   // Alemania no sale más barato que vender aquí, no hay arbitraje. Se mide por
   // dos vías independientes y se exige que coincidan.
-  const deObs = MARKET_OBSERVATIONS.filter((o) => o.market === 'DE' && o.kind === 'anuncio');
-  const esObs = MARKET_OBSERVATIONS.filter((o) => o.market === 'ES' && o.kind === 'anuncio');
-  const ratios = [];
-  for (const e of esObs) {
-    for (const d of deObs) {
-      if (d.brand !== e.brand || d.model !== e.model || d.gen !== e.gen) continue;
-      if (d.year !== e.year || Math.abs(d.km - e.km) > 15000) continue;
-      if ((fuelOf(d) || 'x') !== (fuelOf(e) || 'x')) continue;
-      ratios.push(e.price / d.price);
-    }
-  }
-  const raw = mediana(ratios);
-  // Misma medida pero con el modelo ajustado: mismo coche, mismo año y km.
+  const measured = measuredEsDe();
+  const raw = measured.ratio;
+  // Misma medida pero con el modelo ajustado: mismo coche, acabado y variante.
   const probes = [];
   for (const v of GENERATED_DB) {
-    const d = predictPrice({ market: 'DE', brand: v.brand, model: v.model, gen: v.gen, cv: v.cv, fuel: v.fuel, year: v.priceSource.yearRef, km: v.kmRef });
-    const e = predictPrice({ market: 'ES', brand: v.brand, model: v.model, gen: v.gen, cv: v.cv, fuel: v.fuel, year: v.priceSource.yearRef, km: v.kmRef });
+    const params = {
+      brand: v.brand, model: v.model, gen: v.gen, cv: v.cv, fuel: v.fuel,
+      year: v.priceSource.yearRef, km: v.kmRef, variantKey: v.variantKey || null,
+    };
+    const d = predictPrice({ ...params, market: 'DE' });
+    const e = predictPrice({ ...params, market: 'ES' });
     if (d && e && d.price > 0) probes.push(e.price / d.price);
   }
   const fitted = mediana(probes);
-  console.log(`    diferencial ES/DE sobre anuncios emparejables (mismo modelo, año, km y combustible, n=${ratios.length}): ${pct(raw - 1)}`);
+  console.log(`    diferencial ES/DE en pares elegibles estrictos (mismo año, CV, acabado/caja, km próximos, n=${measured.n}): ${pct(raw - 1)}`);
   console.log(`    diferencial ES/DE según la regresión (n=${probes.length} fichas): ${pct(fitted - 1)}`);
-  if (!(ratios.length >= 20 && probes.length >= 20)) warn('pocos pares emparejables: el diferencial ES/DE se apoya en poca evidencia');
+  if (!(measured.n >= 20 && probes.length >= 20)) warn('pocos pares comparables con variante exacta: diferencial ES/DE no concluyente');
   else if (Math.abs(raw - fitted) > 0.20) fail(`las dos medidas del diferencial ES/DE discrepan ${pct(raw - fitted)}: la evidencia o el ajuste están sesgados`);
   else ok(`las dos medidas del diferencial ES/DE coinciden en torno a ${pct((raw + fitted) / 2 - 1)}`);
   if (raw < 1) warn(`emparejar anuncios sueltos da ${pct(raw - 1)}; no es concluyente (motores y acabados distintos entre países)`);
@@ -434,4 +643,4 @@ if (failures) {
   console.error(`\n${failures} comprobación(es) de precios FALLIDAS`);
   process.exit(1);
 }
-console.log('Auditoría de precios correcta: las cifras del catálogo se sostienen con anuncios reales.');
+console.log('Auditoría de precios correcta: controles superados. Las fichas “modelo” siguen siendo estimaciones orientativas sin calibración común por variante exacta.');

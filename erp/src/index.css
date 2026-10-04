@@ -76,11 +76,13 @@
   transform: rotate(180deg);
 }
 
-.inspection-mileage-history > summary::-webkit-details-marker {
+.inspection-mileage-history > summary::-webkit-details-marker,
+.inspection-reference-details > summary::-webkit-details-marker {
   display: none;
 }
 
-.inspection-mileage-history[open] > summary > svg {
+.inspection-mileage-history[open] > summary > svg,
+.inspection-reference-details[open] > summary > span:last-child > svg {
   transform: rotate(180deg);
 }
 

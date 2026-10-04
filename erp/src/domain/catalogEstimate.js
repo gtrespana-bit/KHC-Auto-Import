@@ -1,10 +1,10 @@
 // ============================================================================
 //  Estimación rápida de beneficio para una variante del catálogo.
-//  Usa precios MEDIOS (no el más barato contra el más caro) y resta todos los
-//  gastos típicos de traer el coche de Alemania y venderlo en A Coruña.
+//  Usa precios MEDIOS (no el más barato contra el más caro) y añade gastos
+//  directos orientativos. No sustituye al simulador fiscal por vendedor/VIN.
 // ============================================================================
 import { DEFAULT_TARIFFS } from './rates.js';
-import { calcIedmt, calcSaleVat, calcIrpfGain } from './taxes.js';
+import { calcIedmt, calcIvtm, calcSaleVat, calcIrpfGain, computeCvf } from './taxes.js';
 
 const mid = (r) => (Array.isArray(r) && r.length ? Math.round(((r[0] ?? 0) + (r[1] ?? r[0] ?? 0)) / 2) : 0);
 const n = (x) => Number(x) || 0;
@@ -26,17 +26,26 @@ export function catalogEstimate(v = {}, tariffs = DEFAULT_TARIFFS, refDate = new
   if (!buy || !asked) return null;
 
   const years = v.years || [];
-  const year = Math.round((n(years[0]) + n(years[1] ?? years[0])) / 2) || refDate.getFullYear() - 5;
+  const catalogYearRef = Number(v.priceSource?.yearRef);
+  const year = Math.round(catalogYearRef || ((n(years[0]) + n(years[1] ?? years[0])) / 2)) || refDate.getFullYear() - 5;
   const firstRegDate = `${year}-06-30`;
   const diesel = /di[eé]sel/i.test(v.fuel || '');
 
   const iedmt = calcIedmt({ co2: n(v.co2), newPrice: n(v.newPrice), firstRegDate, refDate }).quota;
+  const cvf = n(v.cvf) || computeCvf(n(v.cc), n(v.cyl) || 4);
+  const ivtm = cvf > 0
+    ? calcIvtm({ cvf, firstRegDate: refDate, tariffs: t, refDate }).quota
+    : 0;
+  const stockMonths = Math.max(0, n(v.rotationDays) || 58) / 30;
+  const stockInsurance = n(t.seguro_stock_mes) * stockMonths;
   const lines = [
     { label: 'Logística (1 rodando + 2 en camión, media por coche)', amount: n(t.transporte_mixto ?? t.transporte_camion) },
     { label: 'Reserva para imprevistos mecánicos', amount: n(t.imprevistos) },
     { label: 'ITV de importación + ficha técnica', amount: n(diesel ? t.itv_turismo_diesel : t.itv_turismo_gasolina) + n(t.itv_ficha_matriculacion) },
     { label: 'Impuesto de matriculación (576)', amount: Math.round(iedmt) },
     { label: 'Tasa DGT + placas + gestoría', amount: n(t.dgt_matriculacion) + n(t.placas_matricula) + n(t.gestoria) },
+    { label: 'IVTM A Coruña (prorrateo al matricular)', amount: ivtm },
+    { label: 'Seguro de stock (según rotación estimada)', amount: stockInsurance },
     { label: 'Preparación, garantía y anuncios', amount: n(t.preparacion) + n(t.garantia_externa) + n(t.anuncio_portal) },
   ];
   lines.forEach((l) => { l.amount = Math.round(l.amount); });

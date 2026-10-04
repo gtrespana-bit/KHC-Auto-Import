@@ -448,11 +448,14 @@ check('Catálogo: fiabilidad siempre con un nivel conocido', () => {
   assert.equal(bad.length, 0);
 });
 
-check('Catálogo: horquillas de precio coherentes (DE ≤ ES y rango ordenado)', () => {
+check('Catálogo: horquillas positivas y ordenadas; el margen puede ser negativo', () => {
   const bad = VEHICLE_DB.filter((v) => {
     const de = v.dePrice || [];
     const es = v.esPrice || [];
-    return de.length !== 2 || es.length !== 2 || de[0] > de[1] || es[0] > es[1] || es[0] < de[0];
+    return de.length !== 2 || es.length !== 2
+      || !de.every((x) => Number.isFinite(x) && x > 0)
+      || !es.every((x) => Number.isFinite(x) && x > 0)
+      || de[0] > de[1] || es[0] > es[1];
   });
   assert.equal(bad.length, 0, `horquillas incoherentes en: ${bad.slice(0, 3).map((v) => v.id).join(', ')}`);
 });
@@ -618,6 +621,18 @@ check('Catálogo: la ganancia usa precios medios y descuenta gastos e IVA', () =
   assert.equal(e.profit, e.sell - e.buy - e.expenses - e.vat);
   assert.equal(e.expenses, e.lines.reduce((a, l) => a + l.amount, 0));
   assert.ok(e.profit < e.sell - e.buy);
+});
+
+check('Catálogo: el coste orientativo incluye IVTM prorrateado y seguro por rotación', () => {
+  const e = catalogEstimate({
+    dePrice: [10000, 10000], esPrice: [15000, 15000], co2: 118, newPrice: 30000,
+    years: [2020, 2020], cvf: 10, rotationDays: 60,
+  }, undefined, new Date(2026, 9, 4, 12), { regime: 'rebu' });
+  const ivtm = e.lines.find((line) => line.label.startsWith('IVTM A Coruña'));
+  const stock = e.lines.find((line) => line.label.startsWith('Seguro de stock'));
+  assert.ok(ivtm?.amount > 0, 'falta la reserva de IVTM al matricular');
+  assert.equal(stock?.amount, 24, 'el seguro de stock debe escalar con 60 días de rotación');
+  assert.equal(e.expenses, e.lines.reduce((a, line) => a + line.amount, 0));
 });
 
 for (const [name, fn] of checks) {

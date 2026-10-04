@@ -11,7 +11,14 @@ export const VAG = [
     g: [
       ['Golf VII (5G)', 2013, 2016, 27500, [['20tdi150', 118, { gear: 'D' }], ['16tdi105', 109], ['14tsi140', 127], ['12tsi105', 119], ['20tdi184', 129], ['14tsi125', 124]]],
       ['Golf VII.5', 2017, 2020, 31500, [['20tdi150', 118, { gear: 'D' }], ['16tdi115', 110], ['15tsi150', 122, { gear: 'D' }], ['10tsi115', 112], ['20tdi184', 129]]],
-      ['Golf VIII', 2020, 2025, 34900, [['20tdi150', 116, { gear: 'D' }], ['20tdi115', 114], ['15tsi130', 124], ['15etsi150', 120], ['10tsi110', 112], ['20tsi245', 155]]],
+      ['Golf VII GTI 220 DSG', 2016, 2017, 34200, [['20tsi220', 148, { name: '2.0 TSI GTI 220 CV DSG', variantKey: 'vw-golf-vii-gti-220-dsg', years: [2016, 2017], newPrice: 34200 }]]],
+      ['Golf VII GTI Performance 230 DSG', 2016, 2017, 35610, [['20tsi230', 149, { name: '2.0 TSI GTI Performance 230 CV DSG', variantKey: 'vw-golf-vii-gti-performance-230-dsg', years: [2016, 2017], newPrice: 35610 }]]],
+      ['Golf VII GTI Clubsport 265 DSG', 2016, 2017, 39150, [['20tsi265', 155, { name: '2.0 TSI GTI Clubsport 265 CV DSG', variantKey: 'vw-golf-vii-gti-clubsport-265-dsg', years: [2016, 2017], newPrice: 39150 }]]],
+      ['Golf VII.5 GTI Performance 245 DSG', 2017, 2020, 37500, [['20tsi245', 149, { name: '2.0 TSI GTI Performance 245 CV DSG', variantKey: 'vw-golf-vii5-gti-performance-245-dsg', years: [2017, 2020], newPrice: 37500 }]]],
+      ['Golf VII.5 GTI TCR 290 DSG', 2019, 2020, 47590, [['20tsi290', 153, { name: '2.0 TSI GTI TCR 290 CV DSG', variantKey: 'vw-golf-vii5-gti-tcr-290-dsg', years: [2019, 2020], newPrice: 47590 }]]],
+      ['Golf VIII', 2020, 2025, 34900, [['20tdi150', 116, { gear: 'D' }], ['20tdi115', 114], ['15tsi130', 124], ['15etsi150', 120], ['10tsi110', 112], ['20tsi245', 166, { name: '2.0 TSI GTI 245 CV', gear: 'D', variantKey: 'vw-golf-viii-gti-245-dsg', years: [2020, 2024], newPrice: 42290 }]]],
+      ['Golf VIII GTI facelift 265 DSG', 2024, 2026, 49160, [['20tsi265', 162, { name: '2.0 TSI GTI facelift 265 CV', gear: 'D', variantKey: 'vw-golf-viii-gti-265-dsg', years: [2024, 2026] }]]],
+      ['Golf VIII GTI Clubsport 300 DSG', 2020, 2026, 52950, [['20tsi300', 168, { name: '2.0 TSI GTI Clubsport 300 CV', gear: 'D', variantKey: 'vw-golf-viii-gti-clubsport-300-dsg', years: [2020, 2026] }]]],
     ],
   },
   {

@@ -293,6 +293,7 @@ export const DEFAULT_TARIFFS = {
   preparacion: OPERATING_COSTS.preparacionBasica.amount,
   garantia_externa: OPERATING_COSTS.garantiaExternaAnual.amount,
   anuncio_portal: OPERATING_COSTS.anuncioPortal.amount,
+  seguro_stock_mes: OPERATING_COSTS.seguroStockMes.amount,
   ivtm_turismo_1: IVTM_CORUNA_TURISMOS[0].annual,
   ivtm_turismo_2: IVTM_CORUNA_TURISMOS[1].annual,
   ivtm_turismo_3: IVTM_CORUNA_TURISMOS[2].annual,
@@ -344,6 +345,7 @@ export const TARIFF_GROUPS = [
       { key: 'preparacion', label: 'Preparación y limpieza' },
       { key: 'garantia_externa', label: 'Póliza de garantía mecánica' },
       { key: 'anuncio_portal', label: 'Anuncio en portales' },
+      { key: 'seguro_stock_mes', label: 'Seguro de stock (€/mes)' },
     ],
   },
 ];
