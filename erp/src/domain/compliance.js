@@ -11,7 +11,7 @@ import { vehiclePnl, isSold, isInStock, daysInStock } from './finance.js';
 import { quarterOf, addDays, round2, dateEs } from '../lib/format.js';
 
 const n2 = (v) => round2(v);
-import { IVTM_PERIOD, RETA_2026, ITP_GALICIA } from './rates.js';
+import { IVTM_PERIOD, RETA_2026, ITP_GALICIA, VAT } from './rates.js';
 
 export const QUARTER_DEADLINES = { 1: '04-20', 2: '07-20', 3: '10-20', 4: null }; // el 4T se presenta en enero
 
@@ -113,7 +113,11 @@ export function buildTaxCalendar({ company, vehicles = [], expenses = [], year, 
       });
       vehicles.forEach((v) => {
         if (!inQuarter(v.purchaseDate, y, q)) return;
-        if (v.sellerType === 'national_dealer' && isBusiness) input += n2(v.costs?.vatPurchase);
+        // Compra a profesional español con factura: el IVA va incluido en el
+        // precio y es IVA soportado deducible (no se guarda en `costs`).
+        if (['national_dealer', 'pro_es'].includes(v.sellerType) && isBusiness) {
+          input += round2((n2(v.costs?.purchase) * VAT.general) / (1 + VAT.general));
+        }
       });
       const due = round2(output - input);
       if (output === 0 && input === 0) return;

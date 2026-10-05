@@ -9,6 +9,7 @@ import {
   computeCvf, getIedmtRate, valorVenal, calcIedmt, calcItp, calcIvtm,
   calcPurchaseTax, calcSaleVat, calcIrpfGain, calcIs, calcReta,
   landingCost, breakEvenPrice, recalcVehicleTaxes,
+  SELLER_TYPES, canonicalSellerType,
 } from '../erp/src/domain/taxes.js';
 import {
   vehiclePnl, fleetSummary, suggestedPrice, loanQuote, movementsFromData,
@@ -129,6 +130,83 @@ check('Compra a profesional en REBU → sin IVA ni ITP', () => {
   const r = calcPurchaseTax({ sellerType: 'dealer_rebu', priceNet: 13500 });
   assert.equal(r.kind, 'none');
   assert.equal(r.amount, 0);
+});
+
+// --- Los cinco tipos de vendedor nuevos (lenguaje llano) --------------------
+check('Hay exactamente 5 tipos de vendedor y los ids antiguos se traducen', () => {
+  assert.deepEqual(
+    SELLER_TYPES.map((s) => s.id),
+    ['pro_eu_vat', 'pro_eu_rebu', 'private_eu', 'private_es', 'pro_es'],
+  );
+  assert.equal(canonicalSellerType('dealer_vat'), 'pro_eu_vat');
+  assert.equal(canonicalSellerType('dealer_rebu'), 'pro_eu_rebu');
+  assert.equal(canonicalSellerType('private'), 'private_eu');
+  assert.equal(canonicalSellerType('national_dealer'), 'pro_es');
+});
+
+check('Profesional UE con IVA (empresa) → AIB: caja 0, nada suma al coste', () => {
+  const r = calcPurchaseTax({ sellerType: 'pro_eu_vat', priceNet: 13500, buyerIsBusiness: true });
+  assert.equal(r.kind, 'aib');
+  approx(r.amount, 2835, 0.01);
+  assert.equal(r.cash, 0);
+  assert.equal(r.costImpact, 0);
+});
+
+check('Profesional UE con IVA (particular) → Modelo 309: sí sale de la caja', () => {
+  const r = calcPurchaseTax({ sellerType: 'pro_eu_vat', priceNet: 13500, buyerIsBusiness: false });
+  assert.equal(r.kind, 'iva');
+  assert.equal(r.model, '309');
+  approx(r.cash, 2835, 0.01);
+  approx(r.costImpact, 2835, 0.01);
+});
+
+check('Profesional UE sin pagar IVA (margen/REBU) → ni IVA ni ITP', () => {
+  const r = calcPurchaseTax({ sellerType: 'pro_eu_rebu', priceNet: 13500 });
+  assert.equal(r.kind, 'none');
+  assert.equal(r.cash, 0);
+  assert.equal(r.costImpact, 0);
+});
+
+check('Particular UE → ITP Galicia 8 %', () => {
+  const r = calcPurchaseTax({ sellerType: 'private_eu', priceNet: 13500, firstRegDate: '2019-03-10', km: 115000, newPrice: 31500 });
+  assert.equal(r.kind, 'itp');
+  approx(r.amount, 1080, 0.01);
+  approx(r.cash, 1080, 0.01);
+});
+
+check('Particular España → ITP Galicia 8 %', () => {
+  const r = calcPurchaseTax({ sellerType: 'private_es', priceNet: 13500, firstRegDate: '2019-03-10', km: 115000, newPrice: 31500 });
+  assert.equal(r.kind, 'itp');
+  approx(r.amount, 1080, 0.01);
+});
+
+check('Particular UE con coche nuevo a efectos de IVA → Modelo 309 sobre el precio', () => {
+  const r = calcPurchaseTax({ sellerType: 'private_eu', priceNet: 30000, firstRegDate: new Date().toISOString().slice(0, 10), km: 900 });
+  assert.equal(r.kind, 'iva');
+  assert.equal(r.model, '309');
+  approx(r.amount, 6300, 0.01);
+});
+
+check('Profesional España → IVA incluido en factura: caja 0 y nada suma al coste', () => {
+  const r = calcPurchaseTax({ sellerType: 'pro_es', priceNet: 15000, buyerIsBusiness: true });
+  assert.equal(r.kind, 'iva_included');
+  assert.equal(r.cash, 0);
+  assert.equal(r.costImpact, 0);
+  approx(r.vatIncluded, 2603.31, 0.01);
+  assert.equal(r.deductible, true);
+});
+
+check('Profesional España: recalcVehicleTaxes no infla el coste con el IVA', () => {
+  const v = {
+    sellerType: 'pro_es', buyerIsBusiness: true, co2: 118, cc: 1968, cyl: 4,
+    newPrice: 31500, firstRegDate: '2019-03-10',
+    costs: { purchase: 15000 },
+  };
+  const t = recalcVehicleTaxes(v, DEFAULT_TARIFFS);
+  assert.equal(t.vatPurchase, 0);
+  assert.equal(t.itp, 0);
+  const c = landingCost({ ...v, costs: { ...v.costs, vatPurchase: t.vatPurchase } }, DEFAULT_TARIFFS);
+  assert.ok(!c.lines.some((l) => l.key === 'vatPurchase'));
 });
 
 // --- IVA en la venta --------------------------------------------------------

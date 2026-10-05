@@ -113,13 +113,18 @@ export function normalizeVehicle(raw = {}) {
     other: n2(v.costs?.other ?? 0),
   };
   const status = STATUS_FLOW.some((s) => s.id === v.status) ? v.status : LEGACY_STATUS[v.status] || 'prospeccion';
+  // Ids antiguos de vendedor → ids nuevos (dealer_vat, dealer_rebu, private, national_dealer)
+  const SELLER_LEGACY = { dealer_vat: 'pro_eu_vat', dealer_rebu: 'pro_eu_rebu', private: 'private_eu', national_dealer: 'pro_es' };
+  const SELLER_IDS = ['pro_eu_vat', 'pro_eu_rebu', 'private_eu', 'private_es', 'pro_es'];
+  const sellerRaw = v.sellerType || 'pro_eu_vat';
   return {
     ...v,
     id: v.id || uid('veh'),
     costs,
     status,
     firstRegDate: v.firstRegDate || (v.year ? `${v.year}-06-01` : null),
-    sellerType: v.sellerType || 'dealer_vat',
+    sellerType: SELLER_IDS.includes(sellerRaw) ? sellerRaw : SELLER_LEGACY[sellerRaw] || 'pro_eu_vat',
+    taxOverrides: v.taxOverrides || {},
     taxMethod: v.taxMethod || 'tablas',
     documents: v.documents || v.docsChecklist || {},
     notes: v.notes || '',

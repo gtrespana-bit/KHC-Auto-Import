@@ -3,7 +3,7 @@ import { Calculator, Download, Car as CarIcon, ClipboardCheck } from 'lucide-rea
 import { Card, Button, Field, Input, Money, Select, Stat, SectionTitle, Tabs, Badge, KeyValueGrid, Alert, Modal, cx } from '../components/ui.jsx';
 import { useStore } from '../lib/store.jsx';
 import { eur, eur0, num, numEs, todayISO, download } from '../lib/format.js';
-import { recalcVehicleTaxes, landingCost, breakEvenPrice, calcSaleVat } from '../domain/taxes.js';
+import { recalcVehicleTaxes, landingCost, breakEvenPrice, calcSaleVat, SELLER_TYPES } from '../domain/taxes.js';
 import { suggestedPrice, vehiclePnl } from '../domain/finance.js';
 import { searchVehicles } from '../data/vehicleDatabase.js';
 import { getVehicleInspectionGuide } from '../data/vehicleInspection.js';
@@ -28,12 +28,7 @@ function fromSeed(v = {}) {
   return out;
 }
 
-const ORIGEN = [
-  { value: 'subaler', label: 'Subasta / B2B (Mobile.de, Autorola, ADESA)' },
-  { value: 'concesionario', label: 'Concesionario alemán / belga / francés' },
-  { value: 'particular', label: 'Particular extranjero' },
-  { value: 'nacional', label: 'Compra en España' },
-];
+const SELLER_OPTIONS = SELLER_TYPES.map((s) => ({ value: s.id, label: `${s.short} — ${s.tagline}` }));
 
 /**
  * Impacto en caja real del impuesto de compra: en una adquisición
@@ -50,8 +45,8 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
   const [inspectionOpen, setInspectionOpen] = useState(false);
   const [form, setForm] = useState(() => ({
     brand: '', model: '', version: '', year: new Date().getFullYear() - 4, km: 120000, cc: 1600, co2: 118,
-    fuel: 'Diésel', newPrice: 32000, purchase: 9000, origen: 'subaler',
-    sellerType: 'dealer_vat', saleRegime: state.company.vatRegime === 'general' ? 'general' : 'rebu',
+    fuel: 'Diésel', newPrice: 32000, purchase: 9000,
+    sellerType: 'pro_eu_vat', saleRegime: state.company.vatRegime === 'general' ? 'general' : 'rebu',
     transport: 750, cocFicha: 90, gestoria: 0, recond: 250, maintenance: 150, guarantee: 0, advertising: 30, insurance: 0, other: 0,
     salePrice: 0, targetMargin: 12,
     // El catálogo (o una ficha de la flota) puede lanzar la simulación precargada
@@ -66,7 +61,7 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
       brand: form.brand || 'Marca', model: form.model || 'Modelo', version: form.version, year: Number(form.year),
       km: Number(form.km), cc: Number(form.cc), co2: form.co2 === '' || form.co2 === null ? null : Number(form.co2),
       fuel: form.fuel, newPrice: Number(form.newPrice), firstRegDate: `${Number(form.year)}-06-01`,
-      sellerType: form.origen === 'particular' ? 'private' : form.origen === 'nacional' ? 'national_dealer' : form.sellerType,
+      sellerType: form.sellerType,
       buyerIsBusiness: state.company.legalForm !== 'particular',
       taxMethod: 'tablas',
       costs: {
@@ -118,7 +113,7 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
       ['purchase', 'Precio de compra', land.purchase],
       ['transport', 'Transporte', land.logistica],
       ['iedmt', 'IEDMT', taxes.iedmt],
-      ['itpVat', 'ITP / IVA compra', taxes.itp + taxes.vatPurchase + purchaseCash(taxes.purchaseTax)],
+      ['itpVat', 'ITP / IVA compra', taxes.itp + taxes.vatPurchase],
       ['itv', 'ITV + ficha', taxes.itv],
       ['recond', 'Reacondicionamiento', land.puestaVenta],
     ].filter(([, , v]) => v > 0);
@@ -176,7 +171,7 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
     const data = {
       generada: new Date().toISOString(),
       vehiculo: { marca: form.brand, modelo: form.model, version: form.version, año: form.year, km: form.km, cc: form.cc, co2: form.co2, cvf: taxes.cvf },
-      compra: { precio: Number(form.purchase), origen: form.origen, vendedor: form.sellerType },
+      compra: { precio: Number(form.purchase), vendedor: form.sellerType },
       impuestos: {
         iedmt: taxes.iedmt, iedmt_base: taxes.iedmtDetail.base, iedmt_modelo: taxes.iedmtDetail.model,
         impuesto_compra_caja: purchaseCash(taxes.purchaseTax), impuesto_compra_detalle: taxes.purchaseTax.label,
@@ -209,7 +204,9 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
       rotationDays: pickedMatches ? picked.rotationDays : undefined,
       winner: pickedMatches ? picked.winner : undefined,
       inspectionChecks: {}, inspectionProfileKey: inspectionGuide.profileKey,
-      costs: veh.costs, purchaseDate: todayISO(), sellerType: veh.sellerType, status: 'prospeccion', source: 'simulator',
+      costs: veh.costs, purchaseDate: todayISO(), sellerType: veh.sellerType,
+      buyerIsBusiness: state.company.legalForm !== 'particular',
+      taxMethod: 'tablas', status: 'prospeccion', source: 'simulator',
       sale: form.salePrice ? { price: Number(form.salePrice), date: todayISO(), regime: form.saleRegime } : undefined,
     });
     toast('Vehículo añadido a la flota con estos datos');
@@ -306,19 +303,10 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
             <h3 className="text-sm font-bold text-white mb-3">2 · La compra</h3>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Precio de compra" className="col-span-2"><Money value={form.purchase} onChange={(v) => update({ purchase: v })} /></Field>
-              <Field label="Origen" className="col-span-2"><Select value={form.origen} onChange={(v) => update({ origen: v })} options={ORIGEN} /></Field>
-              {form.origen !== 'particular' && form.origen !== 'nacional' && (
-                <Field label="Régimen del vendedor" className="col-span-2">
-                  <Select
-                    value={form.sellerType}
-                    onChange={(v) => update({ sellerType: v })}
-                    options={[
-                      { value: 'dealer_rebu', label: 'REBU (margen, sin IVA repercutido)' },
-                      { value: 'dealer_vat', label: 'Régimen general (factura neta, IVA autoliquidado)' },
-                    ]}
-                  />
-                </Field>
-              )}
+              <Field label="¿A quién se lo compras?" hint="Determina el IVA o ITP de la compra" className="col-span-2">
+                <Select value={form.sellerType} onChange={(v) => update({ sellerType: v })} options={SELLER_OPTIONS} />
+              </Field>
+              <p className="col-span-2 -mt-1 text-[11px] text-slate-400 leading-snug">{taxes.purchaseTax.headline}</p>
             </div>
             <div className="mt-3 pt-3 border-t border-slate-800">
               <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2">Gastos de traída y puesta a punto</p>
@@ -379,7 +367,17 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
                 { label: 'Valor venal (tablas Hacienda)', value: eur(taxes.valorVenal), hint: `Antigüedad ${taxes.iedmtDetail.hacienda.age} años · ${numEs(taxes.iedmtDetail.hacienda.pct * 100, 0)} %` },
                 { label: 'Base IEDMT', value: eur(taxes.iedmtDetail.base), hint: `${numEs((taxes.iedmtDetail.rate || 0) * 100, 2)} % · ${taxes.iedmtDetail.bracket}` },
                 { label: `IEDMT — Modelo ${taxes.iedmtDetail.model.startsWith('576') ? '576' : '06'}`, value: eur(taxes.iedmt), tone: taxes.iedmt === 0 ? 'emerald' : 'rose' },
-                { label: 'Impuesto de compra', value: eur(purchaseCash(taxes.purchaseTax)), tone: 'rose', hint: `${taxes.purchaseTax.label} · autoliquidado ${eur(taxes.purchaseTax.amount)}` },
+                {
+                  label: 'Impuesto de compra',
+                  value: eur(purchaseCash(taxes.purchaseTax)),
+                  tone: purchaseCash(taxes.purchaseTax) > 0 ? 'rose' : 'emerald',
+                  hint:
+                    taxes.purchaseTax.kind === 'aib'
+                      ? `${taxes.purchaseTax.label} · autoliquidado ${eur(taxes.purchaseTax.amount)} y deducido: caja 0 €`
+                      : taxes.purchaseTax.kind === 'iva_included'
+                        ? `IVA de ${eur(taxes.purchaseTax.vatIncluded)} ya incluido en la factura`
+                        : taxes.purchaseTax.label,
+                },
                 { label: 'Tasa 1.1 DGT', value: eur(tariffs.dgt_matriculacion) },
                 { label: 'Placas de matrícula', value: eur(tariffs.placas_matricula) },
                 { label: 'ITV (inspección + ficha)', value: eur(taxes.itv) },

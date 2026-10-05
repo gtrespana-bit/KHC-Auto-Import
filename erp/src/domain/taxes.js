@@ -18,7 +18,7 @@ import {
   RETA_2026,
   DEFAULT_TARIFFS,
 } from './rates.js';
-import { round2 } from '../lib/format.js';
+import { round2, eur } from '../lib/format.js';
 
 const n = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
 
@@ -157,38 +157,164 @@ export function calcIvtm({
 }
 
 // ---------------------------------------------------------------------------
-// IVA / ITP EN LA COMPRA (origen y tipo de vendedor)
-//   sellerType: 'dealer_vat' | 'dealer_rebu' | 'private' | 'national_dealer'
+// TIPOS DE VENDEDOR — ¿a quién le compras el vehículo?
+//   Cinco opciones en lenguaje llano. El motor calcula solo los impuestos
+//   que corresponden a cada una (IVA, ITP, nada).
 // ---------------------------------------------------------------------------
-export function calcPurchaseTax({ sellerType = 'dealer_vat', priceNet = 0, priceGross = 0, firstRegDate, km = 0, newPrice = 0, buyerIsBusiness = true, refDate }) {
+export const SELLER_TYPES = [
+  {
+    id: 'pro_eu_vat',
+    short: 'Profesional UE · con IVA',
+    card: 'Compra a profesional de la UE con IVA',
+    desc: 'Concesionario o compraventa de otro país de la UE (Alemania, Bélgica, Francia…). La factura va sin IVA: el IVA se regulariza en España.',
+    tagline: 'El IVA se regulariza en España',
+    zone: 'ue',
+    who: 'profesional',
+  },
+  {
+    id: 'pro_eu_rebu',
+    short: 'Profesional UE · sin pagar IVA',
+    card: 'Compra a profesional de la UE sin haber pagado IVA',
+    desc: 'El vendedor tributa en su régimen de margen (lo que aquí se llama REBU): la factura va sin IVA. Es el caso típico de subastas y compraventas de usados.',
+    tagline: 'Sin IVA ni ITP',
+    zone: 'ue',
+    who: 'profesional',
+  },
+  {
+    id: 'private_eu',
+    short: 'Particular UE · sin IVA',
+    card: 'Compra a particular de la UE sin IVA',
+    desc: 'Le compras el coche a una persona particular de otro país de la UE. No hay IVA: pagas el ITP gallego (8 %) con el Modelo 620.',
+    tagline: 'ITP 8 % · Modelo 620',
+    zone: 'ue',
+    who: 'particular',
+  },
+  {
+    id: 'private_es',
+    short: 'Particular España',
+    card: 'Compra a particular en España',
+    desc: 'Compra a una persona particular en España. Sin IVA: pagas el ITP gallego (8 %) con el Modelo 620.',
+    tagline: 'ITP 8 % · Modelo 620',
+    zone: 'es',
+    who: 'particular',
+  },
+  {
+    id: 'pro_es',
+    short: 'Profesional España · con factura',
+    card: 'Compra a profesional en España con factura',
+    desc: 'Concesionario o compraventa española: el IVA (21 %) ya va incluido en el precio de la factura. No pagas nada extra.',
+    tagline: 'IVA ya incluido en la factura',
+    zone: 'es',
+    who: 'profesional',
+  },
+];
+
+/** Ids antiguos → ids nuevos (compatibilidad con datos ya guardados). */
+export const SELLER_TYPE_LEGACY = {
+  dealer_vat: 'pro_eu_vat',
+  dealer_rebu: 'pro_eu_rebu',
+  private: 'private_eu',
+  national_dealer: 'pro_es',
+};
+
+export const canonicalSellerType = (t) => {
+  const id = t || 'pro_eu_vat';
+  if (SELLER_TYPES.some((s) => s.id === id)) return id;
+  return SELLER_TYPE_LEGACY[id] || 'pro_eu_vat';
+};
+
+export const sellerTypeMeta = (t) => SELLER_TYPES.find((s) => s.id === canonicalSellerType(t)) || SELLER_TYPES[0];
+
+// ---------------------------------------------------------------------------
+// IVA / ITP EN LA COMPRA según el tipo de vendedor.
+//   Devuelve siempre: amount (cuota), cash (lo que sale del bolsillo) y
+//   costImpact (lo que de verdad suma al coste del coche), además de textos
+//   en lenguaje llano (headline, note, steps) para enseñárselos al usuario.
+// ---------------------------------------------------------------------------
+export function calcPurchaseTax({ sellerType = 'pro_eu_vat', priceNet = 0, priceGross = 0, firstRegDate, km = 0, newPrice = 0, buyerIsBusiness = true, refDate }) {
+  const st = canonicalSellerType(sellerType);
   const price = n(priceNet) || n(priceGross);
   const isNewForVat = !firstRegDate || (fiscalAge(firstRegDate, refDate) === 0 && n(km) < 6000);
 
-  if (sellerType === 'private') {
+  // --- Particular (UE o España) → ITP; si el coche es "nuevo" a efectos de
+  // --- IVA (≤ 6 meses o ≤ 6.000 km) tributa por IVA Modelo 309.
+  if (st === 'private_eu' || st === 'private_es') {
     if (isNewForVat) {
-      // Vehículo "nuevo" a efectos de IVA: tributa en España (Modelo 309 / 303)
-      const base = round2(price / (1 + VAT.general));
-      return { kind: 'iva', label: 'IVA (Modelo 309)', base, rate: VAT.general, amount: round2(base * VAT.general), deductible: buyerIsBusiness, note: 'Vehículo nuevo a efectos de IVA (≤ 6 meses o ≤ 6.000 km): el IVA se ingresa en España.' };
+      const amount = round2(price * VAT.general);
+      return {
+        kind: 'iva', sellerType: st, label: 'IVA (Modelo 309)', model: '309',
+        base: round2(price), rate: VAT.general, amount, cash: amount, costImpact: amount,
+        cashImpact: amount, deductible: false,
+        headline: 'El coche cuenta como «nuevo» a efectos de IVA (menos de 6 meses o 6.000 km): ingresas el 21 % en Hacienda con el Modelo 309.',
+        note: 'Vehículo nuevo a efectos de IVA (≤ 6 meses o ≤ 6.000 km): el IVA se ingresa en España.',
+        steps: ['Modelo 309 (AEAT): ingresar el 21 % del precio antes de matricular'],
+      };
     }
     const itp = calcItp({ price, newPrice, firstRegDate, refDate });
-    return { kind: 'itp', label: 'ITP Galicia (Modelo 620)', base: itp.base, rate: itp.rate, amount: itp.quota, deductible: false, note: itp.fromTables ? 'El precio declarado está por debajo de tablas: la base es el valor medio de Hacienda.' : 'Base: precio pactado.', model: '620' };
+    const es = st === 'private_es';
+    return {
+      kind: 'itp', sellerType: st, label: 'ITP Galicia 8 % (Modelo 620)', model: '620',
+      base: itp.base, rate: itp.rate, amount: itp.quota, cash: itp.quota, costImpact: itp.quota,
+      cashImpact: itp.quota, deductible: false,
+      headline: `No hay IVA por ser vendedor particular: pagas el ITP gallego, el 8 % sobre el mayor entre tu precio (${eur(price)}) y el valor de tablas de Hacienda (${eur(itp.base)}).`,
+      note: itp.fromTables
+        ? 'El precio declarado está por debajo de tablas: la base es el valor medio de Hacienda.'
+        : `Base: precio pactado.${es ? '' : ' Compra hecha fuera de España: guarda el contrato de compraventa y la documentación original.'}`,
+      steps: ['Modelo 620 (ATRIGA): liquidar el ITP en el plazo de un mes desde la compra', es ? 'Contrato de compraventa y DNI del vendedor' : 'Contrato de compraventa (mejor traducido) y documentación original del coche'],
+    };
   }
 
-  if (sellerType === 'dealer_rebu') {
-    return { kind: 'none', label: 'Sin IVA ni ITP (vendedor en REBU)', base: price, rate: 0, amount: 0, deductible: false, note: 'Compra a profesional en Régimen Especial de Bienes Usados: no se repercute IVA ni se paga ITP, y la compra no genera IVA deducible.' };
+  // --- Profesional UE en régimen de margen (REBU) → ni IVA ni ITP.
+  if (st === 'pro_eu_rebu') {
+    return {
+      kind: 'none', sellerType: st, label: 'Sin IVA ni ITP', model: '—',
+      base: price, rate: 0, amount: 0, cash: 0, costImpact: 0, cashImpact: 0, deductible: false,
+      headline: 'El vendedor tributa en su régimen de margen (REBU): la factura va sin IVA. No pagas IVA ni ITP; solo el precio de la factura.',
+      note: 'Compra a profesional en Régimen Especial de Bienes Usados: no se repercute IVA ni se paga ITP, y la compra no genera IVA deducible.',
+      steps: ['Pide factura con la mención «régimen especial de los bienes usados» (sin IVA desglosado)'],
+    };
   }
 
-  if (sellerType === 'national_dealer') {
-    const base = round2(price / (1 + VAT.general));
-    return { kind: 'iva', label: 'IVA soportado (21 %)', base, rate: VAT.general, amount: round2(base * VAT.general), deductible: buyerIsBusiness, note: 'Compra nacional a profesional con IVA repercutido: deducible si el vehículo está afecto a la actividad.' };
+  // --- Profesional España con factura → el IVA ya va incluido en el precio.
+  if (st === 'pro_es') {
+    const vatIncluded = round2((price * VAT.general) / (1 + VAT.general));
+    return {
+      kind: 'iva_included', sellerType: st, label: 'IVA incluido en la factura (21 %)', model: buyerIsBusiness ? '303' : '—',
+      base: round2(price / (1 + VAT.general)), rate: VAT.general, amount: vatIncluded,
+      cash: 0, costImpact: 0, cashImpact: 0, vatIncluded, deductible: buyerIsBusiness,
+      headline: buyerIsBusiness
+        ? `El IVA ya está dentro del precio: no pagas nada extra. Puedes deducir ${eur(vatIncluded)} de IVA soportado en tu Modelo 303 si el vehículo está afecto a la actividad.`
+        : 'El IVA ya está dentro del precio de la factura: no pagas nada extra ni presentas nada por IVA.',
+      note: buyerIsBusiness
+        ? 'Compra nacional a profesional: el IVA de la factura es IVA soportado deducible (Modelo 303) si el vehículo está afecto a la actividad.'
+        : 'Compra nacional a profesional: el IVA va incluido en el precio y no supone ningún trámite extra.',
+      steps: buyerIsBusiness
+        ? [`Factura completa con IVA desglosado (${eur(vatIncluded)} deducibles en el Modelo 303)`]
+        : ['Factura o contrato de compraventa con el precio final'],
+    };
   }
 
-  // dealer_vat → adquisición intracomunitaria de vehículo usado
+  // --- pro_eu_vat → compra a profesional de otro país UE: el IVA se
+  // --- regulariza en España (AIB si tienes actividad, Modelo 309 si no).
   if (buyerIsBusiness) {
-    return { kind: 'aib', label: 'IVA autoliquidado (AIB, Modelo 303)', base: round2(price), rate: VAT.general, amount: round2(price * VAT.general), deductible: true, cashImpact: 0, note: 'Adquisición intracomunitaria: se autoliquida el 21 % y se deduce en el mismo Modelo 303. Efecto en caja nulo. Debe declararse en el Modelo 349.', model: '303 + 349' };
+    const amount = round2(price * VAT.general);
+    return {
+      kind: 'aib', sellerType: st, label: 'IVA autoliquidado (Modelo 303 + 349)', model: '303 + 349',
+      base: round2(price), rate: VAT.general, amount, cash: 0, costImpact: 0, cashImpact: 0, deductible: true,
+      headline: `No le pagas IVA al vendedor y no sale dinero de tu bolsillo: autoliquidas el 21 % (${eur(amount)}) en tu Modelo 303 y lo deduces en ese mismo modelo.`,
+      note: 'Adquisición intracomunitaria: se autoliquida el 21 % y se deduce en el mismo Modelo 303. Efecto en caja nulo. Debe declararse en el Modelo 349.',
+      steps: ['Modelo 303 del trimestre: declaras el IVA (devengado) y lo deduces a la vez → efecto 0 €', 'Modelo 349: declaración recapitulativa de la operación intracomunitaria'],
+    };
   }
-  const base = round2(price);
-  return { kind: 'iva', label: 'IVA (Modelo 309)', base, rate: VAT.general, amount: round2(base * VAT.general), deductible: false, note: 'Particular que compra a profesional de otro país UE: ingresa el IVA español con el Modelo 309.', model: '309' };
+  const amount = round2(price * VAT.general);
+  return {
+    kind: 'iva', sellerType: st, label: 'IVA (Modelo 309)', model: '309',
+    base: round2(price), rate: VAT.general, amount, cash: amount, costImpact: amount,
+    cashImpact: amount, deductible: false,
+    headline: `Como no tienes actividad empresarial, ingresas el IVA español con el Modelo 309: el 21 % del precio (${eur(amount)}), antes de matricular.`,
+    note: 'Particular que compra a profesional de otro país UE: ingresa el IVA español con el Modelo 309.',
+    steps: ['Modelo 309 (AEAT): ingresar el 21 % del precio antes de matricular', 'La factura del vendedor de la UE va sin IVA (operación intracomunitaria)'],
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -239,7 +365,7 @@ export function landingCost(v = {}, tariffs = DEFAULT_TARIFFS) {
       { key: 'itv', label: 'ITV de importación', amount: itv },
       { key: 'iedmt', label: 'IEDMT — Modelo 576', amount: iedmt },
       { key: 'itp', label: 'ITP — Modelo 620', amount: itp },
-      { key: 'vatPurchase', label: 'IVA en la compra (309 / AIB)', amount: vatPurchase },
+      { key: 'vatPurchase', label: 'IVA de la compra (Modelo 309)', amount: vatPurchase },
       { key: 'ivtm', label: 'IVTM prorrateado (Concello)', amount: ivtm },
       { key: 'dgt', label: 'Tasa DGT de matriculación', amount: dgt },
       { key: 'placas', label: 'Placas de matrícula', amount: placas },
@@ -276,7 +402,6 @@ export function recalcVehicleTaxes(v = {}, tariffs = DEFAULT_TARIFFS) {
     newPrice: n(v.newPrice),
     buyerIsBusiness: v.buyerIsBusiness ?? true,
   });
-
   const cvf = n(v.cvf) || computeCvf(n(v.cc), n(v.cyl) || 4);
   const ivtm = calcIvtm({
     cvf,
@@ -300,7 +425,10 @@ export function recalcVehicleTaxes(v = {}, tariffs = DEFAULT_TARIFFS) {
     iedmt: iedmt.quota,
     iedmtDetail: iedmt,
     itp: purchaseTax.kind === 'itp' ? purchaseTax.amount : 0,
-    vatPurchase: purchaseTax.kind === 'iva' ? purchaseTax.amount : 0,
+    // Al coste solo va el impuesto que de verdad sale de la caja: el Modelo
+    // 309. El AIB se autoliquida y se deduce (caja 0) y el IVA de una factura
+    // nacional ya está incluido en el precio de compra.
+    vatPurchase: purchaseTax.kind === 'iva' ? n(purchaseTax.costImpact) : 0,
     purchaseTax,
     ivtm: ivtm.quota,
     ivtmDetail: ivtm,

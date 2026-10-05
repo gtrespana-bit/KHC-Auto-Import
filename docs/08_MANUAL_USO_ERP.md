@@ -71,6 +71,29 @@ En venta → Reservado → Vendido → Entregado), el avance de su documentació
 Dos vistas: tabla y tablero por estados. Se puede filtrar, exportar a CSV y abrir la ficha
 completa haciendo clic en la fila.
 
+**Dar de alta un vehículo.** En *Flota → Añadir vehículo* se abre la ficha con pestañas:
+ficha técnica (con buscador del catálogo que rellena motor, CO₂ y precios de mercado),
+revisión precompra, costes e impuestos, venta, documentación, fotos y web.
+
+En **Costes e impuestos** solo hay que responder una pregunta: *¿a quién le compras el
+vehículo?* Hay cinco opciones en lenguaje llano:
+
+| Opción | Qué pagas en la compra |
+| --- | --- |
+| Profesional UE · con IVA | El IVA se regulariza en España: autoliquidado y deducido en el 303 si tienes actividad (caja 0 €) o Modelo 309 si eres particular. |
+| Profesional UE · sin pagar IVA | El vendedor tributa en régimen de margen (REBU): sin IVA y sin ITP. |
+| Particular UE · sin IVA | ITP gallego del 8 % (Modelo 620) sobre el mayor entre precio y tablas. |
+| Particular España | ITP gallego del 8 % (Modelo 620). |
+| Profesional España · con factura | El IVA ya va incluido en el precio; si tienes actividad es IVA soportado deducible. |
+
+Al elegir la opción, la aplicación calcula sola el impuesto de la compra, el IEDMT
+(Modelo 576 según CO₂ y valor venal), el IVTM prorrateado y muestra el panel
+*«Qué pagas por esta compra»* con el total de impuestos y tasas y los modelos que hay
+que presentar. Los cuatro impuestos aparecen con la etiqueta **Auto**: si Hacienda te
+cobra un importe distinto, pulsas la etiqueta para fijarlo a mano, y con
+*Restaurar cálculo automático* vuelves al cálculo. Los gastos fijos (transporte, ITV,
+DGT, placas, preparación…) se precargan desde *Ajustes → Tarifas*.
+
 ### Catálogo
 1.104 variantes de 37 marcas (101 fichas revisadas a mano + 1.003 generadas por modelo de depreciación). Cada ficha lleva motor, fiabilidad (`Motor roca` / `Correcto` /
 `Precaución` / `PROHIBIDO`), precio de compra estimado en Alemania y precio de venta estimado

@@ -26,6 +26,7 @@ import PublishModal from '../erp/src/components/PublishModal.jsx';
 import PlateEditor from '../erp/src/components/PlateEditor.jsx';
 import WebPublicationPanel from '../erp/src/components/WebPublicationPanel.jsx';
 import { PhotoManager, PhotoStrip } from '../erp/src/components/Photos.jsx';
+import VehicleForm from '../erp/src/components/VehicleForm.jsx';
 
 const LS_KEY = 'khc_autoimport_state_v1';
 
@@ -74,6 +75,11 @@ const CASES = [
   ['Ficha · pestaña Web sin guardar', () => <WebPublicationPanel vehicle={demoState().vehicles[1]} isNew />],
   ['Gestor de fotos', () => <PhotoManager vehicleId="veh-golf" />],
   ['Miniatura de foto', () => <PhotoStrip vehicleId="veh-golf" />],
+  ['Ficha · alta de vehículo (costes e impuestos)', () => <VehicleForm open vehicle={null} onClose={() => {}} initialTab="costes" />],
+  ['Ficha · alta de vehículo (ficha técnica)', () => <VehicleForm open vehicle={null} onClose={() => {}} initialTab="ficha" />],
+  ['Ficha · vehículo existente (costes e impuestos)', () => <VehicleForm open vehicle={demoState().vehicles[0]} onClose={() => {}} initialTab="costes" />],
+  ['Ficha · compra a particular (costes)', () => <VehicleForm open vehicle={demoState().vehicles[2]} onClose={() => {}} initialTab="costes" />],
+  ['Ficha · venta y cliente', () => <VehicleForm open vehicle={demoState().vehicles[0]} onClose={() => {}} initialTab="venta" />],
 ];
 
 export async function run() {
