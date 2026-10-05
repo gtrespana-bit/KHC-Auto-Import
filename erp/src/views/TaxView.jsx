@@ -230,7 +230,23 @@ export default function TaxView({ initialTab = 'calendario' }) {
               { key: 'cvf', label: 'CVF', align: 'right', render: (r) => num(r.t.cvf, 2).toFixed(2).replace('.', ',') },
               { key: 'base', label: 'Base IEDMT', align: 'right', render: (r) => eur0(r.t.iedmtDetail.base) },
               { key: 'iedmt', label: 'IEDMT', align: 'right', render: (r) => (r.t.iedmt === 0 ? <Badge tone="sky">Exento</Badge> : eur(r.t.iedmt)) },
-              { key: 'purchase', label: 'Impuesto de compra', align: 'right', render: (r) => <div><p className="tabular-nums">{purchaseCash(r.t.purchaseTax) > 0 ? eur(purchaseCash(r.t.purchaseTax)) : r.t.purchaseTax.amount > 0 ? `${eur(r.t.purchaseTax.amount)} (autoliquidado)` : 'Sin coste'}</p><p className="text-[10px] text-slate-500">{r.t.purchaseTax.label}</p></div> },
+              {
+                key: 'purchase',
+                label: 'Impuesto de compra',
+                align: 'right',
+                render: (r) => {
+                  const pt = r.t.purchaseTax;
+                  const cash = purchaseCash(pt);
+                  const text = cash > 0
+                    ? eur(cash)
+                    : pt.kind === 'aib'
+                      ? `${eur(pt.amount)} (autoliquidado, caja 0 €)`
+                      : pt.kind === 'iva_included'
+                        ? '0 € (IVA incluido en factura)'
+                        : 'Sin coste';
+                  return <div><p className="tabular-nums">{text}</p><p className="text-[10px] text-slate-500">{pt.label}</p></div>;
+                },
+              },
               { key: 'dgt', label: 'Tasa DGT', align: 'right', render: () => eur(tariffs.dgt_matriculacion) },
               { key: 'itv', label: 'ITV', align: 'right', render: (r) => eur(r.t.itv) },
               { key: 'ivtm', label: 'IVTM/año', align: 'right', render: (r) => eur(r.t.ivtmDetail.annual) },

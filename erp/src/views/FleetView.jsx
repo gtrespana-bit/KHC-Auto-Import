@@ -145,7 +145,7 @@ export default function FleetView({ onOpenVehicle, autoOpenId, onAutoOpened }) {
           )}
           <Button size="sm" variant="ghost" icon={Megaphone} onClick={() => setAdFor(v)} title="Generar anuncio" />
           <Button size="sm" variant="ghost" icon={Pencil} onClick={() => setEditing(v)} title="Editar" />
-          <Button size="sm" variant="ghost" icon={Trash2} onClick={() => setConfirm(v)} title="Eliminar" />
+          <Button size="sm" variant="danger" icon={Trash2} onClick={() => setConfirm(v)} title="Eliminar este vehículo" />
         </div>
       ),
     },
@@ -198,14 +198,31 @@ export default function FleetView({ onOpenVehicle, autoOpenId, onAutoOpened }) {
                   {items.map((v) => {
                     const p = vehiclePnl(v, { regime: state.company.vatRegime === 'general' ? 'general' : 'rebu', tariffs });
                     return (
-                      <button key={v.id} onClick={() => setEditing(v)} className="w-full text-left rounded-xl border border-slate-800 bg-slate-950/50 hover:border-amber-500/40 px-3 py-2.5 transition-colors">
-                        <p className="text-sm font-semibold text-white">{v.brand} {v.model}</p>
+                      <div
+                        key={v.id}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setEditing(v)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setEditing(v); } }}
+                        className="w-full text-left rounded-xl border border-slate-800 bg-slate-950/50 hover:border-amber-500/40 px-3 py-2.5 transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-sm font-semibold text-white">{v.brand} {v.model}</p>
+                          <button
+                            type="button"
+                            title="Eliminar este vehículo"
+                            onClick={(e) => { e.stopPropagation(); setConfirm(v); }}
+                            className="shrink-0 rounded-md p-1 text-slate-500 hover:text-rose-300 hover:bg-rose-500/10 transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                         <p className="text-[11px] text-slate-400">{v.version}</p>
                         <div className="flex items-center justify-between mt-1.5 text-[11px]">
                           <span className="text-slate-500">Coste {eur0(p.cost.total)}</span>
                           <span className={p.net >= 0 ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold'}>{eur0(p.net)}</span>
                         </div>
-                      </button>
+                      </div>
                     );
                   })}
                 </div>

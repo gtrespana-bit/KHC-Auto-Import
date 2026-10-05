@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { Calculator, Save, X, ShieldAlert, RefreshCw, BadgeCheck, Camera, Percent, ClipboardCheck } from 'lucide-react';
+import { Calculator, Save, X, BadgeCheck, Percent, ClipboardCheck, Check, RotateCcw } from 'lucide-react';
 import { Modal, Field, Input, Money, Select, Textarea, Checkbox, Button, Row, Badge, Alert, Card, cx } from './ui.jsx';
 import { useStore } from '../lib/store.jsx';
-import { uid, todayISO, eur, eur0, pct as pctFmt } from '../lib/format.js';
+import { uid, todayISO, eur, eur0, pct as pctFmt, round2 } from '../lib/format.js';
 import { STATUS_FLOW, vehiclePnl, financeOffer } from '../domain/finance.js';
-import { landingCost, recalcVehicleTaxes, calcIedmt, calcPurchaseTax, computeCvf, valorVenal } from '../domain/taxes.js';
+import { landingCost, recalcVehicleTaxes, computeCvf, SELLER_TYPES } from '../domain/taxes.js';
 import { DOCUMENT_CHECKLIST } from '../domain/compliance.js';
 import { searchVehicles, VEHICLE_DB, RELIABILITY_META } from '../data/vehicleDatabase.js';
 import { getVehicleInspectionGuide, searchInspectionPresets } from '../data/vehicleInspection.js';
@@ -12,12 +12,15 @@ import VehicleInspectionChecklist from './VehicleInspectionChecklist.jsx';
 import { PhotoManager } from './Photos.jsx';
 import WebPublicationPanel from './WebPublicationPanel.jsx';
 
-const SELLER_TYPES = [
-  { value: 'dealer_vat', label: 'Profesional UE con IVA (adquisición intracomunitaria)' },
-  { value: 'dealer_rebu', label: 'Profesional UE en REBU (sin IVA repercutido)' },
-  { value: 'private', label: 'Particular (tributa por ITP)' },
-  { value: 'national_dealer', label: 'Profesional español con factura (IVA soportado)' },
-];
+// Campos de impuestos que se calculan solos según la ficha y el vendedor.
+const AUTO_TAX_KEYS = ['iedmt', 'itp', 'vatPurchase', 'ivtm'];
+
+const AUTO_TAX_LABELS = {
+  iedmt: { label: 'Impuesto de matriculación (576)', hint: 'Según CO₂ y valor de tablas' },
+  itp: { label: 'ITP compra a particular (620)', hint: '8 % sobre el mayor entre precio y tablas' },
+  vatPurchase: { label: 'IVA de la compra (309)', hint: 'Solo si toca pagarlo en caja' },
+  ivtm: { label: 'Impuesto de circulación (IVTM)', hint: 'Prorrateado por trimestres' },
+};
 
 const COST_GROUPS = [
   {
@@ -36,18 +39,6 @@ const COST_GROUPS = [
     ],
   },
   {
-    title: 'Impuestos y tasas',
-    keys: [
-      ['iedmt', 'IEDMT — Modelo 576'],
-      ['itp', 'ITP — Modelo 620'],
-      ['vatPurchase', 'IVA compra (309 / AIB)'],
-      ['ivtm', 'IVTM prorrateado'],
-      ['dgt', 'Tasa DGT matriculación'],
-      ['placas', 'Placas'],
-      ['gestoria', 'Gestoría'],
-    ],
-  },
-  {
     title: 'Puesta a la venta',
     keys: [
       ['recond', 'Reacondicionamiento'],
@@ -60,27 +51,56 @@ const COST_GROUPS = [
   },
 ];
 
-const emptyVehicle = () => ({
+/** Vehículo vacío: los gastos fijos salen de Ajustes → Tarifas. */
+const emptyVehicle = ({ tariffs, buyerIsBusiness }) => ({
   id: uid('veh'),
   brand: '', model: '', version: '', engine: '', engineCode: '', year: new Date().getFullYear(), firstRegDate: null,
   km: 0, vin: '', plate: '', fuel: 'Diésel', transmission: 'Manual',
   cc: 1968, cyl: 4, cv: 150, co2: 120, badge: 'C (Verde)', newPrice: 30000, segment: 'Compacto',
   inspectionChecks: {},
-  originCountry: 'Alemania', originCity: '', sellerType: 'dealer_vat', taxMethod: 'tablas',
-  buyerIsBusiness: true, status: 'prospeccion',
+  originCountry: 'Alemania', originCity: '', sellerType: 'pro_eu_vat', taxMethod: 'tablas',
+  buyerIsBusiness, status: 'prospeccion',
   purchaseDate: todayISO(), arrivalDate: null, registrationDate: null,
   costs: {
-    purchase: 0, transport: 750, travel: 0, cocFicha: 90, itv: 132.59, dgt: 99.77, placas: 28,
-    gestoria: 0, iedmt: 0, itp: 0, vatPurchase: 0, ivtm: 0, recond: 180, maintenance: 150,
-    guarantee: 0, advertising: 30, insurance: 0, other: 0,
+    purchase: 0,
+    transport: Number(tariffs.transporte_camion) || 750,
+    travel: 0,
+    cocFicha: 90,
+    itv: round2((Number(tariffs.itv_turismo_diesel) || 52.3) + (Number(tariffs.itv_ficha_matriculacion) || 80.29)),
+    dgt: Number(tariffs.dgt_matriculacion) || 99.77,
+    placas: Number(tariffs.placas_matricula) || 28,
+    gestoria: 0,
+    // Los impuestos (576, ITP, IVA, IVTM) se calculan solos al guardar.
+    iedmt: 0, itp: 0, vatPurchase: 0, ivtm: 0,
+    recond: Number(tariffs.preparacion) || 180,
+    maintenance: 150,
+    guarantee: 0,
+    advertising: Number(tariffs.anuncio_portal) || 30,
+    insurance: 0,
+    other: 0,
   },
+  taxOverrides: {},
   targetSalePrice: 0, documents: {}, sale: null, notes: '',
   itvDue: null, insuranceDue: null, imageUrl: '', rotationDays: 60,
 });
 
 export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTab }) {
   const { state, saveVehicle, toast, tariffs, can } = useStore();
-  const [draft, setDraft] = useState(() => (vehicle ? structuredClone(vehicle) : emptyVehicle()));
+  const buyerIsBusiness = state.company.legalForm !== 'particular';
+
+  const [draft, setDraft] = useState(() => {
+    if (!vehicle) return emptyVehicle({ tariffs, buyerIsBusiness });
+    const base = structuredClone(vehicle);
+    // Si un impuesto guardado ya no cuadra con el cálculo (el usuario metió el
+    // importe real de Hacienda, por ejemplo), se respeta marcándolo como manual.
+    const t = recalcVehicleTaxes(base, tariffs);
+    const computed = { iedmt: t.iedmt, itp: t.itp, vatPurchase: t.vatPurchase, ivtm: t.ivtm };
+    const ov = { ...(base.taxOverrides || {}) };
+    AUTO_TAX_KEYS.forEach((k) => {
+      if (Math.abs((Number(base.costs?.[k]) || 0) - computed[k]) > 0.005) ov[k] = true;
+    });
+    return { ...base, taxOverrides: ov };
+  });
   const [query, setQuery] = useState('');
   const [tab, setTab] = useState(() => initialTab || (vehicle?.status === 'prospeccion' ? 'revision' : 'ficha'));
   const [fin, setFin] = useState(() => ({
@@ -98,10 +118,24 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTa
   const setSale = (patch) => setDraft((d) => ({ ...d, sale: { ...(d.sale || {}), ...patch } }));
 
   const cvf = useMemo(() => Number(computeCvf(draft.cc, draft.cyl || 4).toFixed(2)), [draft.cc, draft.cyl]);
-  const cost = useMemo(() => landingCost(draft, tariffs), [draft, tariffs]);
-  const pnl = useMemo(() => vehiclePnl(draft, { regime: state.company.vatRegime === 'general' ? 'general' : 'rebu', tariffs, personalTax: state.company.legalForm === 'particular' }), [draft, state.company, tariffs]);
 
   const taxes = useMemo(() => recalcVehicleTaxes(draft, tariffs), [draft, tariffs]);
+
+  // Impuestos calculados automáticamente (salvo los que el usuario haya
+  // ajustado a mano, que se quedan como estaban).
+  const computedTaxCosts = useMemo(
+    () => ({ iedmt: taxes.iedmt, itp: taxes.itp, vatPurchase: taxes.vatPurchase, ivtm: taxes.ivtm }),
+    [taxes],
+  );
+  const autoTaxCosts = useMemo(() => {
+    const ov = draft.taxOverrides || {};
+    return Object.fromEntries(AUTO_TAX_KEYS.map((k) => [k, ov[k] ? Number(draft.costs?.[k]) || 0 : computedTaxCosts[k]]));
+  }, [draft.taxOverrides, draft.costs, computedTaxCosts]);
+  /** Ficha con los impuestos ya aplicados: es la que alimenta totales y P&L. */
+  const effective = useMemo(() => ({ ...draft, costs: { ...draft.costs, ...autoTaxCosts } }), [draft, autoTaxCosts]);
+
+  const cost = useMemo(() => landingCost(effective, tariffs), [effective, tariffs]);
+  const pnl = useMemo(() => vehiclePnl(effective, { regime: state.company.vatRegime === 'general' ? 'general' : 'rebu', tariffs, personalTax: state.company.legalForm === 'particular' }), [effective, state.company, tariffs]);
   const offer = useMemo(
     () => financeOffer({ price: Number(draft.sale?.price ?? draft.targetSalePrice ?? 0), ...fin }),
     [draft.sale?.price, draft.targetSalePrice, fin],
@@ -165,19 +199,32 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTa
     toast(`${preset.brand} ${preset.model}: guía cargada, completa los datos exactos por VIN`);
   };
 
-  const applyTaxes = () => {
-    set({
-      cvf: taxes.cvf,
-      costs: {
-        ...draft.costs,
-        iedmt: taxes.iedmt,
-        itp: taxes.itp,
-        vatPurchase: taxes.vatPurchase,
-        ivtm: taxes.ivtm,
-        itv: taxes.itv || draft.costs.itv,
-      },
+  /** Cambia el tipo de vendedor: los impuestos se recalculan solos. */
+  const chooseSeller = (id) => {
+    const next = { ...draft, sellerType: id, buyerIsBusiness };
+    const t = recalcVehicleTaxes(next, tariffs);
+    const meta = SELLER_TYPES.find((s) => s.id === id);
+    set({ sellerType: id, buyerIsBusiness });
+    const pt = t.purchaseTax;
+    toast(`${meta?.short || 'Vendedor'}: ${pt.cash > 0 ? `${pt.label} → ${eur(pt.cash)}` : 'sin impuesto en la compra'}`);
+  };
+
+  /** Ajustar un impuesto a mano (marca el campo como manual). */
+  const setTaxCost = (key, value) =>
+    setDraft((d) => ({ ...d, costs: { ...d.costs, [key]: value }, taxOverrides: { ...(d.taxOverrides || {}), [key]: true } }));
+
+  /** Volver un impuesto al cálculo automático. */
+  const restoreTax = (key) =>
+    setDraft((d) => {
+      const ov = { ...(d.taxOverrides || {}) };
+      delete ov[key];
+      return { ...d, taxOverrides: ov, costs: { ...d.costs, [key]: computedTaxCosts[key] } };
     });
-    toast('Impuestos recalculados con las tarifas 2026');
+
+  const manualTaxCount = AUTO_TAX_KEYS.filter((k) => draft.taxOverrides?.[k]).length;
+  const restoreAllTaxes = () => {
+    setDraft((d) => ({ ...d, taxOverrides: {}, costs: { ...d.costs, ...computedTaxCosts } }));
+    toast('Impuestos restaurados al cálculo automático');
   };
 
   const save = () => {
@@ -186,7 +233,7 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTa
       return;
     }
     const saved = saveVehicle({
-      ...draft,
+      ...effective,
       cvf: draft.cvf || cvf,
       inspectionChecks: draft.inspectionChecks || {},
       inspectionProfileKey: inspectionGuide.profileKey,
@@ -347,30 +394,121 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTa
 
       {tab === 'costes' && (
         <div className="space-y-4">
+          {/* --- 1 · ¿A quién le compras el vehículo? ------------------------- */}
+          <div>
+            <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2">1 · ¿A quién le compras el vehículo?</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2.5">
+              {SELLER_TYPES.map((s) => {
+                const active = draft.sellerType === s.id;
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => chooseSeller(s.id)}
+                    className={cx(
+                      'text-left rounded-xl border p-3 transition-colors',
+                      active ? 'border-amber-500 bg-amber-500/10' : 'border-slate-800 bg-slate-950/50 hover:border-slate-600',
+                    )}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <p className={cx('text-sm font-bold leading-tight', active ? 'text-amber-300' : 'text-white')}>{s.short}</p>
+                      {active && <BadgeCheck className="w-4 h-4 text-amber-400 shrink-0" />}
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-1 leading-snug">{s.desc}</p>
+                    <Badge tone={active ? 'amber' : 'slate'} className="mt-2">{s.tagline}</Badge>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* --- 2 · Qué pagas por esta compra -------------------------------- */}
+          <Card className="p-3.5 border-amber-500/25">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <p className="text-[11px] uppercase tracking-wider text-amber-300 font-semibold flex items-center gap-1.5">
+                <Calculator className="w-3.5 h-3.5" /> 2 · Qué pagas por esta compra — calculado automáticamente
+              </p>
+              {manualTaxCount > 0 && (
+                <Button size="sm" variant="secondary" icon={RotateCcw} onClick={restoreAllTaxes}>
+                  Restaurar cálculo automático ({manualTaxCount} {manualTaxCount === 1 ? 'campo manual' : 'campos manuales'})
+                </Button>
+              )}
+            </div>
+
+            <Row
+              label={`Impuesto de la compra · ${taxes.purchaseTax.label}`}
+              value={taxes.purchaseTax.cash > 0 ? eur(taxes.purchaseTax.cash) : '0 €'}
+              strong
+              tone={taxes.purchaseTax.cash > 0 ? 'rose' : 'emerald'}
+              hint={
+                taxes.purchaseTax.kind === 'aib'
+                  ? `Se autoliquida ${eur(taxes.purchaseTax.amount)} en el Modelo 303 y se deduce en ese mismo modelo: no sale de tu bolsillo`
+                  : taxes.purchaseTax.kind === 'iva_included'
+                    ? `El IVA (${eur(taxes.purchaseTax.vatIncluded)}) ya va dentro del precio de la factura${buyerIsBusiness ? ' y es deducible en tu Modelo 303' : ''}`
+                    : taxes.purchaseTax.kind === 'none'
+                      ? 'El vendedor tributa en régimen de margen: no hay IVA ni ITP'
+                      : undefined
+              }
+            />
+            <p className="text-xs text-slate-300 mt-2 leading-relaxed">{taxes.purchaseTax.headline}</p>
+            {taxes.purchaseTax.steps?.length > 0 && (
+              <ul className="mt-2 space-y-1">
+                {taxes.purchaseTax.steps.map((step) => (
+                  <li key={step} className="text-[11px] text-slate-400 flex items-start gap-1.5">
+                    <Check className="w-3 h-3 text-emerald-400 mt-0.5 shrink-0" /> {step}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <div className="mt-3 pt-2 border-t border-slate-800">
+              <Row
+                label="Impuesto de matriculación — Modelo 576"
+                value={eur(autoTaxCosts.iedmt)}
+                tone={autoTaxCosts.iedmt === 0 ? 'emerald' : 'default'}
+                hint={
+                  autoTaxCosts.iedmt === 0
+                    ? 'Exento (CO₂ ≤ 120 g/km): solo se presenta el Modelo 06'
+                    : `${taxes.iedmtDetail.bracket} · base ${eur(taxes.iedmtDetail.base)} · CVF ${taxes.cvf}`
+                }
+              />
+              <Row
+                label="Impuesto de la compra (IVA o ITP)"
+                value={eur(autoTaxCosts.itp + autoTaxCosts.vatPurchase)}
+                tone={(autoTaxCosts.itp + autoTaxCosts.vatPurchase) === 0 ? 'emerald' : 'default'}
+                hint={taxes.purchaseTax.kind === 'aib' ? 'Autoliquidado y deducido: efecto en caja 0 €' : undefined}
+              />
+              <Row
+                label="Impuesto de circulación (IVTM) — Concello de A Coruña"
+                value={eur(autoTaxCosts.ivtm)}
+                hint={`${taxes.ivtmDetail.quarters}/4 trimestres · ${eur(taxes.ivtmDetail.annual)}/año`}
+              />
+              <Row label="ITV de importación + ficha técnica" value={eur(Number(draft.costs?.itv) || 0)} />
+              <Row label="Tasa DGT de matriculación + placas" value={eur(round2((Number(draft.costs?.dgt) || 0) + (Number(draft.costs?.placas) || 0)))} />
+              <Row
+                label="TOTAL impuestos y tasas de la operación"
+                value={eur(round2(autoTaxCosts.iedmt + autoTaxCosts.itp + autoTaxCosts.vatPurchase + autoTaxCosts.ivtm + (Number(draft.costs?.itv) || 0) + (Number(draft.costs?.dgt) || 0) + (Number(draft.costs?.placas) || 0)))}
+                strong
+                tone="amber"
+              />
+              <p className="text-[10px] text-slate-500 mt-1.5">
+                Valor venal según tablas de Hacienda: {eur(taxes.valorVenal)} · Tarifas oficiales 2026.
+              </p>
+            </div>
+          </Card>
+
+          {/* --- Datos fiscales y fechas --------------------------------------- */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Field label="Tipo de vendedor" hint="Determina si pagas IVA, ITP o nada">
-              <Select value={draft.sellerType} onChange={(v) => set({ sellerType: v })} options={SELLER_TYPES} />
-            </Field>
             <Field label="Base del Modelo 576" hint="Tablas de Hacienda = no comprobable">
               <Select value={draft.taxMethod} onChange={(v) => set({ taxMethod: v })} options={[{ value: 'tablas', label: 'Tablas de Hacienda (valor venal)' }, { value: 'factura', label: 'Precio de factura' }]} />
+            </Field>
+            <Field label="Bonificación IVTM (%)">
+              <Select value={String(draft.ivtmBonificacion || 0)} onChange={(v) => set({ ivtmBonificacion: Number(v) })} options={[{ value: '0', label: 'Sin bonificación' }, { value: '60', label: '60 % — ECO / cero emisiones' }, { value: '100', label: '100 % — histórico' }, { value: '3', label: '3 % — recibo domiciliado' }]} />
             </Field>
             <Field label="Fecha de compra"><Input type="date" value={draft.purchaseDate || ''} onChange={(v) => set({ purchaseDate: v })} /></Field>
             <Field label="Fecha de llegada"><Input type="date" value={draft.arrivalDate || ''} onChange={(v) => set({ arrivalDate: v })} /></Field>
             <Field label="Fecha de matriculación"><Input type="date" value={draft.registrationDate || ''} onChange={(v) => set({ registrationDate: v })} /></Field>
-            <Field label="Bonificación IVTM (%)">
-              <Select value={String(draft.ivtmBonificacion || 0)} onChange={(v) => set({ ivtmBonificacion: Number(v) })} options={[{ value: '0', label: 'Sin bonificación' }, { value: '60', label: '60 % — ECO / cero emisiones' }, { value: '100', label: '100 % — histórico' }, { value: '3', label: '3 % — recibo domiciliado' }]} />
-            </Field>
           </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-800 bg-slate-950/50 px-3.5 py-3">
-            <div className="text-xs text-slate-400">
-              <p className="font-semibold text-slate-200 mb-0.5">Cálculo automático con las tarifas oficiales 2026</p>
-              <p>CVF {taxes.cvf} · Valor venal {eur(taxes.valorVenal)} · IEDMT {eur(taxes.iedmt)} · {taxes.purchaseTax.label} {eur(taxes.purchaseTax.amount)} · IVTM {eur(taxes.ivtm)} ({taxes.ivtmDetail.quarters}/4 trimestres) · ITV {eur(taxes.itv)}</p>
-            </div>
-            <Button variant="outline" icon={RefreshCw} onClick={applyTaxes}>Recalcular impuestos</Button>
-          </div>
-
-          {taxes.purchaseTax.note && <Alert tone="info">{taxes.purchaseTax.note}</Alert>}
 
           {COST_GROUPS.map((group) => (
             <Card key={group.title} className="p-3.5">
@@ -382,6 +520,47 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTa
               </div>
             </Card>
           ))}
+
+          {/* --- Impuestos y tasas --------------------------------------------- */}
+          <Card className="p-3.5">
+            <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-1">Impuestos y tasas</p>
+            <p className="text-[11px] text-slate-500 mb-3">
+              Los cuatro impuestos se calculan solos según el vendedor, el precio y la ficha del coche. Si Hacienda te cobra otra cosa, pulsa «Auto» para fijar tu importe a mano.
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {AUTO_TAX_KEYS.map((k) => {
+                const meta = AUTO_TAX_LABELS[k];
+                const manual = !!draft.taxOverrides?.[k];
+                return (
+                  <div key={k}>
+                    <div className="flex items-center justify-between gap-1 mb-1">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 truncate">{meta.label}</span>
+                      <button
+                        type="button"
+                        onClick={() => (manual ? restoreTax(k) : setTaxCost(k, autoTaxCosts[k]))}
+                        title={manual ? 'Volver al cálculo automático' : 'Fijar el importe a mano'}
+                        className={cx(
+                          'shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold border transition-colors',
+                          manual
+                            ? 'bg-amber-500/15 border-amber-500/40 text-amber-300 hover:bg-amber-500/25'
+                            : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20',
+                        )}
+                      >
+                        {manual ? (<><RotateCcw className="w-2.5 h-2.5" /> Manual</>) : (<><Check className="w-2.5 h-2.5" /> Auto</>)}
+                      </button>
+                    </div>
+                    <Money value={autoTaxCosts[k]} onChange={(v) => setTaxCost(k, v)} />
+                    <span className="block text-[11px] text-slate-500 mt-1">{meta.hint}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3 pt-3 border-t border-slate-800">
+              <Field label="Tasa DGT matriculación"><Money value={draft.costs?.dgt ?? 0} onChange={(v) => setCost('dgt', v)} /></Field>
+              <Field label="Placas"><Money value={draft.costs?.placas ?? 0} onChange={(v) => setCost('placas', v)} /></Field>
+              <Field label="Gestoría"><Money value={draft.costs?.gestoria ?? 0} onChange={(v) => setCost('gestoria', v)} /></Field>
+            </div>
+          </Card>
 
           <Card className="p-3.5">
             <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2">Coste total de aterrizaje</p>
