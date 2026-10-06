@@ -431,6 +431,9 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTa
                 );
               })}
             </div>
+            <Alert tone="info" className="mt-3" title="El precio de compra siempre es la cifra final que pagaste">
+              Si escribes 15.000 €, el coste de compra será 15.000 € en todos los casos: no reducimos esa cifra ni le extraemos IVA. Lo que cambia es la venta: si la compra alemana fue una factura intracomunitaria neta (sin IVA en la factura, con AIB deducible en España), la reventa queda en régimen general y el precio cobrado al cliente incluye el 21 % de IVA español. Por eso el cálculo de beneficio aparta el IVA de la venta y puede exigir vender más caro.
+            </Alert>
           </div>
 
           {/* --- 2 · Qué pagas por esta compra -------------------------------- */}
@@ -652,9 +655,9 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTa
 
           <Card className="p-3.5">
             <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2">Rentabilidad de la operación</p>
-            <Row label="Coste total de aterrizaje" value={eur(pnl.cost.total)} />
-            <Row label="Precio de venta" value={eur(pnl.price)} />
-            <Row label="Beneficio bruto" value={eur(pnl.gross)} tone={pnl.gross >= 0 ? 'emerald' : 'rose'} hint={`${pctFmt(pnl.grossPct * 100, 1)} sobre el precio`} />
+            <Row label="Coste total de aterrizaje" value={eur(pnl.cost.total)} hint={`Compra registrada sin alterar: ${eur(pnl.purchaseCost)}`} />
+            <Row label="Precio de venta (IVA incluido)" value={eur(pnl.price)} hint={pnl.vatRegime === 'general' ? `Base ${eur(pnl.price - pnl.vat)} + IVA repercutido ${eur(pnl.vat)}` : undefined} />
+            <Row label="Beneficio bruto antes de IVA" value={eur(pnl.gross)} tone={pnl.gross >= 0 ? 'emerald' : 'rose'} hint={`${pctFmt(pnl.grossPct * 100, 1)} sobre el precio`} />
             <Row
               label={pnl.vatRegime === 'rebu' ? 'IVA incluido en el margen (REBU)' : 'IVA que ingresas en Hacienda'}
               value={eur(pnl.vatDue)}
