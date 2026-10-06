@@ -136,7 +136,10 @@ export function fleetSummary(vehicles = [], opts = {}) {
   const soldCost = round2(sold.reduce((a, r) => a + r.pnl.cost.total, 0));
   const grossProfit = round2(sold.reduce((a, r) => a + r.pnl.gross, 0));
   const netProfit = round2(sold.reduce((a, r) => a + r.pnl.net, 0));
-  const vatDue = round2(sold.reduce((a, r) => a + r.pnl.vat, 0));
+  // La tesorería debe sumar la cuota realmente ingresada, no solo el IVA
+  // repercutido. Esto conserva correctamente la neutralidad de una AIB y el
+  // IVA soportado deducible de compras nacionales.
+  const vatDue = round2(sold.reduce((a, r) => a + r.pnl.vatDue, 0));
   const avgDays = sold.length ? Math.round(sold.reduce((a, r) => a + r.pnl.days, 0) / sold.length) : 0;
 
   return {
@@ -229,7 +232,7 @@ export function monthlyPnl({ vehicles = [], expenses = [], period } = {}) {
     const b = bucket(key);
     b.revenue = round2(b.revenue + p.price);
     b.cost = round2(b.cost + p.cost.total);
-    b.vat = round2(b.vat + p.vat);
+    b.vat = round2(b.vat + p.vatDue);
     b.net = round2(b.net + p.net);
     b.units += 1;
   });
