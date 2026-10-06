@@ -1,7 +1,7 @@
 // ============================================================================
 //  MOTOR ECONÓMICO — P&L por vehículo, tesorería, precios y KPIs
 // ============================================================================
-import { landingCost, calcSaleVat, calcIrpfGain, calcIs, breakEvenPrice } from './taxes.js';
+import { landingCost, calcSaleVat, calcIrpfGain, calcIs, breakEvenPrice, calcPurchaseTax, resolveSaleRegime, marginPurchaseCost } from './taxes.js';
 import { round2, daysBetween, todayISO, monthKey, parseISO } from '../lib/format.js';
 import { DEFAULT_TARIFFS } from './rates.js';
 
@@ -44,24 +44,70 @@ export function daysInStock(v) {
 export function vehiclePnl(v = {}, { regime = 'rebu', personalTax = false, tariffs = DEFAULT_TARIFFS } = {}) {
   const cost = landingCost(v, tariffs);
   const price = salePriceOf(v);
-  const purchaseCost = cost.purchase;
-  const vat = calcSaleVat({ salePriceGross: price, purchaseCost, regime });
+
+  // Régimen de venta efectivo del vehículo: el elegido en su ficha, corregido
+  // si la compra llevó IVA deducible (entonces el REBU no es aplicable).
+  const resolved = resolveSaleRegime(v, regime);
+  const saleRegime = resolved.regime;
+
+  // Precio de compra a efectos del margen REBU (art. 137 LIVA): precio más
+  // gastos accesorios del vendedor y el ITP soportado si no estaba exento.
+  const marginPurchase = marginPurchaseCost({ ...v, costs: { ...(v.costs || {}), itp: n(v.costs?.itp) } });
+
+  // IVA soportado deducible de la compra (AIB de la intracomunitaria o
+  // factura nacional), que se compensa contra el IVA de la venta.
+  const firstRegDate = v.firstRegDate || (v.year ? `${v.year}-01-01` : null);
+  const purchaseTax = calcPurchaseTax({
+    sellerType: v.sellerType,
+    priceNet: cost.purchase,
+    firstRegDate,
+    km: v.km,
+    newPrice: v.newPrice,
+    buyerIsBusiness: v.buyerIsBusiness ?? true,
+    cc: v.cc,
+    badge: v.environmentalBadge || v.badge,
+    itpExemption: !!v.itpExemption,
+  });
+  const inputVat = n(purchaseTax.vatDeductible);
+  // La AIB se devenga y se deduce en el mismo 303: es neutra en caja, pero hay
+  // que sumarla al devengado para no infravalorar el IVA a ingresar del periodo.
+  const selfAssessedVat = purchaseTax.kind === 'aib' ? n(purchaseTax.amount) : 0;
+
+  const vat = calcSaleVat({
+    salePriceGross: price,
+    purchaseCost: marginPurchase,
+    regime: saleRegime,
+    inputVatDeductible: inputVat,
+    selfAssessedVat,
+  });
 
   const gross = round2(price - cost.total);
+  // En régimen general, del precio cobrado una parte es IVA de Hacienda: el
+  // beneficio es el neto una vez restado el IVA a ingresar (ya compensado con
+  // el IVA deducible de la compra). En REBU y en las ventas exentas coincide
+  // con la cuota devengada.
+  const vatDue = round2(vat.due);
   const irpf = personalTax ? calcIrpfGain(gross).tax : 0;
-  const net = round2(gross - vat.vat - irpf);
+  const net = round2(gross - vatDue - irpf);
 
   const days = daysInStock(v);
   const years = days > 0 ? days / 365 : 0;
 
   return {
     cost,
-    purchaseCost,
+    purchaseCost: cost.purchase,
+    marginPurchase,
     price,
     gross,
     grossPct: price > 0 ? gross / price : 0,
     vat: vat.vat,
-    vatRegime: vat.regime,
+    vatDue,
+    inputVat,
+    aibVat: selfAssessedVat,
+    vatRegime: saleRegime,
+    regimeWanted: resolved.wanted,
+    regimeForced: resolved.forced,
+    regimeNote: resolved.reason,
     irpf,
     net,
     netPct: price > 0 ? net / price : 0,
@@ -70,7 +116,7 @@ export function vehiclePnl(v = {}, { regime = 'rebu', personalTax = false, tarif
     tae: years > 0 ? Math.pow(Math.max(0.0001, 1 + (cost.total > 0 ? net / cost.total : 0)), 1 / years) - 1 : 0,
     days,
     profitPerDay: days > 0 ? net / days : 0,
-    breakEven: breakEvenPrice(cost.total, { regime, purchaseCost }),
+    breakEven: breakEvenPrice(cost.total, { regime: saleRegime, purchaseCost: marginPurchase }),
     isSold: isSold(v),
   };
 }
@@ -228,8 +274,14 @@ export function suggestedPrice({ totalCost, purchaseCost, targetNetPct = 0.12, r
     if (divisor <= 0) return round2(n(totalCost) * 10); // objetivo inalcanzable
     return round2((n(totalCost) - (n(purchaseCost) * 0.21) / 1.21) / divisor);
   }
+  if (regime === 'intra_exempt' || regime === 'particular') {
+    if (target >= 1) return round2(n(totalCost) * 10);
+    return round2(n(totalCost) / (1 - target));
+  }
+  // Régimen general: del precio de venta hay que apartar el 21 % de IVA, así
+  // que el margen se calcula sobre la base (precio / 1,21).
   if (target >= 1) return round2(n(totalCost) * 10);
-  return round2(n(totalCost) / (1 - target));
+  return round2((n(totalCost) * 1.21) / (1 - target));
 }
 
 export function loanQuote({ principal, apr, months, entry = 0, fees = 0 }) {

@@ -10,6 +10,8 @@ import {
   calcPurchaseTax, calcSaleVat, calcIrpfGain, calcIs, calcReta,
   landingCost, breakEvenPrice, recalcVehicleTaxes,
   SELLER_TYPES, canonicalSellerType,
+  getDepreciationPct, fiscalAge, fiscalAgeExact, monthsSince, marginPurchaseCost,
+  rebuEligibility, resolveSaleRegime, allowedSaleRegimes,
 } from '../erp/src/domain/taxes.js';
 import {
   vehiclePnl, fleetSummary, suggestedPrice, loanQuote, movementsFromData,
@@ -53,39 +55,83 @@ check('IEDMT 128 g/km = 4,75 %', () => assert.equal(getIedmtRate(128), 0.0475));
 check('IEDMT 168 g/km = 9,75 %', () => assert.equal(getIedmtRate(168), 0.0975));
 check('IEDMT 210 g/km = 14,75 %', () => assert.equal(getIedmtRate(210), 0.1475));
 
-check('Valor venal: Golf 2019 (31.500 €) con 7 años = 10.710 €', () => {
-  const v = valorVenal({ newPrice: 31500, firstRegDate: '2019-03-10', co2: 118, refDate: new Date(2026, 8, 24) });
-  assert.equal(v.age, 7);
-  assert.equal(v.pct, 0.34);
-  approx(v.valorVenal, 10710, 0.01);
-  approx(v.iedmtBase, 8851.24, 0.01);
+check('Antigüedad fiscal: años completos para mostrar y años exactos para el anexo IV', () => {
+  assert.equal(fiscalAge('2019-03-10', new Date(2026, 8, 24)), 7);
+  approx(fiscalAgeExact('2019-03-10', new Date(2026, 8, 24)), 7.5, 0.01);
+  assert.equal(monthsSince('2019-03-10', new Date(2026, 8, 24)), 90);
 });
 
-check('Modelo 576 por tablas: base 8.516,90 € y cuota 404,55 € (128 g/km)', () => {
+check('Depreciación anexo IV por intervalos reales: 5 años y 2 meses = 39 %, 7 años y 6 meses = 28 %', () => {
+  // El anexo IV se lee «más de N años, hasta N+1» con la antigüedad real.
+  assert.equal(getDepreciationPct(5.17), 0.39);
+  assert.equal(getDepreciationPct(7.5), 0.28);
+  assert.equal(getDepreciationPct(10.33), 0.17);
+  assert.equal(getDepreciationPct(0.5), 1);
+});
+
+check('Valor venal: Golf 2019 (31.500 €) con 7 años y medio = 8.820 € (28 %)', () => {
+  const v = valorVenal({ newPrice: 31500, firstRegDate: '2019-03-10', co2: 118, refDate: new Date(2026, 8, 24) });
+  assert.equal(v.age, 7);
+  assert.equal(v.pct, 0.28);
+  approx(v.valorVenal, 8820, 0.01);
+  approx(v.iedmtBase, 7289.26, 0.01);   // 8.820 / 1,21 (tipo 0 % a 118 g/km)
+});
+
+check('Modelo 576 por tablas: base 7.013,92 € y cuota 333,16 € (128 g/km)', () => {
   const r = calcIedmt({ co2: 128, method: 'tablas', purchasePrice: 13500, newPrice: 31500, firstRegDate: '2019-03-10', refDate: new Date(2026, 8, 24) });
-  approx(r.base, 8516.9, 0.05);
-  approx(r.quota, 404.55, 0.05);
+  approx(r.base, 7013.92, 0.05);
+  approx(r.quota, 333.16, 0.05);
   assert.equal(r.model, '576');
 });
 
-check('Modelo 576 exento genera Modelo 06', () => {
+check('Golf GTI 2016 importado (149 g/km): base 4.814,08 € y cuota 228,67 €', () => {
+  const r = calcIedmt({ co2: 149, method: 'tablas', purchasePrice: 16500, newPrice: 35610, firstRegDate: '2016-03-15', refDate: new Date(2026, 6, 20) });
+  approx(r.base, 4814.08, 0.05);
+  approx(r.quota, 228.67, 0.05);
+  assert.equal(r.model, '576');
+  assert.equal(r.exempt, false);
+});
+
+check('IEDMT ≤ 120 g/km: tipo 0 %, cuota cero, se presenta el 576 (no el 06)', () => {
   const r = calcIedmt({ co2: 110, newPrice: 20000, firstRegDate: '2020-01-01' });
   assert.equal(r.quota, 0);
+  assert.equal(r.model, '576');
+  assert.equal(r.zeroRate, true);
+  assert.equal(r.exempt, true);
+});
+
+check('IEDMT con exención o no sujeción legal → Modelo 06', () => {
+  const r = calcIedmt({ co2: 149, newPrice: 20000, firstRegDate: '2020-01-01', exemptLegal: true });
+  assert.equal(r.quota, 0);
   assert.equal(r.model, '06 (no sujeción / exención)');
+  assert.equal(r.exemptLegal, true);
 });
 
 // --- ITP Galicia ------------------------------------------------------------
-check('ITP 8 % sobre el mayor de precio/valor venal', () => {
+check('ITP Galicia 3 % sobre el mayor de precio/valor venal', () => {
   const r = calcItp({ price: 13500, newPrice: 31500, firstRegDate: '2019-03-10' });
   approx(r.base, 13500, 0.01);
-  approx(r.quota, 1080, 0.01);
+  approx(r.quota, 405, 0.01);
   assert.equal(r.fromTables, false);
+  assert.equal(r.rate, 0.03);
 });
 check('ITP usa tablas si el precio es inferior', () => {
   const r = calcItp({ price: 4000, newPrice: 31500, firstRegDate: '2019-03-10' });
-  approx(r.base, 10710, 0.01);
-  approx(r.quota, 856.8, 0.01);
+  approx(r.base, 8820, 0.01);
+  approx(r.quota, 264.6, 0.01);
   assert.equal(r.fromTables, true);
+});
+check('ITP: cuota fija para vehículos de 15 años o más (38 € hasta 1.599 cc)', () => {
+  const r = calcItp({ price: 3000, newPrice: 20000, firstRegDate: '2010-05-01', cc: 1595 });
+  assert.equal(r.fixedQuota, true);
+  approx(r.quota, 38, 0.01);
+  const r2 = calcItp({ price: 3000, newPrice: 20000, firstRegDate: '2010-05-01', cc: 1100 });
+  approx(r2.quota, 22, 0.01);
+});
+check('ITP: etiqueta «0 emisiones» → tipo 0 % (Ley 10/2023)', () => {
+  const r = calcItp({ price: 30000, newPrice: 40000, firstRegDate: '2024-05-01', badge: '0 (Cero emisiones)' });
+  assert.equal(r.zeroEmissions, true);
+  approx(r.quota, 0, 0.01);
 });
 
 // --- IVTM A Coruña ----------------------------------------------------------
@@ -109,10 +155,26 @@ check('Los cinco tramos de la ordenanza están cargados', () => {
 });
 
 // --- IVA / ITP en la compra -------------------------------------------------
-check('Compra a particular usado → ITP', () => {
+check('Compra a particular usado → ITP 3 %', () => {
   const r = calcPurchaseTax({ sellerType: 'private', priceNet: 13500, firstRegDate: '2019-03-10', km: 115000, newPrice: 31500 });
   assert.equal(r.kind, 'itp');
-  approx(r.amount, 1080, 0.01);
+  approx(r.amount, 405, 0.01);
+});
+
+check('Compra a particular con exención de reventa → ITP 620 con cuota cero', () => {
+  const r = calcPurchaseTax({ sellerType: 'private', priceNet: 16500, firstRegDate: '2016-03-15', km: 120000, newPrice: 35610, buyerIsBusiness: true, itpExemption: true });
+  assert.equal(r.kind, 'itp');
+  approx(r.amount, 0, 0.01);
+  assert.equal(r.exempt, true);
+  assert.equal(r.provisional, true);
+  assert.equal(r.cashImpact, 0);
+  approx(r.base, 16500, 0.01);
+});
+
+check('La exención de reventa no aplica si compras como particular', () => {
+  const r = calcPurchaseTax({ sellerType: 'private', priceNet: 16500, firstRegDate: '2016-03-15', km: 120000, newPrice: 35610, buyerIsBusiness: false, itpExemption: true });
+  assert.equal(r.exempt, false);
+  approx(r.amount, 495, 0.01);   // 3 % de 16.500
 });
 check('Compra a profesional UE siendo empresa → AIB con efecto caja cero', () => {
   const r = calcPurchaseTax({ sellerType: 'dealer_vat', priceNet: 13500, firstRegDate: '2019-03-10', buyerIsBusiness: true });
@@ -167,17 +229,17 @@ check('Profesional UE sin pagar IVA (margen/REBU) → ni IVA ni ITP', () => {
   assert.equal(r.costImpact, 0);
 });
 
-check('Particular UE → ITP Galicia 8 %', () => {
+check('Particular UE → ITP Galicia 3 %', () => {
   const r = calcPurchaseTax({ sellerType: 'private_eu', priceNet: 13500, firstRegDate: '2019-03-10', km: 115000, newPrice: 31500 });
   assert.equal(r.kind, 'itp');
-  approx(r.amount, 1080, 0.01);
-  approx(r.cash, 1080, 0.01);
+  approx(r.amount, 405, 0.01);
+  approx(r.cash, 405, 0.01);
 });
 
-check('Particular España → ITP Galicia 8 %', () => {
+check('Particular España → ITP Galicia 3 %', () => {
   const r = calcPurchaseTax({ sellerType: 'private_es', priceNet: 13500, firstRegDate: '2019-03-10', km: 115000, newPrice: 31500 });
   assert.equal(r.kind, 'itp');
-  approx(r.amount, 1080, 0.01);
+  approx(r.amount, 405, 0.01);
 });
 
 check('Particular UE con coche nuevo a efectos de IVA → Modelo 309 sobre el precio', () => {
@@ -210,6 +272,43 @@ check('Profesional España: recalcVehicleTaxes no infla el coste con el IVA', ()
 });
 
 // --- IVA en la venta --------------------------------------------------------
+check('REBU solo si la compra no llevó IVA deducible: forzado a general', () => {
+  assert.equal(rebuEligibility({ sellerType: 'private_eu' }).allowed, true);
+  assert.equal(rebuEligibility({ sellerType: 'pro_eu_rebu' }).allowed, true);
+  assert.equal(rebuEligibility({ sellerType: 'pro_eu_vat' }).allowed, false);
+  assert.equal(rebuEligibility({ sellerType: 'pro_es' }).allowed, false);
+  const forced = resolveSaleRegime({ sellerType: 'pro_eu_vat', sale: { vatRegime: 'rebu' } });
+  assert.equal(forced.regime, 'general');
+  assert.equal(forced.wanted, 'rebu');
+  assert.equal(forced.forced, true);
+  const libre = resolveSaleRegime({ sellerType: 'private_eu', sale: { vatRegime: 'rebu' } });
+  assert.equal(libre.regime, 'rebu');
+  assert.equal(libre.forced, false);
+});
+
+check('Regímenes de venta ofrecidos según la compra', () => {
+  const conRebu = allowedSaleRegimes({ sellerType: 'private_eu' }).map((o) => o.value);
+  assert.deepEqual(conRebu, ['rebu', 'general', 'intra_exempt', 'particular']);
+  const sinRebu = allowedSaleRegimes({ sellerType: 'pro_eu_vat' }).map((o) => o.value);
+  assert.deepEqual(sinRebu, ['general', 'intra_exempt', 'particular']);
+});
+
+check('Precio de compra con IVA para el margen REBU (art. 137 LIVA)', () => {
+  assert.equal(marginPurchaseCost({ sellerType: 'private_eu', costs: { purchase: 16500 } }), 16500);
+  // Los accesorios facturados por el vendedor y el ITP soportado engrosan el margen.
+  assert.equal(marginPurchaseCost({ sellerType: 'private_eu', costs: { purchase: 16500, marginExtras: 200, itp: 495 } }), 17195);
+  // Los gastos propios (transporte, reacondicionamiento) NO suben el precio de compra.
+  assert.equal(marginPurchaseCost({ sellerType: 'private_eu', costs: { purchase: 16500, transport: 750, recond: 300 } }), 16500);
+});
+
+check('Venta exenta intracomunitaria (art. 25 LIVA): sin IVA y permite recuperar el soportado', () => {
+  const r = calcSaleVat({ salePriceGross: 19900, purchaseCost: 16500, regime: 'intra_exempt', inputVatDeductible: 3465 });
+  assert.equal(r.vat, 0);
+  assert.equal(r.exempt, true);
+  approx(r.base, 19900, 0.01);
+  approx(r.due, -3465, 0.01);   // el IVA soportado queda a devolver o a compensar
+});
+
 check('REBU: venta 17.400 € con compra de 13.500 € → IVA 676,86 €', () => {
   const r = calcSaleVat({ salePriceGross: 17400, purchaseCost: 13500, regime: 'rebu' });
   approx(r.base, 3223.14, 0.01);
@@ -270,13 +369,49 @@ const golf = {
   },
 };
 
-check('P&L del Golf: coste total 15.309,50 €, bruto 2.090,50 €, neto tras IVA REBU 1.413,64 €', () => {
+check('P&L del Golf comprado a profesional con IVA: REBU no cabe → régimen general', () => {
+  // sellerType dealer_vat (id antiguo de pro_eu_vat): la AIB se deduce, así que
+  // la reventa va por el régimen general aunque se pidiera REBU.
   const p = vehiclePnl(golf, { regime: 'rebu' });
   approx(p.cost.total, 15309.5, 0.01);
   approx(p.gross, 2090.5, 0.01);
-  approx(p.vat, 676.86, 0.01);
-  approx(p.net, 1413.64, 0.01);
+  assert.equal(p.vatRegime, 'general');
+  assert.equal(p.regimeForced, true);
+  approx(p.vat, 3019.84, 0.01);        // 21/121 de 17.400
+  approx(p.inputVat, 2835, 0.01);      // AIB deducible: 21 % de 13.500
+  approx(p.aibVat, 2835, 0.01);        // y devengada en el mismo 303: neutra en caja
+  approx(p.vatDue, 3019.84, 0.01);     // lo que realmente ingresa en Hacienda
+  approx(p.net, -929.34, 0.01);        // vender al mismo PVP en general destruye margen
   assert.equal(p.days, 35);
+});
+
+check('La AIB es neutra en caja, pero no puede restarse dos veces del IVA a ingresar', () => {
+  const p = vehiclePnl(golf, { regime: 'rebu' });
+  approx(p.aibVat, p.inputVat, 0.01);      // se devenga y se deduce por el mismo importe
+  approx(p.vatDue, p.vat, 0.01);           // cuota del periodo = IVA de la venta
+  const exenta = vehiclePnl(
+    { ...golf, sale: { price: 17400, date: '2026-07-15', vatRegime: 'intra_exempt' } },
+    { regime: 'rebu' },
+  );
+  assert.equal(exenta.vatRegime, 'intra_exempt');
+  approx(exenta.vatDue, 0, 0.01);          // ni se ingresa ni genera devolución
+  approx(exenta.net, exenta.gross, 0.01);
+});
+
+check('P&L del Golf comprado a particular: REBU con IVA sobre el margen', () => {
+  const p = vehiclePnl({ ...golf, sellerType: 'private_eu' }, { regime: 'rebu' });
+  assert.equal(p.vatRegime, 'rebu');
+  assert.equal(p.regimeForced, false);
+  approx(p.marginPurchase, 13500, 0.01);
+  approx(p.vat, 676.86, 0.01);
+  approx(p.vatDue, 676.86, 0.01);
+  approx(p.net, 1413.64, 0.01);
+  approx(p.breakEven, 15689.5, 0.01);  // coste + margen/(1 − 21/121)
+});
+
+check('Precio de equilibrio y sugerido en régimen general incluyen el 21 %', () => {
+  approx(breakEvenPrice(18666.59, { regime: 'general', purchaseCost: 16500 }), 22586.57, 0.05);
+  approx(suggestedPrice({ totalCost: 18666.59, purchaseCost: 16500, targetNetPct: 0.12, regime: 'general' }), 25666.56, 0.05);
 });
 
 check('El desglose de líneas suma exactamente el coste total', () => {
@@ -368,13 +503,73 @@ check('Calendario: los impuestos ligados a un vehículo no son pagos pendientes'
   assert.equal(cal.find((f) => f.id === '303-2026-T1').status, 'pendiente');
 });
 
-check('Calendario: compra a particular genera el Modelo 620 (ITP 8 %)', () => {
-  const v = { ...vehCalendario, id: 'v2', sellerType: 'private', costs: { purchase: 13500, itp: 1080 } };
+check('Calendario: compra a particular genera el Modelo 620 (ITP 3 %)', () => {
+  const v = { ...vehCalendario, id: 'v2', sellerType: 'private', costs: { purchase: 13500, itp: 405 } };
   const cal = buildTaxCalendar({ company: { legalForm: 'particular', vatRegime: 'rebu' }, vehicles: [v], expenses: [], year: 2026, tariffs: DEFAULT_TARIFFS });
   const itp = cal.find((f) => f.id === '620-v2');
   assert.equal(itp.model, '620');
-  approx(itp.amount, 1080, 0.01);
+  approx(itp.amount, 405, 0.01);
   assert.equal(itp.deadline, '2026-02-09');   // un mes desde la compra
+});
+
+check('Calendario: ITP exento por reventa → 620 con cuota cero', () => {
+  const v = { ...vehCalendario, id: 'v4', sellerType: 'private_eu', itpExemption: true, status: 'stock', sale: undefined };
+  const cal = buildTaxCalendar({ company: companyAutonomo, vehicles: [v], expenses: [], year: 2026, tariffs: DEFAULT_TARIFFS });
+  const itp = cal.find((f) => f.id === '620-v4');
+  assert.ok(itp, 'falta el 620 del vehículo exento');
+  approx(itp.amount, 0, 0.01);
+  assert.match(itp.note, /exención provisional/i);
+});
+
+check('Calendario: la AIB entra en las casillas 10/11 del 303 y genera el 349 con clave A', () => {
+  const v = {
+    ...vehCalendario, id: 'v3', sellerType: 'dealer_vat', purchaseDate: '2026-05-10', status: 'stock', sale: undefined,
+    costs: { purchase: 13500, iedmt: 0, itp: 0, vatPurchase: 0, ivtm: 0, transport: 0 },
+  };
+  const cal = buildTaxCalendar({ company: companyAutonomo, vehicles: [v], expenses: [], year: 2026, tariffs: DEFAULT_TARIFFS });
+  const q2 = cal.find((f) => f.id === '303-2026-T2');
+  assert.ok(q2, 'falta el 303 del 2T');
+  assert.match(q2.note, /casillas 10\/11/);
+  approx(q2.amount, 0, 0.01);   // devengada y deducida en el mismo modelo
+  const r349 = cal.find((f) => f.id === '349-2026-T2');
+  assert.ok(r349, 'falta el 349 del 2T');
+  assert.match(r349.note, /A \(adquisición\)/);
+});
+
+check('Calendario: compra a revendedor UE en margen → sin AIB y sin 349', () => {
+  const v = {
+    ...vehCalendario, id: 'v7', sellerType: 'pro_eu_rebu', purchaseDate: '2026-05-10', status: 'stock', sale: undefined,
+    costs: { purchase: 13500, iedmt: 0, itp: 0, vatPurchase: 0, ivtm: 0, transport: 0 },
+  };
+  const cal = buildTaxCalendar({ company: companyAutonomo, vehicles: [v], expenses: [], year: 2026, tariffs: DEFAULT_TARIFFS });
+  assert.equal(cal.find((f) => f.id === '303-2026-T2'), undefined);
+  assert.equal(cal.find((f) => f.id === '349-2026-T2'), undefined);
+  assert.equal(cal.find((f) => f.id === 'aib-v7'), undefined);
+});
+
+check('Calendario: venta intracomunitaria exenta → casilla 59 del 303 y clave E del 349', () => {
+  const v = { ...vehCalendario, id: 'v5', sellerType: 'private_eu', sale: { price: 17400, date: '2026-03-14', vatRegime: 'intra_exempt' } };
+  const cal = buildTaxCalendar({ company: companyAutonomo, vehicles: [v], expenses: [], year: 2026, tariffs: DEFAULT_TARIFFS });
+  const q1 = cal.find((f) => f.id === '303-2026-T1');
+  assert.match(q1.note, /casilla 59/);
+  approx(q1.amount, 0, 0.01);
+  const r349 = cal.find((f) => f.id === '349-2026-T1');
+  assert.ok(r349, 'falta el 349 del 1T');
+  assert.match(r349.note, /E \(entrega\)/);
+});
+
+check('Calendario: el 130 acumula el ejercicio y descuenta los pagos ya realizados', () => {
+  const v = { ...vehCalendario, id: 'v6', sellerType: 'private_eu', sale: { price: 17400, date: '2026-09-14', regime: 'rebu' } };
+  const cal = buildTaxCalendar({
+    company: companyAutonomo, vehicles: [v], year: 2026, tariffs: DEFAULT_TARIFFS,
+    expenses: [{ id: 'e1', date: '2026-02-01', amount: 605, vatDeductible: 105 }],
+  });
+  const q1 = cal.find((f) => f.id === '130-2026-T1');
+  approx(q1.base, -500, 0.01);        // gasto neto de IVA, sin ventas todavía
+  approx(q1.amount, 0, 0.01);
+  const q3 = cal.find((f) => f.id === '130-2026-T3');
+  approx(q3.base, 1746.23, 0.01);     // acumulado: 2.246,23 de margen − 500 de gastos
+  approx(q3.amount, 349.25, 0.01);    // 20 % del acumulado − 0 pagado
 });
 
 check('Calendario: como particular la ganancia va al Modelo 100', () => {
@@ -711,8 +906,8 @@ check('Catálogo: GTI 230 distingue resultado central positivo del prudente nega
     dePrice: [golf.dePrice[1], golf.dePrice[1]],
     esPrice: [golf.esPrice[0], golf.esPrice[0]],
   }, DEFAULT_TARIFFS, refDate, { regime: 'rebu' });
-  assert.equal(central.profit, 2622);
-  assert.equal(prudent.profit, -647);
+  assert.equal(central.profit, 2649);
+  assert.equal(prudent.profit, -620);
   assert.equal(profitLevel(central.profit).tone, 'emerald');
   assert.equal(profitLevel(prudent.profit).tone, 'rose');
 });

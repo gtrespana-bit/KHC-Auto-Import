@@ -3,7 +3,7 @@ import { Calculator, Download, Car as CarIcon, ClipboardCheck } from 'lucide-rea
 import { Card, Button, Field, Input, Money, Select, Stat, SectionTitle, Tabs, Badge, KeyValueGrid, Alert, Modal, cx } from '../components/ui.jsx';
 import { useStore } from '../lib/store.jsx';
 import { eur, eur0, num, numEs, todayISO, download } from '../lib/format.js';
-import { recalcVehicleTaxes, landingCost, breakEvenPrice, calcSaleVat, SELLER_TYPES } from '../domain/taxes.js';
+import { recalcVehicleTaxes, landingCost, breakEvenPrice, calcSaleVat, resolveSaleRegime, allowedSaleRegimes, marginPurchaseCost, rebuEligibility, SELLER_TYPES } from '../domain/taxes.js';
 import { suggestedPrice, vehiclePnl } from '../domain/finance.js';
 import { searchVehicles } from '../data/vehicleDatabase.js';
 import { getVehicleInspectionGuide } from '../data/vehicleInspection.js';
@@ -86,12 +86,14 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
     veh.costs.placas = Number(tariffs.placas_matricula || 0);
     veh.costs.ivtm = taxes.ivtm;
     const land = landingCost(veh, tariffs);
-    const regime = form.saleRegime;
-    const sugg = suggestedPrice({ totalCost: land.total, purchaseCost: land.purchase, targetNetPct: (Number(form.targetMargin) || 12) / 100, regime });
+    const resolved = resolveSaleRegime(veh, form.saleRegime);
+    const regime = resolved.regime;
+    const marginPurchase = marginPurchaseCost({ ...veh, costs: { ...veh.costs, itp: taxes.itp } });
+    const sugg = suggestedPrice({ totalCost: land.total, purchaseCost: marginPurchase, targetNetPct: (Number(form.targetMargin) || 12) / 100, regime });
     const price = Number(form.salePrice) || sugg;
-    const sold = { ...veh, sale: { price, date: todayISO(), regime } };
+    const sold = { ...veh, sale: { price, date: todayISO(), vatRegime: regime } };
     const pnl = vehiclePnl(sold, { regime, tariffs });
-    return { veh, taxes, land, sugg, price, pnl };
+    return { veh, taxes, land, sugg, price, pnl, regime, resolved, marginPurchase };
   }, [form, tariffs, state.company.legalForm]);
 
   const { veh, taxes, land, sugg, price, pnl } = calc;
@@ -101,12 +103,12 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
     const base = calc.price;
     return [-0.1, -0.05, 0, 0.05, 0.1].map((d) => {
       const p = Math.round(base * (1 + d));
-      const v = calcSaleVat({ salePriceGross: p, purchaseCost: land.purchase, regime: form.saleRegime });
+      const v = calcSaleVat({ salePriceGross: p, purchaseCost: calc.marginPurchase, regime: calc.regime, inputVatDeductible: taxes.vatDeductible, selfAssessedVat: pnl.aibVat });
       const gross = p - land.total;
-      const net = gross - v.vat;
+      const net = gross - v.due;
       return { value: p, gross, vat: v.vat, net, marginPct: p > 0 ? net / p : 0, delta: d };
     });
-  }, [calc.price, land, form.saleRegime]);
+  }, [calc.price, calc.marginPurchase, calc.regime, land, taxes.vatDeductible, pnl.aibVat]);
 
   const costSens = useMemo(() => {
     const parts = [
@@ -119,11 +121,11 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
     ].filter(([, , v]) => v > 0);
     return parts.map(([key, label, amount]) => {
       const deltaCost = amount * 0.2;
-      const vat = calcSaleVat({ salePriceGross: calc.price, purchaseCost: land.purchase, regime: form.saleRegime });
-      const deltaNet = form.saleRegime === 'rebu' ? deltaCost * (1 - 0.21 / 1.21) + (key === 'purchase' ? deltaCost * (0.21 / 1.21) : 0) : deltaCost;
+      const vat = calcSaleVat({ salePriceGross: calc.price, purchaseCost: calc.marginPurchase, regime: calc.regime, inputVatDeductible: taxes.vatDeductible, selfAssessedVat: pnl.aibVat });
+      const deltaNet = calc.regime === 'rebu' ? deltaCost * (1 - 0.21 / 1.21) + (key === 'purchase' ? deltaCost * (0.21 / 1.21) : 0) : deltaCost;
       return { key, label, amount, deltaCost, deltaNet };
     }).sort((a, b) => b.deltaNet - a.deltaNet);
-  }, [land, taxes, calc.price, form.saleRegime]);
+  }, [land, taxes, calc.price, calc.regime, pnl.aibVat]);
 
   const catalogHits = useMemo(() => {
     const term = q.trim();
@@ -179,7 +181,7 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
         ivtm_anual: taxes.ivtmDetail.annual,
       },
       coste_total: land.total,
-      venta: { precio: calc.price, regimen: form.saleRegime, iva: pnl.vat, bruto: pnl.gross, neto: pnl.net, equilibrio: pnl.breakEven },
+      venta: { precio: calc.price, regimen: calc.regime, iva: pnl.vat, ivaAIngresar: pnl.vatDue, bruto: pnl.gross, neto: pnl.net, equilibrio: pnl.breakEven },
     };
     download(`simulacion_${form.brand || 'vehiculo'}_${form.model || ''}.json`.replace(/\s+/g, '_'), JSON.stringify(data, null, 2), 'application/json');
     toast('Ficha de la simulación descargada');
@@ -207,7 +209,7 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
       costs: veh.costs, purchaseDate: todayISO(), sellerType: veh.sellerType,
       buyerIsBusiness: state.company.legalForm !== 'particular',
       taxMethod: 'tablas', status: 'prospeccion', source: 'simulator',
-      sale: form.salePrice ? { price: Number(form.salePrice), date: todayISO(), regime: form.saleRegime } : undefined,
+      sale: form.salePrice ? { price: Number(form.salePrice), date: todayISO(), vatRegime: calc.regime } : undefined,
     });
     toast('Vehículo añadido a la flota con estos datos');
   };
@@ -229,7 +231,7 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Stat label="Coste total real" value={eur0(land.total)} hint={`${eur0(land.purchase)} del vehículo + ${eur0(land.total - land.purchase)} de gastos e impuestos`} tone="rose" />
         <Stat label="Precio de venta sugerido" value={eur0(sugg)} hint={`Margen objetivo ${numEs(form.targetMargin, 0)} % neto`} tone="sky" />
-        <Stat label="Beneficio neto previsto" value={eur0(pnl.net)} hint={`Bruto ${eur0(pnl.gross)} − IVA ${eur0(pnl.vat)}`} tone={pnl.net >= 0 ? 'emerald' : 'rose'} />
+        <Stat label="Beneficio neto previsto" value={eur0(pnl.net)} hint={`Bruto ${eur0(pnl.gross)} − IVA a ingresar ${eur0(pnl.vatDue)}`} tone={pnl.net >= 0 ? 'emerald' : 'rose'} />
         <Stat label="Punto de equilibrio" value={eur0(pnl.breakEven)} hint="Por debajo de este precio no ganas nada" tone="amber" />
       </div>
 
@@ -331,9 +333,9 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
               </Field>
               <Field label="Régimen de la venta">
                 <Select
-                  value={form.saleRegime}
+                  value={calc.regime}
                   onChange={(v) => update({ saleRegime: v })}
-                  options={[{ value: 'rebu', label: 'REBU (21 % del margen)' }, { value: 'general', label: 'Régimen general (21 % del precio)' }]}
+                  options={allowedSaleRegimes(veh)}
                 />
               </Field>
               <Field label="Margen neto objetivo (%)"><Input type="number" step="0.5" value={form.targetMargin} onChange={(v) => update({ targetMargin: v })} /></Field>
@@ -341,6 +343,11 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
                 <Button variant="secondary" className="w-full" onClick={() => update({ salePrice: sugg })}>Usar precio sugerido</Button>
               </div>
             </div>
+            {calc.resolved.forced && (
+              <Alert tone="warn" className="mt-3">
+                <b>Régimen corregido a general.</b> {calc.resolved.reason}
+              </Alert>
+            )}
             <KeyValueGrid
               className="mt-4"
               cols={3}
@@ -348,7 +355,7 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
                 { label: 'Ingresos', value: eur(pnl.price) },
                 { label: 'Coste total', value: eur(pnl.cost.total), tone: 'rose' },
                 { label: 'Beneficio bruto', value: eur(pnl.gross), tone: pnl.gross >= 0 ? 'emerald' : 'rose' },
-                { label: `IVA a repercutir (${form.saleRegime.toUpperCase()})`, value: eur(pnl.vat), tone: 'amber', hint: form.saleRegime === 'rebu' ? '21 % sobre el margen' : '21 % sobre el precio' },
+                { label: `IVA a ingresar (${calc.regime.toUpperCase()})`, value: eur(pnl.vatDue), tone: 'amber', hint: calc.regime === 'rebu' ? '21 % sobre el margen' : calc.regime === 'intra_exempt' ? 'Entrega intracomunitaria exenta' : '21 % sobre el precio' },
                 { label: 'Beneficio neto', value: eur(pnl.net), tone: pnl.net >= 0 ? 'emerald' : 'rose', hint: `Margen ${numEs(pnl.netPct * 100, 1)} % sobre el precio` },
                 { label: 'ROI sobre el coste', value: `${numEs(pnl.roiNet * 100, 1)} %`, hint: `TAE ${numEs(pnl.tae * 100, 0)} %` },
               ]}

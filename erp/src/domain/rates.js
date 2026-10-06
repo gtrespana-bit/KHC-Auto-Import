@@ -17,7 +17,7 @@ export const RATES_YEAR = 2026;
 //    Galicia no ha ejercido la facultad de modificar los tipos estatales.   [V]
 // ---------------------------------------------------------------------------
 export const IEDMT_BRACKETS = [
-  { epigrafe: '1.º', label: 'Hasta 120 g/km', minCo2: 0, maxCo2: 120, rate: 0, note: 'Exento. Híbridos, eléctricos y buena parte de los diésel/gasolina WLTP actuales. Se presenta el Modelo 06.' },
+  { epigrafe: '1.º', label: 'Hasta 120 g/km', minCo2: 0, maxCo2: 120, rate: 0, note: 'Tipo 0 %. No es una exención: se documenta con el Modelo 576 de cuota cero. El Modelo 06 se reserva para las exenciones y no sujeciones legales (discapacidad, traslado de residencia, taxi, autoescuela…).' },
   { epigrafe: '2.º', label: 'Más de 120 y menos de 160 g/km', minCo2: 121, maxCo2: 159, rate: 0.0475, note: 'Tramo más habitual en SUV medios y compactos gasolina.' },
   { epigrafe: '3.º', label: 'De 160 a menos de 200 g/km', minCo2: 160, maxCo2: 199, rate: 0.0975, note: 'SUV grandes, furgonetas, 4x4.' },
   { epigrafe: '4.º', label: '200 g/km o más', minCo2: 200, maxCo2: 99999, rate: 0.1475, note: 'Deportivos, pick-up, V6/V8.' },
@@ -126,34 +126,53 @@ export const ITV_GALICIA = {
 };
 
 // ---------------------------------------------------------------------------
-// 6. ITP — Galicia. Art. 14.Uno del TR aprobado por D. Leg. 1/2011 (redacción
-//    de la Ley 10/2023, en vigor desde 2024): tipo general 8 %.            [V]
+// 6. ITP — Galicia. Art. 14.Uno del TR aprobado por D. Leg. 1/2011, redacción
+//    de la Ley 10/2023 (DOG 29-12-2023, en vigor desde el 1-1-2024):
+//      · tipo general ................................................. 3 %
+//      · etiqueta ambiental «0 emisiones» (bici, VMP) ................. 0 %
+//      · embarcaciones de recreo y motores marinos .................... 1 %
+//      · turismos/todoterrenos con uso ≥ 15 años .......... cuota fija
+//        (22 € hasta 1.199 cc; 38 € de 1.200 a 1.599 cc)             [V]
 //    Autoliquidación: Modelo 620 (vehículos) ante la ATRIGA. Plazo: 1 mes.
 // ---------------------------------------------------------------------------
 export const ITP_GALICIA = {
-  rate: 0.08,
+  rate: 0.03,
+  zeroEmissionsRate: 0,
+  boatsRate: 0.01,
+  fixedQuota: [
+    { maxCc: 1199, quota: 22 },
+    { maxCc: 1599, quota: 38 },
+  ],
+  fixedQuotaMinYears: 15,
   model: '620',
   agency: 'ATRIGA (Axencia Tributaria de Galicia)',
   deadlineDays: 30,
-  base: 'Mayor entre el precio pactado y el valor medio de tablas (Hacienda).',
+  base: 'Mayor entre el valor declarado, el precio pactado y el valor de mercado (tablas de Hacienda). Para el ITP NO se minora la parte de IVA/IEDMT.',
   appliesWhen: 'Compra a PARTICULAR (dentro o fuera de España). Si el vendedor es empresario que factura con IVA o en REBU, la operación no tributa por ITP.',
+  resaleExemption: {
+    legal: 'Art. 45.I.B).17 TRLITPAJD',
+    who: 'Empresario dedicado habitualmente a la compraventa de vehículos usados.',
+    what: 'Adquisición de vehículos usados para su reventa: exención provisional, que se eleva a definitiva si se justifica la venta dentro del año siguiente (DGT V2399-17 y V0066-25).',
+    how: 'Se presenta igualmente el Modelo 620 con cuota cero. Si no se vende en el año, procede autoliquidar con intereses de demora.',
+  },
   exemptions: [
-    'Vehículos de cero emisiones adquiridos por sujetos pasivos de IVA en el ejercicio de su actividad (verificar en la normativa autonómica vigente).',
+    'Vehículos con etiqueta ambiental «0 emisiones»: tipo 0 % (requiere el distintivo de la DGT).',
     'Compraventas entre empresarios por vehículos afectos a la actividad: sujetas a IVA, no a ITP.',
+    'Adquisición por empresario habitual de compraventa para reventa en el año: exención provisional (art. 45.I.B).17).',
   ],
 };
 
 // Tipos de ITP de las demás CCAA (para compras fuera de Galicia).         [E]
 export const ITP_BY_REGION = [
-  { region: 'Galicia', rate: 0.08 }, { region: 'Andalucía', rate: 0.04 },
-  { region: 'Aragón', rate: 0.08 }, { region: 'Asturias', rate: 0.08 },
-  { region: 'Baleares', rate: 0.08 }, { region: 'Canarias', rate: 0.055 },
-  { region: 'Cantabria', rate: 0.05 }, { region: 'Castilla-La Mancha', rate: 0.06 },
+  { region: 'Galicia', rate: 0.03 }, { region: 'Andalucía', rate: 0.04 },
+  { region: 'Aragón', rate: 0.04 }, { region: 'Asturias', rate: 0.04 },
+  { region: 'Baleares', rate: 0.04 }, { region: 'Canarias', rate: 0.055 },
+  { region: 'Cantabria', rate: 0.08 }, { region: 'Castilla-La Mancha', rate: 0.06 },
   { region: 'Castilla y León', rate: 0.05 }, { region: 'Cataluña', rate: 0.05 },
-  { region: 'C. Valenciana', rate: 0.08 }, { region: 'Extremadura', rate: 0.06 },
+  { region: 'C. Valenciana', rate: 0.06 }, { region: 'Extremadura', rate: 0.06 },
   { region: 'Madrid', rate: 0.04 }, { region: 'Murcia', rate: 0.04 },
   { region: 'Navarra', rate: 0.06 }, { region: 'País Vasco', rate: 0.04 },
-  { region: 'La Rioja', rate: 0.07 },
+  { region: 'La Rioja', rate: 0.04 },
 ];
 
 // ---------------------------------------------------------------------------
@@ -181,17 +200,22 @@ export const IRPF_SAVINGS = [
   { label: 'Más de 300.000 €', from: 300000, to: Infinity, rate: 0.30 },
 ];
 
-// Escala general combinada (estatal + autonómica) usada para estimar el IRPF
-// de un autónomo. Galicia aplica un primer tramo autonómico del 9,00 % (0,50
-// puntos menos que el estatal) y el mismo 22,50 % máximo: la escala agregada
-// real puede diferir unas décimas. EDITABLE en Ajustes → Fiscalidad.      [E]
+// Escala general combinada (estatal + autonómica de Galicia) usada para
+// estimar el IRPF de un autónomo residente en Galicia.                        [V]
+//   Estatal:  9,50 / 12,00 / 15,00 / 18,50 / 22,50 / 24,50 %
+//   Galicia:  9,00 / 11,65 / 14,90 / 18,40 / 22,50 %
+//   Tramos autonómicos gallegos (D. Leg. 1/2011, art. 13): 12.985,35 €,
+//   21.068,60 €, 35.200 €, 60.000 €. Marginal combinado 18,5 % → 47 %.
+// EDITABLE en Ajustes → Fiscalidad.
 export const IRPF_GENERAL_COMBINED = [
   { from: 0, to: 12450, rate: 0.185 },
-  { from: 12450, to: 20200, rate: 0.235 },
-  { from: 20200, to: 35200, rate: 0.295 },
-  { from: 35200, to: 60000, rate: 0.365 },
-  { from: 60000, to: 300000, rate: 0.445 },
-  { from: 300000, to: Infinity, rate: 0.465 },
+  { from: 12450, to: 12985.35, rate: 0.215 },
+  { from: 12985.35, to: 20200, rate: 0.2365 },
+  { from: 20200, to: 21068.6, rate: 0.265 },
+  { from: 21068.6, to: 35200, rate: 0.299 },
+  { from: 35200, to: 60000, rate: 0.369 },
+  { from: 60000, to: 300000, rate: 0.45 },
+  { from: 300000, to: Infinity, rate: 0.47 },
 ];
 
 export const IRPF_MINIMO_PERSONAL = 5550; // mínimo del contribuyente 2026
