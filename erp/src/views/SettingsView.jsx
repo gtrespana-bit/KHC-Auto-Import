@@ -102,7 +102,7 @@ export default function SettingsView({ initialTab = 'empresa' }) {
                   ]}
                 />
               </Field>
-              <Field label="Régimen de IVA" hint="REBU es el habitual en compraventa de usados">
+              <Field label="Régimen de IVA por defecto" hint="Se puede cambiar vehículo a vehículo según cómo lo hayas comprado">
                 <Select
                   value={c.vatRegime}
                   onChange={(v) => setCompany({ vatRegime: v })}
@@ -112,6 +112,23 @@ export default function SettingsView({ initialTab = 'empresa' }) {
                   ]}
                 />
               </Field>
+              <Field
+                label="NIF-IVA / ROI"
+                hint="Tu número con el prefijo del país (ES…). Es el que va en el 349 y en las facturas intracomunitarias."
+              >
+                <Input
+                  value={c.vatNumber || ''}
+                  onChange={(v) => setCompany({ vatNumber: v })}
+                  placeholder="ESB15000000"
+                />
+              </Field>
+              <Field label="Epígrafes IAE" hint="Compraventa de vehículos (615.1 / 665.2) y, si reparas, 691.9">
+                <Input
+                  value={c.iae || ''}
+                  onChange={(v) => setCompany({ iae: v })}
+                  placeholder="615.1 Comercio de vehículos · 665.2"
+                />
+              </Field>
               <Field label="Cifra de negocio anual estimada" hint="Determina si aplicas tipo reducido de IS">
                 <Money value={c.turnover} onChange={(v) => setCompany({ turnover: v })} />
               </Field>
@@ -119,14 +136,39 @@ export default function SettingsView({ initialTab = 'empresa' }) {
                 <Money value={c.fiscal?.monthlyQuota} onChange={(v) => setCompany({ fiscal: { ...c.fiscal, monthlyQuota: v } })} />
               </Field>
             </div>
-            <div className="mt-3">
+            <div className="mt-3 space-y-3">
               <Checkbox
                 checked={!!c.fiscal?.tarifaPlana}
                 onChange={(v) => setCompany({ fiscal: { ...c.fiscal, tarifaPlana: v } })}
                 label="Tengo derecho a la tarifa plana de nuevos autónomos"
                 hint={`${eur(RETA_2026.tarifaPlana)}/mes durante los primeros 12 meses`}
               />
+              <Checkbox
+                checked={!!c.fiscal?.roiRegistered}
+                onChange={(v) => setCompany({ fiscal: { ...c.fiscal, roiRegistered: v } })}
+                label="Estoy dado de alta en el ROI (modelo 036/037)"
+                hint="Sin alta en el ROI no se puede autoliquidar la adquisición intracomunitaria en el 303 ni deducir ese IVA."
+              />
+              <Checkbox
+                checked={!!c.fiscal?.marginScheme}
+                onChange={(v) => setCompany({ fiscal: { ...c.fiscal, marginScheme: v } })}
+                label="Aplico el REBU a las reventas de vehículos comprados sin IVA deducible"
+                hint="Régimen especial de bienes usados: factura sin desglose de IVA y mención obligatoria (arts. 135-139 y 55 RIVA). La renuncia es caso por caso."
+              />
             </div>
+            {c.legalForm === 'particular' ? (
+              <Alert tone="warn" className="mt-3" title="Estás configurado como particular">
+                Comprar y revender coches de forma habitual es una actividad económica: corresponde alta censal (036/037), IAE y facturación con IVA. Como particular solo tributan las ganancias patrimoniales en el IRPF, sin deducir gastos ni IVA.
+              </Alert>
+            ) : !c.fiscal?.roiRegistered ? (
+              <Alert tone="warn" className="mt-3" title="Falta el alta en el ROI">
+                Si compras a profesionales de la UE con factura sin IVA (entrega intracomunitaria exenta, art. 25 LIVA), necesitas el alta en el Registro de Operadores Intracomunitarios para autoliquidar la AIB en el 303 (casillas 10/11 y 36/37, clave A del 349) y deducirla. Las compras a un profesional en régimen de margen (Differenzbesteuerung) no son adquisiciones intracomunitarias: no van al 349 ni devengan AIB.
+              </Alert>
+            ) : (
+              <Alert tone="info" className="mt-3" title="Coherencia del ROI">
+                Comprueba cada trimestre que tu NIF-IVA sigue validado en VIES antes de facturar sin IVA a otro empresario de la UE (entrega exenta del art. 25 LIVA, clave E del 349 y casilla 59 del 303).
+              </Alert>
+            )}
           </Card>
 
           <Card className="p-4">
@@ -343,9 +385,11 @@ export default function SettingsView({ initialTab = 'empresa' }) {
               {[
                 ['Cuotas de autónomo por tramo', 'Los tramos de 2026 están publicados, pero la cuota exacta y el tipo de cotización los fija la TGSS.'],
                 ['Escala autonómica gallega del IRPF', 'Solo están verificados el primer (9,0 %) y el último (22,5 %) tramo.'],
-                ['Bonificación del ITP gallego para vehículos eléctricos', 'No confirmada contra el texto vigente del D. Leg. 1/2011.'],
+                ['Bonificación del ITP gallego para vehículos eléctricos', 'La Ley 10/2023 fija el tipo 0 % para la etiqueta «0 emisiones» y la cuota fija para vehículos de 15 años o más. Confírmalo con Atriga antes de liquidar.'],
                 ['Precio medio del vehículo nuevo (valor venal)', 'Depende de la Orden anual de precios medios vigente en el momento del devengo.'],
                 ['Bonificaciones del IVTM de A Coruña', 'Según la Ordenanza Fiscal nº 52: 60 % para vehículos de bajas emisiones, no acumulables.'],
+                ['Trámite del 620 con cuota cero (exención por reventa)', 'La exención provisional del art. 45.I.B).17 TRLITPAJD se declara en el 620 con cuota cero; confirma con la gestoría si Atriga exige documentación acreditativa de la actividad.'],
+                ['Casilla 97 del 303 (REBU)', 'Resumen anual informativo de las entregas en régimen de margen: se cumplimenta en el 303 del cuarto trimestre.'],
               ].map(([t, d]) => (
                 <div key={t} className="flex items-start gap-2 py-1.5 border-b border-slate-800/60 last:border-0">
                   <Badge tone="amber">Verificar</Badge>

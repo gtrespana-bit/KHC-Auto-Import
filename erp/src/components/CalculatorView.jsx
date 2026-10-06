@@ -386,9 +386,9 @@ export default function CalculatorView({ onAddVehicleToPipeline, setActiveTab })
   const calculatedIedmt = valuation.base * iedmtRate;
   const valorVenal = valuation.hacienda.valorVenal;
 
-  // ITP (8% en Galicia) solo si se compra a particular. Base: el mayor entre precio y valor venal.
+  // ITP (3 % en Galicia desde 1-1-2024) solo si se compra a particular. Base: el mayor entre precio y valor venal.
   const itpBase = Math.max(Number(formData.purchasePrice) || 0, valorVenal || 0);
-  const calculatedItp = formData.sellerType === "private" ? itpBase * 0.08 : 0;
+  const calculatedItp = formData.sellerType === "private" ? itpBase * 0.03 : 0;
 
   // IVTM Concello de A Coruña (alta a mitad de año: 2 trimestres)
   const calculatedIvtm = getCorunaIvtm(formData.cvf) * (2 / 4);
@@ -721,7 +721,7 @@ export default function CalculatorView({ onAddVehicleToPipeline, setActiveTab })
                   className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white font-medium focus:border-amber-400 focus:outline-none"
                 >
                   <option value="dealer">Compraventa / Concesionario (Factura con IVA/REBU)</option>
-                  <option value="private">Particular Europeo (Aplica ITP 8% en Galicia)</option>
+                  <option value="private">Particular Europeo (Aplica ITP 3% en Galicia)</option>
                 </select>
               </div>
 
@@ -1077,7 +1077,7 @@ export default function CalculatorView({ onAddVehicleToPipeline, setActiveTab })
 
               {formData.sellerType === "private" && (
                 <div className="flex justify-between py-1.5 border-b border-slate-800/60">
-                  <span className="text-slate-400">8. ITP 8% ATRIGA Galicia <span className="text-slate-500">(s/ {formatEuro(itpBase)}{itpBase > Number(formData.purchasePrice) ? ' valor venal' : ' precio'})</span></span>
+                  <span className="text-slate-400">8. ITP 3% ATRIGA Galicia <span className="text-slate-500">(s/ {formatEuro(itpBase)}{itpBase > Number(formData.purchasePrice) ? ' valor venal' : ' precio'})</span></span>
                   <span className="font-semibold text-amber-400">{formatEuro(calculatedItp)}</span>
                 </div>
               )}

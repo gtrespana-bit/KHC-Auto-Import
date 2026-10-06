@@ -4,7 +4,7 @@ import { Modal, Field, Input, Money, Select, Textarea, Checkbox, Button, Row, Ba
 import { useStore } from '../lib/store.jsx';
 import { uid, todayISO, eur, eur0, pct as pctFmt, round2 } from '../lib/format.js';
 import { STATUS_FLOW, vehiclePnl, financeOffer } from '../domain/finance.js';
-import { landingCost, recalcVehicleTaxes, computeCvf, SELLER_TYPES } from '../domain/taxes.js';
+import { landingCost, recalcVehicleTaxes, computeCvf, SELLER_TYPES, allowedSaleRegimes, rebuEligibility, canonicalSellerType } from '../domain/taxes.js';
 import { DOCUMENT_CHECKLIST } from '../domain/compliance.js';
 import { searchVehicles, VEHICLE_DB, RELIABILITY_META } from '../data/vehicleDatabase.js';
 import { getVehicleInspectionGuide, searchInspectionPresets } from '../data/vehicleInspection.js';
@@ -16,8 +16,8 @@ import WebPublicationPanel from './WebPublicationPanel.jsx';
 const AUTO_TAX_KEYS = ['iedmt', 'itp', 'vatPurchase', 'ivtm'];
 
 const AUTO_TAX_LABELS = {
-  iedmt: { label: 'Impuesto de matriculación (576)', hint: 'Según CO₂ y valor de tablas' },
-  itp: { label: 'ITP compra a particular (620)', hint: '8 % sobre el mayor entre precio y tablas' },
+  iedmt: { label: 'Impuesto de matriculación (576)', hint: 'Según CO₂ y valor de tablas · 0 % (cuota cero) hasta 120 g/km' },
+  itp: { label: 'ITP compra a particular (620)', hint: '3 % sobre el mayor entre precio y tablas · 0 % si etiqueta «0 emisiones»' },
   vatPurchase: { label: 'IVA de la compra (309)', hint: 'Solo si toca pagarlo en caja' },
   ivtm: { label: 'Impuesto de circulación (IVTM)', hint: 'Prorrateado por trimestres' },
 };
@@ -29,6 +29,7 @@ const COST_GROUPS = [
       ['purchase', 'Precio de compra'],
       ['transport', 'Transporte / portacoches'],
       ['travel', 'Viaje y dietas'],
+      ['marginExtras', 'Accesorios facturados por el vendedor (suben el margen REBU)'],
     ],
   },
   {
@@ -135,7 +136,14 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTa
   const effective = useMemo(() => ({ ...draft, costs: { ...draft.costs, ...autoTaxCosts } }), [draft, autoTaxCosts]);
 
   const cost = useMemo(() => landingCost(effective, tariffs), [effective, tariffs]);
-  const pnl = useMemo(() => vehiclePnl(effective, { regime: state.company.vatRegime === 'general' ? 'general' : 'rebu', tariffs, personalTax: state.company.legalForm === 'particular' }), [effective, state.company, tariffs]);
+  const pnl = useMemo(
+    () => vehiclePnl(effective, {
+      regime: draft.sale?.vatRegime || (state.company.vatRegime === 'general' ? 'general' : 'rebu'),
+      tariffs,
+      personalTax: state.company.legalForm === 'particular',
+    }),
+    [effective, draft.sale?.vatRegime, state.company, tariffs],
+  );
   const offer = useMemo(
     () => financeOffer({ price: Number(draft.sale?.price ?? draft.targetSalePrice ?? 0), ...fin }),
     [draft.sale?.price, draft.targetSalePrice, fin],
@@ -221,6 +229,9 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTa
       return { ...d, taxOverrides: ov, costs: { ...d.costs, [key]: computedTaxCosts[key] } };
     });
 
+  // Regímenes de reventa posibles según cómo se compró el coche (arts. 135-139 LIVA).
+  const saleRegimes = useMemo(() => allowedSaleRegimes(effective), [effective]);
+  const rebu = useMemo(() => rebuEligibility(effective), [effective]);
   const manualTaxCount = AUTO_TAX_KEYS.filter((k) => draft.taxOverrides?.[k]).length;
   const restoreAllTaxes = () => {
     setDraft((d) => ({ ...d, taxOverrides: {}, costs: { ...d.costs, ...computedTaxCosts } }));
@@ -468,7 +479,9 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTa
                 tone={autoTaxCosts.iedmt === 0 ? 'emerald' : 'default'}
                 hint={
                   autoTaxCosts.iedmt === 0
-                    ? 'Exento (CO₂ ≤ 120 g/km): solo se presenta el Modelo 06'
+                    ? taxes.iedmtDetail.model === '06'
+                      ? 'Exención o no sujeción legal: se presenta el Modelo 06 y no se paga nada'
+                      : 'CO₂ ≤ 120 g/km: tipo 0 %, se presenta el Modelo 576 con cuota cero'
                     : `${taxes.iedmtDetail.bracket} · base ${eur(taxes.iedmtDetail.base)} · CVF ${taxes.cvf}`
                 }
               />
@@ -509,6 +522,30 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTa
             <Field label="Fecha de llegada"><Input type="date" value={draft.arrivalDate || ''} onChange={(v) => set({ arrivalDate: v })} /></Field>
             <Field label="Fecha de matriculación"><Input type="date" value={draft.registrationDate || ''} onChange={(v) => set({ registrationDate: v })} /></Field>
           </div>
+
+          {/* --- Exenciones que dependen del comprador y del destino -------- */}
+          <Card className="p-3.5 space-y-3">
+            <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Exenciones de esta compra</p>
+            {['private_eu', 'private_es'].includes(canonicalSellerType(draft.sellerType)) && buyerIsBusiness && (
+              <Checkbox
+                checked={!!draft.itpExemption}
+                onChange={(v) => set({ itpExemption: v })}
+                label="Exención de ITP por reventa (art. 45.I.B).17 TRLITPAJD"
+                hint="Solo para quien se dedica habitualmente a la compraventa de vehículos usados: el 620 se presenta con cuota cero y la exención se eleva a definitiva si revendes el coche dentro del año."
+              />
+            )}
+            <Checkbox
+              checked={!!draft.iedmtExemption}
+              onChange={(v) => set({ iedmtExemption: v })}
+              label="Exención o no sujeción legal del IEDMT (Modelo 06)"
+              hint="Supuestos legales tasados (vehículos de personas con movilidad reducida, familia numerosa con reconocimiento previo, etc.). Si no lo tienes reconocido antes de matricular, no lo marques."
+            />
+            {taxes.itpExempt && (
+              <Alert tone="ok" title="ITP con cuota cero">
+                Marca la exención provisional en el Modelo 620. Si el coche no se vende dentro del año natural siguiente, tendrás que autoliquidar el ITP con intereses de demora.
+              </Alert>
+            )}
+          </Card>
 
           {COST_GROUPS.map((group) => (
             <Card key={group.title} className="p-3.5">
@@ -591,9 +628,24 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTa
               <Select value={draft.sale?.contactId || ''} onChange={(v) => setSale({ contactId: v })} placeholder="Sin asignar" options={state.contacts.map((c) => ({ value: c.id, label: `${c.name}${c.city ? ` (${c.city})` : ''}` }))} />
             </Field>
             <Field label="Factura nº"><Input value={draft.sale?.invoiceNumber || ''} onChange={(v) => setSale({ invoiceNumber: v })} placeholder={`${state.company.invoicePrefix || 'F'}0001`} /></Field>
-            <Field label="Régimen de IVA">
-              <Select value={draft.sale?.vatRegime || state.company.vatRegime || 'rebu'} onChange={(v) => setSale({ vatRegime: v })} options={[{ value: 'rebu', label: 'REBU (IVA sobre margen)' }, { value: 'general', label: 'Régimen general (21 %)' }, { value: 'particular', label: 'Venta como particular (sin IVA)' }]} />
+            <Field label="Régimen de IVA de la venta" hint={rebu.allowed ? 'REBU disponible: la compra no llevó IVA deducible' : 'REBU no aplicable por cómo compraste el coche'}>
+              <Select value={pnl.vatRegime} onChange={(v) => setSale({ vatRegime: v })} options={saleRegimes} />
             </Field>
+            {pnl.regimeForced && (
+              <Alert tone="warn" className="md:col-span-2" title="Régimen corregido a general">
+                {pnl.regimeNote} El REBU solo cabe si la compra no llevó IVA deducible (arts. 135-139 LIVA).
+              </Alert>
+            )}
+            {!pnl.regimeForced && pnl.vatRegime === 'rebu' && (
+              <Alert tone="info" className="md:col-span-2" title="Venta en REBU: la factura no desglosa el IVA">
+                Factura sin cuota desglosada y con la mención «Régimen especial de los bienes usados» (art. 55 RIVA). Rellena la casilla 97 del 303 y el libro de facturas expedidas.
+              </Alert>
+            )}
+            {pnl.vatRegime === 'intra_exempt' && (
+              <Alert tone="info" className="md:col-span-2" title="Entrega intracomunitaria exenta (art. 25 LIVA)">
+                Consigna el NIF-IVA del comprador validado en VIES, marca la casilla 59 del 303 y declara la operación en el 349 con clave E.
+              </Alert>
+            )}
             <Field label="Garantía entregada (meses)"><Input type="number" value={draft.sale?.warrantyMonths ?? state.company.warrantyMonths ?? 12} onChange={(v) => setSale({ warrantyMonths: v })} /></Field>
             <Field label="Kilómetros entregado"><Input type="number" value={draft.sale?.kmAtSale ?? ''} onChange={(v) => setSale({ kmAtSale: v })} /></Field>
           </div>
@@ -603,7 +655,12 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTa
             <Row label="Coste total de aterrizaje" value={eur(pnl.cost.total)} />
             <Row label="Precio de venta" value={eur(pnl.price)} />
             <Row label="Beneficio bruto" value={eur(pnl.gross)} tone={pnl.gross >= 0 ? 'emerald' : 'rose'} hint={`${pctFmt(pnl.grossPct * 100, 1)} sobre el precio`} />
-            <Row label={`IVA repercutido (${pnl.vatRegime === 'rebu' ? 'REBU sobre margen' : 'régimen general'})`} value={eur(pnl.vat)} tone="amber" />
+            <Row
+              label={pnl.vatRegime === 'rebu' ? 'IVA incluido en el margen (REBU)' : 'IVA que ingresas en Hacienda'}
+              value={eur(pnl.vatDue)}
+              tone="amber"
+              hint={pnl.inputVat > 0 ? `Repercutido ${eur(pnl.vat)} − IVA deducible de la compra ${eur(pnl.inputVat)}` : undefined}
+            />
             {state.company.legalForm === 'particular' && <Row label="IRPF estimado (ganancia patrimonial)" value={eur(pnl.irpf)} tone="amber" />}
             <Row label="BENEFICIO NETO" value={eur(pnl.net)} strong tone={pnl.net >= 0 ? 'emerald' : 'rose'} hint={`ROI ${pctFmt(pnl.roiNet * 100, 1)} · ${pnl.days} días en stock`} />
             <Row label="Precio de equilibrio (ni ganas ni pierdes)" value={eur(pnl.breakEven)} tone="slate" />
