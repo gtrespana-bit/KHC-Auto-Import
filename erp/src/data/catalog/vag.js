@@ -11,6 +11,8 @@ export const VAG = [
     g: [
       ['Golf VII (5G)', 2013, 2016, 27500, [['20tdi150', 118, { gear: 'D' }], ['16tdi105', 109], ['14tsi140', 127], ['12tsi105', 119], ['20tdi184', 129], ['14tsi125', 124]]],
       ['Golf VII.5', 2017, 2020, 31500, [['20tdi150', 118, { gear: 'D' }], ['16tdi115', 110], ['15tsi150', 122, { gear: 'D' }], ['10tsi115', 112], ['20tdi184', 129]]],
+      ['Golf VII GTI 220 manual', 2015, 2016, 32600, [['20tsi220', 139, { name: '2.0 TSI GTI 220 CV manual', gear: 'M', variantKey: 'vw-golf-vii-gti-220-manual', years: [2015, 2016], newPrice: 32600 }]]],
+      ['Golf VII GTI Performance 230 manual', 2015, 2016, 34010, [['20tsi230', 139, { name: '2.0 TSI GTI Performance 230 CV manual', gear: 'M', variantKey: 'vw-golf-vii-gti-performance-230-manual', years: [2015, 2016], newPrice: 34010 }]]],
       ['Golf VII GTI 220 DSG', 2016, 2017, 34200, [['20tsi220', 148, { name: '2.0 TSI GTI 220 CV DSG', variantKey: 'vw-golf-vii-gti-220-dsg', years: [2016, 2017], newPrice: 34200 }]]],
       ['Golf VII GTI Performance 230 DSG', 2016, 2017, 35610, [['20tsi230', 149, { name: '2.0 TSI GTI Performance 230 CV DSG', variantKey: 'vw-golf-vii-gti-performance-230-dsg', years: [2016, 2017], newPrice: 35610 }]]],
       ['Golf VII GTI Clubsport 265 DSG', 2016, 2017, 39150, [['20tsi265', 155, { name: '2.0 TSI GTI Clubsport 265 CV DSG', variantKey: 'vw-golf-vii-gti-clubsport-265-dsg', years: [2016, 2017], newPrice: 39150 }]]],

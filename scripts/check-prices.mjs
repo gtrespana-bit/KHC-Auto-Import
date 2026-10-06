@@ -202,8 +202,11 @@ section('1. La evidencia está bien formada');
 
   const profileFailures = [];
   for (const profile of Object.values(PERFORMANCE_VARIANT_PROFILES)) {
-    if (profile.years?.[0] < 2016 || profile.years?.[1] > 2026) {
-      profileFailures.push(`${profile.variantKey}: ventana deportiva fuera de 2016–2026`);
+    // Ventana de compra de los deportivos: 2015–2026. Se abrió a 2015 al dar
+    // de alta el Golf VII GTI pre-facelift con cambio manual (220 y 230 CV),
+    // que es la unidad que se encuentra de verdad en Alemania a ese precio.
+    if (profile.years?.[0] < 2015 || profile.years?.[1] > 2026) {
+      profileFailures.push(`${profile.variantKey}: ventana deportiva fuera de 2015–2026`);
     }
     const rows = GENERATED_DB.filter((v) => v.variantKey === profile.variantKey);
     if (rows.length !== 1) {

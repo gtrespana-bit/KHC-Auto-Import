@@ -7,6 +7,21 @@ const observedAt = '2026-10-04';
 const profiles = {
   // Golf VII/7.5 — perfiles independientes por motor y acabado; los anuncios
   // 3/5 puertas se agrupan en carrocería hatchback, nunca con Variant.
+  // Pre-facelift con cambio manual: es la caja mayoritaria de los GTI de esos
+  // años y no se mezcla con los DSG, que se pagan por encima. La ventana se
+  // limita a 2015-2016 porque antes de 2015 el coche sale de los once años.
+  golf220M: {
+    brand: 'Volkswagen', model: 'Golf', gen: 'Golf VII GTI 220 manual', engineCode: '20tsi220',
+    variantKey: 'vw-golf-vii-gti-220-manual', variantLabel: 'GTI 220 manual', trim: 'GTI 220',
+    body: 'Hatchback', years: [2015, 2016], co2: 139,
+    transmission: 'Manual', fuel: 'Gasolina', cv: 220, engine: '2.0 TSI 220 CV GTI manual',
+  },
+  golf230M: {
+    brand: 'Volkswagen', model: 'Golf', gen: 'Golf VII GTI Performance 230 manual', engineCode: '20tsi230',
+    variantKey: 'vw-golf-vii-gti-performance-230-manual', variantLabel: 'GTI Performance 230 manual', trim: 'GTI Performance',
+    body: 'Hatchback', years: [2015, 2016], co2: 139,
+    transmission: 'Manual', fuel: 'Gasolina', cv: 230, engine: '2.0 TSI 230 CV GTI Performance manual',
+  },
   golf220: {
     brand: 'Volkswagen', model: 'Golf', gen: 'Golf VII GTI 220 DSG', engineCode: '20tsi220',
     variantKey: 'vw-golf-vii-gti-220-dsg', variantLabel: 'GTI 220 DSG', trim: 'GTI 220',
@@ -107,6 +122,8 @@ function ad(profile, market, listingId, year, km, price, url, extra = {}) {
   };
 }
 
+const DE_GOLF_15_M = 'https://www.autoscout24.de/lst/volkswagen/golf/va_gti/re_2015/tr_schaltgetriebe';
+const ES_GOLF_15_M = 'https://www.autoscout24.es/lst/volkswagen/golf-gti/re_2015/tr_manual';
 const DE_GOLF_16 = 'https://www.autoscout24.de/lst/volkswagen/golf/va_gti/re_2016/tr_automatik';
 const ES_GOLF_16 = 'https://www.autoscout24.es/lst/volkswagen/golf-gti/re_2016/tr_automatico';
 const DE_GOLF_17 = 'https://www.autoscout24.de/lst/volkswagen/golf/va_gti/re_2017/tr_automatik';
@@ -133,6 +150,51 @@ const ES_FL5_24 = 'https://www.autoscout24.es/lst/honda/civic/ve_type-r/re_2024/
 const DE_FL5_25 = 'https://www.autoscout24.de/lst/honda/civic/ve_type-r/re_2025/tr_schaltgetriebe';
 
 export const PERFORMANCE_MARKET_OBSERVATIONS = [
+  // Golf VII GTI 220 CV manual (2015). Censo completo de la búsqueda alemana
+  // de ese año con cambio manual (15 anuncios en total entre 220 y 230 CV).
+  ad(profiles.golf220M, 'DE', 'as24-de-2015-m-gti220-illgen-139004', 2015, 139004, 13760, DE_GOLF_15_M,
+    { source: 'AutoScout24.de · Autohaus Illgen (profesional)' }),
+  ad(profiles.golf220M, 'DE', 'as24-de-2015-m-gti220-autowelt-114512', 2015, 114512, 12990, DE_GOLF_15_M,
+    { source: 'AutoScout24.de · AUTOWELT GmbH (profesional)' }),
+  ad(profiles.golf220M, 'DE', 'as24-de-2015-m-gti220-recklinghausen-143000', 2015, 143000, 14980, DE_GOLF_15_M,
+    { source: 'AutoScout24.de · Particular (coste de compra válido)' }),
+  ad(profiles.golf220M, 'DE', 'as24-de-2015-m-gti220-mosbach-70000', 2015, 70000, 15600, DE_GOLF_15_M,
+    { source: 'AutoScout24.de · Particular (coste de compra válido)', note: 'Golf VII 5 puertas con techo panorámico y cámara.' }),
+  ad(profiles.golf220M, 'DE', 'as24-de-2015-m-gti220-gumpinger-84900', 2015, 84900, 15900, DE_GOLF_15_M,
+    { source: 'AutoScout24.de · Autohaus Gumpinger (profesional)' }),
+  ad(profiles.golf220M, 'DE', 'as24-de-2015-m-gti220-valentino-98878', 2015, 98878, 15999, DE_GOLF_15_M,
+    { source: 'AutoScout24.de · VALENTINO CAR´S (profesional)' }),
+  ad(profiles.golf220M, 'DE', 'as24-de-2015-m-gti220-dresden-117650', 2015, 117650, 17000, DE_GOLF_15_M,
+    { source: 'AutoScout24.de · Particular (coste de compra válido)' }),
+  ad(profiles.golf220M, 'DE', 'as24-de-2015-m-gti220-mack-91193', 2015, 91193, 17700, DE_GOLF_15_M,
+    { source: 'AutoScout24.de · Mack Automobile (profesional)' }),
+  ad(profiles.golf220M, 'ES', 'as24-es-2015-m-gti220-topcars-194000', 2015, 194000, 15399, ES_GOLF_15_M,
+    { source: 'AutoScout24.es · Top Cars 2025, Vandellòs (profesional)' }),
+  ad(profiles.golf220M, 'ES', 'as24-es-2015-m-gti220-laspalmas-29000', 2015, 29000, 25000, ES_GOLF_15_M,
+    { eligible: false, source: 'AutoScout24.es · Particular, Las Palmas', eligibilityReason: 'Vendedor particular y unidad en Canarias; fuera del mercado peninsular que usamos como PVP.' }),
+
+  // Golf VII GTI Performance 230 CV manual (2015), misma búsqueda.
+  ad(profiles.golf230M, 'DE', 'as24-de-2015-m-perf230-siegburg-220000', 2015, 220000, 10300, DE_GOLF_15_M,
+    { source: 'AutoScout24.de · Particular, Siegburg (coste de compra válido)' }),
+  ad(profiles.golf230M, 'DE', 'as24-de-2015-m-perf230-berlin-102225', 2015, 102225, 10500, DE_GOLF_15_M,
+    { source: 'AutoScout24.de · Particular, Berlín-Spandau', note: 'Misma unidad que el anuncio de mobile.de 48095259214496 (12.000 €): el vendedor la publica 1.500 € más barata en AutoScout24.' }),
+  ad(profiles.golf230M, 'DE', 'as24-de-2015-m-perf230-kahraman-188000', 2015, 188000, 11999, DE_GOLF_15_M,
+    { source: 'AutoScout24.de · Kahraman Automobile (profesional)' }),
+  ad(profiles.golf230M, 'DE', 'as24-de-2015-m-perf230-horb-125000', 2015, 125000, 14800, DE_GOLF_15_M,
+    { source: 'AutoScout24.de · Particular, Horb am Neckar', note: 'Anuncio con IVA deducible.' }),
+  ad(profiles.golf230M, 'DE', 'as24-de-2015-m-perf230-tpautomotive-113000', 2015, 113000, 15650, DE_GOLF_15_M,
+    { source: 'AutoScout24.de · TP Automotive (profesional)' }),
+  ad(profiles.golf230M, 'DE', 'as24-de-2015-m-perf230-droege-87260', 2015, 87260, 16280, DE_GOLF_15_M,
+    { source: 'AutoScout24.de · Autohaus Dröge (profesional)' }),
+  ad(profiles.golf230M, 'DE', 'as24-de-2015-m-perf230-muehltal-84761', 2015, 84761, 22999, DE_GOLF_15_M,
+    { eligible: false, source: 'AutoScout24.de · Particular, Mühltal', eligibilityReason: 'Pide un 45 % más que el resto de 2015 a kilometraje equivalente y el portal no le asigna evaluación de precio; no es un coste de compra realista.' }),
+  ad(profiles.golf230M, 'ES', 'as24-es-2015-m-perf230-royb-121410', 2015, 121410, 21480, ES_GOLF_15_M,
+    { source: 'AutoScout24.es · ROYB Motor Cádiz (profesional)' }),
+  ad(profiles.golf230M, 'ES', 'as24-es-2015-m-perf230-calella-145000', 2015, 145000, 14900, ES_GOLF_15_M,
+    { eligible: false, source: 'AutoScout24.es · Particular, Calella', eligibilityReason: 'Vendedor particular; excluido del PVP profesional, igual que en el resto de variantes.' }),
+  ad(profiles.golf230M, 'ES', 'as24-es-2015-m-perf230-qualiauto-144000', 2015, 144000, 22990, ES_GOLF_15_M,
+    { eligible: false, source: 'AutoScout24.es · Qualiauto, Las Palmas', eligibilityReason: 'Unidad en Canarias: régimen fiscal e IGIC distintos, fuera del mercado peninsular.' }),
+
   // Golf VII GTI 220 CV DSG (2016–2017). En España solo apareció una tarjeta
   // particular; se conserva excluida para no convertirla en PVP profesional.
   ad(profiles.golf220, 'DE', 'ee442ea6-b4ef-4392-9133-fc60edd1db8c', 2016, 172000, 13490, DE_GOLF_16,
