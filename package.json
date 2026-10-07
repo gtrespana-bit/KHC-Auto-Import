@@ -18,6 +18,7 @@
     "test:trip": "node scripts/test-trip-vehicle.mjs && node scripts/test-trip-map.mjs",
     "test:vat": "node scripts/test-vat-purchase-semantics.mjs",
     "test:demo": "node scripts/test-demo-data.mjs",
+    "test:vehicle-imports": "node scripts/test-vehicle-imports.mjs",
     "test:publication": "node scripts/test-web-publication.mjs",
     "test:catalog": "node scripts/test-web-catalog.mjs",
     "prices:check": "node scripts/check-prices.mjs",

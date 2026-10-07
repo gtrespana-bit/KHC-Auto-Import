@@ -52,6 +52,22 @@ const COST_GROUPS = [
   },
 ];
 
+const PENDING_COST_LABELS = {
+  transport: 'Transporte / portacoches',
+  travel: 'Viaje y dietas',
+  cocFicha: 'COC / ficha reducida / traducción',
+  itv: 'ITV de importación',
+  dgt: 'Tasa DGT',
+  placas: 'Placas de matrícula',
+  gestoria: 'Gestoría',
+  recond: 'Reacondicionamiento',
+  maintenance: 'Mantenimiento',
+  guarantee: 'Póliza de garantía',
+  advertising: 'Publicidad y portales',
+  insurance: 'Seguro de stock',
+  other: 'Otros gastos',
+};
+
 /** Vehículo vacío: los gastos fijos salen de Ajustes → Tarifas. */
 const emptyVehicle = ({ tariffs, buyerIsBusiness }) => ({
   id: uid('veh'),
@@ -87,7 +103,7 @@ const emptyVehicle = ({ tariffs, buyerIsBusiness }) => ({
 
 export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTab }) {
   const { state, saveVehicle, toast, tariffs, can } = useStore();
-  const buyerIsBusiness = state.company.legalForm !== 'particular';
+  const buyerIsBusiness = ['autonomo', 'sl'].includes(state.company.legalForm);
 
   const [draft, setDraft] = useState(() => {
     if (!vehicle) return emptyVehicle({ tariffs, buyerIsBusiness });
@@ -114,7 +130,11 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTa
   const isNew = !vehicle;
 
   const set = (patch) => setDraft((d) => ({ ...d, ...patch }));
-  const setCost = (key, value) => setDraft((d) => ({ ...d, costs: { ...d.costs, [key]: value } }));
+  const setCost = (key, value) => setDraft((d) => ({
+    ...d,
+    costs: { ...d.costs, [key]: value },
+    pendingCostFields: (d.pendingCostFields || []).filter((field) => field !== key),
+  }));
   const setDoc = (key, value) => setDraft((d) => ({ ...d, documents: { ...d.documents, [key]: value } }));
   const setSale = (patch) => setDraft((d) => ({ ...d, sale: { ...(d.sale || {}), ...patch } }));
 
@@ -353,14 +373,42 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTa
             </Alert>
           )}
 
+          {draft.sourceListing?.url && (
+            <Card tone="sky" className="p-3.5 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold text-white">Origen: {draft.sourceListing.marketplace || 'anuncio'} · {draft.sourceListing.listingId || 'referencia guardada'}</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  {draft.sourceListing.sellerType || 'Vendedor pendiente de confirmar'}
+                  {draft.sourceListing.sellerLocation ? ` · ${draft.sourceListing.sellerLocation}` : ''}
+                  {Number(draft.sourceListing.askingPrice) > 0 ? ` · anunciado por ${eur0(draft.sourceListing.askingPrice)}` : ''}
+                </p>
+                {draft.priceTarget?.isEstimate && (
+                  <p className="text-[10px] text-amber-300 mt-1">Objetivo orientativo: {eur0(draft.priceTarget.amount)} · {draft.priceTarget.basis}</p>
+                )}
+              </div>
+              <a href={draft.sourceListing.url} target="_blank" rel="noreferrer" className="text-xs text-sky-300 hover:text-sky-200 underline underline-offset-2 shrink-0">
+                Abrir anuncio original ↗
+              </a>
+            </Card>
+          )}
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <Field label="Marca" required><Input value={draft.brand} onChange={(v) => set({ brand: v })} list="brands" /></Field>
             <Field label="Modelo" required><Input value={draft.model} onChange={(v) => set({ model: v })} list="models" /></Field>
             <Field label="Versión / acabado" className="col-span-2"><Input value={draft.version} onChange={(v) => set({ version: v })} /></Field>
+            <Field label="Color exterior"><Input value={draft.color || ''} onChange={(v) => set({ color: v })} placeholder="Por confirmar" /></Field>
+            <Field label="Interior / tapicería"><Input value={draft.interior || ''} onChange={(v) => set({ interior: v })} placeholder="Por confirmar" /></Field>
             <Field label="Motor / familia" className="col-span-2"><Input value={draft.engine || ''} onChange={(v) => set({ engine: v })} placeholder="Ej.: 2.0 TSI EA888" /></Field>
             <Field label="Código de motor" className="col-span-2" hint="Confírmalo con el VIN o la documentación"><Input value={draft.engineCode || ''} onChange={(v) => set({ engineCode: v })} placeholder="Ej.: código indicado en el CoC" /></Field>
             <Field label="Año"><Input type="number" value={draft.year} onChange={(v) => set({ year: v })} /></Field>
-            <Field label="1ª matriculación" hint="Determina la antigüedad fiscal"><Input type="date" value={draft.firstRegDate || ''} onChange={(v) => set({ firstRegDate: v })} /></Field>
+            <Field
+              label="1ª matriculación"
+              hint={draft.firstRegDatePending
+                ? `En el anuncio solo consta ${draft.sourceListing?.firstRegistration || draft.year}; confirma el día exacto en la documentación.`
+                : 'Determina la antigüedad fiscal'}
+            >
+              <Input type="date" value={draft.firstRegDate || ''} onChange={(v) => set({ firstRegDate: v || null, firstRegDatePending: !v })} />
+            </Field>
             <Field label="Kilómetros"><Input type="number" value={draft.km} onChange={(v) => set({ km: v })} /></Field>
             <Field label="Matrícula española"><Input value={draft.plate} onChange={(v) => set({ plate: v })} placeholder="0000 XXX" /></Field>
             <Field label="VIN / bastidor" className="col-span-2"><Input value={draft.vin} onChange={(v) => set({ vin: v })} /></Field>
@@ -532,7 +580,7 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTa
             {['private_eu', 'private_es'].includes(canonicalSellerType(draft.sellerType)) && buyerIsBusiness && (
               <Checkbox
                 checked={!!draft.itpExemption}
-                onChange={(v) => set({ itpExemption: v })}
+                onChange={(v) => set({ itpExemption: v, itpExemptionPending: false })}
                 label="Exención de ITP por reventa (art. 45.I.B).17 TRLITPAJD"
                 hint="Solo para quien se dedica habitualmente a la compraventa de vehículos usados: el 620 se presenta con cuota cero y la exención se eleva a definitiva si revendes el coche dentro del año."
               />
@@ -543,12 +591,23 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTa
               label="Exención o no sujeción legal del IEDMT (Modelo 06)"
               hint="Supuestos legales tasados (vehículos de personas con movilidad reducida, familia numerosa con reconocimiento previo, etc.). Si no lo tienes reconocido antes de matricular, no lo marques."
             />
+            {draft.itpExemptionPending && buyerIsBusiness && ['private_eu', 'private_es'].includes(canonicalSellerType(draft.sellerType)) && (
+              <Alert tone="warn" title="Elegibilidad de la exención del ITP pendiente">
+                No se aplica la exención automáticamente. El cálculo mantiene el ITP ordinario hasta que confirmes que la empresa cumple los requisitos y el plazo legal de reventa.
+              </Alert>
+            )}
             {taxes.itpExempt && (
               <Alert tone="ok" title="ITP con cuota cero">
                 Marca la exención provisional en el Modelo 620. Si el coche no se vende dentro del año natural siguiente, tendrás que autoliquidar el ITP con intereses de demora.
               </Alert>
             )}
           </Card>
+
+          {!!draft.pendingCostFields?.length && (
+            <Alert tone="warn" title="Costes pendientes de confirmar">
+              Los campos a 0 € no representan un servicio gratuito y no se incluyen en el subtotal. Pendientes: {draft.pendingCostFields.map((key) => PENDING_COST_LABELS[key] || key).join(' · ')}. Introduce cada importe confirmado para retirarlo de esta lista.
+            </Alert>
+          )}
 
           {COST_GROUPS.map((group) => (
             <Card key={group.title} className="p-3.5">
@@ -603,9 +662,12 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTa
           </Card>
 
           <Card className="p-3.5">
-            <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2">Coste total de aterrizaje</p>
+            <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2">{draft.pendingCostFields?.length ? 'Subtotal de aterrizaje' : 'Coste total de aterrizaje'}</p>
+            {draft.pendingCostFields?.length > 0 && (
+              <p className="text-[10px] text-amber-300 mb-2">No incluye {draft.pendingCostFields.length} conceptos pendientes de confirmar.</p>
+            )}
             {cost.lines.map((l) => <Row key={l.key} label={l.label} value={eur(l.amount)} />)}
-            <Row label="TOTAL" value={eur(cost.total)} strong tone="amber" />
+            <Row label={draft.pendingCostFields?.length ? 'SUBTOTAL (sin costes pendientes)' : 'TOTAL'} value={eur(cost.total)} strong tone="amber" />
           </Card>
         </div>
       )}
@@ -653,9 +715,15 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTa
             <Field label="Kilómetros entregado"><Input type="number" value={draft.sale?.kmAtSale ?? ''} onChange={(v) => setSale({ kmAtSale: v })} /></Field>
           </div>
 
+          {!!draft.pendingCostFields?.length && (
+            <Alert tone="warn" title="Rentabilidad parcial: faltan gastos por confirmar">
+              El beneficio, el ROI y el precio de equilibrio no incluyen: {draft.pendingCostFields.map((key) => PENDING_COST_LABELS[key] || key).join(' · ')}. Completa estos importes antes de usar el resultado como previsión de rentabilidad.
+            </Alert>
+          )}
+
           <Card className="p-3.5">
             <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2">Rentabilidad de la operación</p>
-            <Row label="Coste total de aterrizaje" value={eur(pnl.cost.total)} hint={`Compra registrada sin alterar: ${eur(pnl.purchaseCost)}`} />
+            <Row label={draft.pendingCostFields?.length ? 'Subtotal (faltan costes pendientes)' : 'Coste total de aterrizaje'} value={eur(pnl.cost.total)} hint={`Compra registrada sin alterar: ${eur(pnl.purchaseCost)}`} />
             <Row label="Precio de venta (IVA incluido)" value={eur(pnl.price)} hint={pnl.vatRegime === 'general' ? `Base ${eur(pnl.price - pnl.vat)} + IVA repercutido ${eur(pnl.vat)}` : undefined} />
             <Row label="Beneficio bruto antes de IVA" value={eur(pnl.gross)} tone={pnl.gross >= 0 ? 'emerald' : 'rose'} hint={`${pctFmt(pnl.grossPct * 100, 1)} sobre el precio`} />
             <Row
