@@ -74,6 +74,7 @@ const emptyVehicle = ({ tariffs, buyerIsBusiness }) => ({
   brand: '', model: '', version: '', engine: '', engineCode: '', year: new Date().getFullYear(), firstRegDate: null,
   km: 0, vin: '', plate: '', fuel: 'Diésel', transmission: 'Manual',
   cc: 1968, cyl: 4, cv: 150, co2: 120, badge: 'C (Verde)', newPrice: 30000, segment: 'Compacto',
+  consumption: null, color: '', interior: '', doors: null, traction: '', previousOwners: null,
   inspectionChecks: {},
   originCountry: 'Alemania', originCity: '', sellerType: 'pro_eu_vat', taxMethod: 'tablas',
   buyerIsBusiness, status: 'prospeccion',
@@ -436,6 +437,12 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTa
               <Select value={draft.tipoDgt || 'turismo'} onChange={(v) => set({ tipoDgt: v })} options={[{ value: 'turismo', label: 'Turismo' }, { value: 'furgon', label: 'Furgón / mixto' }, { value: 'camion', label: 'Camión' }, { value: 'moto', label: 'Motocicleta' }]} />
             </Field>
             <Field label="Carga útil (kg)" hint="Solo furgones/camiones"><Input type="number" value={draft.cargaUtil || 0} onChange={(v) => set({ cargaUtil: v })} /></Field>
+            <Field label="Consumo (l/100 km)" hint="Dato homologado WLTP; se publica en la web"><Input type="number" step="0.1" value={draft.consumption ?? ''} onChange={(v) => set({ consumption: v === '' ? null : Number(v) })} placeholder="Ej.: 4.9" /></Field>
+            <Field label="Puertas" hint="Se publica en la web"><Input type="number" value={draft.doors ?? ''} onChange={(v) => set({ doors: v === '' ? null : Number(v) })} placeholder="Ej.: 5" /></Field>
+            <Field label="Tracción" hint="Se publica en la web">
+              <Select value={draft.traction || ''} onChange={(v) => set({ traction: v })} placeholder="Sin indicar" options={['Delantera', 'Trasera', 'Total', 'Total 4x4', 'Total 4MATIC', 'Total quattro', 'Total xDrive', 'Total AWD']} />
+            </Field>
+            <Field label="Propietarios anteriores" hint="Se publica en la web"><Input type="number" value={draft.previousOwners ?? ''} onChange={(v) => set({ previousOwners: v === '' ? null : Number(v) })} placeholder="Ej.: 2" /></Field>
           </div>
 
           <datalist id="brands">{[...new Set(VEHICLE_DB.map((v) => v.brand))].map((b) => <option key={b} value={b} />)}</datalist>

@@ -251,6 +251,11 @@ create policy public_photos_write on storage.objects for all
 --    "brand": "BMW", "model": "Serie 3 Touring",
 --    "year": 2018, "km": 128000, "fuel": "Diésel", "transmission": "Automático",
 --    "cv": 190, "cc": 1995, "co2": 128, "badge": "C", "segment": "Familiar",
+--    "consumption": 4.9,            -- opcional, l/100 km (también acepta "consumo")
+--    "color": "Negro Saphir",      -- opcional
+--    "doors": 5,                   -- opcional, número de puertas
+--    "traction": "Total xDrive",   -- opcional (Delantera / Trasera / Total …)
+--    "previousOwners": 2,          -- opcional, propietarios anteriores
 --    "firstRegDate": "2018-06-01", "originCountry": "Alemania",
 --    "price": 21900, "priceNote": "Precio al contado, IVA incluido",
 --    "description": "…texto comercial…",
@@ -260,6 +265,10 @@ create policy public_photos_write on storage.objects for all
 --    "photos": [{"path": "org/veh/1.jpg", "url": "https://…", "alt": "…", "cover": true}],
 --    "publishedAt": "2026-10-02T10:00:00.000Z"
 --  }
+--
+--  Todos los campos nuevos (consumption, color, doors, traction,
+--  previousOwners) son OPCIONALES: la ficha pública los muestra solo si
+--  vienen informados; si faltan, esa casilla no aparece.
 --
 --  NUNCA: precio de compra, costes, margen, VIN, matrícula, notas internas,
 --  documentación ni datos del vendedor anterior.
