@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
   Calendar, Gauge, Fuel, Cog, Zap, Leaf, MapPin, ShieldCheck, Wallet, Check, Phone, MessageCircle, Globe2, Car,
+  CarFront, Cylinder, Droplets, Wind, Palette, DoorOpen, MoveHorizontal, Users,
 } from 'lucide-react';
 import Gallery from '@/components/Gallery.jsx';
 import ShareButton from '@/components/ShareButton.jsx';
@@ -9,7 +10,7 @@ import LeadForm from '@/components/LeadForm.jsx';
 import JsonLd from '@/components/JsonLd.jsx';
 import VehicleCard from '@/components/VehicleCard.jsx';
 import { getListings, getListing, similarToListing, coverOf } from '@/lib/listings.js';
-import { eur, km as kmFmt, whatsappLink, dateEs, originOf } from '@/lib/format.js';
+import { eur, km as kmFmt, cc as ccFmt, consumption as consumptionFmt, co2 as co2Fmt, whatsappLink, dateEs, originOf } from '@/lib/format.js';
 import { site } from '@/lib/site.js';
 
 export const revalidate = 60;
@@ -63,8 +64,16 @@ export default async function ListingPage({ params }) {
     { icon: Gauge, label: 'Kilómetros', value: kmFmt(listing.km) },
     { icon: Fuel, label: 'Combustible', value: listing.fuel },
     { icon: Cog, label: 'Cambio', value: listing.transmission || '—' },
+    { icon: CarFront, label: 'Categoría', value: listing.segment },
+    { icon: Cylinder, label: 'Cilindrada', value: ccFmt(listing.cc) },
     { icon: Zap, label: 'Potencia', value: listing.cv ? `${listing.cv} CV` : '—' },
+    { icon: Droplets, label: 'Consumo', value: consumptionFmt(listing.consumption ?? listing.consumo) },
+    { icon: Wind, label: 'Emisiones CO₂', value: co2Fmt(listing.co2) },
     { icon: Leaf, label: 'Etiqueta', value: listing.badge ? `Etiqueta ${listing.badge}` : '—' },
+    { icon: Palette, label: 'Color', value: listing.color },
+    { icon: DoorOpen, label: 'Puertas', value: listing.doors ? `${listing.doors}` : '—' },
+    { icon: MoveHorizontal, label: 'Tracción', value: listing.traction },
+    { icon: Users, label: 'Propietarios', value: listing.previousOwners ? `${listing.previousOwners}` : '—' },
     { icon: Globe2, label: 'Procedencia', value: origin.label },
     { icon: MapPin, label: 'Ubicación', value: listing.location || site.city },
     { icon: Calendar, label: '1ª matriculación', value: dateEs(listing.firstRegDate) },
@@ -86,10 +95,15 @@ export default async function ListingPage({ params }) {
       '@type': 'EngineSpecification',
       engineDisplacement: { '@type': 'QuantitativeValue', value: listing.cc, unitCode: 'CMQ' },
       enginePower: { '@type': 'QuantitativeValue', value: listing.cv, unitCode: 'N12' },
+      fuelConsumption: (listing.consumption ?? listing.consumo)
+        ? { '@type': 'QuantitativeValue', value: Number(listing.consumption ?? listing.consumo), unitCode: 'L/100km' }
+        : undefined,
     },
+    vehicleBodyType: listing.segment || undefined,
     dateVehicleFirstRegistered: listing.firstRegDate,
     numberOfPreviousOwners: listing.previousOwners || undefined,
     color: listing.color || undefined,
+    vehicleNumberOfDoors: listing.doors || undefined,
     countryOfOrigin: listing.originCountry || undefined,
     image: cover?.url ? [cover.url] : undefined,
     description: listing.description,
