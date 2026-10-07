@@ -125,7 +125,11 @@ export default function PendingVehicleImports() {
                   ))}
                 </div>
                 <p className="mt-2 text-[10px] text-slate-500 flex items-center gap-1.5">
-                  <Images className="w-3.5 h-3.5" /> {draft.photos.length} fotos del anuncio; se copiarán al expediente privado del vehículo.
+                  <Images className="w-3.5 h-3.5" /> {draft.photos.length} fotos del anuncio
+                  {draft.photos.some((photo) => photo.backgroundEdited) && (
+                    <> · {draft.photos.filter((photo) => photo.backgroundEdited).length} vistas exteriores con fondo homogeneizado; interiores sin alterar</>
+                  )}
+                  ; se copiarán al expediente privado del vehículo.
                 </p>
               </div>
 

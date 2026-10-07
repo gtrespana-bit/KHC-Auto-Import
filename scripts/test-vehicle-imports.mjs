@@ -23,12 +23,20 @@ assert.equal(draft.vehicle.firstRegDatePending, true);
 assert.equal(draft.vehicle.costs.purchase, 10650);
 assert.equal(draft.priceTarget.amount, 15990);
 assert.equal(draft.photos.length, 9);
+assert.equal(draft.photos.filter((photo) => photo.backgroundEdited).length, 4);
 
 for (const photo of draft.photos) {
+  assert.ok(photo.assetPath, `Falta assetPath para ${photo.filename}`);
   assert.ok(
-    existsSync(path.join(root, 'public', 'images', 'audi a3 gris', photo.filename)),
-    `Falta el archivo de imagen ${photo.filename}`,
+    existsSync(path.join(root, 'public', 'images', photo.assetPath)),
+    `Falta el archivo de imagen ${photo.assetPath}`,
   );
+  if (photo.sourceFilename) {
+    assert.ok(
+      existsSync(path.join(root, 'public', 'images', 'audi a3 gris', photo.sourceFilename)),
+      `Falta el original del anuncio ${photo.sourceFilename}`,
+    );
+  }
 }
 
 assert.equal(getPendingVehicleImports([draft], [], []).length, 1);
