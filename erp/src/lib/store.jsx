@@ -26,6 +26,7 @@ import { uid, todayISO, num } from './format.js';
 import { SITE_SLUG, PUBLICATION_STATUS, publicationStatusForVehicle } from './web.js';
 import { DEFAULT_TARIFFS } from '../domain/rates.js';
 import { invoiceNumber, invoiceLines } from './templates.js';
+import { VEHICLE_IMPORT_ADDED, VEHICLE_IMPORT_DISMISSED } from './vehicleImports.js';
 import { STATUS_FLOW } from '../domain/finance.js';
 import { demoState } from '../data/demoState.js';
 import {
@@ -136,7 +137,7 @@ export function normalizeVehicle(raw = {}) {
     id: v.id || uid('veh'),
     costs,
     status,
-    firstRegDate: v.firstRegDate || (v.year ? `${v.year}-06-01` : null),
+    firstRegDate: v.firstRegDate || (v.firstRegDatePending ? null : (v.year ? `${v.year}-06-01` : null)),
     sellerType: SELLER_IDS.includes(sellerRaw) ? sellerRaw : SELLER_LEGACY[sellerRaw] || 'pro_eu_vat',
     taxOverrides: v.taxOverrides || {},
     taxMethod: v.taxMethod || 'tablas',
@@ -775,6 +776,99 @@ export function StoreProvider({ children }) {
     repo.deletePhotos(id).catch((err) => console.error('[store] fotos:', err));
   }, [remove, repo]);
 
+  /**
+   * Alta idempotente desde un borrador empaquetado en el código. En la nube
+   * espera a que queden guardados la ficha, las fotos privadas y el evento de
+   * auditoría antes de quitar el aviso de importación.
+   */
+  const importVehicleDraft = useCallback(async ({ draftId, vehicle, photos = [] } = {}) => {
+    if (!guard('vehicles') || !guard('photos')) return null;
+    if (!draftId || !vehicle?.id) throw new Error('Falta el identificador del borrador o del vehículo');
+
+    const alreadyImported = stateRef.current.vehicles.find((item) => item.importDraftId === draftId);
+    if (alreadyImported) return alreadyImported;
+
+    const normalized = normalizeVehicle({ ...vehicle, importDraftId: draftId });
+    const activityEntry = {
+      id: `vehicle-import-${draftId}`,
+      type: VEHICLE_IMPORT_ADDED,
+      draftId,
+      at: new Date().toISOString(),
+      text: `${normalized.brand} ${normalized.model} añadido a la flota desde un borrador de importación`,
+    };
+    let photosAttempted = false;
+    let vehicleAttempted = false;
+    let activityAttempted = false;
+
+    if (isRemote) setSync((s) => ({ ...s, status: 'saving', error: null }));
+    try {
+      photosAttempted = true;
+      await repo.putPhotos(normalized.id, photos);
+
+      if (isRemote) {
+        vehicleAttempted = true;
+        await repo.upsert('vehicles', normalized);
+        activityAttempted = true;
+        await repo.upsert('activity', activityEntry);
+      }
+
+      setState((prev) => {
+        if (prev.vehicles.some((item) => item.importDraftId === draftId)) return prev;
+        return {
+          ...prev,
+          vehicles: [normalized, ...prev.vehicles],
+          activity: [activityEntry, ...(prev.activity || []).filter((item) => item.id !== activityEntry.id)].slice(0, 200),
+        };
+      });
+
+      if (isRemote) {
+        setSync((s) => ({ ...s, status: pending.current.size ? 'saving' : 'saved', error: null }));
+      }
+      return normalized;
+    } catch (err) {
+      // Si una parte de la importación falla, intentamos no dejar un alta a
+      // medias. El borrador seguirá visible y se podrá volver a intentar.
+      if (isRemote) {
+        if (activityAttempted) await repo.remove('activity', activityEntry.id).catch(() => {});
+        if (vehicleAttempted) await repo.remove('vehicles', normalized.id).catch(() => {});
+      }
+      if (photosAttempted) await repo.deletePhotos(normalized.id).catch(() => {});
+      if (isRemote) setSync((s) => ({ ...s, status: 'error', error: describeError(err) }));
+      throw err;
+    }
+  }, [guard, repo, isRemote]);
+
+  /** Descarta un borrador de forma persistente, también entre dispositivos. */
+  const dismissVehicleImportDraft = useCallback(async (draft) => {
+    if (!guard('activity')) return false;
+    if (!draft?.id) throw new Error('Falta el identificador del borrador');
+
+    const activityEntry = {
+      id: `vehicle-import-dismissed-${draft.id}`,
+      type: VEHICLE_IMPORT_DISMISSED,
+      draftId: draft.id,
+      at: new Date().toISOString(),
+      text: `Borrador de importación descartado: ${draft.title || draft.id}`,
+    };
+
+    if (isRemote) {
+      setSync((s) => ({ ...s, status: 'saving', error: null }));
+      try {
+        await repo.upsert('activity', activityEntry);
+      } catch (err) {
+        setSync((s) => ({ ...s, status: 'error', error: describeError(err) }));
+        throw err;
+      }
+      setSync((s) => ({ ...s, status: pending.current.size ? 'saving' : 'saved', error: null }));
+    }
+
+    setState((prev) => ({
+      ...prev,
+      activity: [activityEntry, ...(prev.activity || []).filter((item) => item.id !== activityEntry.id)].slice(0, 200),
+    }));
+    return true;
+  }, [guard, repo, isRemote]);
+
   const putPhotos = useCallback(async (vehicleId, list) => {
     if (!guard('photos')) return;
     try {
@@ -816,6 +910,8 @@ export function StoreProvider({ children }) {
       issueInvoice,
       nextInvoiceNumber,
       deleteVehicle,
+      importVehicleDraft,
+      dismissVehicleImportDraft,
       // Web pública
       savePublication,
       removePublication,
@@ -830,7 +926,7 @@ export function StoreProvider({ children }) {
       dismissLocalBackup,
       toasts,
     }),
-    [state, ready, repo, role, sync, tariffs, toast, log, setCompany, upsert, remove, updateCollection, replaceAll, loadDemo, removeDemo, hasDemo, importWebCatalog, removeWebCatalog, webCatalog, resetData, reloadFromServer, saveVehicle, issueInvoice, nextInvoiceNumber, deleteVehicle, savePublication, removePublication, uploadPublicPhoto, deletePublicPhotos, updateLead, deleteLead, putPhotos, localBackup, importLocalBackup, dismissLocalBackup, toasts],
+    [state, ready, repo, role, sync, tariffs, toast, log, setCompany, upsert, remove, updateCollection, replaceAll, loadDemo, removeDemo, hasDemo, importWebCatalog, removeWebCatalog, webCatalog, resetData, reloadFromServer, saveVehicle, issueInvoice, nextInvoiceNumber, deleteVehicle, importVehicleDraft, dismissVehicleImportDraft, savePublication, removePublication, uploadPublicPhoto, deletePublicPhotos, updateLead, deleteLead, putPhotos, localBackup, importLocalBackup, dismissLocalBackup, toasts],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

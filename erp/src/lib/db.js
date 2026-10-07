@@ -258,9 +258,11 @@ export async function putPhotos(vehicleId, list) {
   try {
     await migrateLegacy();
     const db = await openDb();
-    await writeKey(db, PHOTOS, vehicleId, list);
+    const ok = await writeKey(db, PHOTOS, vehicleId, list);
+    if (!ok) throw new Error('IndexedDB rechazó la escritura de las fotos');
   } catch (err) {
     console.error('[db] no se han podido guardar las fotos:', err.message);
+    throw err;
   }
 }
 

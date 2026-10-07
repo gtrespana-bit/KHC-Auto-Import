@@ -313,12 +313,15 @@ section('2. Coherencia interna del catálogo generado');
   const noSpread = GENERATED_DB.filter((v) => (v.dePrice[0] + v.dePrice[1]) / 2 >= (v.esPrice[0] + v.esPrice[1]) / 2);
   console.log(`    ${noSpread.length} fichas con venta media ≤ compra media (sin arbitraje antes de gastos)`);
 
-  // Dentro de una generación, más potencia no puede valer menos.
+  // Comparar la potencia solo entre fichas del mismo combustible y cohorte
+  // de años: una gasolina nueva no es comparable con un diésel más viejo,
+  // aunque pertenezcan a la misma generación comercial.
   let inversions = 0;
   const inversionExamples = [];
   const byGen = new Map();
   GENERATED_DB.forEach((v) => {
-    const k = `${v.brand}|${v.model}|${v.gen}`;
+    const yearRange = Array.isArray(v.years) ? v.years.join('-') : 'sin-años';
+    const k = `${v.brand}|${v.model}|${v.gen}|${v.fuel}|${yearRange}`;
     if (!byGen.has(k)) byGen.set(k, []);
     byGen.get(k).push(v);
   });
@@ -334,7 +337,7 @@ section('2. Coherencia interna del catálogo generado');
     }
   }
   if (inversions) fail(`${inversions} inversiones de potencia: ${inversionExamples.join(' | ')}`);
-  else ok('en cada generación, más potencia nunca vale menos');
+  else ok('en cada cohorte de generación/combustible/años, más potencia nunca vale menos');
 
   // Bandas absurdamente anchas no sirven para presupuestar.
   const tooWide = GENERATED_DB.filter((v) => v.dePrice[1] > v.dePrice[0] * 1.9 || v.esPrice[1] > v.esPrice[0] * 1.9);

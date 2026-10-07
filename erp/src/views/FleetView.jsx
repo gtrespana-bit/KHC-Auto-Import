@@ -10,6 +10,7 @@ import VehicleForm from '../components/VehicleForm.jsx';
 import AdModal from '../components/AdModal.jsx';
 import PublishModal from '../components/PublishModal.jsx';
 import { PhotoStrip } from '../components/Photos.jsx';
+import PendingVehicleImports from '../components/PendingVehicleImports.jsx';
 
 const STATUS_TONE = Object.fromEntries(STATUS_FLOW.map((s) => [s.id, s.color]));
 
@@ -164,6 +165,8 @@ export default function FleetView({ onOpenVehicle, autoOpenId, onAutoOpened }) {
           </>
         }
       />
+
+      <PendingVehicleImports />
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         <Stat label="Unidades" value={summary.count} hint={`${summary.stockCount} en stock · ${summary.soldCount} vendidas`} />

@@ -71,7 +71,15 @@ Cada vehículo con su **coste real** (no el precio de compra), su estado en el f
 En venta → Reservado → Vendido → Entregado), el avance de su documentación y su margen neto.
 
 Dos vistas: tabla y tablero por estados. Se puede filtrar, exportar a CSV y abrir la ficha
-completa haciendo clic en la fila.
+completa haciendo clic en la fila. Si hay un **borrador de importación** preparado en el código,
+aparece un aviso arriba con los datos, las fotos, el anuncio y el precio objetivo. Los gastos no
+confirmados se muestran como pendientes y no se suman al subtotal. *Añadir a mi flota* guarda la
+ficha y sus fotos en la base de datos, y *Descartar* recuerda la decisión. El vehículo entra como
+**Prospección**: no se marca como comprado ni se publica en la web. La exención del ITP no se
+preselecciona; su elegibilidad debe confirmarse en la ficha antes de aplicarla.
+
+Cómo preparar más coches, qué datos completar y cómo asociar las fotos: [Borradores de alta de
+vehículos](17_BORRADORES_IMPORTACION_FLOTA.md).
 
 **Dar de alta un vehículo.** En *Flota → Añadir vehículo* se abre la ficha con pestañas:
 ficha técnica (con buscador del catálogo que rellena motor, CO₂ y precios de mercado),
