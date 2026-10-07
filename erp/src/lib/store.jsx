@@ -28,6 +28,14 @@ import { DEFAULT_TARIFFS } from '../domain/rates.js';
 import { invoiceNumber, invoiceLines } from './templates.js';
 import { STATUS_FLOW } from '../domain/finance.js';
 import { demoState } from '../data/demoState.js';
+import {
+  DEMO_CLEANUP_COLLECTIONS,
+  DEMO_DATA_COLLECTIONS,
+  containsDemoData,
+  isUnchangedDemoCompany,
+  mergeDemoData,
+  removeDemoData,
+} from './demoData.js';
 
 const SCHEMA_VERSION = 2;
 
@@ -401,7 +409,7 @@ export function StoreProvider({ children }) {
   }, [enqueue, repo, guard]);
 
   const replaceAll = useCallback(async (next) => {
-    if (!guard('data')) return;
+    if (!guard('data')) return false;
     const normalized = normalizeState(next);
     setState(normalized);
     if (isRemote) {
@@ -412,9 +420,11 @@ export function StoreProvider({ children }) {
       } catch (err) {
         toast(`No se ha podido guardar la importación: ${describeError(err)}`, 'error');
         setSync((s) => ({ ...s, status: 'error', error: describeError(err) }));
-        reloadFromServer();
+        await reloadFromServer();
+        return false;
       }
     }
+    return true;
   }, [guard, isRemote, repo, toast, reloadFromServer]);
 
   const resetData = useCallback(async ({ keepCompany = false } = {}) => {
@@ -430,23 +440,84 @@ export function StoreProvider({ children }) {
     try { localStorage.removeItem('importauto_completed_steps'); } catch { /* noop */ }
   }, [guard, repo, toast]);
 
-  const loadDemo = useCallback(() => replaceAll(demoState()), [replaceAll]);
+  /**
+   * Añade ejemplos sin sustituir nada: conserva empresa, vehículos y el resto
+   * de registros reales. En la nube se hacen solo INSERT/UPSERT de los ids de
+   * demo que faltan; nunca se vacían tablas. Las publicaciones y leads falsos
+   * quedan fuera para no afectar a la web pública.
+   */
+  const loadDemo = useCallback(async () => {
+    if (!guard('data')) return { ok: false, total: 0, added: {} };
+    const demo = normalizeState(demoState());
+    const result = mergeDemoData(stateRef.current, demo);
+    const next = normalizeState(result.state);
+    setState(next);
 
-  /** Quita SOLO los registros del ejemplo (mismos id que demoState) y deja lo que haya dado de alta el usuario. */
+    if (isRemote && result.total > 0) {
+      setSync((s) => ({ ...s, status: 'saving' }));
+      try {
+        await Promise.all(
+          DEMO_DATA_COLLECTIONS.flatMap((key) =>
+            result.addedRecords[key].map((item) => repo.upsert(key, item)),
+          ),
+        );
+        setSync((s) => ({ ...s, status: 'saved', error: null }));
+      } catch (err) {
+        const message = describeError(err);
+        toast(`No se han podido añadir todos los ejemplos: ${message}`, 'error');
+        setSync((s) => ({ ...s, status: 'error', error: message }));
+        await reloadFromServer();
+        return { ok: false, total: 0, added: {} };
+      }
+    }
+
+    return { ok: true, total: result.total, added: result.added };
+  }, [guard, isRemote, repo, toast, reloadFromServer]);
+
+  /**
+   * Quita exclusivamente lo añadido por la demo. También reconoce y sanea los
+   * ids de ejemplo que pudiera haber guardado una versión antigua.
+   */
   const removeDemo = useCallback(async () => {
-    const demo = demoState();
-    const cur = stateRef.current;
-    const ids = new Set(Object.values(demo).filter(Array.isArray).flat().map((x) => x.id));
-    const next = { ...cur };
-    for (const [k, v] of Object.entries(cur)) if (Array.isArray(v)) next[k] = v.filter((x) => !ids.has(x.id));
-    if (cur.company?.name && cur.company.name === demo.company?.name) next.company = defaultState().company;
-    await replaceAll(next);
+    if (!guard('data')) return { ok: false, total: 0, removed: {} };
+    const demo = normalizeState(demoState());
+    const current = stateRef.current;
+    const result = removeDemoData(current, demo);
+    const resetLegacyDemoCompany = isUnchangedDemoCompany(current.company, demo.company);
+    const next = normalizeState({
+      ...result.state,
+      company: resetLegacyDemoCompany ? defaultState().company : current.company,
+    });
+    setState(next);
+
+    if (isRemote) {
+      setSync((s) => ({ ...s, status: 'saving' }));
+      try {
+        await Promise.all(
+          DEMO_CLEANUP_COLLECTIONS.flatMap((key) =>
+            result.removedRecords[key].map((item) => {
+              if (key === 'publications') return repo.removePublication(item.id);
+              if (key === 'leads') return repo.removeLead(item.id);
+              return repo.remove(key, item.id);
+            }),
+          ),
+        );
+        if (resetLegacyDemoCompany) await repo.saveCompany(next.company);
+        setSync((s) => ({ ...s, status: 'saved', error: null }));
+      } catch (err) {
+        const message = describeError(err);
+        toast(`No se han podido quitar todos los ejemplos: ${message}`, 'error');
+        setSync((s) => ({ ...s, status: 'error', error: message }));
+        await reloadFromServer();
+        return { ok: false, total: 0, removed: {} };
+      }
+    }
+
     try { localStorage.removeItem('importauto_completed_steps'); } catch { /* noop */ }
-  }, [replaceAll]);
-  const hasDemo = useMemo(() => {
-    const ids = new Set(Object.values(demoState()).filter(Array.isArray).flat().map((x) => x.id));
-    return Object.values(state).some((v) => Array.isArray(v) && v.some((x) => ids.has(x.id)));
-  }, [state]);
+    return { ok: true, total: result.total, removed: result.removed };
+  }, [guard, isRemote, repo, toast, reloadFromServer]);
+
+  const hasDemo = useMemo(() => containsDemoData(state, normalizeState(demoState())), [state]);
 
   /** Importa a la nube los datos que este navegador guardaba en local. */
   const importLocalBackup = useCallback(async () => {

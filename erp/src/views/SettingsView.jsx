@@ -31,8 +31,12 @@ export default function SettingsView({ initialTab = 'empresa' }) {
       const text = await file.text();
       const data = JSON.parse(text);
       if (!data || (!data.vehicles && !data.company)) throw new Error('El archivo no tiene el formato esperado');
-      replaceAll(data);
-      toast('Datos importados correctamente');
+      const confirmed = window.confirm(
+        'Restaurar este respaldo sustituirá los datos actuales. ¿Has descargado antes una copia de seguridad de lo que tienes ahora?',
+      );
+      if (!confirmed) return;
+      const saved = await replaceAll(data);
+      if (saved) toast('Datos importados correctamente');
     } catch (e) {
       toast(`No se ha podido importar: ${e.message}`, 'error');
     }
@@ -297,15 +301,33 @@ export default function SettingsView({ initialTab = 'empresa' }) {
             {isCloud && !can('data') && (
               <Alert tone="info" className="mt-3">Restaurar, cargar ejemplos y borrar todo están reservados al rol <b>Propietario</b>. Tu rol actual: <b>{roleLabel(role)}</b>.</Alert>
             )}
+            <Alert tone="info" className="mt-3">
+              <b>Los ejemplos no sustituyen tus datos.</b> Se añaden con identificadores separados, no cambian tu empresa ni publican coches ficticios en la web. Después puedes quitarlos sin borrar tus registros reales.
+            </Alert>
             <div className="flex flex-wrap gap-2 mt-4">
               <Button icon={Download} onClick={exportJson}>Descargar respaldo</Button>
               <label className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 text-slate-100 hover:bg-slate-700 border border-slate-700 text-sm px-3.5 py-2 cursor-pointer">
                 <Upload className="w-4 h-4" /> Restaurar desde archivo
-                <input type="file" accept="application/json,.json" className="hidden" onChange={(e) => e.target.files?.[0] && importJson(e.target.files[0])} />
+                <input
+                  type="file"
+                  accept="application/json,.json"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = '';
+                    if (file) importJson(file);
+                  }}
+                />
               </label>
               {hasDemo
-                ? <Button variant="secondary" icon={RotateCcw} onClick={async () => { await removeDemo(); toast('Datos de ejemplo quitados'); }}>Quitar datos de ejemplo</Button>
-                : <Button variant="secondary" icon={Database} onClick={() => { loadDemo(); toast('Datos de ejemplo cargados'); }}>Cargar datos de ejemplo</Button>}
+                ? <Button variant="secondary" icon={RotateCcw} onClick={async () => {
+                    const result = await removeDemo();
+                    if (result?.ok) toast('Datos de ejemplo quitados. Tus datos reales se han conservado.');
+                  }}>Quitar datos de ejemplo</Button>
+                : <Button variant="secondary" icon={Database} onClick={async () => {
+                    const result = await loadDemo();
+                    if (result?.ok) toast('Ejemplos añadidos sin modificar tus datos reales');
+                  }}>Añadir datos de ejemplo</Button>}
               <Button variant="danger" icon={RotateCcw} onClick={() => setConfirmReset(true)}>Borrar todo</Button>
             </div>
           </Card>
@@ -341,11 +363,18 @@ export default function SettingsView({ initialTab = 'empresa' }) {
             <Button
               className="mt-3"
               disabled={!importText.trim()}
-              onClick={() => {
+              onClick={async () => {
                 try {
-                  replaceAll(JSON.parse(importText));
-                  setImportText('');
-                  toast('Datos importados');
+                  const data = JSON.parse(importText);
+                  const confirmed = window.confirm(
+                    'Importar este texto sustituirá los datos actuales. ¿Has descargado antes una copia de seguridad de lo que tienes ahora?',
+                  );
+                  if (!confirmed) return;
+                  const saved = await replaceAll(data);
+                  if (saved) {
+                    setImportText('');
+                    toast('Datos importados');
+                  }
                 } catch (e) {
                   toast(`JSON no válido: ${e.message}`, 'error');
                 }
