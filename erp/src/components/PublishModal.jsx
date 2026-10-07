@@ -7,7 +7,9 @@ import {
   Modal, Button, Field, Input, Money, Textarea, Checkbox, Alert, Badge, Row, Card, Tabs, cx, ConfirmDialog,
 } from './ui.jsx';
 import { useStore } from '../lib/store.jsx';
-import { buildWebListing, mergeFeatureLists, parseFeatureList, webSlug } from '../lib/templates.js';
+import {
+  buildWebListing, isLegacyWebDescription, mergeFeatureLists, parseFeatureList, webSlug,
+} from '../lib/templates.js';
 import { eur, eur0, uid, numEs } from '../lib/format.js';
 import { salePriceOf, vehiclePnl } from '../domain/finance.js';
 import { SITE_SLUG, PUBLICATION_STATUS, publicationTone, publicUrl } from '../lib/web.js';
@@ -78,18 +80,29 @@ export default function PublishModal({ open, onClose, vehicle }) {
       setNewFeature('');
 
       const prev = existing?.data || null;
+      // Vehículos publicados antes de admitir el pegado masivo pueden tener
+      // el equipamiento guardado como un único bloque (todo junto, separado
+      // por comas dentro de un solo elemento). Se vuelve a repartir aquí,
+      // sin esperar a que alguien pulse nada: así una ficha antigua se ve
+      // igual de bien que una nueva en cuanto se abre.
+      const repairedFeatures = Array.isArray(prev?.features)
+        ? mergeFeatureLists([], prev.features.flatMap((f) => parseFeatureList(f)))
+        : null;
       const base = {
         title: prev?.title || generated.title,
         price: prev?.price ?? generated.price,
         priceNote: prev?.priceNote ?? DEFAULT_PRICE_NOTE,
         description: prev?.description || generated.description,
-        features: Array.isArray(prev?.features) ? prev.features : generated.features,
+        features: repairedFeatures || generated.features,
         warrantyMonths: prev?.warrantyMonths ?? vehicle.sale?.warrantyMonths ?? vehicle.warrantyMonths ?? state.company.warrantyMonths ?? 12,
         financingText: prev?.financingText ?? DEFAULT_FINANCING,
         location: prev?.location || state.company.city || 'A Coruña',
         slug: prev?.slug || '',
       };
       setDraft(base);
+      if (repairedFeatures && prev.features.length && repairedFeatures.length > prev.features.length) {
+        toast('Equipamiento agrupado detectado: se ha separado automáticamente en elementos individuales');
+      }
       const prevPhotos = prev?.photos || [];
       if (prevPhotos.length) {
         setSelected(prevPhotos.map((p) => p.photoId).filter((id) => list.some((ph) => ph.id === id)));
@@ -122,6 +135,21 @@ export default function PublishModal({ open, onClose, vehicle }) {
     return { parsed: parsed.length, added };
   };
 
+  // Cuántos elementos del equipamiento guardado siguen siendo un bloque con
+  // varios artículos dentro (p. ej. «Aire acondicionado, techo, llantas» como
+  // un único chip). Permite avisar y ofrecer separarlos con un clic.
+  const combinedFeaturesCount = (draft.features || []).reduce(
+    (count, f) => count + (parseFeatureList(f).length > 1 ? 1 : 0),
+    0,
+  );
+
+  const splitCombinedFeatures = () => {
+    const current = draft.features || [];
+    const merged = mergeFeatureLists([], current.flatMap((f) => parseFeatureList(f)));
+    set({ features: merged });
+    toast('Equipamiento separado en elementos individuales');
+  };
+
   // --- Qué ha cambiado desde la publicación ---------------------------------
   const differences = useMemo(() => {
     if (!existing?.data || !vehicle) return [];
@@ -146,10 +174,19 @@ export default function PublishModal({ open, onClose, vehicle }) {
     set({
       title: fresh.title,
       description: fresh.description,
-      features: fresh.features,
+      // Se añade el equipamiento base (CV, etiqueta, documentación…) sin
+      // perder lo que ya se había añadido a mano: regenerar actualiza el
+      // texto, no borra trabajo hecho.
+      features: mergeFeatureLists(fresh.features, draft.features || []),
     });
-    toast('Texto regenerado con los datos actuales de la ficha');
+    toast('Descripción regenerada con los nuevos estándares. Pulsa «Guardar borrador» o «Actualizar en la web» para que se quede así.');
   };
+
+  // El texto se guarda como estaba la primera vez que se publicó el coche:
+  // si es de antes de incluir la revisión integral, líquidos, aceites,
+  // filtros y diagnosis de sensores como estándar, se avisa para que sea muy
+  // fácil ponerlo al día con un solo clic.
+  const descriptionIsLegacy = !!existing?.data && isLegacyWebDescription(draft.description);
 
   /** Refresca los datos técnicos que van a la web con los de la ficha del ERP. */
   const resyncTechnical = () => {
@@ -382,6 +419,21 @@ export default function PublishModal({ open, onClose, vehicle }) {
             </Alert>
           )}
 
+          {descriptionIsLegacy && (
+            <Alert tone="info" title="Este anuncio usa el texto antiguo">
+              <div className="space-y-2">
+                <p>
+                  Se redactó antes de incluir la revisión integral, líquidos, aceites, filtros y diagnosis de
+                  sensores como estándar. Puedes ponerlo al día con un clic sin perder el equipamiento que ya
+                  tenga añadido.
+                </p>
+                <Button size="sm" variant="secondary" icon={Sparkles} onClick={regenerate}>
+                  Generar descripción con los nuevos estándares
+                </Button>
+              </div>
+            </Alert>
+          )}
+
           {!writable && (
             <Alert tone="warn">
               Tu rol no permite publicar en la web. Puedes revisarlo, pero no guardar cambios.
@@ -442,9 +494,16 @@ export default function PublishModal({ open, onClose, vehicle }) {
               </div>
 
               <div>
-                <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2">
-                  Equipamiento y garantías ({(draft.features || []).length})
-                </p>
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
+                    Equipamiento y garantías ({(draft.features || []).length})
+                  </p>
+                  {combinedFeaturesCount > 0 && (
+                    <Button size="sm" variant="secondary" icon={Sparkles} onClick={splitCombinedFeatures}>
+                      Separar {combinedFeaturesCount} elemento{combinedFeaturesCount === 1 ? '' : 's'} agrupado{combinedFeaturesCount === 1 ? '' : 's'}
+                    </Button>
+                  )}
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {(draft.features || []).map((f, i) => (
                     <span key={`${f}-${i}`} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-950/60 pl-2.5 pr-1.5 py-1 text-xs text-slate-200">
@@ -467,12 +526,26 @@ export default function PublishModal({ open, onClose, vehicle }) {
                 <div className="mt-3 rounded-xl border border-slate-800 bg-slate-950/35 p-3">
                   <Field
                     label="Añadir equipamiento en bloque"
-                    hint="Pega una lista separada por comas, punto y coma, viñetas o saltos de línea. Los duplicados se omiten automáticamente."
+                    hint="Pega la lista entera de golpe: se separa sola por comas, punto y coma, guiones, barras, viñetas o saltos de línea. Los duplicados se omiten automáticamente."
                   >
                     <Textarea
                       rows={4}
                       value={newFeature}
-                      onChange={setNewFeature}
+                      onChange={(value) => {
+                        // Red de seguridad por si el navegador no expone
+                        // `clipboardData` en el evento paste (pasa en algunos
+                        // móviles, extensiones o al pegar desde el menú
+                        // contextual en vez de con el teclado): un salto tan
+                        // grande de caracteres de una sola vez solo puede
+                        // venir de pegar o soltar texto, nunca de escribir a
+                        // mano, así que se reparte igual en cuanto se detecta.
+                        const grewALot = value.length - newFeature.length > 3;
+                        if (grewALot && parseFeatureList(value).length >= 2) {
+                          addFeatureList(value, { notify: true });
+                          return;
+                        }
+                        setNewFeature(value);
+                      }}
                       placeholder={'Cámara de marcha atrás, Apple CarPlay, control de crucero\nAsientos calefactados\nSensores de aparcamiento'}
                       onPaste={(event) => {
                         const text = event.clipboardData?.getData('text') || '';
