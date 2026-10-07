@@ -4,7 +4,7 @@ La pantalla **ERP → Flota y stock** puede enseñar fichas de coches preparados
 
 ## Qué hace el flujo
 
-- Presenta los vehículos pendientes con fotos, datos técnicos, vendedor, anuncio original y precio objetivo. Los importes de gastos que no se han verificado quedan a 0 y se identifican como pendientes; no se cuentan en el subtotal.
+- Presenta los vehículos pendientes con fotos, datos técnicos, tipo de vendedor, aviso del anuncio, anuncio original y precio objetivo. Los gastos estándar (transporte, COC, ITV de importación, tasa DGT, placas, gestoría, preparación, mantenimiento y publicidad) vienen rellenados con las tarifas de *Ajustes → Tarifas*; solo lo que de verdad no se puede estimar queda a 0, se identifica como pendiente y no se cuenta en el subtotal.
 - **Añadir a mi flota** guarda la ficha completa y copia las fotos al almacenamiento privado del vehículo. La ficha se crea como **Prospección**, no como compra confirmada ni como publicación web.
 - Los impuestos se recalculan con la forma jurídica y tarifas de la empresa. La exención provisional de ITP no se presume por comprar como empresa: queda sin marcar hasta que se confirme que se cumplen sus requisitos y el plazo legal de reventa.
 - **Descartar** registra la decisión en `activity`; no vuelve a ofrecer ese borrador al iniciar sesión en otro dispositivo.
@@ -18,8 +18,9 @@ La pantalla **ERP → Flota y stock** puede enseñar fichas de coches preparados
    - un `id` único e inmutable (por ejemplo, el marketplace y el ID del anuncio);
    - `sourceListing` con URL, precio anunciado, vendedor, localización y fecha de captura;
    - `vehicle` con la ficha conocida, estado `prospeccion` y `purchaseDate: null` si aún no se ha comprado;
-   - `costs` con precios anunciados, facturas/presupuestos confirmados o importes de tarifas configuradas; para cada concepto sin confirmar, añade su clave a `pendingCostFields` y fija su coste explícitamente en 0 (no significa que sea gratuito);
-   - `itpExemption: false` salvo que la elegibilidad esté confirmada expresamente; deja `itpExemptionPending: true` si aún debe revisarse;
+   - `costs` con el precio anunciado y los gastos estándar rellenados con las tarifas configuradas (transporte en camión, COC de fábrica, ITV de importación + ficha técnica, tasa DGT 1.1, placas, gestoría, preparación, mantenimiento y publicidad), para que la ficha importada no quede con huecos; son estimaciones y se sustituyen por las facturas reales al cerrar; para cada concepto que de verdad no se pueda estimar (viaje, garantía, seguro de stock, otros), añade su clave a `pendingCostFields` y fija su coste explícitamente en 0 (no significa que sea gratuito);
+   - `warnings` con los avisos propios del anuncio que hay que leer antes de comprar (defectos declarados, régimen de la factura del vendedor, CO₂ dudoso…); la tarjeta de Flota los muestra en el recuadro «Revisar antes de comprar»;
+   - `itpExemption: false` salvo que la elegibilidad esté confirmada expresamente; deja `itpExemptionPending: true` si aún debe revisarse (en compras a profesional no hay ITP y puede ir a `false`);
    - `priceTarget` indicando que es una estimación y cuál es su base;
    - `photos` con el nombre de archivo, identificador estable, descripción y una sola portada.
 4. Deja como vacío/null lo que no se haya verificado (VIN, matrícula, código de motor, día exacto de matriculación, etc.). Si el anuncio solo da mes y año, guarda ese texto en `sourceListing` y usa `firstRegDatePending: true`, sin inventar el día. Si una cifra técnica viene del catálogo y no del anuncio, anótalo y marca qué documentación debe confirmarla.
