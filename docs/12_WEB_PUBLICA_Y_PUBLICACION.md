@@ -198,9 +198,10 @@ Una fila por vehículo publicado, con **campos copiados** (nada de `join` con `v
 2. Modal de publicación con:
    - Precio público (por defecto, el precio de venta objetivo; editable, con aviso si queda
      por debajo del punto de equilibrio — eso ya existe en la app).
-   - Título y descripción autogenerados (revisables). El equipamiento se marca con
-     casillas; las descripciones genéricas («ITV en vigor», «libro de mantenimiento») ya
-     están en las plantillas.
+   - Título y descripción profesional autogenerados (revisables), con revisión integral,
+     renovación de líquidos, aceites y filtros, diagnosis y preparación para la entrega. El
+     equipamiento se puede pegar como una lista completa separada por comas, punto y coma,
+     viñetas o saltos de línea; la aplicación elimina duplicados.
    - Fotos: elige las de la ficha, marca la portada y **oculta las que muestren matrícula
      legible** (o tapa la matrícula al vuelo; ver §4.3).
    - Garantía y financiación (texto, sin cifras de TAE en v1).

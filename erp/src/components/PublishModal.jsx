@@ -7,10 +7,10 @@ import {
   Modal, Button, Field, Input, Money, Textarea, Checkbox, Alert, Badge, Row, Card, Tabs, cx, ConfirmDialog,
 } from './ui.jsx';
 import { useStore } from '../lib/store.jsx';
-import { buildWebListing, webSlug } from '../lib/templates.js';
+import { buildWebListing, mergeFeatureLists, parseFeatureList, webSlug } from '../lib/templates.js';
 import { eur, eur0, uid, numEs } from '../lib/format.js';
 import { salePriceOf, vehiclePnl } from '../domain/finance.js';
-import { SITE_SLUG, PUBLICATION_STATUS, publicationTone, publicUrl, PUBLIC_WEB_URL } from '../lib/web.js';
+import { SITE_SLUG, PUBLICATION_STATUS, publicationTone, publicUrl } from '../lib/web.js';
 import PlateEditor from './PlateEditor.jsx';
 
 const DEFAULT_PRICE_NOTE = 'Precio al contado, IVA incluido.';
@@ -83,7 +83,7 @@ export default function PublishModal({ open, onClose, vehicle }) {
         price: prev?.price ?? generated.price,
         priceNote: prev?.priceNote ?? DEFAULT_PRICE_NOTE,
         description: prev?.description || generated.description,
-        features: prev?.features?.length ? prev.features : generated.features,
+        features: Array.isArray(prev?.features) ? prev.features : generated.features,
         warrantyMonths: prev?.warrantyMonths ?? vehicle.sale?.warrantyMonths ?? vehicle.warrantyMonths ?? state.company.warrantyMonths ?? 12,
         financingText: prev?.financingText ?? DEFAULT_FINANCING,
         location: prev?.location || state.company.city || 'A Coruña',
@@ -102,13 +102,29 @@ export default function PublishModal({ open, onClose, vehicle }) {
     return () => { alive = false; };
   }, [open, vehicle?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!vehicle) return null;
-
   const set = (patch) => setDraft((d) => ({ ...d, ...patch }));
+
+  const addFeatureList = (text, { notify = false } = {}) => {
+    const parsed = parseFeatureList(text);
+    if (!parsed.length) return { parsed: 0, added: 0 };
+    const before = draft.features || [];
+    const merged = mergeFeatureLists(before, parsed);
+    const added = merged.length - mergeFeatureLists([], before).length;
+    set({ features: merged });
+    setNewFeature('');
+    if (notify) {
+      toast(
+        added > 0
+          ? `${added} elemento${added === 1 ? '' : 's'} añadido${added === 1 ? '' : 's'} de una vez`
+          : 'Ese equipamiento ya estaba incluido',
+      );
+    }
+    return { parsed: parsed.length, added };
+  };
 
   // --- Qué ha cambiado desde la publicación ---------------------------------
   const differences = useMemo(() => {
-    if (!existing?.data) return [];
+    if (!existing?.data || !vehicle) return [];
     const d = existing.data;
     const out = [];
     if (Number(d.km) !== Number(vehicle.km)) out.push(`kilómetros (ficha: ${numEs(vehicle.km, 0)} km)`);
@@ -117,6 +133,8 @@ export default function PublishModal({ open, onClose, vehicle }) {
     if ((d.fuel || '') !== (vehicle.fuel || '')) out.push('combustible');
     return out;
   }, [existing, vehicle]);
+
+  if (!vehicle) return null;
 
   const priceGap = existing?.data ? Number(draft.price || 0) - salePriceOf(vehicle) : 0;
   const leadsForVehicle = existing?.data?.slug
@@ -201,7 +219,7 @@ export default function PublishModal({ open, onClose, vehicle }) {
         price: Number(draft.price) || 0,
         priceNote: draft.priceNote || '',
         description: draft.description || '',
-        features: (draft.features || []).filter(Boolean),
+        features: mergeFeatureLists([], draft.features || []),
         warrantyMonths: Number(draft.warrantyMonths) || 12,
         financingText: draft.financingText || '',
         location: draft.location || state.company.city || 'A Coruña',
@@ -418,8 +436,8 @@ export default function PublishModal({ open, onClose, vehicle }) {
                 </div>
                 <Textarea rows={10} value={draft.description} onChange={(v) => set({ description: v })} />
                 <p className="mt-1 text-[11px] text-slate-500">
-                  Solo se afirman cosas que están marcadas en la ficha (libro de mantenimiento, llaves, ITV). Revisa el
-                  texto antes de publicar: es lo que lee el comprador.
+                  El texto incluye la revisión integral, la renovación de líquidos, aceites y filtros, y la diagnosis de
+                  sensores como compromiso de preparación antes de la entrega. Revísalo antes de publicar.
                 </p>
               </div>
 
@@ -446,22 +464,41 @@ export default function PublishModal({ open, onClose, vehicle }) {
                     </span>
                   )}
                 </div>
-                <div className="mt-2 flex gap-2">
-                  <Input
-                    value={newFeature}
-                    onChange={setNewFeature}
-                    placeholder="Añadir equipamiento (p. ej. «Cámara de marcha atrás»)"
-                    className="flex-1"
-                  />
-                  <Button
-                    variant="secondary"
-                    icon={Plus}
-                    disabled={!newFeature.trim()}
-                    onClick={() => {
-                      set({ features: [...(draft.features || []), newFeature.trim()] });
-                      setNewFeature('');
-                    }}
-                  />
+                <div className="mt-3 rounded-xl border border-slate-800 bg-slate-950/35 p-3">
+                  <Field
+                    label="Añadir equipamiento en bloque"
+                    hint="Pega una lista separada por comas, punto y coma, viñetas o saltos de línea. Los duplicados se omiten automáticamente."
+                  >
+                    <Textarea
+                      rows={4}
+                      value={newFeature}
+                      onChange={setNewFeature}
+                      placeholder={'Cámara de marcha atrás, Apple CarPlay, control de crucero\nAsientos calefactados\nSensores de aparcamiento'}
+                      onPaste={(event) => {
+                        const text = event.clipboardData?.getData('text') || '';
+                        if (parseFeatureList(text).length < 2) return;
+                        event.preventDefault();
+                        addFeatureList(text, { notify: true });
+                      }}
+                      onKeyDown={(event) => {
+                        if ((event.ctrlKey || event.metaKey) && event.key === 'Enter' && newFeature.trim()) {
+                          event.preventDefault();
+                          addFeatureList(newFeature, { notify: true });
+                        }
+                      }}
+                    />
+                  </Field>
+                  <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-[11px] text-slate-500">También puedes escribir un solo elemento. Ctrl/⌘ + Enter para añadir.</span>
+                    <Button
+                      variant="secondary"
+                      icon={Plus}
+                      disabled={!newFeature.trim()}
+                      onClick={() => addFeatureList(newFeature, { notify: true })}
+                    >
+                      Añadir lista
+                    </Button>
+                  </div>
                 </div>
               </div>
 

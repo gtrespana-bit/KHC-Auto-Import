@@ -204,62 +204,113 @@ export function webFeatures(vehicle = {}) {
   return out;
 }
 
+const featureKey = (value) => String(value || '')
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, ' ')
+  .trim();
+
 /**
- * Texto de la ficha de la web. Sobrio y verificable: cuatro párrafos cortos.
+ * Convierte una lista pegada en elementos separados. Admite comas, punto y
+ * coma, saltos de línea, tabuladores y viñetas; limpia numeraciones tipo
+ * «1.», «2)» y evita duplicados sin distinguir mayúsculas ni tildes.
+ */
+export function parseFeatureList(value = '') {
+  const seen = new Set();
+  const out = [];
+  for (const raw of String(value).replace(/\r/g, '\n').split(/[\n,;\t•|]+/)) {
+    const item = raw
+      .replace(/^\s*(?:(?:[-–—*✓✔]+)|(?:\d{1,3}[.)-]))\s*/, '')
+      .replace(/\s+/g, ' ')
+      .replace(/[.·:]+$/, '')
+      .trim();
+    const key = featureKey(item);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push(item);
+  }
+  return out;
+}
+
+/** Une equipamiento existente y pegado sin repetir elementos. */
+export function mergeFeatureLists(existing = [], incoming = []) {
+  const out = [];
+  const seen = new Set();
+  for (const item of [...existing, ...incoming]) {
+    const clean = String(item || '').replace(/\s+/g, ' ').trim();
+    const key = featureKey(clean);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push(clean);
+  }
+  return out;
+}
+
+/** Texto profesional de preparación, adaptado para no atribuir aceite de motor a un eléctrico puro. */
+export function webPreparationText(vehicle = {}) {
+  const fuel = String(vehicle.fuel || '').toLowerCase();
+  const pureElectric = /el[eé]ctric/.test(fuel) && !/h[ií]brid/.test(fuel);
+  if (pureElectric) {
+    return 'Se entrega con una revisión integral y una puesta a punto completas. La preparación incluye la sustitución de todos los líquidos y filtros de mantenimiento aplicables, así como el servicio de la transmisión de acuerdo con las especificaciones del fabricante. También se realiza una diagnosis electrónica, junto con la limpieza, comprobación y ajuste de todos los sensores del vehículo.';
+  }
+  return 'Se entrega con una revisión integral y una puesta a punto completas. La preparación incluye la sustitución de todos los líquidos de mantenimiento, el aceite de motor y el aceite de la caja de cambios o transmisión, además de los filtros de aceite, aire, combustible y transmisión, de acuerdo con las especificaciones del fabricante. También se realiza una diagnosis electrónica, junto con la limpieza, comprobación y ajuste de todos los sensores del vehículo.';
+}
+
+/**
+ * Texto profesional de la ficha pública. Separa presentación, procedencia,
+ * preparación, garantía y llamada a la acción en párrafos fáciles de leer.
  * Devuelve `{ title, description, features }`.
  */
 export function buildWebListing({ vehicle = {}, company = {}, price = 0 } = {}) {
   const v = vehicle;
-  const kmTxt = numEs(n(v.km), 0);
   const docs = v.documents || {};
-  const garantia = n(v.sale?.warrantyMonths ?? v.warrantyMonths ?? company.warrantyMonths ?? 12);
-
-  const parrafos = [];
-
-  const presentacion = [
-    `${v.fuel || ''} ${v.transmission || ''}`.trim() ? `${v.fuel || ''} con cambio ${v.transmission || ''}` : '',
-    v.year ? `de ${v.year}` : '',
-    n(v.km) ? `con ${kmTxt} km` : '',
-  ].filter(Boolean).join(', ');
-
-  parrafos.push(
-    `${v.brand || ''} ${v.model || ''}${v.version ? ` ${v.version}` : ''} ${presentacion ? `: unidad ${presentacion}` : ''}.`.replace(/\s+\./, '.').replace(/\s+/g, ' '),
-  );
+  const garantia = Math.max(12, n(v.sale?.warrantyMonths ?? v.warrantyMonths ?? company.warrantyMonths ?? 12));
+  const title = webTitle(v) || 'Vehículo disponible';
+  const details = [
+    v.year ? `año ${v.year}` : '',
+    n(v.km) ? `${numEs(n(v.km), 0)} km` : '',
+    v.fuel || '',
+    v.transmission ? `cambio ${v.transmission}` : '',
+    v.cv ? `${v.cv} CV` : '',
+  ].filter(Boolean);
+  const parrafos = [
+    `Presentamos ${title}${details.length ? `, ${details.join(', ')}` : ''}. Una unidad cuidadosamente seleccionada por su configuración, estado y calidad general.`,
+  ];
 
   const origin = originLabel(v);
-  if (v.firstRegDate) {
-    parrafos.push(
-      `Primera matriculación en ${dateEs(v.firstRegDate)}${origin.isImport ? ` (${origin.country})` : ''}.`,
-    );
-  }
+  const firstRegistration = v.firstRegDate ? ` Primera matriculación: ${dateEs(v.firstRegDate)}.` : '';
   parrafos.push(
     origin.isImport
-      ? 'Unidad seleccionada fuera de España: la importación, los impuestos y la matriculación ya están resueltos.'
-      : 'Vehículo con matrícula española: nos ocupamos de la transferencia y de los trámites con la DGT.',
+      ? `Unidad seleccionada en ${origin.country}, con la importación, los impuestos, la matriculación y la documentación ya resueltos.${firstRegistration}`
+      : `Vehículo con matrícula española. Nos ocupamos de la transferencia y de todos los trámites con la DGT.${firstRegistration}`,
   );
 
-  const estado = [
-    'Se entrega revisado, con la puesta a punto hecha y la documentación al día',
-    docs.serviceBook ? 'con libro de mantenimiento' : '',
-    docs.keys ? 'y dos llaves' : '',
-  ].filter(Boolean).join(' ');
+  parrafos.push(webPreparationText(v));
+
+  const documentation = [
+    'Se entrega con la documentación al día',
+    docs.serviceBook ? 'libro de mantenimiento' : '',
+    docs.keys ? 'dos llaves' : '',
+  ].filter(Boolean);
   parrafos.push(
-    `${estado}. Incluye garantía mínima de ${Math.max(12, garantia)} meses, por escrito, y acompañamiento en todos los trámites.`,
+    `${documentation.join(', ')}. Incluye una garantía mínima de ${garantia} meses por escrito, con sus coberturas detalladas, y acompañamiento durante toda la gestión y la entrega.`,
   );
 
-  if (v.co2) {
-    parrafos.push(`Emisiones de ${v.co2} g/km de CO₂${v.badge ? ` y etiqueta ambiental ${v.badge}` : ''}.`);
+  if (v.co2 || v.badge) {
+    const environmental = [
+      v.co2 ? `emisiones homologadas de ${v.co2} g/km de CO₂` : '',
+      v.badge ? `etiqueta ambiental ${v.badge}` : '',
+    ].filter(Boolean).join(' y ');
+    parrafos.push(`Dispone de ${environmental}.`);
   }
 
-  const cierre = [
-    'Puedes verlo y probarlo con cita previa',
-    'aceptamos tu coche actual como parte del pago',
-    'y estudiamos financiación a medida',
-  ].join(', ');
-  parrafos.push(`${cierre}.`);
+  parrafos.push(
+    'Disponible para inspección y prueba con cita previa. Aceptamos tu vehículo actual como parte de pago y estudiamos financiación a medida, sujeta a aprobación.',
+  );
 
   return {
-    title: webTitle(v),
+    title,
     description: parrafos.filter(Boolean).join('\n\n'),
     features: webFeatures(v),
     price: n(price),

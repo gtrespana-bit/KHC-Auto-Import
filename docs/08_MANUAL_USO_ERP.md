@@ -187,8 +187,10 @@ En la ficha del vehículo, pestaña **Web** → botón *Publicar en la web* (sol
 
 1. **Contenido:** precio publicado, garantía, título, descripción y equipamiento. Todo llega
    rellenado desde la ficha; el botón *Regenerar desde la ficha* vuelve a redactarlo si has
-   cambiado los datos. La descripción solo afirma lo que está marcado en la ficha (libro de
-   mantenimiento, llaves, ITV): revisa que lo que afirmas es verdad.
+   cambiado los datos. La descripción incorpora la preparación comprometida antes de la entrega:
+   revisión integral, líquidos, aceites, filtros y diagnosis de sensores. El equipamiento se puede
+   pegar completo, separado por comas, punto y coma, viñetas o saltos de línea; se añade de una vez
+   y los duplicados se omiten. Revisa siempre que el texto coincide con la unidad y el trabajo real.
 2. **Fotos:** marca las que se publican, elige la portada y, si se ve la matrícula, pulsa el lápiz
    para **taparla** (se pixela solo en la copia que sube a la web; la original de la ficha no se
    toca). Las imágenes salen redimensionadas y sin datos EXIF (nada de geolocalización).

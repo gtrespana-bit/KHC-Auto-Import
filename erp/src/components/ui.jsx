@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { X, Search, ChevronDown, AlertTriangle, CheckCircle2, Info, Trash2, Plus } from 'lucide-react';
 import { eur, eur0, dateEs, pct as pctFmt } from '../lib/format.js';
 
@@ -122,7 +122,7 @@ export function Money({ value, onChange, className = '', placeholder = '0,00' })
   );
 }
 
-export function Textarea({ value, onChange, rows = 3, placeholder, className = '' }) {
+export function Textarea({ value, onChange, rows = 3, placeholder, className = '', ...props }) {
   return (
     <textarea
       rows={rows}
@@ -130,6 +130,7 @@ export function Textarea({ value, onChange, rows = 3, placeholder, className = '
       value={value ?? ''}
       onChange={(e) => onChange(e.target.value)}
       className={cx(inputClass, 'resize-y', className)}
+      {...props}
     />
   );
 }

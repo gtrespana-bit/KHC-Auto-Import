@@ -119,7 +119,9 @@ comas).
 ## Publicar un coche (flujo completo)
 
 1. En el ERP: ficha del vehículo → pestaña **Web** → **Publicar en la web** (solo `owner`/`manager`).
-2. Se rellena el contenido público (título, descripción, precio, equipamiento, garantía), se
+2. Se rellena el contenido público (título, descripción profesional, precio, equipamiento y
+   garantía). La descripción incluye la revisión integral y la preparación mecánica comprometida;
+   el equipamiento admite pegar una lista completa separada por comas, viñetas o líneas. Después se
    eligen las fotos (con opción de **tapar la matrícula** en la copia publicada) y se revisa la
    **vista previa**.
 3. Al confirmar, el ERP escribe en `publications` y copia las fotos al bucket público
