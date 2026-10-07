@@ -12,6 +12,13 @@ import {
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
+// Las vistas exteriores homogeneizadas conservan su original del anuncio en
+// la carpeta del coche; el mapa liga carpeta editada → carpeta de originales.
+const ORIGINAL_FOLDER = {
+  'audi a3 gris editadas/': 'audi a3 gris/',
+  'bmw serie 3 touring editadas/': 'bmw serie 3 touring/',
+};
+
 assert.equal(PENDING_VEHICLE_IMPORT_DATA.length, 2);
 const [audi, bmw] = PENDING_VEHICLE_IMPORT_DATA;
 assert.equal(audi.id, 'mobilede-48386412615008');
@@ -35,13 +42,22 @@ for (const draft of PENDING_VEHICLE_IMPORT_DATA) {
       existsSync(path.join(root, 'public', 'images', photo.assetPath)),
       `Falta el archivo de imagen ${photo.assetPath}`,
     );
-    if (photo.sourceFilename && photo.assetPath.startsWith('audi a3 gris editadas/')) {
+    const editedFolder = Object.keys(ORIGINAL_FOLDER).find((folder) => photo.assetPath.startsWith(folder));
+    if (editedFolder) {
+      assert.ok(photo.backgroundEdited, `${photo.filename}: una vista homogeneizada se marca como backgroundEdited`);
+      assert.ok(photo.sourceFilename, `${photo.filename}: la vista homogeneizada conserva la referencia del original`);
       assert.ok(
-        existsSync(path.join(root, 'public', 'images', 'audi a3 gris', photo.sourceFilename)),
+        existsSync(path.join(root, 'public', 'images', ORIGINAL_FOLDER[editedFolder], photo.sourceFilename)),
         `Falta el original del anuncio ${photo.sourceFilename}`,
       );
     }
   }
+
+  // Las vistas exteriores SIEMPRE se homogeneizan a la ubicación de la empresa.
+  assert.ok(
+    draft.photos.some((photo) => photo.backgroundEdited),
+    `${draft.id}: las vistas exteriores llevan el fondo homogeneizado`,
+  );
 
   // Los conceptos estándar se estiman con tarifas; solo lo no estimable queda pendiente.
   const v = draft.vehicle;
@@ -92,6 +108,7 @@ assert.equal(bmw.vehicle.firstRegDatePending, true);
 assert.equal(bmw.vehicle.costs.purchase, 12990);
 assert.equal(bmw.priceTarget.amount, 16990);
 assert.equal(bmw.photos.length, 11);
+assert.equal(bmw.photos.filter((photo) => photo.backgroundEdited).length, 6, 'las seis vistas exteriores homogeneizadas');
 assert.deepEqual(bmw.vehicle.pendingCostFields, ['travel', 'guarantee', 'insurance', 'other']);
 assert.equal(bmw.vehicle.costs.itv, 132.59, 'diésel 52,30 € + ficha 80,29 €');
 assert.equal(bmw.vehicle.costs.cocFicha, 120);
@@ -100,8 +117,12 @@ assert.equal(bmw.vehicle.costs.placas, 28);
 assert.equal(bmw.vehicle.costs.gestoria, 180);
 assert.equal(bmw.vehicle.costs.transport, 750);
 assert.ok(
-  bmw.photos[0].assetPath.startsWith('bmw serie 3 touring/'),
-  'las fotos del BMW viven en su carpeta del repo',
+  bmw.photos[0].assetPath.startsWith('bmw serie 3 touring editadas/'),
+  'la portada del BMW es la vista homogeneizada a nuestra ubicación',
+);
+assert.ok(
+  bmw.photos.slice(6).every((photo) => photo.assetPath.startsWith('bmw serie 3 touring/')),
+  'interiores y maletero del BMW conservan los originales del anuncio',
 );
 
 // ---------------------------------------------------------------------------

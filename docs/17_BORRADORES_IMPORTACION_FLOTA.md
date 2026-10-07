@@ -22,7 +22,7 @@ La pantalla **ERP → Flota y stock** puede enseñar fichas de coches preparados
    - `warnings` con los avisos propios del anuncio que hay que leer antes de comprar (defectos declarados, régimen de la factura del vendedor, CO₂ dudoso…); la tarjeta de Flota los muestra en el recuadro «Revisar antes de comprar»;
    - `itpExemption: false` salvo que la elegibilidad esté confirmada expresamente; deja `itpExemptionPending: true` si aún debe revisarse (en compras a profesional no hay ITP y puede ir a `false`);
    - `priceTarget` indicando que es una estimación y cuál es su base;
-   - `photos` con el nombre de archivo, identificador estable, descripción y una sola portada.
+   - `photos` con el nombre de archivo, identificador estable, descripción y una sola portada. Las vistas exteriores se homogeneizan **siempre** a la ubicación de la empresa (fachada de hormigón y madera, sin rótulos ni matrículas del vendedor) y se marcan con `backgroundEdited: true`; los originales del anuncio se conservan en la carpeta del coche y las fotos de interior y maletero quedan intactas.
 4. Deja como vacío/null lo que no se haya verificado (VIN, matrícula, código de motor, día exacto de matriculación, etc.). Si el anuncio solo da mes y año, guarda ese texto en `sourceListing` y usa `firstRegDatePending: true`, sin inventar el día. Si una cifra técnica viene del catálogo y no del anuncio, anótalo y marca qué documentación debe confirmarla.
 5. Ejecuta `npm run test:vehicle-imports` y `npm run build:erp`.
 
