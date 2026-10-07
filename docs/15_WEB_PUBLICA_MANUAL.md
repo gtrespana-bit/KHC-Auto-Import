@@ -121,9 +121,12 @@ comas).
 1. En el ERP: ficha del vehículo → pestaña **Web** → **Publicar en la web** (solo `owner`/`manager`).
 2. Se rellena el contenido público (título, descripción profesional, precio, equipamiento y
    garantía). La descripción incluye la revisión integral y la preparación mecánica comprometida;
-   el equipamiento admite pegar una lista completa separada por comas, viñetas o líneas. Después se
-   eligen las fotos (con opción de **tapar la matrícula** en la copia publicada) y se revisa la
-   **vista previa**.
+   si el coche ya tenía anuncio de antes de este estándar, un aviso permite regenerarlo con un
+   clic sin perder el equipamiento añadido a mano. El equipamiento admite pegar una lista
+   completa de golpe (comas, guiones, barras, «·», viñetas o líneas: se separa sola), y si un
+   coche antiguo quedó con todo agrupado en un bloque, se reparte automáticamente al abrir su
+   publicación. Después se eligen las fotos (con opción de **tapar la matrícula** en la copia
+   publicada) y se revisa la **vista previa**.
 3. Al confirmar, el ERP escribe en `publications` y copia las fotos al bucket público
    `public-photos` (redimensionadas, sin EXIF y sin la matrícula si se ha tapado).
 4. La web la muestra en menos de un minuto (revalidación de 60 s). Al marcar el coche como

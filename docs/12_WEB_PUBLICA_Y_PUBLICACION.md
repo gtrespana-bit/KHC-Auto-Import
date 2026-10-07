@@ -199,9 +199,13 @@ Una fila por vehículo publicado, con **campos copiados** (nada de `join` con `v
    - Precio público (por defecto, el precio de venta objetivo; editable, con aviso si queda
      por debajo del punto de equilibrio — eso ya existe en la app).
    - Título y descripción profesional autogenerados (revisables), con revisión integral,
-     renovación de líquidos, aceites y filtros, diagnosis y preparación para la entrega. El
-     equipamiento se puede pegar como una lista completa separada por comas, punto y coma,
-     viñetas o saltos de línea; la aplicación elimina duplicados.
+     renovación de líquidos, aceites y filtros, diagnosis y preparación para la entrega. En
+     vehículos que ya tenían anuncio de antes de este estándar aparece un aviso para
+     regenerarlo con un clic, sin perder el equipamiento añadido a mano. El equipamiento se
+     puede pegar como una lista completa separada por comas, punto y coma, guiones, barras,
+     «·», viñetas o saltos de línea; la aplicación elimina duplicados y, si detecta equipamiento
+     antiguo guardado como un único bloque, lo reparte solo (o con el botón *Separar elementos
+     agrupados*).
    - Fotos: elige las de la ficha, marca la portada y **oculta las que muestren matrícula
      legible** (o tapa la matrícula al vuelo; ver §4.3).
    - Garantía y financiación (texto, sin cifras de TAE en v1).

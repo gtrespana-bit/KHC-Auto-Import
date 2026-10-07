@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {
   buildWebListing,
+  isLegacyWebDescription,
   mergeFeatureLists,
   parseFeatureList,
   webPreparationText,
@@ -64,4 +65,57 @@ const electricPreparation = webPreparationText({ fuel: 'Eléctrico' });
 assert.ok(/revisión integral/i.test(electricPreparation));
 assert.ok(!/aceite de motor/i.test(electricPreparation), 'un eléctrico puro no debe anunciar cambio de aceite de motor');
 
-console.log('✓ Publicación web: texto profesional y pegado masivo verificados');
+// El pegado masivo debe funcionar sea cual sea el separador que traiga el
+// origen: comas, guiones entre palabras, barras, viñetas « · » o columnas
+// pegadas con varios espacios (típico al copiar de un PDF o una hoja).
+assert.deepEqual(
+  parseFeatureList('Aire acondicionado - Climatizador bizona - Llantas de 19"'),
+  ['Aire acondicionado', 'Climatizador bizona', 'Llantas de 19"'],
+  'debe separar por guiones usados como separador entre elementos',
+);
+assert.deepEqual(
+  parseFeatureList('Aire acondicionado · Climatizador bizona · Llantas de aleación'),
+  ['Aire acondicionado', 'Climatizador bizona', 'Llantas de aleación'],
+  'debe separar por el carácter «·»',
+);
+assert.deepEqual(
+  parseFeatureList('Aire acondicionado/Climatizador bizona/Llantas de aleación'),
+  ['Aire acondicionado', 'Climatizador bizona', 'Llantas de aleación'],
+  'debe separar por barras',
+);
+assert.deepEqual(
+  parseFeatureList('Aire acondicionado   Climatizador bizona   Llantas de aleación'),
+  ['Aire acondicionado', 'Climatizador bizona', 'Llantas de aleación'],
+  'dos o más espacios seguidos (columnas pegadas) también separan elementos',
+);
+assert.deepEqual(
+  parseFeatureList('Todo-terreno, Aire acondicionado'),
+  ['Todo-terreno', 'Aire acondicionado'],
+  'un guion sin espacios alrededor es parte de la palabra, no un separador',
+);
+
+// Vehículos publicados antes de admitir el pegado masivo quedaron con el
+// equipamiento entero metido en un único elemento: se tiene que poder
+// reparar reprocesando cada elemento ya guardado con `parseFeatureList`.
+const legacyBlockFeatures = ['Aire acondicionado, Climatizador bizona, Llantas de aleación, Techo solar'];
+assert.deepEqual(
+  mergeFeatureLists([], legacyBlockFeatures.flatMap((f) => parseFeatureList(f))),
+  ['Aire acondicionado', 'Climatizador bizona', 'Llantas de aleación', 'Techo solar'],
+  'un equipamiento guardado como bloque único debe poder repartirse en elementos independientes',
+);
+
+// Detección de descripciones redactadas con la plantilla antigua, para poder
+// avisar en vehículos que ya existían antes de este estándar.
+assert.equal(isLegacyWebDescription(''), false, 'una ficha sin descripción no se marca como antigua');
+assert.equal(
+  isLegacyWebDescription('Bonito coche, pocos kilómetros, muy cuidado. Llamar para más información.'),
+  true,
+  'un texto sin la revisión integral ni la diagnosis es de la plantilla antigua',
+);
+assert.equal(
+  isLegacyWebDescription(listing.description),
+  false,
+  'el texto generado con los estándares actuales no debe marcarse como antiguo',
+);
+
+console.log('✓ Publicación web: texto profesional, pegado masivo y reparación de equipamiento antiguo verificados');

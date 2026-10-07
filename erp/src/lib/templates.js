@@ -213,15 +213,27 @@ const featureKey = (value) => String(value || '')
 
 /**
  * Convierte una lista pegada en elementos separados. Admite comas, punto y
- * coma, saltos de línea, tabuladores y viñetas; limpia numeraciones tipo
- * «1.», «2)» y evita duplicados sin distinguir mayúsculas ni tildes.
+ * coma, saltos de línea, tabuladores, viñetas (incluidas las que usan ●, ▪,
+ * ‣, ➤, →, ○), barras, el carácter «·» y guiones usados como separador entre
+ * palabras («Aire acondicionado - Llantas de aleación - Asientos de cuero»);
+ * limpia numeraciones tipo «1.», «2)» y evita duplicados sin distinguir
+ * mayúsculas ni tildes. Pensado para aceptar cualquier formato en el que se
+ * haya copiado el equipamiento (portal, PDF, WhatsApp, hoja de cálculo…).
  */
 export function parseFeatureList(value = '') {
   const seen = new Set();
   const out = [];
-  for (const raw of String(value).replace(/\r/g, '\n').split(/[\n,;\t•|]+/)) {
+  const normalized = String(value)
+    .replace(/\r/g, '\n')
+    // Guiones/rayas usados como separador entre elementos (con espacios a
+    // ambos lados), no como parte de una palabra compuesta.
+    .replace(/\s+[-–—]\s+/g, '\n')
+    // Dos o más espacios seguidos suelen separar columnas pegadas de una
+    // tabla o un PDF: se tratan como salto de elemento.
+    .replace(/ {2,}/g, '\n');
+  for (const raw of normalized.split(/[\n,;\t•●▪‣➤→○·|/]+/)) {
     const item = raw
-      .replace(/^\s*(?:(?:[-–—*✓✔]+)|(?:\d{1,3}[.)-]))\s*/, '')
+      .replace(/^\s*(?:(?:[-–—*✓✔·]+)|(?:\d{1,3}[.)-]))\s*/, '')
       .replace(/\s+/g, ' ')
       .replace(/[.·:]+$/, '')
       .trim();
@@ -255,6 +267,20 @@ export function webPreparationText(vehicle = {}) {
     return 'Se entrega con una revisión integral y una puesta a punto completas. La preparación incluye la sustitución de todos los líquidos y filtros de mantenimiento aplicables, así como el servicio de la transmisión de acuerdo con las especificaciones del fabricante. También se realiza una diagnosis electrónica, junto con la limpieza, comprobación y ajuste de todos los sensores del vehículo.';
   }
   return 'Se entrega con una revisión integral y una puesta a punto completas. La preparación incluye la sustitución de todos los líquidos de mantenimiento, el aceite de motor y el aceite de la caja de cambios o transmisión, además de los filtros de aceite, aire, combustible y transmisión, de acuerdo con las especificaciones del fabricante. También se realiza una diagnosis electrónica, junto con la limpieza, comprobación y ajuste de todos los sensores del vehículo.';
+}
+
+/**
+ * Detecta si una descripción ya guardada se redactó con la plantilla antigua
+ * (de antes de incluir la revisión integral, líquidos, aceites, filtros y
+ * diagnosis de sensores como estándar). Sirve para avisar, en vehículos que
+ * ya tenían anuncio antes de este estándar, de que conviene regenerar el
+ * texto; no se sobrescribe nada automáticamente para no perder redacciones
+ * hechas a mano.
+ */
+export function isLegacyWebDescription(description = '') {
+  const text = String(description || '').trim();
+  if (!text) return false;
+  return !(/revisión integral/i.test(text) && /diagnosis/i.test(text));
 }
 
 /**
