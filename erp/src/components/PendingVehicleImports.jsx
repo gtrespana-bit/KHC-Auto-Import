@@ -96,6 +96,9 @@ export default function PendingVehicleImports() {
         const previewPhotos = draft.photos.filter((photo) => photo.id !== cover?.id).slice(0, 3);
         const preview = previews[draft.id];
         const pendingCostCount = draft.vehicle.pendingCostFields?.length || 0;
+        const sellerIsPrivate = ['private_eu', 'private_es'].includes(draft.vehicle?.sellerType);
+        const sellerLabel = [listing.sellerType, listing.sellerName].filter(Boolean).join(' · ')
+          || 'Vendedor por confirmar';
         const importing = busy?.id === draft.id && busy.action === 'import';
         const dismissing = busy?.id === draft.id && busy.action === 'discard';
         const disabled = Boolean(busy) || !can('vehicles') || !can('photos');
@@ -152,7 +155,7 @@ export default function PendingVehicleImports() {
 
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-300">
                   <span className="font-semibold text-amber-300">Anuncio: {eur0(listing.askingPrice)}{listing.negotiable ? ' · negociable' : ''}</span>
-                  <span>Vendedor particular</span>
+                  <span>{sellerLabel}</span>
                   <span className="inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-slate-500" />{listing.sellerLocation}</span>
                   <a
                     href={listing.url}
@@ -189,12 +192,19 @@ export default function PendingVehicleImports() {
                 </div>
 
                 <Alert tone="warn" title="Revisar antes de comprar">
-                  El vendedor declara un pequeño daño de granizo en el techo y otros defectos estéticos; la venta es particular y sin garantía/devolución. El objetivo de {eur0(draft.priceTarget?.amount)} es una estimación.{' '}
+                  {draft.warnings?.length > 0 && (
+                    <ul className="list-disc ml-4 space-y-1 mb-1">
+                      {draft.warnings.map((warning) => <li key={warning}>{warning}</li>)}
+                    </ul>
+                  )}
+                  El objetivo de {eur0(draft.priceTarget?.amount)} es una estimación.{' '}
                   {pendingCostCount > 0
                     ? `El subtotal excluye ${pendingCostCount} costes pendientes (${draft.vehicle.pendingCostFields.map((key) => PENDING_COST_LABELS[key] || key).join(', ')}), que siguen a 0 € hasta tener importes confirmados.`
-                    : 'El subtotal incluye los importes cargados; confirma que las tarifas coinciden con la operación.'}{' '}
-                  Confirma desperfectos, VIN, CO₂, el día exacto de primera matriculación y los costes reales antes de cerrar.
-                  {buyerIsBusiness ? ' La exención de ITP no está preseleccionada: confirma la elegibilidad antes de aplicarla.' : ' No se aplica una exención de ITP al perfil particular.'}
+                    : 'Los costes cargados proceden de las tarifas del ERP o del anuncio: sustitúyelos por las facturas reales en cuanto las tengas.'}{' '}
+                  Confirma desperfectos, VIN, CO₂, el día exacto de primera matriculación y los costes reales antes de cerrar.{' '}
+                  {sellerIsPrivate
+                    ? (buyerIsBusiness ? 'La exención de ITP no está preseleccionada: confirma la elegibilidad antes de aplicarla.' : 'No se aplica una exención de ITP al perfil particular.')
+                    : 'Compra a profesional de la UE: sin ITP; el IVA se regulariza en España según tu forma jurídica.'}
                 </Alert>
 
                 <div className="flex flex-wrap items-center justify-between gap-3 mt-auto pt-1">

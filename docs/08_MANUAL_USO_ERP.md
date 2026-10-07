@@ -72,11 +72,14 @@ En venta → Reservado → Vendido → Entregado), el avance de su documentació
 
 Dos vistas: tabla y tablero por estados. Se puede filtrar, exportar a CSV y abrir la ficha
 completa haciendo clic en la fila. Si hay un **borrador de importación** preparado en el código,
-aparece un aviso arriba con los datos, las fotos, el anuncio y el precio objetivo. Los gastos no
-confirmados se muestran como pendientes y no se suman al subtotal. *Añadir a mi flota* guarda la
-ficha y sus fotos en la base de datos, y *Descartar* recuerda la decisión. El vehículo entra como
-**Prospección**: no se marca como comprado ni se publica en la web. La exención del ITP no se
-preselecciona; su elegibilidad debe confirmarse en la ficha antes de aplicarla.
+aparece un aviso arriba con los datos, las fotos, el anuncio, el tipo de vendedor, los avisos del
+anuncio y el precio objetivo. Los gastos estándar (transporte, COC, ITV de importación, tasa DGT,
+placas, gestoría, preparación, mantenimiento y publicidad) vienen ya rellenados con las tarifas de
+*Ajustes → Tarifas*; solo lo que de verdad no se puede estimar queda a 0 como pendiente y fuera del
+subtotal. *Añadir a mi flota* guarda la ficha y sus fotos en la base de datos, y *Descartar*
+recuerda la decisión. El vehículo entra como **Prospección**: no se marca como comprado ni se
+publica en la web. En compras a particular la exención del ITP no se preselecciona: su elegibilidad
+debe confirmarse en la ficha antes de aplicarla (en compras a profesional no hay ITP).
 
 Cómo preparar más coches, qué datos completar y cómo asociar las fotos: [Borradores de alta de
 vehículos](17_BORRADORES_IMPORTACION_FLOTA.md).
@@ -92,8 +95,8 @@ vehículo?* Hay cinco opciones en lenguaje llano:
 | --- | --- |
 | Profesional UE · con IVA | El IVA se regulariza en España: autoliquidado y deducido en el 303 si tienes actividad (caja 0 €) o Modelo 309 si eres particular. |
 | Profesional UE · sin pagar IVA | El vendedor tributa en régimen de margen (REBU): sin IVA y sin ITP. |
-| Particular UE · sin IVA | ITP gallego del 8 % (Modelo 620) sobre el mayor entre precio y tablas. |
-| Particular España | ITP gallego del 8 % (Modelo 620). |
+| Particular UE · sin IVA | ITP gallego del 3 % (Modelo 620) sobre el mayor entre precio y tablas. |
+| Particular España | ITP gallego del 3 % (Modelo 620). |
 | Profesional España · con factura | El IVA ya va incluido en el precio; si tienes actividad es IVA soportado deducible. |
 
 Al elegir la opción, la aplicación calcula sola el impuesto de la compra, el IEDMT
@@ -261,7 +264,7 @@ El calendario fiscal del ejercicio, generado con tus datos:
 | Modelo | Qué es | Cuándo |
 | --- | --- | --- |
 | 576 / 06 | IEDMT (matriculación) | Antes de matricular; 06 si CO₂ ≤ 120 g/km |
-| 620 | ITP Galicia 8 % (compra a particular) | 1 mes, ATRIGA |
+| 620 | ITP Galicia 3 % (compra a particular) | 1 mes, ATRIGA |
 | 303 | IVA trimestral | 20 abr / 20 jul / 20 oct / 30 ene |
 | 349 | Operaciones intracomunitarias | Con cada 303 |
 | 390 | Resumen anual de IVA | 30 de enero |
@@ -300,7 +303,7 @@ pegar, borrar) y el listado de fuentes de cada cifra.
 | ITV turismo gasolina / diésel (Galicia) | 43,76 € / 52,30 € | Tarifas reguladas Xunta, IVA incluido |
 | Expedición de ficha técnica | 80,29 € | Tarifas reguladas Xunta |
 | IEDMT | 0 / 4,75 / 9,75 / 14,75 % | Art. 70 Ley 38/1992, por tramos de CO₂ |
-| ITP Galicia | 8 % (Mod. 620, ATRIGA, 1 mes) | Art. 14.Uno TR D. Leg. 1/2011 |
+| ITP Galicia | 3 % (Mod. 620, ATRIGA, 1 mes) | Art. 14.Uno TR D. Leg. 1/2011, redacción Ley 10/2023 |
 | IVTM A Coruña (turismos) | 19,50 / 62,62 / 132,19 / 179,20 / 224,00 € | Ordenanza Fiscal nº 52 (BOP 15-01-2025) |
 | Bonificación IVTM bajas emisiones | 60 % (no acumulable) | OF 52, art. 5.2 |
 | IVA general / REBU | 21 % / 21 % sobre el margen | Ley 37/1992, arts. 135-139 |
