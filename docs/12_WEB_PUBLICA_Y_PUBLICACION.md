@@ -218,6 +218,34 @@ Una fila por vehículo publicado, con **campos copiados** (nada de `join` con `v
    carga (no hace falta tocar la web).
 6. La ficha muestra el estado: `Web: publicado el 12/10 · última sincronización 14/10 · 34 visitas`.
 
+### 3.2.bis Del catálogo de demostración a anuncios reales (un solo botón)
+
+Mientras la web no tiene credenciales de Supabase, enseña un catálogo de **12 coches de
+demostración** escritos a mano en `lib/demo.js`, con sus fotos en `public/images/coches/`.
+Se ven perfectos, pero **no existen en ninguna base de datos**: no se pueden editar, ni
+reservar, ni vender, ni generan contactos asociados a una ficha.
+
+Para convertirlos en stock real hay un botón en **Ajustes → Datos → Catálogo de la web**:
+
+- Crea **un vehículo del ERP por anuncio** (año, km, motor, etiqueta, origen y
+  equipamiento) con id `veh-web-{slug}`.
+- Crea su **publicación en estado `borrador`** (id `pub-web-{slug}`) con el mismo slug, el
+  mismo texto comercial, el mismo equipamiento y las mismas fotos.
+- **No publica nada.** Pasar a `publicado` sigue siendo una decisión manual desde la
+  pestaña **Web** de cada vehículo.
+- **No inventa números internos**: los costes quedan a cero y la ficha lleva una nota
+  recordando revisar compra, gastos, matrícula, bastidor y documentación. Lo único que se
+  trae es el precio de venta, porque ya era público.
+- Es **idempotente y reversible**: lo ya importado no se duplica, y «Quitar lo importado»
+  elimina solo los ids con esos prefijos, sin tocar un registro real.
+
+Las fotos heredadas se guardan con su ruta estática (`/images/coches/…`) y marcadas con
+`external: true`. El modal de publicación las **conserva al actualizar el anuncio** aunque
+el vehículo todavía no tenga fotos propias en el ERP, y ofrece quitarlas de un clic en
+cuanto subas las reales.
+
+Comprobación automática: `npm run test:catalog`.
+
 ### 3.3 Diferencias con el módulo «Anuncios» actual
 
 El generador de textos de Wallapop/Milanuncios/Coches.net sigue existiendo: la web **no lo

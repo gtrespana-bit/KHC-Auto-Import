@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Settings as SettingsIcon, Building2, Percent, Database, BookOpen, Upload, Download, RotateCcw, ExternalLink, ShieldCheck } from 'lucide-react';
+import { Settings as SettingsIcon, Building2, Percent, Database, BookOpen, Upload, Download, RotateCcw, ExternalLink, ShieldCheck, Globe, CarFront } from 'lucide-react';
 import { Card, Button, Field, Input, Money, Select, SectionTitle, Tabs, Badge, Row, Alert, KeyValueGrid, ConfirmDialog, Checkbox, Textarea, Stat } from '../components/ui.jsx';
 import { useStore } from '../lib/store.jsx';
 import { eur, eur0, numEs, todayISO, download } from '../lib/format.js';
@@ -9,7 +9,7 @@ import { ROLES, roleLabel } from '../lib/roles.js';
 import { useOptionalAuth } from '../lib/auth.jsx';
 
 export default function SettingsView({ initialTab = 'empresa' }) {
-  const { state, setCompany, tariffs, replaceAll, loadDemo, removeDemo, hasDemo, resetData, toast, mode, role, can } = useStore();
+  const { state, setCompany, tariffs, replaceAll, loadDemo, removeDemo, hasDemo, importWebCatalog, removeWebCatalog, webCatalog, resetData, toast, mode, role, can } = useStore();
   const auth = useOptionalAuth();
   const isCloud = mode === 'supabase';
   const [tab, setTab] = useState(initialTab);
@@ -329,6 +329,62 @@ export default function SettingsView({ initialTab = 'empresa' }) {
                     if (result?.ok) toast('Ejemplos añadidos sin modificar tus datos reales');
                   }}>Añadir datos de ejemplo</Button>}
               <Button variant="danger" icon={RotateCcw} onClick={() => setConfirmReset(true)}>Borrar todo</Button>
+            </div>
+          </Card>
+
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Globe className="w-4 h-4 text-amber-400" />
+              <h3 className="text-sm font-bold text-white">Catálogo de la web</h3>
+            </div>
+            <p className="text-xs text-slate-400">
+              La web pública enseña <b>{webCatalog.total} coches de demostración</b> escritos a mano (texto, equipamiento
+              y fotos) que no existen en el ERP: no se pueden editar, reservar ni vender. Con este botón se convierten en
+              fichas reales con su publicación <b>en borrador</b>, para que solo tengas que revisar el precio y pulsar
+              «Publicar» en la pestaña <b>Web</b> de cada vehículo.
+            </p>
+            <KeyValueGrid
+              cols={3}
+              className="mt-3"
+              items={[
+                { label: 'En el catálogo', value: webCatalog.total },
+                { label: 'Ya importados', value: webCatalog.imported },
+                { label: 'Pendientes', value: webCatalog.pending },
+              ]}
+            />
+            <Alert tone="info" className="mt-3">
+              <b>No publica nada por su cuenta.</b> Todo entra como borrador, con identificadores propios
+              (<code>veh-web-…</code>), sin tocar tus vehículos reales y sin inventar precios de compra ni gastos:
+              esos los pones tú en la ficha.
+            </Alert>
+            <div className="flex flex-wrap gap-2 mt-4">
+              <Button
+                icon={CarFront}
+                disabled={!webCatalog.pending}
+                onClick={async () => {
+                  const result = await importWebCatalog();
+                  if (!result?.ok) return;
+                  toast(
+                    result.added
+                      ? `${result.added} coche${result.added === 1 ? '' : 's'} del catálogo importado${result.added === 1 ? '' : 's'} como borrador`
+                      : 'El catálogo ya estaba importado',
+                  );
+                }}
+              >
+                {webCatalog.imported ? 'Importar los que faltan' : `Importar los ${webCatalog.total} coches`}
+              </Button>
+              {!!webCatalog.imported && (
+                <Button
+                  variant="secondary"
+                  icon={RotateCcw}
+                  onClick={async () => {
+                    const result = await removeWebCatalog();
+                    if (result?.ok) toast('Importación del catálogo retirada. Tus vehículos reales siguen intactos.');
+                  }}
+                >
+                  Quitar lo importado
+                </Button>
+              )}
             </div>
           </Card>
           {isCloud && (

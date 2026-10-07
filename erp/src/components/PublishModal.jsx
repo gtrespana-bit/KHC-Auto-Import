@@ -12,7 +12,7 @@ import {
 } from '../lib/templates.js';
 import { eur, eur0, uid, numEs } from '../lib/format.js';
 import { salePriceOf, vehiclePnl } from '../domain/finance.js';
-import { SITE_SLUG, PUBLICATION_STATUS, publicationTone, publicUrl } from '../lib/web.js';
+import { SITE_SLUG, PUBLICATION_STATUS, publicAssetUrl, publicationTone, publicUrl } from '../lib/web.js';
 import PlateEditor from './PlateEditor.jsx';
 
 const DEFAULT_PRICE_NOTE = 'Precio al contado, IVA incluido.';
@@ -57,6 +57,10 @@ export default function PublishModal({ open, onClose, vehicle }) {
   const [selected, setSelected] = useState([]);
   const [coverId, setCoverId] = useState(null);
   const [hidden, setHidden] = useState({}); // photoId → dataURL con la matrícula tapada
+  // Fotos que ya están publicadas pero NO salen de la galería del ERP (por
+  // ejemplo, las del catálogo de la web importado: viven en `/images/coches/`).
+  // Se conservan al republicar mientras no se quiten a mano.
+  const [kept, setKept] = useState([]);
   const [editing, setEditing] = useState(null);
   const [tab, setTab] = useState('contenido');
   const [busy, setBusy] = useState(false);
@@ -104,6 +108,7 @@ export default function PublishModal({ open, onClose, vehicle }) {
         toast('Equipamiento agrupado detectado: se ha separado automáticamente en elementos individuales');
       }
       const prevPhotos = prev?.photos || [];
+      setKept(prevPhotos.filter((p) => p.external || !p.photoId || !list.some((ph) => ph.id === p.photoId)));
       if (prevPhotos.length) {
         setSelected(prevPhotos.map((p) => p.photoId).filter((id) => list.some((ph) => ph.id === id)));
         setCoverId((prevPhotos.find((p) => p.cover) || prevPhotos[0])?.photoId || null);
@@ -203,7 +208,9 @@ export default function PublishModal({ open, onClose, vehicle }) {
     try {
       const previousPhotos = existing?.data?.photos || [];
       const wanted = photos.filter((p) => selected.includes(p.id));
-      const nextPhotos = [];
+      // Las fotos externas (catálogo de la web) no se vuelven a subir: ya son
+      // públicas y se mantienen tal cual mientras no se quiten.
+      const nextPhotos = kept.map((p) => ({ ...p, external: true }));
       const usedPaths = new Set();
 
       for (const photo of wanted) {
@@ -229,6 +236,10 @@ export default function PublishModal({ open, onClose, vehicle }) {
       const stalePaths = previousPhotos.map((p) => p.path).filter((path) => path && !usedPaths.has(path));
       if (stalePaths.length) deletePublicPhotos(stalePaths).catch(() => {});
 
+      // Una sola portada: manda la foto elegida de la galería del ERP; si no
+      // hay ninguna, vale la primera de las que se conservan del catálogo.
+      const uploadedCover = nextPhotos.find((p) => !p.external && p.cover);
+      if (uploadedCover) nextPhotos.forEach((p) => { if (p !== uploadedCover) p.cover = false; });
       if (nextPhotos.length && !nextPhotos.some((p) => p.cover)) nextPhotos[0].cover = true;
 
       const taken = publications.filter((p) => p.id !== existing?.id).map((p) => p.data?.slug).filter(Boolean);
@@ -584,7 +595,22 @@ export default function PublishModal({ open, onClose, vehicle }) {
           {/* --- Fotos --- */}
           {tab === 'fotos' && (
             <div className="space-y-4">
-              {!photos.length && (
+              {kept.length > 0 && (
+                <Alert tone="info" title={`${kept.length} foto${kept.length === 1 ? '' : 's'} del catálogo de la web`}>
+                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 my-2">
+                    {kept.map((p) => (
+                      <img key={p.url} src={publicAssetUrl(p.url)} alt={p.alt || ''} className="w-full h-16 object-cover rounded-lg border border-slate-800" />
+                    ))}
+                  </div>
+                  Ya están publicadas y <b>se mantienen al actualizar el anuncio</b>, aunque este vehículo todavía no
+                  tenga fotos propias en el ERP. Cuando subas tus fotos reales, quítalas aquí y publica de nuevo.
+                  <div className="mt-2">
+                    <Button variant="secondary" onClick={() => setKept([])}>Quitar las fotos del catálogo</Button>
+                  </div>
+                </Alert>
+              )}
+
+              {!photos.length && !kept.length && (
                 <Alert tone="warn" title="Este vehículo no tiene fotos">
                   Sube fotos en la pestaña <b>Fotos</b> de la ficha. Un anuncio sin fotos no vende: mejor 6 buenas que 20
                   regulares (frontal, trasera, ambos laterales, interior, cuadro y maletero).

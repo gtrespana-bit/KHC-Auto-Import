@@ -19,6 +19,7 @@
     "test:vat": "node scripts/test-vat-purchase-semantics.mjs",
     "test:demo": "node scripts/test-demo-data.mjs",
     "test:publication": "node scripts/test-web-publication.mjs",
+    "test:catalog": "node scripts/test-web-catalog.mjs",
     "prices:check": "node scripts/check-prices.mjs",
     "scrape:de": "node scripts/autoscout-de-scrape.mjs --import"
   },
