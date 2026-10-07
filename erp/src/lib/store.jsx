@@ -36,6 +36,12 @@ import {
   mergeDemoData,
   removeDemoData,
 } from './demoData.js';
+import {
+  isWebCatalogPublication,
+  isWebCatalogVehicle,
+  webCatalogRecords,
+  webCatalogStatus,
+} from './webCatalog.js';
 
 const SCHEMA_VERSION = 2;
 
@@ -519,6 +525,106 @@ export function StoreProvider({ children }) {
 
   const hasDemo = useMemo(() => containsDemoData(state, normalizeState(demoState())), [state]);
 
+  // --- Catálogo de la web de demostración -----------------------------------
+  /**
+   * Convierte los coches que la web enseña en modo demostración en fichas
+   * reales del ERP más su publicación en BORRADOR. No publica nada: deja el
+   * trabajo hecho (texto, equipamiento y fotos) para que solo haya que
+   * revisar el precio y pulsar «Publicar» en la pestaña Web del vehículo.
+   *
+   * Es idempotente: lo que ya esté importado no se duplica ni se sobrescribe,
+   * así que nunca pisa ediciones hechas a mano.
+   */
+  const importWebCatalog = useCallback(async () => {
+    if (!guard('vehicles')) return { ok: false, added: 0, skipped: 0 };
+    if (!canWrite(role, 'publications')) {
+      toast('Tu rol no permite crear publicaciones', 'error');
+      return { ok: false, added: 0, skipped: 0 };
+    }
+
+    const current = stateRef.current;
+    const records = webCatalogRecords();
+    const vehicleIds = new Set((current.vehicles || []).map((v) => v.id));
+    const publicationIds = new Set((current.publications || []).map((p) => p.id));
+
+    const newVehicles = records
+      .filter((r) => !vehicleIds.has(r.vehicle.id))
+      .map((r) => normalizeVehicle(r.vehicle));
+    const newPublications = records
+      .filter((r) => !publicationIds.has(r.publication.id))
+      .map((r) => normalizePublication(r.publication));
+
+    if (!newVehicles.length && !newPublications.length) {
+      return { ok: true, added: 0, skipped: records.length };
+    }
+
+    setState((prev) => ({
+      ...prev,
+      vehicles: [...newVehicles, ...(prev.vehicles || [])],
+      publications: [...newPublications, ...(prev.publications || [])],
+    }));
+
+    if (isRemote) {
+      setSync((s) => ({ ...s, status: 'saving' }));
+      try {
+        await Promise.all([
+          ...newVehicles.map((v) => repo.upsert('vehicles', v)),
+          ...newPublications.map((p) => repo.savePublication(p)),
+        ]);
+        setSync((s) => ({ ...s, status: 'saved', error: null }));
+      } catch (err) {
+        const message = describeError(err);
+        toast(`No se ha podido importar el catálogo de la web: ${message}`, 'error');
+        setSync((s) => ({ ...s, status: 'error', error: message }));
+        await reloadFromServer();
+        return { ok: false, added: 0, skipped: 0 };
+      }
+    }
+
+    log(`Catálogo de la web importado: ${newVehicles.length} vehículo(s) en borrador`);
+    return {
+      ok: true,
+      added: newVehicles.length,
+      skipped: records.length - newVehicles.length,
+    };
+  }, [guard, role, toast, isRemote, repo, reloadFromServer, log]);
+
+  /** Quita solo lo importado del catálogo (ids `veh-web-…` / `pub-web-…`). */
+  const removeWebCatalog = useCallback(async () => {
+    if (!guard('vehicles')) return { ok: false, removed: 0 };
+    const current = stateRef.current;
+    const vehicles = (current.vehicles || []).filter(isWebCatalogVehicle);
+    const publications = (current.publications || []).filter(isWebCatalogPublication);
+    if (!vehicles.length && !publications.length) return { ok: true, removed: 0 };
+
+    setState((prev) => ({
+      ...prev,
+      vehicles: (prev.vehicles || []).filter((v) => !isWebCatalogVehicle(v)),
+      publications: (prev.publications || []).filter((p) => !isWebCatalogPublication(p)),
+    }));
+
+    if (isRemote) {
+      setSync((s) => ({ ...s, status: 'saving' }));
+      try {
+        await Promise.all([
+          ...publications.map((p) => repo.removePublication(p.id)),
+          ...vehicles.map((v) => repo.remove('vehicles', v.id)),
+        ]);
+        setSync((s) => ({ ...s, status: 'saved', error: null }));
+      } catch (err) {
+        const message = describeError(err);
+        toast(`No se ha podido quitar la importación: ${message}`, 'error');
+        setSync((s) => ({ ...s, status: 'error', error: message }));
+        await reloadFromServer();
+        return { ok: false, removed: 0 };
+      }
+    }
+
+    return { ok: true, removed: vehicles.length };
+  }, [guard, isRemote, repo, toast, reloadFromServer]);
+
+  const webCatalog = useMemo(() => webCatalogStatus(state), [state.vehicles]); // eslint-disable-line react-hooks/exhaustive-deps
+
   /** Importa a la nube los datos que este navegador guardaba en local. */
   const importLocalBackup = useCallback(async () => {
     if (!localBackup) return;
@@ -701,6 +807,9 @@ export function StoreProvider({ children }) {
       loadDemo,
       removeDemo,
       hasDemo,
+      importWebCatalog,
+      removeWebCatalog,
+      webCatalog,
       resetData,
       reloadFromServer,
       saveVehicle,
@@ -721,7 +830,7 @@ export function StoreProvider({ children }) {
       dismissLocalBackup,
       toasts,
     }),
-    [state, ready, repo, role, sync, tariffs, toast, log, setCompany, upsert, remove, updateCollection, replaceAll, loadDemo, removeDemo, hasDemo, resetData, reloadFromServer, saveVehicle, issueInvoice, nextInvoiceNumber, deleteVehicle, savePublication, removePublication, uploadPublicPhoto, deletePublicPhotos, updateLead, deleteLead, putPhotos, localBackup, importLocalBackup, dismissLocalBackup, toasts],
+    [state, ready, repo, role, sync, tariffs, toast, log, setCompany, upsert, remove, updateCollection, replaceAll, loadDemo, removeDemo, hasDemo, importWebCatalog, removeWebCatalog, webCatalog, resetData, reloadFromServer, saveVehicle, issueInvoice, nextInvoiceNumber, deleteVehicle, savePublication, removePublication, uploadPublicPhoto, deletePublicPhotos, updateLead, deleteLead, putPhotos, localBackup, importLocalBackup, dismissLocalBackup, toasts],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

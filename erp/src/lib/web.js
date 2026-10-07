@@ -34,3 +34,12 @@ export const PUBLICATION_STATUS = {
 export const publicationTone = (status) => PUBLICATION_STATUS[status]?.tone || 'slate';
 
 export const publicUrl = (slug) => (slug ? `${PUBLIC_WEB_URL}/coches/${slug}` : PUBLIC_WEB_URL);
+
+/**
+ * URL absoluta de un recurso publicado para poder verlo DESDE el ERP.
+ * Las fotos heredadas del catálogo de la web se guardan con ruta relativa
+ * (`/images/coches/…`), porque así las sirve el propio despliegue público;
+ * el ERP vive en otro dominio, de modo que aquí hay que anteponerlo.
+ */
+export const publicAssetUrl = (url = '') =>
+  (url.startsWith('/') ? `${PUBLIC_WEB_URL}${url}` : url);
