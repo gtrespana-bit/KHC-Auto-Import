@@ -17,6 +17,7 @@
     "smoke": "node scripts/smoke.mjs",
     "test:trip": "node scripts/test-trip-vehicle.mjs && node scripts/test-trip-map.mjs",
     "test:vat": "node scripts/test-vat-purchase-semantics.mjs",
+    "test:demo": "node scripts/test-demo-data.mjs",
     "prices:check": "node scripts/check-prices.mjs",
     "scrape:de": "node scripts/autoscout-de-scrape.mjs --import"
   },

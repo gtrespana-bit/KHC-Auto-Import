@@ -51,8 +51,10 @@ Qué puede hacer cada rol:
 3. **Flota → Añadir vehículo.** Cuando la compra es real, se da de alta y empieza a
    acumular costes, impuestos y documentación.
 
-Si quieres ver la aplicación funcionando antes de meter tus datos:
-*Cuadro de mando → Cargar datos de ejemplo*.
+Si quieres ver la aplicación funcionando, usa *Cuadro de mando → Añadir datos de ejemplo*.
+Los ejemplos se añaden sin sustituir los vehículos, contactos, gastos ni ajustes que ya tengas,
+y se pueden quitar después sin borrar tus registros reales. Tampoco se publican vehículos
+ficticios en la web pública.
 
 ---
 

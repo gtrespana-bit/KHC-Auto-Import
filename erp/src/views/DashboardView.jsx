@@ -40,7 +40,10 @@ export default function DashboardView({ go, editVehicle }) {
             <Button onClick={() => go('fleet')}>Dar de alta un vehículo</Button>
             <Button variant="secondary" onClick={() => go('settings')}>Configurar la empresa</Button>
             <Button variant="ghost" onClick={() => go('catalog')}>Explorar el catálogo</Button>
-            <Button variant="outline" onClick={() => { loadDemo(); toast('Datos de ejemplo cargados: una venta, dos unidades en stock y gastos reales'); }}>Cargar datos de ejemplo</Button>
+            <Button variant="outline" onClick={async () => {
+              const result = await loadDemo();
+              if (result?.ok) toast('Ejemplos añadidos sin modificar tus datos reales');
+            }}>Añadir datos de ejemplo</Button>
           </div>
         }>
           Esta aplicación guarda los datos en tu navegador (IndexedDB). No se envía nada a ningún servidor: exporta un respaldo JSON desde Ajustes para no perderlos.
@@ -54,7 +57,11 @@ export default function DashboardView({ go, editVehicle }) {
       {hasDemo && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
           <span>Estás viendo <b>datos de ejemplo</b>. Quítalos para empezar desde cero (lo que hayas dado de alta tú se conserva).</span>
-          <Button variant="danger" onClick={async () => { if (window.confirm('¿Quitar todos los datos de ejemplo?')) { await removeDemo(); toast('Datos de ejemplo quitados: todo a cero'); } }}>Quitar datos de ejemplo</Button>
+          <Button variant="danger" onClick={async () => {
+            if (!window.confirm('¿Quitar todos los datos de ejemplo? Tus datos reales se conservarán.')) return;
+            const result = await removeDemo();
+            if (result?.ok) toast('Datos de ejemplo quitados. Tus datos reales se han conservado.');
+          }}>Quitar datos de ejemplo</Button>
         </div>
       )}
       <SectionTitle
