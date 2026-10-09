@@ -17,12 +17,14 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ORIGINAL_FOLDER = {
   'audi a3 gris editadas/': 'audi a3 gris/',
   'bmw serie 3 touring editadas/': 'bmw serie 3 touring/',
+  'golf gris 2022 editadas/': 'golf gris 2022/',
 };
 
-assert.equal(PENDING_VEHICLE_IMPORT_DATA.length, 2);
-const [audi, bmw] = PENDING_VEHICLE_IMPORT_DATA;
+assert.equal(PENDING_VEHICLE_IMPORT_DATA.length, 3);
+const [audi, bmw, golf] = PENDING_VEHICLE_IMPORT_DATA;
 assert.equal(audi.id, 'mobilede-48386412615008');
 assert.equal(bmw.id, 'mobilede-44333260322272');
+assert.equal(golf.id, 'mobilede-460197027');
 
 // ---------------------------------------------------------------------------
 // Invariantes comunes a todos los borradores
@@ -126,9 +128,44 @@ assert.ok(
 );
 
 // ---------------------------------------------------------------------------
+// Volkswagen Golf VIII 1.0 TSI · mobile.de 460197027
+// ---------------------------------------------------------------------------
+assert.equal(golf.vehicle.brand, 'Volkswagen');
+assert.equal(golf.vehicle.model, 'Golf');
+assert.equal(golf.vehicle.km, 122500);
+assert.equal(golf.vehicle.cv, 110);
+assert.equal(golf.vehicle.transmission, 'Manual');
+assert.equal(golf.vehicle.color, 'Gris (Uranograu, uni)');
+assert.equal(golf.vehicle.interior, 'Tela negra (Quad Paper)');
+assert.equal(golf.vehicle.sellerType, 'pro_eu_vat', 'compra a concesionario alemán con IVA intracomunitario');
+assert.equal(golf.vehicle.itpExemption, false);
+assert.equal(golf.vehicle.itpExemptionPending, false, 'sin ITP en compra a profesional');
+assert.equal(golf.vehicle.firstRegDate, null);
+assert.equal(golf.vehicle.firstRegDatePending, true);
+assert.equal(golf.vehicle.costs.purchase, 12500);
+assert.equal(golf.priceTarget.amount, 18700);
+assert.equal(golf.photos.length, 12);
+assert.equal(golf.photos.filter((photo) => photo.backgroundEdited).length, 6, 'las seis vistas exteriores homogeneizadas');
+assert.deepEqual(golf.vehicle.pendingCostFields, ['travel', 'guarantee', 'insurance', 'other']);
+assert.equal(golf.vehicle.costs.itv, 124.05, 'gasolina 43,76 € + ficha 80,29 €');
+assert.equal(golf.vehicle.costs.cocFicha, 120);
+assert.equal(golf.vehicle.costs.dgt, 99.77);
+assert.equal(golf.vehicle.costs.placas, 28);
+assert.equal(golf.vehicle.costs.gestoria, 180);
+assert.equal(golf.vehicle.costs.transport, 750);
+assert.ok(
+  golf.photos[0].assetPath.startsWith('golf gris 2022 editadas/'),
+  'la portada del Golf es la vista homogeneizada a nuestra ubicación',
+);
+assert.ok(
+  golf.photos.slice(6).every((photo) => photo.assetPath.startsWith('golf gris 2022/')),
+  'interiores y maletero del Golf conservan los originales del anuncio',
+);
+
+// ---------------------------------------------------------------------------
 // Deduplicación de borradores pendientes
 // ---------------------------------------------------------------------------
-assert.equal(getPendingVehicleImports(PENDING_VEHICLE_IMPORT_DATA, [], []).length, 2);
+assert.equal(getPendingVehicleImports(PENDING_VEHICLE_IMPORT_DATA, [], []).length, 3);
 assert.equal(
   getPendingVehicleImports([audi], [{ id: 'veh', importDraftId: audi.id }], []).length,
   0,
@@ -215,4 +252,18 @@ const bmwPersonal = buildImportedVehicle(bmw, { buyerIsBusiness: false, today: '
 assert.equal(bmwPersonal.costs.vatPurchase, 2727.9, 'particular que compra a profesional UE: IVA del 309');
 assert.equal(bmwPersonal.costs.itp, 0);
 
-console.log('OK: 2 borradores (Audi A3 y BMW 318d Touring), fotos en el repo, costes de tarifa rellenos, pendientes acotados, deduplicación e impuestos por forma jurídica.');
+const golfCompany = buildImportedVehicle(golf, { buyerIsBusiness: true, today: '2026-10-08' });
+assert.equal(golfCompany.id, `veh-import-${golf.id}`);
+assert.equal(golfCompany.costs.purchase, 12500);
+assert.equal(golfCompany.costs.itp, 0, 'compra a profesional: sin ITP');
+assert.equal(golfCompany.costs.vatPurchase, 0, 'empresa: la AIB se autoliquida y deduce (caja 0 €)');
+assert.equal(golfCompany.costs.iedmt, 0, '104 g/km WLTP cae en el tramo 0 % del modelo 576');
+assert.equal(golfCompany.costs.itv, 124.05, 'la ITV de importación de gasolina se conserva');
+assert.equal(golfCompany.firstRegDate, null, 'no se inventa el día cuando el anuncio solo indica mes y año');
+assert.equal(golfCompany.itpExemptionPending, false);
+
+const golfPersonal = buildImportedVehicle(golf, { buyerIsBusiness: false, today: '2026-10-08' });
+assert.equal(golfPersonal.costs.vatPurchase, 2625, 'particular que compra a profesional UE: IVA del 309 (21 %)');
+assert.equal(golfPersonal.costs.itp, 0);
+
+console.log('OK: 3 borradores (Audi A3, BMW 318d Touring y Golf VIII 1.0 TSI), fotos en el repo, costes de tarifa rellenos, pendientes acotados, deduplicación e impuestos por forma jurídica.');
