@@ -1,5 +1,5 @@
 // Fotos de los borradores de importación versionados en el código.
-// Las vistas exteriores de ambos coches usan fondos homogeneizados a la
+// Las vistas exteriores de los tres coches usan fondos homogeneizados a la
 // ubicación de la empresa (fachada de hormigón y madera); los originales del
 // anuncio se conservan en la carpeta del coche y las fotos de interior y
 // maletero permanecen intactas. Vite empaqueta estos assets desde public/.
@@ -23,6 +23,18 @@ import bmw3Photo08 from '../../../public/images/bmw serie 3 touring/3779cc3c-91a
 import bmw3Photo09 from '../../../public/images/bmw serie 3 touring/b1e45a23-c936-49b7-b013-6a38b4c0e37b.avif';
 import bmw3Photo10 from '../../../public/images/bmw serie 3 touring/0abe4cf5-4577-4ee1-a7dd-b5f6ade030b5.avif';
 import bmw3Photo11 from '../../../public/images/bmw serie 3 touring/0eacf341-a706-4be6-b18d-05c7749fd52a.avif';
+import golf8Photo01 from '../../../public/images/golf gris 2022 editadas/vw-golf-viii-tres-cuartos-frontal.jpg';
+import golf8Photo02 from '../../../public/images/golf gris 2022 editadas/vw-golf-viii-frontal.jpg';
+import golf8Photo03 from '../../../public/images/golf gris 2022 editadas/vw-golf-viii-lateral-1.jpg';
+import golf8Photo04 from '../../../public/images/golf gris 2022 editadas/vw-golf-viii-lateral-2.jpg';
+import golf8Photo05 from '../../../public/images/golf gris 2022 editadas/vw-golf-viii-tres-cuartos-trasero.jpg';
+import golf8Photo06 from '../../../public/images/golf gris 2022 editadas/vw-golf-viii-trasera.jpg';
+import golf8Photo07 from '../../../public/images/golf gris 2022/9662cb1d-29f3-4e9b-85e5-a16bc1309249.avif';
+import golf8Photo08 from '../../../public/images/golf gris 2022/afae077d-1bb0-4179-9bed-d4ca408d16af.avif';
+import golf8Photo09 from '../../../public/images/golf gris 2022/3fbacaa4-3530-4d43-b679-1e589685126c.avif';
+import golf8Photo10 from '../../../public/images/golf gris 2022/7f367c22-813a-43d6-97ab-8e890263767b.jfif';
+import golf8Photo11 from '../../../public/images/golf gris 2022/88b8aaa2-b1d2-48bc-a9a4-23df514e7da2.jfif';
+import golf8Photo12 from '../../../public/images/golf gris 2022/09644f89-fd33-4a7f-b93d-a0cebf1ad342.jfif';
 import { PENDING_VEHICLE_IMPORT_DATA } from './vehicleImportDraftData.js';
 
 const PHOTO_ASSETS = {
@@ -46,6 +58,18 @@ const PHOTO_ASSETS = {
   'bmw serie 3 touring/b1e45a23-c936-49b7-b013-6a38b4c0e37b.avif': bmw3Photo09,
   'bmw serie 3 touring/0abe4cf5-4577-4ee1-a7dd-b5f6ade030b5.avif': bmw3Photo10,
   'bmw serie 3 touring/0eacf341-a706-4be6-b18d-05c7749fd52a.avif': bmw3Photo11,
+  'golf gris 2022 editadas/vw-golf-viii-tres-cuartos-frontal.jpg': golf8Photo01,
+  'golf gris 2022 editadas/vw-golf-viii-frontal.jpg': golf8Photo02,
+  'golf gris 2022 editadas/vw-golf-viii-lateral-1.jpg': golf8Photo03,
+  'golf gris 2022 editadas/vw-golf-viii-lateral-2.jpg': golf8Photo04,
+  'golf gris 2022 editadas/vw-golf-viii-tres-cuartos-trasero.jpg': golf8Photo05,
+  'golf gris 2022 editadas/vw-golf-viii-trasera.jpg': golf8Photo06,
+  'golf gris 2022/9662cb1d-29f3-4e9b-85e5-a16bc1309249.avif': golf8Photo07,
+  'golf gris 2022/afae077d-1bb0-4179-9bed-d4ca408d16af.avif': golf8Photo08,
+  'golf gris 2022/3fbacaa4-3530-4d43-b679-1e589685126c.avif': golf8Photo09,
+  'golf gris 2022/7f367c22-813a-43d6-97ab-8e890263767b.jfif': golf8Photo10,
+  'golf gris 2022/88b8aaa2-b1d2-48bc-a9a4-23df514e7da2.jfif': golf8Photo11,
+  'golf gris 2022/09644f89-fd33-4a7f-b93d-a0cebf1ad342.jfif': golf8Photo12,
 };
 
 export const PENDING_VEHICLE_IMPORTS = PENDING_VEHICLE_IMPORT_DATA.map((draft) => ({
