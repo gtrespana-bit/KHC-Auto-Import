@@ -11,8 +11,11 @@ import {
   prepareVehicleImportPhotos,
 } from '../lib/vehicleImports.js';
 
+const priceLabel = (value) => value == null ? 'Pendiente de confirmar' : eur0(value);
+
 const numberEs = (value) => Number(value || 0).toLocaleString('es-ES');
 const PENDING_COST_LABELS = {
+  purchase: 'compra', marginExtras: 'comisiones', iedmt: 'IEDMT',
   transport: 'transporte', travel: 'viaje', cocFicha: 'COC/ficha', itv: 'ITV',
   dgt: 'tasa DGT', placas: 'placas', gestoria: 'gestoría', recond: 'reacondicionamiento',
   maintenance: 'mantenimiento', guarantee: 'garantía', advertising: 'publicidad',
@@ -154,7 +157,7 @@ export default function PendingVehicleImports() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-300">
-                  <span className="font-semibold text-amber-300">Anuncio: {eur0(listing.askingPrice)}{listing.negotiable ? ' · negociable' : ''}</span>
+                  <span className="font-semibold text-amber-300">Anuncio: {priceLabel(listing.askingPrice)}{listing.negotiable ? ' · negociable' : ''}</span>
                   <span>{sellerLabel}</span>
                   <span className="inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-slate-500" />{listing.sellerLocation}</span>
                   <a
@@ -163,14 +166,14 @@ export default function PendingVehicleImports() {
                     rel="noreferrer"
                     className="inline-flex items-center gap-1 text-sky-300 hover:text-sky-200 underline underline-offset-2"
                   >
-                    Abrir anuncio en mobile.de <ExternalLink className="w-3 h-3" />
+                    {listing.marketplace === 'CarReport' ? 'Abrir informe PDF' : `Abrir anuncio en ${listing.marketplace || 'origen'}`} <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   <div className="rounded-lg border border-slate-800 bg-slate-950/60 p-2.5">
                     <p className="text-[10px] uppercase tracking-wide text-slate-500">Compra anunciada</p>
-                    <p className="text-sm font-bold text-white mt-0.5">{eur0(listing.askingPrice)}</p>
+                    <p className="text-sm font-bold text-white mt-0.5">{priceLabel(listing.askingPrice)}</p>
                   </div>
                   <div className="rounded-lg border border-slate-800 bg-slate-950/60 p-2.5">
                     <p className="text-[10px] uppercase tracking-wide text-slate-500">{pendingCostCount ? 'Subtotal conocido' : 'Aterrizaje estimado'}</p>
@@ -181,7 +184,7 @@ export default function PendingVehicleImports() {
                   </div>
                   <div className="rounded-lg border border-slate-800 bg-slate-950/60 p-2.5">
                     <p className="text-[10px] uppercase tracking-wide text-slate-500">Precio objetivo inicial</p>
-                    <p className="text-sm font-bold text-white mt-0.5">{eur0(draft.priceTarget?.amount || draft.vehicle.targetSalePrice)}</p>
+                    <p className="text-sm font-bold text-white mt-0.5">{priceLabel(draft.priceTarget?.amount ?? draft.vehicle.targetSalePrice)}</p>
                   </div>
                 </div>
 
@@ -197,7 +200,9 @@ export default function PendingVehicleImports() {
                       {draft.warnings.map((warning) => <li key={warning}>{warning}</li>)}
                     </ul>
                   )}
-                  El objetivo de {eur0(draft.priceTarget?.amount)} es una estimación.{' '}
+                  {draft.priceTarget?.amount == null
+                    ? 'Precio objetivo pendiente de valoración.'
+                    : `El objetivo de ${eur0(draft.priceTarget.amount)} es una estimación.`}{' '}
                   {pendingCostCount > 0
                     ? `El subtotal excluye ${pendingCostCount} costes pendientes (${draft.vehicle.pendingCostFields.map((key) => PENDING_COST_LABELS[key] || key).join(', ')}), que siguen a 0 € hasta tener importes confirmados.`
                     : 'Los costes cargados proceden de las tarifas del ERP o del anuncio: sustitúyelos por las facturas reales en cuanto las tengas.'}{' '}

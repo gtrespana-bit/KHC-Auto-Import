@@ -435,4 +435,326 @@ export const PENDING_VEHICLE_IMPORT_DATA = [
       priceTarget: null,
     },
   },
+{
+  "id": "carreport-11514903",
+  "title": "Volvo V40 Cross Country D2 Black Edition 120 CV",
+  "reference": "CarReport · 11514903",
+  "photoCount": 25,
+  "sourceListing": {
+    "marketplace": "CarReport",
+    "listingId": "11514903",
+    "url": "/Volvo%20V40/CarReport-11514903.pdf",
+    "capturedAt": "2026-10-10",
+    "askingPrice": 9800,
+    "currency": "EUR",
+    "negotiable": false,
+    "sellerType": "Empresa UE con IVA deducible",
+    "sellerLocation": "Bilzen, Bélgica",
+    "sellerName": null,
+    "firstRegistration": "17/10/2019",
+    "productionDate": "2019-05-13",
+    "inspectionValidUntil": "17/10/2026",
+    "vatRegime": "IVA deducible; precio neto, IVA excluido",
+    "emissionStandard": "EU6d-Temp",
+    "keys": 2,
+    "exteriorColor": "Negro",
+    "interior": "Negro, tela",
+    "equipment": [
+      "Climatizador automático",
+      "Sensores de aparcamiento traseros",
+      "Cámara de visión trasera",
+      "Navegador, Bluetooth y CD",
+      "Faros LED",
+      "Control de crucero y limitador",
+      "Reconocimiento de señales",
+      "Frenada de emergencia y ayuda en pendientes",
+      "Retrovisores eléctricos, plegables y calefactados",
+      "Retrovisor interior con oscurecimiento automático",
+      "Asientos de tela con apoyo lumbar e ISOFIX",
+      "Sensor de luz y lluvia",
+      "Llantas de aleación y control de presión",
+      "Volante de cuero multifunción",
+      "Barras de techo",
+      "Elevalunas eléctricos delanteros y traseros"
+    ],
+    "previousAskingPrice": 10100,
+    "advertisedDiscount": 300,
+    "advertisedTotalInclVat": 12390.4,
+    "priceIncludesVat": false,
+    "priceSource": "Precio comunicado por el usuario el 10/10/2026; no figura en el PDF."
+  },
+  "priceTarget": {
+    "amount": null,
+    "isEstimate": false,
+    "basis": "Pendiente de precio de adquisición, comisiones, inspección y comparación de mercado."
+  },
+  "warnings": [
+    "Precio neto confirmado por el usuario: 9.800 € (antes 10.100 €, descuento 300 €). Total anunciado con IVA: 12.390,40 €. A un 21 %, 9.800 € + IVA = 11.858 €: quedan 532,40 € sin desglose. Comisiones y objetivo de venta pendientes; no imputar la diferencia automáticamente como IVA o gasto.",
+    "Daño declarado: arañazos en el parachoques trasero (página 3). Presupuesto de reparación pendiente; revisar el detalle original y no valorar el estado por las imágenes editadas.",
+    "Inspección técnica válida hasta el 17/10/2026 según el informe; comprobar vigencia antes del traslado. No equivale a la ITV de importación española.",
+    "Compra a empresa UE con IVA deducible, confirmada por el usuario: pro_eu_vat, sin ITP y venta en régimen general (no REBU). Para comprador empresa con requisitos de AIB, IVA autoliquidado y deducido; confirmar factura y condiciones intracomunitarias. CO₂ y valor fiscal pendientes: el IEDMT calculado a 0 no acredita exención.",
+    "Cuatro exteriores con fondo editado por IA; verificar fidelidad antes de publicar. El resto son imágenes del PDF de baja resolución (300 px), sin fotografías documentales en la galería comercial."
+  ],
+  "photos": [
+    {
+      "filename": "volvo-v40-frontal.jpg",
+      "assetPath": "volvo v40 editadas/volvo-v40-frontal.jpg",
+      "sourceFilename": "portada.jpeg",
+      "alt": "Volvo V40 Cross Country negro, vista frontal; fondo editado con IA",
+      "cover": true,
+      "backgroundEdited": true,
+      "id": "carreport-11514903-photo-01"
+    },
+    {
+      "filename": "volvo-v40-trasera.jpg",
+      "assetPath": "volvo v40 editadas/volvo-v40-trasera.jpg",
+      "sourceFilename": "foto-03.jpeg",
+      "alt": "Volvo V40 Cross Country negro, vista tres cuartos trasera; fondo editado con IA",
+      "cover": false,
+      "backgroundEdited": true,
+      "id": "carreport-11514903-photo-02"
+    },
+    {
+      "filename": "volvo-v40-lateral-1.jpg",
+      "assetPath": "volvo v40 editadas/volvo-v40-lateral-1.jpg",
+      "sourceFilename": "foto-05.jpeg",
+      "alt": "Volvo V40 Cross Country negro, lateral izquierdo; fondo editado con IA",
+      "cover": false,
+      "backgroundEdited": true,
+      "id": "carreport-11514903-photo-03"
+    },
+    {
+      "filename": "volvo-v40-lateral-2.jpg",
+      "assetPath": "volvo v40 editadas/volvo-v40-lateral-2.jpg",
+      "sourceFilename": "foto-06.jpeg",
+      "alt": "Volvo V40 Cross Country negro, lateral derecho; fondo editado con IA",
+      "cover": false,
+      "backgroundEdited": true,
+      "id": "carreport-11514903-photo-04"
+    },
+    {
+      "filename": "foto-07.jpeg",
+      "assetPath": "volvo v40/foto-07.jpeg",
+      "alt": "Volvo V40: Volante y puesto de conducción (original del informe)",
+      "cover": false,
+      "id": "carreport-11514903-photo-05"
+    },
+    {
+      "filename": "foto-08.jpeg",
+      "assetPath": "volvo v40/foto-08.jpeg",
+      "alt": "Volvo V40: Asientos delanteros (original del informe)",
+      "cover": false,
+      "id": "carreport-11514903-photo-06"
+    },
+    {
+      "filename": "foto-09.jpeg",
+      "assetPath": "volvo v40/foto-09.jpeg",
+      "alt": "Volvo V40: Salpicadero y consola (original del informe)",
+      "cover": false,
+      "id": "carreport-11514903-photo-07"
+    },
+    {
+      "filename": "foto-10.jpeg",
+      "assetPath": "volvo v40/foto-10.jpeg",
+      "alt": "Volvo V40: Maletero (original del informe)",
+      "cover": false,
+      "id": "carreport-11514903-photo-08"
+    },
+    {
+      "filename": "foto-11.jpeg",
+      "assetPath": "volvo v40/foto-11.jpeg",
+      "alt": "Volvo V40: Llanta delantera (original del informe)",
+      "cover": false,
+      "id": "carreport-11514903-photo-09"
+    },
+    {
+      "filename": "foto-12.jpeg",
+      "assetPath": "volvo v40/foto-12.jpeg",
+      "alt": "Volvo V40: Cuadro de instrumentos (original del informe)",
+      "cover": false,
+      "id": "carreport-11514903-photo-10"
+    },
+    {
+      "filename": "foto-14.jpeg",
+      "assetPath": "volvo v40/foto-14.jpeg",
+      "alt": "Volvo V40: Navegador (original del informe)",
+      "cover": false,
+      "id": "carreport-11514903-photo-11"
+    },
+    {
+      "filename": "foto-16.jpeg",
+      "assetPath": "volvo v40/foto-16.jpeg",
+      "alt": "Volvo V40: Llanta (original del informe)",
+      "cover": false,
+      "id": "carreport-11514903-photo-12"
+    },
+    {
+      "filename": "foto-17.jpeg",
+      "assetPath": "volvo v40/foto-17.jpeg",
+      "alt": "Volvo V40: Llanta (original del informe)",
+      "cover": false,
+      "id": "carreport-11514903-photo-13"
+    },
+    {
+      "filename": "foto-18.jpeg",
+      "assetPath": "volvo v40/foto-18.jpeg",
+      "alt": "Volvo V40: Llanta (original del informe)",
+      "cover": false,
+      "id": "carreport-11514903-photo-14"
+    },
+    {
+      "filename": "foto-19.jpeg",
+      "assetPath": "volvo v40/foto-19.jpeg",
+      "alt": "Volvo V40: Mandos de elevalunas (original del informe)",
+      "cover": false,
+      "id": "carreport-11514903-photo-15"
+    },
+    {
+      "filename": "foto-20.jpeg",
+      "assetPath": "volvo v40/foto-20.jpeg",
+      "alt": "Volvo V40: Mandos de iluminación (original del informe)",
+      "cover": false,
+      "id": "carreport-11514903-photo-16"
+    },
+    {
+      "filename": "foto-21.jpeg",
+      "assetPath": "volvo v40/foto-21.jpeg",
+      "alt": "Volvo V40: Asientos traseros (original del informe)",
+      "cover": false,
+      "id": "carreport-11514903-photo-17"
+    },
+    {
+      "filename": "foto-22.jpeg",
+      "assetPath": "volvo v40/foto-22.jpeg",
+      "alt": "Volvo V40: Banqueta trasera (original del informe)",
+      "cover": false,
+      "id": "carreport-11514903-photo-18"
+    },
+    {
+      "filename": "foto-23.jpeg",
+      "assetPath": "volvo v40/foto-23.jpeg",
+      "alt": "Volvo V40: Consola central (original del informe)",
+      "cover": false,
+      "id": "carreport-11514903-photo-19"
+    },
+    {
+      "filename": "foto-24.jpeg",
+      "assetPath": "volvo v40/foto-24.jpeg",
+      "alt": "Volvo V40: Pantalla multimedia (original del informe)",
+      "cover": false,
+      "id": "carreport-11514903-photo-20"
+    },
+    {
+      "filename": "foto-25.jpeg",
+      "assetPath": "volvo v40/foto-25.jpeg",
+      "alt": "Volvo V40: Pantalla y avisos (original del informe)",
+      "cover": false,
+      "id": "carreport-11514903-photo-21"
+    },
+    {
+      "filename": "foto-26.jpeg",
+      "assetPath": "volvo v40/foto-26.jpeg",
+      "alt": "Volvo V40: Detalle de moldura interior (original del informe)",
+      "cover": false,
+      "id": "carreport-11514903-photo-22"
+    },
+    {
+      "filename": "foto-30.jpeg",
+      "assetPath": "volvo v40/foto-30.jpeg",
+      "alt": "Volvo V40: Interior delantero (original del informe)",
+      "cover": false,
+      "id": "carreport-11514903-photo-23"
+    },
+    {
+      "filename": "foto-35.jpeg",
+      "assetPath": "volvo v40/foto-35.jpeg",
+      "alt": "Volvo V40: Puesto de conducción (original del informe)",
+      "cover": false,
+      "id": "carreport-11514903-photo-24"
+    },
+    {
+      "filename": "foto-36.jpeg",
+      "assetPath": "volvo v40/foto-36.jpeg",
+      "alt": "Volvo V40: Detalle original del parachoques trasero (original del informe)",
+      "cover": false,
+      "id": "carreport-11514903-photo-25"
+    }
+  ],
+  "vehicle": {
+    "brand": "Volvo",
+    "model": "V40 Cross Country",
+    "version": "D2 Black Edition 120 CV",
+    "engine": "Diésel 1.969 cc, 88 kW",
+    "engineCode": "",
+    "color": "Negro metalizado",
+    "interior": "Tela negra",
+    "catalogId": "",
+    "year": 2019,
+    "firstRegDate": "2019-10-17",
+    "firstRegDatePending": false,
+    "km": 141723,
+    "vin": "",
+    "plate": "2ADN702",
+    "fuel": "Diésel",
+    "transmission": "Manual",
+    "cc": 1969,
+    "cyl": null,
+    "cv": 120,
+    "co2": null,
+    "cvf": null,
+    "badge": "",
+    "newPrice": null,
+    "segment": "Compacto",
+    "originCountry": "Bélgica",
+    "originCity": "Bilzen",
+    "sellerType": "pro_eu_vat",
+    "taxMethod": "tablas",
+    "status": "prospeccion",
+    "purchaseDate": null,
+    "arrivalDate": null,
+    "registrationDate": null,
+    "itpExemption": false,
+    "itpExemptionPending": false,
+    "costs": {
+      "purchase": 9800,
+      "transport": 750,
+      "travel": 0,
+      "marginExtras": 0,
+      "cocFicha": 120,
+      "itv": 132.59,
+      "dgt": 99.77,
+      "placas": 28,
+      "gestoria": 180,
+      "iedmt": 0,
+      "itp": 0,
+      "vatPurchase": 0,
+      "ivtm": 0,
+      "recond": 0,
+      "maintenance": 150,
+      "guarantee": 0,
+      "advertising": 30,
+      "insurance": 0,
+      "other": 0
+    },
+    "pendingCostFields": [
+      "marginExtras",
+      "travel",
+      "recond",
+      "guarantee",
+      "insurance",
+      "other",
+      "iedmt"
+    ],
+    "taxOverrides": {},
+    "targetSalePrice": null,
+    "rotationDays": null,
+    "documents": {},
+    "inspectionChecks": {},
+    "sale": null,
+    "imageUrl": "",
+    "sourceListing": null,
+    "priceTarget": null,
+    "notes": "BORRADOR PENDIENTE DE APROBACIÓN: no consta compra formalizada. Precio comunicado posteriormente por el usuario: 9.800 € netos, compra a empresa UE con IVA deducible. El PDF no contiene precio. Datos extraídos del informe, páginas 1–3. Producción 13/05/2019; primera matriculación 17/10/2019; 141.723 km; 2 llaves; Euro 6d-Temp. Documentos belgas completos, certificado de conformidad y registro de mantenimiento declarados disponibles, no verificados. Neumáticos: 5 mm delante y 7 mm detrás. VIN oculto en el informe; no se reconstruye. Cilindros, código motor, CO₂, etiqueta DGT y valor fiscal pendientes de documentación. El cálculo automático de potencia fiscal es orientativo.\n\nPrecio neto confirmado por el usuario: 9.800 € (antes 10.100 €, descuento 300 €). Total anunciado con IVA: 12.390,40 €. A un 21 %, 9.800 € + IVA = 11.858 €: quedan 532,40 € sin desglose. Comisiones y objetivo de venta pendientes; no imputar la diferencia automáticamente como IVA o gasto.\nDaño declarado: arañazos en el parachoques trasero (página 3). Presupuesto de reparación pendiente; revisar el detalle original y no valorar el estado por las imágenes editadas.\nInspección técnica válida hasta el 17/10/2026 según el informe; comprobar vigencia antes del traslado. No equivale a la ITV de importación española.\nCompra a empresa UE con IVA deducible, confirmada por el usuario: pro_eu_vat, sin ITP y venta en régimen general (no REBU). Para comprador empresa con requisitos de AIB, IVA autoliquidado y deducido; confirmar factura y condiciones intracomunitarias. CO₂ y valor fiscal pendientes: el IEDMT calculado a 0 no acredita exención.\nCuatro exteriores con fondo editado por IA; verificar fidelidad antes de publicar. El resto son imágenes del PDF de baja resolución (300 px), sin fotografías documentales en la galería comercial.\n\nCostes estándar estimados según tarifas ERP 2026: transporte 750 €, provisión COC/ficha 120 € (revisar, el informe declara CdC disponible), ITV+ficha 132,59 €, DGT 99,77 €, placas 28 €, gestoría 180 €, mantenimiento 150 € y publicidad 30 €. Compra prevista: 9.800 € netos. Comisiones, reparación, viaje, garantía, seguro y otros sin presupuesto. No hay valoración de mercado ni rentabilidad validada.\n\nOriginales extraídos del PDF conservados en public/images/volvo v40; cuatro exteriores editados con IA en volvo v40 editadas. No acreditar ubicación física con estas imágenes."
+  }
+},
 ];

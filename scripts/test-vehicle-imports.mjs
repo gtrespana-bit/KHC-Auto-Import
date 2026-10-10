@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { recalcVehicleTaxes } from '../erp/src/domain/taxes.js';
+import { vehiclePnl } from '../erp/src/domain/finance.js';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,13 +17,14 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // Las vistas exteriores homogeneizadas conservan su original del anuncio en
 // la carpeta del coche; el mapa liga carpeta editada → carpeta de originales.
 const ORIGINAL_FOLDER = {
+  'volvo v40 editadas/': 'volvo v40/',
   'audi a3 gris editadas/': 'audi a3 gris/',
   'bmw serie 3 touring editadas/': 'bmw serie 3 touring/',
   'golf gris 2022 editadas/': 'golf gris 2022/',
 };
 
-assert.equal(PENDING_VEHICLE_IMPORT_DATA.length, 3);
-const [audi, bmw, golf] = PENDING_VEHICLE_IMPORT_DATA;
+assert.equal(PENDING_VEHICLE_IMPORT_DATA.length, 4);
+const [audi, bmw, golf, volvo] = PENDING_VEHICLE_IMPORT_DATA;
 assert.equal(audi.id, 'mobilede-48386412615008');
 assert.equal(bmw.id, 'mobilede-44333260322272');
 assert.equal(golf.id, 'mobilede-460197027');
@@ -165,7 +168,7 @@ assert.ok(
 // ---------------------------------------------------------------------------
 // Deduplicación de borradores pendientes
 // ---------------------------------------------------------------------------
-assert.equal(getPendingVehicleImports(PENDING_VEHICLE_IMPORT_DATA, [], []).length, 3);
+assert.equal(getPendingVehicleImports(PENDING_VEHICLE_IMPORT_DATA, [], []).length, 4);
 assert.equal(
   getPendingVehicleImports([audi], [{ id: 'veh', importDraftId: audi.id }], []).length,
   0,
@@ -266,4 +269,50 @@ const golfPersonal = buildImportedVehicle(golf, { buyerIsBusiness: false, today:
 assert.equal(golfPersonal.costs.vatPurchase, 2625, 'particular que compra a profesional UE: IVA del 309 (21 %)');
 assert.equal(golfPersonal.costs.itp, 0);
 
-console.log('OK: 3 borradores (Audi A3, BMW 318d Touring y Golf VIII 1.0 TSI), fotos en el repo, costes de tarifa rellenos, pendientes acotados, deduplicación e impuestos por forma jurídica.');
+console.log('OK: borradores anteriores (Audi A3, BMW 318d Touring y Golf VIII 1.0 TSI), fotos en el repo, costes de tarifa rellenos, pendientes acotados, deduplicación e impuestos por forma jurídica.');
+
+// Volvo: precio neto confirmado por el usuario; total anunciado pendiente de desglose.
+assert.equal(volvo.id, 'carreport-11514903');
+assert.equal(volvo.vehicle.firstRegDate, '2019-10-17');
+assert.equal(volvo.vehicle.firstRegDatePending, false);
+assert.equal(volvo.vehicle.km, 141723);
+assert.equal(volvo.vehicle.cc, 1969);
+assert.equal(volvo.vehicle.cv, 120);
+assert.equal(volvo.vehicle.co2, null);
+assert.equal(volvo.vehicle.vin, '');
+assert.equal(volvo.sourceListing.askingPrice, 9800);
+assert.equal(volvo.priceTarget.amount, null);
+assert.equal(volvo.vehicle.targetSalePrice, null);
+assert.ok(!volvo.vehicle.pendingCostFields.includes('purchase'));
+assert.ok(volvo.vehicle.pendingCostFields.includes('marginExtras'));
+assert.equal(volvo.sourceListing.advertisedTotalInclVat, 12390.40);
+assert.equal(volvo.sourceListing.previousAskingPrice, 10100);
+assert.equal(volvo.sourceListing.advertisedDiscount, 300);
+assert.ok(volvo.vehicle.pendingCostFields.includes('recond'));
+assert.equal(volvo.photos.filter(p => p.backgroundEdited).length, 4);
+assert.equal(volvo.photos.length, 25);
+assert.ok(existsSync(path.join(root, 'public', decodeURIComponent(volvo.sourceListing.url))));
+assert.ok(volvo.warnings.some(w => w.includes('arañazos')));
+for (const buyerIsBusiness of [true, false]) {
+  const imported = buildImportedVehicle(volvo, { buyerIsBusiness, today: '2026-10-10' });
+  assert.equal(imported.status, 'prospeccion');
+  assert.equal(imported.purchaseDate, null);
+  assert.equal(imported.costs.purchase, 9800);
+  assert.equal(imported.costs.recond, 0);
+  assert.equal(imported.costs.itv, 132.59);
+  assert.equal(imported.sourceListing.askingPrice, 9800);
+  assert.equal(imported.targetSalePrice, null);
+  assert.equal(imported.co2, null);
+  assert.equal(getPendingVehicleImports([volvo], [imported], []).length, 0);
+}
+console.log('OK: Volvo V40 pendiente de aprobación, 25 fotos, precios y datos desconocidos pendientes.');
+
+const volvoCompany = buildImportedVehicle(volvo, { buyerIsBusiness: true });
+const volvoTaxes = recalcVehicleTaxes(volvoCompany);
+assert.equal(volvoTaxes.itp, 0);
+assert.equal(volvoTaxes.vatPurchase, 0, 'AIB empresarial: IVA sin impacto en el coste');
+assert.equal(volvoTaxes.vatDeductible, 2058, '21 % sobre 9.800 netos sin dividirlos otra vez');
+assert.equal(volvoCompany.costs.marginExtras, 0, 'no inventar comisiones a partir del total anunciado');
+const volvoPnl = vehiclePnl({ ...volvoCompany, sale: { price: 18000, vatRegime: 'rebu' } });
+assert.equal(volvoPnl.vatRegime, 'general', 'la compra con IVA deducible no permite REBU');
+assert.equal(volvoPnl.purchaseCost, 9800);
