@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { recalcVehicleTaxes } from '../erp/src/domain/taxes.js';
+import { vehiclePnl } from '../erp/src/domain/finance.js';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -269,7 +271,7 @@ assert.equal(golfPersonal.costs.itp, 0);
 
 console.log('OK: borradores anteriores (Audi A3, BMW 318d Touring y Golf VIII 1.0 TSI), fotos en el repo, costes de tarifa rellenos, pendientes acotados, deduplicación e impuestos por forma jurídica.');
 
-// Volvo: informe sin precio. No inventar importes, CO₂, VIN ni compra.
+// Volvo: precio neto confirmado por el usuario; total anunciado pendiente de desglose.
 assert.equal(volvo.id, 'carreport-11514903');
 assert.equal(volvo.vehicle.firstRegDate, '2019-10-17');
 assert.equal(volvo.vehicle.firstRegDatePending, false);
@@ -278,10 +280,14 @@ assert.equal(volvo.vehicle.cc, 1969);
 assert.equal(volvo.vehicle.cv, 120);
 assert.equal(volvo.vehicle.co2, null);
 assert.equal(volvo.vehicle.vin, '');
-assert.equal(volvo.sourceListing.askingPrice, null);
+assert.equal(volvo.sourceListing.askingPrice, 9800);
 assert.equal(volvo.priceTarget.amount, null);
 assert.equal(volvo.vehicle.targetSalePrice, null);
-assert.ok(volvo.vehicle.pendingCostFields.includes('purchase'));
+assert.ok(!volvo.vehicle.pendingCostFields.includes('purchase'));
+assert.ok(volvo.vehicle.pendingCostFields.includes('marginExtras'));
+assert.equal(volvo.sourceListing.advertisedTotalInclVat, 12390.40);
+assert.equal(volvo.sourceListing.previousAskingPrice, 10100);
+assert.equal(volvo.sourceListing.advertisedDiscount, 300);
 assert.ok(volvo.vehicle.pendingCostFields.includes('recond'));
 assert.equal(volvo.photos.filter(p => p.backgroundEdited).length, 4);
 assert.equal(volvo.photos.length, 25);
@@ -291,12 +297,22 @@ for (const buyerIsBusiness of [true, false]) {
   const imported = buildImportedVehicle(volvo, { buyerIsBusiness, today: '2026-10-10' });
   assert.equal(imported.status, 'prospeccion');
   assert.equal(imported.purchaseDate, null);
-  assert.equal(imported.costs.purchase, 0);
+  assert.equal(imported.costs.purchase, 9800);
   assert.equal(imported.costs.recond, 0);
   assert.equal(imported.costs.itv, 132.59);
-  assert.equal(imported.sourceListing.askingPrice, null);
+  assert.equal(imported.sourceListing.askingPrice, 9800);
   assert.equal(imported.targetSalePrice, null);
   assert.equal(imported.co2, null);
   assert.equal(getPendingVehicleImports([volvo], [imported], []).length, 0);
 }
 console.log('OK: Volvo V40 pendiente de aprobación, 25 fotos, precios y datos desconocidos pendientes.');
+
+const volvoCompany = buildImportedVehicle(volvo, { buyerIsBusiness: true });
+const volvoTaxes = recalcVehicleTaxes(volvoCompany);
+assert.equal(volvoTaxes.itp, 0);
+assert.equal(volvoTaxes.vatPurchase, 0, 'AIB empresarial: IVA sin impacto en el coste');
+assert.equal(volvoTaxes.vatDeductible, 2058, '21 % sobre 9.800 netos sin dividirlos otra vez');
+assert.equal(volvoCompany.costs.marginExtras, 0, 'no inventar comisiones a partir del total anunciado');
+const volvoPnl = vehiclePnl({ ...volvoCompany, sale: { price: 18000, vatRegime: 'rebu' } });
+assert.equal(volvoPnl.vatRegime, 'general', 'la compra con IVA deducible no permite REBU');
+assert.equal(volvoPnl.purchaseCost, 9800);

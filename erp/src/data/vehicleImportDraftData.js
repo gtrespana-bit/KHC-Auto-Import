@@ -445,16 +445,16 @@ export const PENDING_VEHICLE_IMPORT_DATA = [
     "listingId": "11514903",
     "url": "/Volvo%20V40/CarReport-11514903.pdf",
     "capturedAt": "2026-10-10",
-    "askingPrice": null,
+    "askingPrice": 9800,
     "currency": "EUR",
     "negotiable": false,
-    "sellerType": "Profesional UE (por confirmar)",
+    "sellerType": "Empresa UE con IVA deducible",
     "sellerLocation": "Bilzen, Bélgica",
     "sellerName": null,
     "firstRegistration": "17/10/2019",
     "productionDate": "2019-05-13",
     "inspectionValidUntil": "17/10/2026",
-    "vatRegime": "IVA excluido",
+    "vatRegime": "IVA deducible; precio neto, IVA excluido",
     "emissionStandard": "EU6d-Temp",
     "keys": 2,
     "exteriorColor": "Negro",
@@ -476,7 +476,12 @@ export const PENDING_VEHICLE_IMPORT_DATA = [
       "Volante de cuero multifunción",
       "Barras de techo",
       "Elevalunas eléctricos delanteros y traseros"
-    ]
+    ],
+    "previousAskingPrice": 10100,
+    "advertisedDiscount": 300,
+    "advertisedTotalInclVat": 12390.4,
+    "priceIncludesVat": false,
+    "priceSource": "Precio comunicado por el usuario el 10/10/2026; no figura en el PDF."
   },
   "priceTarget": {
     "amount": null,
@@ -484,10 +489,10 @@ export const PENDING_VEHICLE_IMPORT_DATA = [
     "basis": "Pendiente de precio de adquisición, comisiones, inspección y comparación de mercado."
   },
   "warnings": [
-    "El informe no indica precio de compra, comisiones ni precio objetivo de venta. Pendientes de confirmar; 0 € en los costes pendientes no significa gratuito.",
+    "Precio neto confirmado por el usuario: 9.800 € (antes 10.100 €, descuento 300 €). Total anunciado con IVA: 12.390,40 €. A un 21 %, 9.800 € + IVA = 11.858 €: quedan 532,40 € sin desglose. Comisiones y objetivo de venta pendientes; no imputar la diferencia automáticamente como IVA o gasto.",
     "Daño declarado: arañazos en el parachoques trasero (página 3). Presupuesto de reparación pendiente; revisar el detalle original y no valorar el estado por las imágenes editadas.",
     "Inspección técnica válida hasta el 17/10/2026 según el informe; comprobar vigencia antes del traslado. No equivale a la ITV de importación española.",
-    "Régimen indicado: IVA excluido. Confirmar vendedor, factura y comisiones. CO₂ en g/km y valor fiscal no figuran: impuestos provisionales, no interpretar el IEDMT calculado a 0 como exención.",
+    "Compra a empresa UE con IVA deducible, confirmada por el usuario: pro_eu_vat, sin ITP y venta en régimen general (no REBU). Para comprador empresa con requisitos de AIB, IVA autoliquidado y deducido; confirmar factura y condiciones intracomunitarias. CO₂ y valor fiscal pendientes: el IEDMT calculado a 0 no acredita exención.",
     "Cuatro exteriores con fondo editado por IA; verificar fidelidad antes de publicar. El resto son imágenes del PDF de baja resolución (300 px), sin fotografías documentales en la galería comercial."
   ],
   "photos": [
@@ -711,7 +716,7 @@ export const PENDING_VEHICLE_IMPORT_DATA = [
     "itpExemption": false,
     "itpExemptionPending": false,
     "costs": {
-      "purchase": 0,
+      "purchase": 9800,
       "transport": 750,
       "travel": 0,
       "marginExtras": 0,
@@ -732,7 +737,6 @@ export const PENDING_VEHICLE_IMPORT_DATA = [
       "other": 0
     },
     "pendingCostFields": [
-      "purchase",
       "marginExtras",
       "travel",
       "recond",
@@ -750,7 +754,7 @@ export const PENDING_VEHICLE_IMPORT_DATA = [
     "imageUrl": "",
     "sourceListing": null,
     "priceTarget": null,
-    "notes": "BORRADOR PENDIENTE DE APROBACIÓN: no consta compra ni precio en CarReport-11514903.pdf. Datos extraídos del informe, páginas 1–3. Producción 13/05/2019; primera matriculación 17/10/2019; 141.723 km; 2 llaves; Euro 6d-Temp. Documentos belgas completos, certificado de conformidad y registro de mantenimiento declarados disponibles, no verificados. Neumáticos: 5 mm delante y 7 mm detrás. VIN oculto en el informe; no se reconstruye. Cilindros, código motor, CO₂, etiqueta DGT y valor fiscal pendientes de documentación. El cálculo automático de potencia fiscal es orientativo.\n\nEl informe no indica precio de compra, comisiones ni precio objetivo de venta. Pendientes de confirmar; 0 € en los costes pendientes no significa gratuito.\nDaño declarado: arañazos en el parachoques trasero (página 3). Presupuesto de reparación pendiente; revisar el detalle original y no valorar el estado por las imágenes editadas.\nInspección técnica válida hasta el 17/10/2026 según el informe; comprobar vigencia antes del traslado. No equivale a la ITV de importación española.\nRégimen indicado: IVA excluido. Confirmar vendedor, factura y comisiones. CO₂ en g/km y valor fiscal no figuran: impuestos provisionales, no interpretar el IEDMT calculado a 0 como exención.\nCuatro exteriores con fondo editado por IA; verificar fidelidad antes de publicar. El resto son imágenes del PDF de baja resolución (300 px), sin fotografías documentales en la galería comercial.\n\nCostes estándar estimados según tarifas ERP 2026: transporte 750 €, provisión COC/ficha 120 € (revisar, el informe declara CdC disponible), ITV+ficha 132,59 €, DGT 99,77 €, placas 28 €, gestoría 180 €, mantenimiento 150 € y publicidad 30 €. Compra, comisiones, reparación, viaje, garantía, seguro y otros sin presupuesto. No hay valoración de mercado ni rentabilidad validada.\n\nOriginales extraídos del PDF conservados en public/images/volvo v40; cuatro exteriores editados con IA en volvo v40 editadas. No acreditar ubicación física con estas imágenes."
+    "notes": "BORRADOR PENDIENTE DE APROBACIÓN: no consta compra formalizada. Precio comunicado posteriormente por el usuario: 9.800 € netos, compra a empresa UE con IVA deducible. El PDF no contiene precio. Datos extraídos del informe, páginas 1–3. Producción 13/05/2019; primera matriculación 17/10/2019; 141.723 km; 2 llaves; Euro 6d-Temp. Documentos belgas completos, certificado de conformidad y registro de mantenimiento declarados disponibles, no verificados. Neumáticos: 5 mm delante y 7 mm detrás. VIN oculto en el informe; no se reconstruye. Cilindros, código motor, CO₂, etiqueta DGT y valor fiscal pendientes de documentación. El cálculo automático de potencia fiscal es orientativo.\n\nPrecio neto confirmado por el usuario: 9.800 € (antes 10.100 €, descuento 300 €). Total anunciado con IVA: 12.390,40 €. A un 21 %, 9.800 € + IVA = 11.858 €: quedan 532,40 € sin desglose. Comisiones y objetivo de venta pendientes; no imputar la diferencia automáticamente como IVA o gasto.\nDaño declarado: arañazos en el parachoques trasero (página 3). Presupuesto de reparación pendiente; revisar el detalle original y no valorar el estado por las imágenes editadas.\nInspección técnica válida hasta el 17/10/2026 según el informe; comprobar vigencia antes del traslado. No equivale a la ITV de importación española.\nCompra a empresa UE con IVA deducible, confirmada por el usuario: pro_eu_vat, sin ITP y venta en régimen general (no REBU). Para comprador empresa con requisitos de AIB, IVA autoliquidado y deducido; confirmar factura y condiciones intracomunitarias. CO₂ y valor fiscal pendientes: el IEDMT calculado a 0 no acredita exención.\nCuatro exteriores con fondo editado por IA; verificar fidelidad antes de publicar. El resto son imágenes del PDF de baja resolución (300 px), sin fotografías documentales en la galería comercial.\n\nCostes estándar estimados según tarifas ERP 2026: transporte 750 €, provisión COC/ficha 120 € (revisar, el informe declara CdC disponible), ITV+ficha 132,59 €, DGT 99,77 €, placas 28 €, gestoría 180 €, mantenimiento 150 € y publicidad 30 €. Compra prevista: 9.800 € netos. Comisiones, reparación, viaje, garantía, seguro y otros sin presupuesto. No hay valoración de mercado ni rentabilidad validada.\n\nOriginales extraídos del PDF conservados en public/images/volvo v40; cuatro exteriores editados con IA en volvo v40 editadas. No acreditar ubicación física con estas imágenes."
   }
 },
 ];
