@@ -27,3 +27,13 @@ La pantalla **ERP → Flota y stock** puede enseñar fichas de coches preparados
 5. Ejecuta `npm run test:vehicle-imports` y `npm run build:erp`.
 
 El ERP convierte cada foto a JPEG (máximo 1.600 px) al importarla; así la copia guardada en la ficha no depende de que el anuncio siga publicado y no conserva metadatos EXIF. Los originales permanecen en `public/images/` como material del borrador.
+
+## Volvo V40 · CarReport 11514903 (10/10/2026)
+
+- Borrador `carreport-11514903`, sin alta automática ni publicación. Aprobar en **Flota y stock → Vehículos preparados para importar → Añadir a mi flota**.
+- Fuente: `public/Volvo V40/CarReport-11514903.pdf`. El enlace del ERP se empaqueta con Vite para funcionar en el dominio de la aplicación.
+- D2 Cross Country Black Edition, 120 CV, manual, diésel, 1.969 cc; primera matriculación 17/10/2019 y 141.723 km. Recogida en Bilzen (Bélgica).
+- Sin precio en el informe: compra, comisiones y objetivo de venta pendientes. No se inventan CO₂, VIN, valor fiscal ni etiqueta. Los impuestos automáticos no son una liquidación validada.
+- Arañazos declarados en parachoques trasero; reparación pendiente. Inspección válida hasta 17/10/2026 según el informe. IVA excluido: confirmar factura y vendedor.
+- 25 imágenes: cuatro exteriores con fondo de hormigón/madera editado por IA y 21 interiores/detalles originales, incluido el detalle del parachoques. Los originales de los exteriores se conservan junto a las demás fotos. Las miniaturas del PDF tienen solo 300 px: verificar fidelidad de las ediciones antes de publicar. No son prueba de ubicación física.
+- No se incorporan las fotos de documentos a la galería comercial. COC e historial constan como disponibles en el informe, no como comprobados en el expediente.

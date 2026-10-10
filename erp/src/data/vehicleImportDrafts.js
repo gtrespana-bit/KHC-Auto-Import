@@ -1,5 +1,5 @@
 // Fotos de los borradores de importación versionados en el código.
-// Las vistas exteriores de los tres coches usan fondos homogeneizados a la
+// Las vistas exteriores de los coches usan fondos homogeneizados a la
 // ubicación de la empresa (fachada de hormigón y madera); los originales del
 // anuncio se conservan en la carpeta del coche y las fotos de interior y
 // maletero permanecen intactas. Vite empaqueta estos assets desde public/.
@@ -35,9 +35,62 @@ import golf8Photo09 from '../../../public/images/golf gris 2022/3fbacaa4-3530-4d
 import golf8Photo10 from '../../../public/images/golf gris 2022/7f367c22-813a-43d6-97ab-8e890263767b.jfif';
 import golf8Photo11 from '../../../public/images/golf gris 2022/88b8aaa2-b1d2-48bc-a9a4-23df514e7da2.jfif';
 import golf8Photo12 from '../../../public/images/golf gris 2022/09644f89-fd33-4a7f-b93d-a0cebf1ad342.jfif';
+import volvoReport from '../../../public/Volvo V40/CarReport-11514903.pdf?url';
 import { PENDING_VEHICLE_IMPORT_DATA } from './vehicleImportDraftData.js';
 
+import volvo40Photo01 from '../../../public/images/volvo v40 editadas/volvo-v40-frontal.jpg';
+import volvo40Photo02 from '../../../public/images/volvo v40 editadas/volvo-v40-trasera.jpg';
+import volvo40Photo03 from '../../../public/images/volvo v40 editadas/volvo-v40-lateral-1.jpg';
+import volvo40Photo04 from '../../../public/images/volvo v40 editadas/volvo-v40-lateral-2.jpg';
+import volvo40Photo05 from '../../../public/images/volvo v40/foto-07.jpeg';
+import volvo40Photo06 from '../../../public/images/volvo v40/foto-08.jpeg';
+import volvo40Photo07 from '../../../public/images/volvo v40/foto-09.jpeg';
+import volvo40Photo08 from '../../../public/images/volvo v40/foto-10.jpeg';
+import volvo40Photo09 from '../../../public/images/volvo v40/foto-11.jpeg';
+import volvo40Photo10 from '../../../public/images/volvo v40/foto-12.jpeg';
+import volvo40Photo11 from '../../../public/images/volvo v40/foto-14.jpeg';
+import volvo40Photo12 from '../../../public/images/volvo v40/foto-16.jpeg';
+import volvo40Photo13 from '../../../public/images/volvo v40/foto-17.jpeg';
+import volvo40Photo14 from '../../../public/images/volvo v40/foto-18.jpeg';
+import volvo40Photo15 from '../../../public/images/volvo v40/foto-19.jpeg';
+import volvo40Photo16 from '../../../public/images/volvo v40/foto-20.jpeg';
+import volvo40Photo17 from '../../../public/images/volvo v40/foto-21.jpeg';
+import volvo40Photo18 from '../../../public/images/volvo v40/foto-22.jpeg';
+import volvo40Photo19 from '../../../public/images/volvo v40/foto-23.jpeg';
+import volvo40Photo20 from '../../../public/images/volvo v40/foto-24.jpeg';
+import volvo40Photo21 from '../../../public/images/volvo v40/foto-25.jpeg';
+import volvo40Photo22 from '../../../public/images/volvo v40/foto-26.jpeg';
+import volvo40Photo23 from '../../../public/images/volvo v40/foto-30.jpeg';
+import volvo40Photo24 from '../../../public/images/volvo v40/foto-35.jpeg';
+import volvo40Photo25 from '../../../public/images/volvo v40/foto-36.jpeg';
+
 const PHOTO_ASSETS = {
+  'volvo v40 editadas/volvo-v40-frontal.jpg': volvo40Photo01,
+  'volvo v40 editadas/volvo-v40-trasera.jpg': volvo40Photo02,
+  'volvo v40 editadas/volvo-v40-lateral-1.jpg': volvo40Photo03,
+  'volvo v40 editadas/volvo-v40-lateral-2.jpg': volvo40Photo04,
+  'volvo v40/foto-07.jpeg': volvo40Photo05,
+  'volvo v40/foto-08.jpeg': volvo40Photo06,
+  'volvo v40/foto-09.jpeg': volvo40Photo07,
+  'volvo v40/foto-10.jpeg': volvo40Photo08,
+  'volvo v40/foto-11.jpeg': volvo40Photo09,
+  'volvo v40/foto-12.jpeg': volvo40Photo10,
+  'volvo v40/foto-14.jpeg': volvo40Photo11,
+  'volvo v40/foto-16.jpeg': volvo40Photo12,
+  'volvo v40/foto-17.jpeg': volvo40Photo13,
+  'volvo v40/foto-18.jpeg': volvo40Photo14,
+  'volvo v40/foto-19.jpeg': volvo40Photo15,
+  'volvo v40/foto-20.jpeg': volvo40Photo16,
+  'volvo v40/foto-21.jpeg': volvo40Photo17,
+  'volvo v40/foto-22.jpeg': volvo40Photo18,
+  'volvo v40/foto-23.jpeg': volvo40Photo19,
+  'volvo v40/foto-24.jpeg': volvo40Photo20,
+  'volvo v40/foto-25.jpeg': volvo40Photo21,
+  'volvo v40/foto-26.jpeg': volvo40Photo22,
+  'volvo v40/foto-30.jpeg': volvo40Photo23,
+  'volvo v40/foto-35.jpeg': volvo40Photo24,
+  'volvo v40/foto-36.jpeg': volvo40Photo25,
+
   'audi a3 gris editadas/audi-a3-frontal.jpg': audi3Photo01,
   'audi a3 gris editadas/audi-a3-trasera.jpg': audi3Photo02,
   'audi a3 gris editadas/audi-a3-lateral-1.jpg': audi3Photo03,
@@ -74,6 +127,10 @@ const PHOTO_ASSETS = {
 
 export const PENDING_VEHICLE_IMPORTS = PENDING_VEHICLE_IMPORT_DATA.map((draft) => ({
   ...draft,
+  // Vite empaqueta el PDF bajo /erp/assets/ para que funcione también en el dominio app.
+  sourceListing: draft.id === 'carreport-11514903'
+    ? { ...draft.sourceListing, url: volvoReport }
+    : draft.sourceListing,
   photos: draft.photos.map((photo) => ({
     ...photo,
     src: PHOTO_ASSETS[photo.assetPath],
