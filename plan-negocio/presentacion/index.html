@@ -3,80 +3,211 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Plan de negocio — KHC Auto Import</title>
+<title>Financiación 50.000 € — KHC Auto Import</title>
 <style>
   :root { --ink:#0a1020; --gold:#b3934e; --ivory:#f7f6f2; --cover:#212228; --slate:#4a5872; --green:#1f6b4a; --line:#e4dfd4; }
   * { box-sizing:border-box; }
-  html, body { margin:0; height:100%; background:var(--cover); color:var(--ink); font-family: "Segoe UI", Helvetica, Arial, sans-serif; }
-  .slide { display:none; min-height:100vh; padding:7vh 7vw 8vh; flex-direction:column; background:var(--ivory); }
+  html, body { margin:0; background:var(--cover); color:var(--ink); font-family:"Segoe UI", Helvetica, Arial, sans-serif; }
+  .slide { display:none; min-height:100vh; padding:7vh 8vw 9vh; flex-direction:column; background:var(--ivory); }
   .slide.active { display:flex; }
   .slide.dark { background:var(--cover); color:#f4f1ea; }
-  .logo { width:168px; height:auto; margin:0 0 18px; }
-  .kicker { letter-spacing:.14em; font-size:12px; font-weight:700; color:var(--gold); margin:0 0 12px; }
-  h1 { font-family: Georgia, "Times New Roman", serif; font-weight:500; font-size:clamp(28px, 3.6vw, 46px); line-height:1.08; margin:0 0 18px; max-width:28ch; }
-  .slide.dark h1 { max-width:16ch; }
-  .sub, .lead { font-size:18px; line-height:1.45; max-width:62ch; color:var(--slate); }
-  .lead.light, .slide.dark .sub { color:#cfc8ba; }
-  .stats, .grid3, .split { display:grid; gap:16px; margin-top:28px; }
-  .stats { grid-template-columns:repeat(3, 1fr); }
-  .grid3 { grid-template-columns:repeat(3, 1fr); }
-  .split { grid-template-columns:1fr 1fr; }
-  .stat, article, section { background:#fff; border:1px solid var(--line); border-top:3px solid var(--gold); border-radius:8px; padding:18px 18px 16px; }
-  .slide.dark .stat { background:#2a2b32; border-color:#3a3b44; color:#f4f1ea; }
-  .stat b, article b, .darkcard b { display:block; font-family:Georgia, serif; font-size:28px; font-weight:500; margin-bottom:6px; }
-  .stat span, article p, section li { color:var(--slate); font-size:15px; line-height:1.4; }
+  .kicker { letter-spacing:.14em; font-size:12px; font-weight:700; color:var(--gold); margin:0 0 10px; }
+  h1 { font-family:Georgia, serif; font-weight:500; font-size:clamp(28px, 3.6vw, 46px); line-height:1.08; margin:0 0 16px; max-width:22ch; }
+  .lead, .note { font-size:18px; line-height:1.45; max-width:68ch; color:var(--slate); }
+  .slide.dark .lead { color:#cfc8ba; }
+  .stats, .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:22px; }
+  .stat, article { background:#fff; border-top:3px solid var(--gold); border-radius:8px; padding:16px 18px; }
+  .slide.dark .stat { background:#2a2b32; color:#f4f1ea; }
+  .stat b, article b { display:block; font-family:Georgia, serif; font-size:28px; font-weight:500; }
+  .stat span, article p { color:var(--slate); font-size:15px; line-height:1.4; }
   .slide.dark .stat span { color:#cfc8ba; }
-  .good { border-top-color:var(--green); }
-  .bad { border-top-color:#8c3a3a; }
-  .gold { border-top-color:var(--gold); }
-  h3 { margin:0 0 10px; font-size:13px; letter-spacing:.08em; text-transform:uppercase; }
-  ul { margin:0; padding-left:18px; }
-  li { margin:0 0 10px; line-height:1.4; }
-  .line { display:flex; justify-content:space-between; gap:24px; background:#fff; border-left:3px solid var(--gold); padding:14px 16px; margin:8px 0; }
-  .bars { margin-top:18px; }
-  .bar { display:grid; grid-template-columns:220px 1fr 90px; align-items:center; gap:12px; margin:8px 0; font-size:14px; }
-  .bar i { display:block; height:12px; background:var(--green); border-radius:2px; }
-  table { width:100%; border-collapse:collapse; font-size:14px; margin-top:8px; }
+  .line { display:flex; justify-content:space-between; gap:16px; background:#fff; border-left:3px solid var(--gold); padding:12px 16px; margin:8px 0; }
+  .line.total { background:#212228; color:#f4f1ea; }
+  .line.total b { color:#b3934e; }
+  table { width:100%; border-collapse:collapse; font-size:15px; margin-top:8px; }
   th { text-align:left; background:var(--ink); color:#fff; padding:8px 10px; font-size:12px; }
-  td { padding:7px 10px; border-bottom:1px solid var(--line); }
+  td { padding:8px 10px; border-bottom:1px solid var(--line); }
+  tr.wait td { background:#f6efe2; font-weight:700; }
   .num { text-align:right; font-variant-numeric:tabular-nums; }
-  .ratio { font-family:Georgia, serif; font-size:18px; }
-  .note { color:var(--slate); font-size:14px; line-height:1.45; margin-top:14px; }
-  .chart { width:100%; height:220px; margin-top:10px; }
-  .ink { fill:none; stroke:#0a1020; stroke-width:2.5; }
-  .goldline { fill:none; stroke:#b3934e; stroke-width:2.5; }
-  .inkdot { fill:#0a1020; }
-  .golddot { fill:#b3934e; }
-  .grid { stroke:#e4dfd4; stroke-width:1; }
-  .axis { fill:#4a5872; font-size:11px; text-anchor:end; }
-  .tag { fill:#0a1020; font-size:12px; font-weight:700; }
-  .goldtext { fill:#755d2b; }
-  .legend { color:#4a5872; font-size:14px; display:flex; gap:18px; align-items:center; }
-  .inkswatch, .goldswatch { display:inline-block; width:22px; height:3px; margin-right:6px; }
-  .inkswatch { background:#0a1020; }
-  .goldswatch { background:#b3934e; }
-  .mini { display:block; height:10px; background:#1f6b4a; border-radius:2px; }
-  tr.total td { background:#212228; color:#f4f1ea; font-weight:700; }
-  article small { display:block; margin-top:14px; color:#0a1020; font-size:14px; border-top:1px solid var(--line); padding-top:10px; }
-  .line.last { background:#212228; color:#f4f1ea; }
-  .line.last b { color:#b3934e; }
-  .months { display:flex; justify-content:space-between; color:var(--slate); font-size:12px; padding:0 4% 0 5%; }
-  .darkcard { background:var(--cover); color:#f4f1ea; border:0; }
-  .darkcard p { color:#cfc8ba; }
-  .stack article { margin-bottom:12px; }
-  .sources li { font-size:16px; }
-  footer { margin-top:auto; display:flex; justify-content:space-between; padding-top:18px; font-size:12px; letter-spacing:.08em; color:var(--gold); }
-  .progress { position:fixed; left:0; top:0; height:3px; background:var(--gold); width:0; }
-  .hint { position:fixed; right:18px; bottom:14px; color:#8a8172; font-size:12px; }
-  @media (max-width: 800px) {
-    .stats, .grid3, .split, .bar { grid-template-columns:1fr; }
-    h1 { font-size:32px; }
-  }
+  .split { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .yes { border-top:3px solid var(--green); background:#fff; border-radius:8px; padding:16px 20px; }
+  .no { border-top:3px solid #8c3a3a; background:#fff; border-radius:8px; padding:16px 20px; }
+  ul { margin:8px 0 0; padding-left:18px; }
+  li { margin:0 0 8px; line-height:1.4; }
+  .pills { display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; }
+  .pill { background:#fff; border-radius:8px; padding:12px; min-width:100px; border-top:3px solid var(--green); }
+  .pill.bad { border-top-color:#8c3a3a; }
+  .pill b { display:block; font-family:Georgia, serif; font-size:18px; }
+  .pill span { color:var(--slate); font-size:12px; }
+  .logo { width:160px; margin-bottom:12px; }
+  footer { margin-top:auto; display:flex; justify-content:space-between; padding-top:18px; color:var(--gold); font-size:12px; letter-spacing:.08em; }
+  .progress { position:fixed; left:0; top:0; height:3px; background:var(--gold); }
+  .hint { position:fixed; right:16px; bottom:12px; color:#8a8172; font-size:12px; }
+  @media (max-width: 800px) { .stats, .grid3, .split { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
 <div class="progress" id="bar"></div>
-<section class='slide dark' data-i='0'><img class='logo' src='logo_flat.png' alt='KHC Auto Import'><p class='kicker'>Plan de negocio</p><h1>Vehículos seleccionados,<br>con el coste ya cerrado.</h1><p class='sub'>Para banco, aval o capital privado. Galicia, octubre 2026.</p><div class='stats'><div class='stat'><b>3.781 €</b><span>Margen neto real<br>por coche del lote</span></div><div class='stat'><b>822,90 €</b><span>Para arrancar<br>equipados</span></div><div class='stat'><b>1,72×</b><span>RCSD con una venta<br>al mes y la nave</span></div></div><footer><span>KHC AUTO IMPORT</span><span>01 / 17</span></footer></section><section class='slide ' data-i='1'><p class='kicker'>La tesis</p><h1>El margen no se negocia en el anuncio.<br>Se decide antes de pagar.</h1><p class='lead'>Galicia compra etiqueta C o ECO, motor que un mecánico recomendaría a su familia, y un precio entre 16.000 y 23.000 €. Lo demás se deja en Alemania. El ERP ya impide comprar lo que rompe la garantía.</p><div class='stats'><div class='stat light'><b>12–20 días</b><span>Rotación de los modelos que el estudio de mercado da por ganadores</span></div><div class='stat light'><b>26.467 €</b><span>Margen neto del lote de siete, después de coste completo e IVA REBU</span></div><div class='stat light'><b>0 €</b><span>De sueldo. Los 25.000 € familiares no entran en la sociedad</span></div></div><footer><span>KHC AUTO IMPORT</span><span>02 / 17</span></footer></section><section class='slide ' data-i='2'><p class='kicker'>Qué se vende</p><h1>No se vende una importación. Se vende un coche revisado.</h1><div class='grid3'><article><em>01</em><h3>Seleccionado</h3><p>Nacional o importado, sin jerarquía. Se compra donde el número cierra: Alemania, Bélgica, Italia o España.</p><small>El simulador compara las dos orillas antes de reservar el vuelo.</small></article><article><em>02</em><h3>Con historial</h3><p>Libro de mantenimiento, kilometraje correlativo y ausencia de siniestro estructural. Si no se acredita, no se paga.</p><small>Si el kilometraje no cuadra con el libro, no hay transferencia.</small></article><article><em>03</em><h3>Con garantía</h3><p>Mínimo 12 meses, por escrito, en todas las ventas. Es la promesa pública de khcimport.autos.</p><small>Va dentro del coste cerrado. No se resta otra vez del margen.</small></article></div><footer><span>KHC AUTO IMPORT</span><span>03 / 17</span></footer></section><section class='slide ' data-i='3'><p class='kicker'>Mercado</p><h1>Cuatro coches que Galicia ya compra.</h1><div class='split'><section class='good'><h3>Lo que rota</h3><ul><li>Golf 7.5 2.0 TDI — 12 a 18 días. Impuesto de matriculación al 0 %.</li><li>BMW X1 18d — 12 a 25 días. El SUV que pide la lluvia.</li><li>Mercedes Clase A W177 — 14 a 22 días. Interior que cierra la visita.</li><li>BMW 320d Touring, solo con pocos kilómetros. A 162.000 km el catálogo ya no da margen.</li></ul></section><section class='bad'><h3>Lo que no entra</h3><ul><li>PureTech, 1.2 TCe, EcoBoost de correa bañada, N47, Ingenium diésel.</li><li>Diésel anterior a septiembre de 2015. Etiqueta B, y las ZBE ya están.</li><li>SUV grande de gasolina o diésel alto en CO₂. El 576 se come el expediente.</li><li>El kilómetro manda más que el modelo. Dos ganadores de la matriz pierden a 162.000 km.</li></ul></section></div><footer><span>KHC AUTO IMPORT</span><span>04 / 17</span></footer></section><section class='slide ' data-i='4'><p class='kicker'>El sistema, ya construido</p><h1>El control existe antes de pedir el dinero.</h1><div class='grid3'><article><b>1.104</b><p>Variantes en catálogo, con fiabilidad y precio de las dos orillas</p><small>El motor prohibido no se puede marcar como comprable.</small></article><article><b>Flota</b><p>Coste real, no precio de anuncio. Del prospecto a la entrega</p><small>El estado del coche y lo que ha costado viven en la misma ficha.</small></article><article><b>Impuestos</b><p>REBU, régimen general, ITP e IEDMT, calculados en la ficha</p><small>Si la factura trae IVA deducible, el REBU queda bloqueado.</small></article><article><b>Viaje</b><p>Peajes, combustible y tres rutas antes de subir al avión</p><small>La ruta se elige con el número, no al llegar al peaje.</small></article><article><b>Inspección</b><p>Launch, espesor de pintura y los seis papeles alemanes</p><small>La pintura gruesa o el fallo en diagnosis paran la compra.</small></article><article><b>Web</b><p>Stock vivo en khcimport.autos. Si se reserva, se marca el mismo día</p><small>Lo que se enseña al cliente sale del mismo sistema.</small></article></div><footer><span>KHC AUTO IMPORT</span><span>05 / 17</span></footer></section><section class='slide ' data-i='5'><p class='kicker'>Día 0</p><h1>822,90 € para no comprar a ciegas.<br>El resto es stock.</h1><div class='line'><span>Diagnosis Launch, medidor de pintura y arrancador</span><b>476,18 €</b></div><div class='line'><span>Diez informes de historial</span><b>145,08 €</b></div><div class='line'><span>Imagen de entrega: tapamatrículas, carpetas, cerámica</span><b>136,64 €</b></div><div class='line'><span>Línea de negocio y una consulta con la gestoría</span><b>65,00 €</b></div><p class='note'>Con 50.000 € propios quedan 49.177 € para coches. Un mes sin compra, en el piloto, cuesta entre 100 y 245 €.</p><footer><span>KHC AUTO IMPORT</span><span>06 / 17</span></footer></section><section class='slide ' data-i='6'><p class='kicker'>La unidad de la sociedad</p><h1>Compra, venta y margen. El aterrizaje ya está dentro.</h1><p class='note'>Venta menos coste completo, menos el IVA del REBU, que va dentro del margen. El transporte no se resta otra vez.</p><table><thead><tr><th>Unidad</th><th>Coste</th><th>Venta</th><th>Neto</th><th></th></tr></thead><tbody><tr><td>Clase C Estate 2019</td><td class='num'>17.666 €</td><td class='num'>23.990 €</td><td class='num ratio'>5.226 €</td><td><i class='mini' style='width:100%'></i></td></tr><tr><td>Golf GTI Performance 2015</td><td class='num'>12.674 €</td><td class='num'>18.500 €</td><td class='num ratio'>4.815 €</td><td><i class='mini' style='width:92%'></i></td></tr><tr><td>BMW 116d Manual 2015</td><td class='num'>9.010 €</td><td class='num'>13.475 €</td><td class='num ratio'>3.690 €</td><td><i class='mini' style='width:71%'></i></td></tr><tr><td>Golf VIII 1.0 TSI 2021</td><td class='num'>14.617 €</td><td class='num'>18.700 €</td><td class='num ratio'>3.374 €</td><td><i class='mini' style='width:65%'></i></td></tr><tr><td>BMW 318d Touring 2019</td><td class='num'>14.220 €</td><td class='num'>18.250 €</td><td class='num ratio'>3.331 €</td><td><i class='mini' style='width:64%'></i></td></tr><tr><td>Volvo XC40 2.0 D3 2020</td><td class='num'>14.738 €</td><td class='num'>18.500 €</td><td class='num ratio'>3.109 €</td><td><i class='mini' style='width:59%'></i></td></tr><tr><td>Audi A3 1.0 TFSI 2018</td><td class='num'>12.455 €</td><td class='num'>15.990 €</td><td class='num ratio'>2.921 €</td><td><i class='mini' style='width:56%'></i></td></tr><tr class='total'><td>Lote de siete</td><td class='num'>95.380 €</td><td class='num'>127.405 €</td><td class='num'>26.467 €</td><td></td></tr></tbody></table><footer><span>KHC AUTO IMPORT</span><span>07 / 17</span></footer></section><section class='slide ' data-i='7'><p class='kicker'>Flujo desde el día 1  ·  sin nave  ·  particular</p><h1>75 días. Tres coches. Todo descontado.</h1><table><thead><tr><th>Día</th><th>Qué ocurre</th><th>Movimiento</th><th>Caja</th></tr></thead><tbody><tr><td>0</td><td>Capital en la cuenta</td><td class='num'>—</td><td class='num'>50.000 €</td></tr><tr><td>1</td><td>Arranque cerrado: Launch, medidor, historial, imagen</td><td class='num'>−823</td><td class='num'>49.177 €</td></tr><tr><td>4</td><td>Focus ST 280, compra y bajada rodando</td><td class='num'>−18.880</td><td class='num'>30.297 €</td></tr><tr><td>11</td><td>ITV, modelo 576, DGT y placas del Focus</td><td class='num'>−1.831</td><td class='num'>28.466 €</td></tr><tr><td>14</td><td>Compra del Golf GTI en Alemania</td><td class='num'>−19.400</td><td class='num'>9.066 €</td></tr><tr><td>25</td><td>Camión, 576 y taller del GTI. Valle de caja</td><td class='num'>−2.812</td><td class='num'>6.254 €</td></tr><tr><td>28</td><td>Cobro del Focus, 24.490 €, menos reserva</td><td class='num'>+23.444</td><td class='num'>29.699 €</td></tr><tr><td>44</td><td>Cobro del GTI, 26.290 €, menos reserva</td><td class='num'>+25.183</td><td class='num'>54.881 €</td></tr><tr><td>47</td><td>Cayenne E-Hybrid / Q7 TFSIe. Impuesto 576 a cero</td><td class='num'>−29.500</td><td class='num'>25.381 €</td></tr><tr><td>60</td><td>Camión y matriculación del híbrido</td><td class='num'>−1.840</td><td class='num'>23.542 €</td></tr><tr><td>75</td><td>Cobro 36.900 €, menos IRPF, garantía y SIM</td><td class='num'>+35.310</td><td class='num'>58.852 €</td></tr></tbody></table><p class='note'>Tabla redondeada al euro. Al día 75 la cuenta operativa tiene 58.851,94 € y la subcuenta de IRPF y garantía, 3.727,93 €. Total en el banco: 62.579,87 €. Beneficio neto: 8.851,94 €. Régimen de particular: no es el de la sociedad.</p><footer><span>KHC AUTO IMPORT</span><span>08 / 17</span></footer></section><section class='slide ' data-i='8'><p class='kicker'>Capital</p><h1>Dos maneras de entrar. Una sola disciplina.</h1><div class='split'><section><h3>Piloto, capital propio</h3><ul><li>45.000 a 50.000 €. Sin deuda y sin nave.</li><li>Tres coches en 75 días, uno de ellos híbrido enchufable para no pagar el 576.</li><li>Valle de caja: 6.254 €. No se compra el tercero antes de cobrar el segundo.</li><li>Después, autónomo REBU a 284,14 € al mes, todavía sin local.</li></ul></section><section class='gold'><h3>Sociedad, con financiación</h3><ul><li>50.000 € propios y 50.000 € ajenos. Aval, préstamo o las dos cosas.</li><li>Siete coches a coste cerrado: 95.380 €. Caja el día 1: 4.620 €.</li><li>Nave de San Marcos en el plan: 1.100 € al mes. La reforma, con el primer cobro.</li><li>RCSD de 1,72× vendiendo un coche al mes. El taller no hace falta para que cuadre.</li></ul></section></div><footer><span>KHC AUTO IMPORT</span><span>09 / 17</span></footer></section><section class='slide ' data-i='9'><p class='kicker'>La nave y el taller</p><h1>El local no es un capricho. Tampoco se abre el mismo día.</h1><div class='grid3'><article><b>1.100 €</b><p>Renta de San Marcos en el plan. Otras naves del roadmap: 750 a 1.300 €.</p></article><article><b>4.550 €</b><p>Reforma de materiales. Con el primer cobro. Si se adelanta, la caja baja a 2.461 €.</p></article><article><b>60 €</b><p>Mano de obra que hoy sale fuera. Aceite, 52,70. Filtros, 63,90.</p></article></div><table><thead><tr><th>Servicio</th><th>Recambio</th><th>Mano de obra</th><th>Ticket</th><th>Beneficio contado</th></tr></thead><tbody><tr><td>Aceite y cuatro filtros</td><td>116,60 €</td><td>60 €</td><td>176,60 €</td><td>60 €</td></tr><tr><td>Aceite de caja</td><td>sin tarifa</td><td>—</td><td>al abrir</td><td>0 €</td></tr><tr><td>Pastillas de freno</td><td>sin tarifa</td><td>—</td><td>al abrir</td><td>0 €</td></tr><tr><td>Neumáticos</td><td>después</td><td>—</td><td>más tarde</td><td>0 €</td></tr></tbody></table><p class='note'>Hipótesis, no facturación: dos servicios externos por semana. Mano de obra, 5.760 € al año, más 720 € en los doce coches propios. Total, 6.480 €, fuera del 1,72×. El recambio se cobra a coste.</p><footer><span>KHC AUTO IMPORT</span><span>10 / 17</span></footer></section><section class='slide ' data-i='10'><p class='kicker'>Gastos e impuestos</p><h1>Lo fijo, al mes. El impuesto, sin mezclarlo.</h1><div class='split'><section><h3>Estructura de la sociedad</h3><div class='line'><span>San Marcos, 550 m²</span><b>1.100 €</b></div><div class='line'><span>Autónomo societario</span><b>380 €</b></div><div class='line'><span>Portales y gestoría</span><b>250 €</b></div><div class='line'><span>Suministros</span><b>150 €</b></div><div class='line'><span>Estructura, sin la cuota</span><b>1.880 €</b></div><div class='line last'><span>Cuota exacta, 5,50 % y 60 meses</span><b>955,06 €</b></div></section><section><h3>Impuestos, cada uno en su sitio</h3><div class='line'><span>IVA del REBU, dentro del margen del lote</span><b>5.558 €</b></div><div class='line'><span>Sociedades al 15 % en el año de estrés</span><b>3.043 €</b></div><div class='line'><span>Sociedades al 23 %, el mismo año</span><b>4.666 €</b></div><div class='line'><span>IRPF del piloto, apartado y no gastado</span><b>2.677,93 €</b></div><div class='line'><span>Modelo 576 del híbrido enchufable</span><b>0 €</b></div><div class='line last'><span>Cuota de autónomo REBU, camino sin nave</span><b>284,14 €</b></div></section></div><p class='note'>La cuota no es un gasto de explotación: va al denominador del RCSD, no dentro de los 1.880 €. El impuesto al 23 % son 4.666 € y el ratio baja a 1,58×. No se rompe.</p><footer><span>KHC AUTO IMPORT</span><span>11 / 17</span></footer></section><section class='slide ' data-i='11'><p class='kicker'>El año de la sociedad</p><h1>Una venta al mes ya cubre la nave y la cuota.</h1><table><thead><tr><th>Lectura</th><th>Ventas</th><th>RCSD</th><th>Qué significa</th></tr></thead><tbody><tr><td>Una venta al mes, impuesto 15 %</td><td class='num'>12</td><td class='num ratio'>1,72×</td><td>El suelo con el que se pide el dinero</td></tr><tr><td>La misma venta, impuesto al 23 %</td><td class='num'>12</td><td class='num ratio'>1,58×</td><td>Si el tipo de nueva creación no aplica</td></tr><tr><td>Dos precios de la web, mil euros debajo</td><td class='num'>12</td><td class='num ratio'>1,51×</td><td>116d a 12.475 € y 318d a 17.250 €</td></tr><tr><td>Precio de venta un 5 % por debajo</td><td class='num'>12</td><td class='num ratio'>1,06×</td><td>Cubre la cuota. Queda bajo 1,30×</td></tr><tr><td>Objetivo del plan, 2,5 coches al mes</td><td class='num'>30</td><td class='num ratio'>6,77×</td><td>Siete coches a 90 días dan unas 28 ventas</td></tr></tbody></table><p class='note'>Estructura mensual del plan, sin la cuota: 1.880 €. Cuota exacta al 5,50 % y 60 meses: 955,06 €. Hacen falta 11 ventas al año para el 1,30×.</p><footer><span>KHC AUTO IMPORT</span><span>12 / 17</span></footer></section><section class='slide ' data-i='12'><p class='kicker'>Caja de la sociedad, año 1</p><h1>Se compran los siete. Se repone uno al mes.</h1><svg viewBox='0 0 800 240' class='chart'><line x1='70' y1='210.0' x2='750' y2='210.0' class='grid'/><text x='62' y='214.0' class='axis'>0</text><line x1='70' y1='167.5' x2='750' y2='167.5' class='grid'/><text x='62' y='171.5' class='axis'>5 mil</text><line x1='70' y1='125.0' x2='750' y2='125.0' class='grid'/><text x='62' y='129.0' class='axis'>10 mil</text><line x1='70' y1='82.5' x2='750' y2='82.5' class='grid'/><text x='62' y='86.5' class='axis'>15 mil</text><line x1='70' y1='40.0' x2='750' y2='40.0' class='grid'/><text x='62' y='44.0' class='axis'>20 mil</text><polyline points='70.0,150.4 131.8,133.6 193.6,126.3 255.5,121.7 317.3,117.5 379.1,115.2 440.9,114.4 502.7,94.1 564.5,77.3 626.4,70.0 688.2,65.4 750.0,61.2' class='ink'/><circle cx='70.0' cy='150.4' r='3.2' class='inkdot'/><circle cx='131.8' cy='133.6' r='3.2' class='inkdot'/><circle cx='193.6' cy='126.3' r='3.2' class='inkdot'/><circle cx='255.5' cy='121.7' r='3.2' class='inkdot'/><circle cx='317.3' cy='117.5' r='3.2' class='inkdot'/><circle cx='379.1' cy='115.2' r='3.2' class='inkdot'/><circle cx='440.9' cy='114.4' r='3.2' class='inkdot'/><circle cx='502.7' cy='94.1' r='3.2' class='inkdot'/><circle cx='564.5' cy='77.3' r='3.2' class='inkdot'/><circle cx='626.4' cy='70.0' r='3.2' class='inkdot'/><circle cx='688.2' cy='65.4' r='3.2' class='inkdot'/><circle cx='750.0' cy='61.2' r='3.2' class='inkdot'/><polyline points='70.0,189.1 131.8,172.2 193.6,165.0 255.5,160.4 317.3,156.2 379.1,153.9 440.9,153.1 502.7,132.8 564.5,116.0 626.4,108.7 688.2,104.1 750.0,99.9' class='goldline'/><circle cx='70.0' cy='189.1' r='3.2' class='golddot'/><circle cx='131.8' cy='172.2' r='3.2' class='golddot'/><circle cx='193.6' cy='165.0' r='3.2' class='golddot'/><circle cx='255.5' cy='160.4' r='3.2' class='golddot'/><circle cx='317.3' cy='156.2' r='3.2' class='golddot'/><circle cx='379.1' cy='153.9' r='3.2' class='golddot'/><circle cx='440.9' cy='153.1' r='3.2' class='golddot'/><circle cx='502.7' cy='132.8' r='3.2' class='golddot'/><circle cx='564.5' cy='116.0' r='3.2' class='golddot'/><circle cx='626.4' cy='108.7' r='3.2' class='golddot'/><circle cx='688.2' cy='104.1' r='3.2' class='golddot'/><circle cx='750.0' cy='99.9' r='3.2' class='golddot'/><text x='84' y='142' class='tag'>7.011 €</text><text x='84' y='205' class='tag goldtext'>2.461 €</text><text x='740' y='53' text-anchor='end' class='tag'>17.503 €</text><text x='740' y='116' text-anchor='end' class='tag goldtext'>12.953 €</text></svg><div class='months'><span>M1</span><span>M2</span><span>M3</span><span>M4</span><span>M5</span><span>M6</span><span>M7</span><span>M8</span><span>M9</span><span>M10</span><span>M11</span><span>M12</span></div><p class='legend'><i class='inkswatch'></i> Reforma después del primer cobro <i class='goldswatch'></i> Reforma pagada en el mes 1</p><p class='note'>El mes más justo es el Audi: 2.921 € de margen contra 2.835 € de estructura y cuota. Cubre. No sobra.</p><footer><span>KHC AUTO IMPORT</span><span>13 / 17</span></footer></section><section class='slide ' data-i='13'><p class='kicker'>Destino del dinero</p><h1>Cien mil euros. Un solo uso el día 1.</h1><div class='grid3'><article class='darkcard'><b>95.380 €</b><p>Siete coches, coste ya completo</p></article><article class='darkcard'><b>4.620 €</b><p>Caja que no se toca hasta cobrar</p></article><article class='darkcard'><b>0 €</b><p>De reforma, de sueldo y de taller nuevo</p></article></div><p class='lead'>El aval o el préstamo de 50.000 € rota existencias. La reforma, el elevador y el utillaje de frenos salen de la caja que generan las ventas. El 5,50 % a 60 meses es la hipótesis del plan, no una oferta: si el tipo es otro, se sustituye la cuota y se vuelve a mirar el 1,72×.</p><footer><span>KHC AUTO IMPORT</span><span>14 / 17</span></footer></section><section class='slide ' data-i='14'><p class='kicker'>Lo que puede fallar</p><h1>Cuatro golpes, y la respuesta ya está escrita.</h1><div class='stack'><article><b>El precio cede un 5 %</b><p>El ratio baja a 1,06×. Se deja de reponer y se adelgaza la deuda.</p></article><article><b>Un motor de la lista negra</b><p>No se compra. El catálogo lo marca prohibido antes de la transferencia.</p></article><article><b>Hace falta un sueldo</b><p>No sale de la sociedad. El administrador vive de los 25.000 € personales.</p></article><article><b>La nave tienta el día 1</b><p>La renta cabe en el 1,72×. La reforma, no, hasta el primer cobro.</p></article></div><footer><span>KHC AUTO IMPORT</span><span>15 / 17</span></footer></section><section class='slide dark' data-i='15'><p class='kicker'>Para la reunión</p><h1>50.000 € al lado<br>de otros 50.000 €.</h1><p class='lead light'>El papel que se firma es un circulante para siete coches cuyo coste ya está cerrado, con una nave que se paga con la explotación y un taller que es margen de más, no la tesis. Lo que se pide en la sala es una oferta de tipo, no una rebaja del margen.</p><div class='stats'><div class='stat'><b>50.000 €</b><span>Financiación</span></div><div class='stat'><b>3.781 €</b><span>Por coche</span></div><div class='stat'><b>1,72×</b><span>En el suelo</span></div></div><footer><span>KHC AUTO IMPORT</span><span>16 / 17</span></footer></section><section class='slide ' data-i='16'><p class='kicker'>De dónde sale cada cifra</p><h1>Nada de esta presentación es una venta cobrada.</h1><ul class='sources'><li>Piloto de 75 días: plan-negocio/03, columna de 50.000 €. Particular e IRPF.</li><li>Lote de siete y gastos de la nave: plan de viabilidad de cuatro páginas. Coste de compra ya completo.</li><li>Contraste ERP: borrador del Golf VIII, 14.611,82 € frente a 14.617 € del plan.</li><li>Mercado y motores: estudio Alemania / Galicia, guía de fiabilidad y matriz de ganadores, con la corrección de kilometraje del 24 de septiembre de 2026.</li><li>Arranque: 822,90 € cerrados en el presupuesto de día 0, con proveedor.</li><li>Taller: aceite 52,70 € y filtros 63,90 € del escandallo. La mano de obra de 60 € es la que hoy se paga fuera. Dos servicios externos por semana son hipótesis, no facturación.</li><li>Web: precios públicos de khcimport.autos a 11 de octubre de 2026.</li></ul><footer><span>KHC AUTO IMPORT</span><span>17 / 17</span></footer></section>
+<section class="slide dark">
+  <img class="logo" src="logo_flat.png" alt="KHC">
+  <p class="kicker">Solicitud de financiación</p>
+  <h1>50.000 € para abrir la nave y comprar seis coches.</h1>
+  <p class="lead">Otros 50.000 € son capital propio. Santiago de Compostela. El Mercedes no se paga hasta el primer cobro.</p>
+  <div class="stats">
+    <div class="stat"><b>50.000 €</b><span>Lo que se pide</span></div>
+    <div class="stat"><b>17.736 €</b><span>Caja el día 1, nave abierta</span></div>
+    <div class="stat"><b>3.781 €</b><span>Lo que deja un coche, de media</span></div>
+  </div>
+  <footer><span>KHC AUTO IMPORT</span><span>01 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">El día que entra el dinero</p>
+  <h1>Quedan 17.736 € en el banco. La nave ya está abierta.</h1>
+  <div class="line"><span>Capital propio</span><b>+50.000 €</b></div>
+  <div class="line"><span>Financiación</span><b>+50.000 €</b></div>
+  <div class="line"><span>Seis coches, coste ya completo</span><b>−77.714 €</b></div>
+  <div class="line"><span>Reforma, para abrir la nave ese día</span><b>−4.550 €</b></div>
+  <div class="line total"><span>Caja que no se toca</span><b>17.736 €</b></div>
+  <p class="note">El Mercedes, 17.666 €, espera. No porque sobre: es el más caro, y ese dinero es la caja de emergencia. Se paga con el primer cobro.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>02 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">Cómo se gana un coche</p>
+  <h1>El que menos deja cubre el mes. Sobran 86 €.</h1>
+  <div class="stats">
+    <div class="stat"><b>12.455 €</b><span>Coste del Audi. Transporte y matriculación ya dentro.</span></div>
+    <div class="stat"><b>15.990 €</b><span>Venta. El IVA, 613,51 €, solo grava la ganancia.</span></div>
+    <div class="stat"><b>2.921,49 €</b><span>Quedan. El mes cuesta 2.835,06 €. Sobran 86,43 €.</span></div>
+  </div>
+  <p class="note">El IVA no se paga sobre los 15.990 €. Se paga sobre la ganancia. Ya está restado. No se vuelve a restar el transporte.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>03 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">Los siete del plan</p>
+  <h1>Seis se compran el día 1. El Mercedes espera.</h1>
+  <table><thead><tr><th>Coche</th><th>Coste</th><th>Venta</th><th>Quedan</th><th>Día 1</th></tr></thead><tbody><tr class='wait'><td>Clase C Estate 2019</td><td class='num'>17.666 €</td><td class='num'>23.990 €</td><td class='num'>5.226,45 €</td><td>Espera</td></tr><tr class=''><td>Golf GTI Performance 2015</td><td class='num'>12.674 €</td><td class='num'>18.500 €</td><td class='num'>4.814,88 €</td><td>Se compra</td></tr><tr class=''><td>BMW 116d Manual 2015</td><td class='num'>9.010 €</td><td class='num'>13.475 €</td><td class='num'>3.690,08 €</td><td>Se compra</td></tr><tr class=''><td>Golf VIII 1.0 TSI 2021</td><td class='num'>14.617 €</td><td class='num'>18.700 €</td><td class='num'>3.374,38 €</td><td>Se compra</td></tr><tr class=''><td>BMW 318d Touring 2019</td><td class='num'>14.220 €</td><td class='num'>18.250 €</td><td class='num'>3.330,58 €</td><td>Se compra</td></tr><tr class=''><td>Volvo XC40 2.0 D3 2020</td><td class='num'>14.738 €</td><td class='num'>18.500 €</td><td class='num'>3.109,09 €</td><td>Se compra</td></tr><tr class=''><td>Audi A3 1.0 TFSI 2018</td><td class='num'>12.455 €</td><td class='num'>15.990 €</td><td class='num'>2.921,49 €</td><td>Se compra</td></tr></tbody></table>
+  <p class="note">Los seis cuestan 77.714 €. En la web, el 116d está a 12.475 € y el 318d a 17.250 €. Con esos precios la cobertura baja de 1,72 a 1,51.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>04 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">Cada mes</p>
+  <h1>Una venta paga el mes. Sobran 946 €.</h1>
+  <div class="split">
+    <div>
+      <div class="line"><span>Nave</span><b>1.100 €</b></div>
+      <div class="line"><span>Autónomo</span><b>380 €</b></div>
+      <div class="line"><span>Portales y gestoría</span><b>250 €</b></div>
+      <div class="line"><span>Luz y tasas</span><b>150 €</b></div>
+      <div class="line"><span>Cuota exacta</span><b>955,06 €</b></div>
+      <div class="line total"><span>El mes</span><b>2.835,06 €</b></div>
+    </div>
+    <article>
+      <b>1,72</b>
+      <p>Doce ventas, pagado el impuesto, dividido entre las doce cuotas. El 1,32 de las cuatro páginas es el margen partido por nave más cuota redondeada, sin quitar el impuesto. Mismo margen. Otra cuenta.</p>
+    </article>
+  </div>
+  <footer><span>KHC AUTO IMPORT</span><span>05 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">El primer cobro</p>
+  <h1>Aunque sea el Audi, se compra el Mercedes y sobra caja.</h1>
+  <div class="line"><span>Día 1</span><b>17.736,00 €</b></div>
+  <div class="line"><span>Un mes de nave y cuota</span><b>14.900,94 €</b></div>
+  <div class="line"><span>Cobro del Audi, 15.990 €</span><b>30.890,94 €</b></div>
+  <div class="line"><span>IVA de esa ganancia, 613,51 €</span><b>30.277,43 €</b></div>
+  <div class="line total"><span>Compra del Mercedes, 17.666 €</span><b>12.611,43 €</b></div>
+  <p class="note">Si el primero es el Golf GTI, la caja queda en 14.723,82 €.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>06 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">Si no entra ningún cobro</p>
+  <h1>La caja aguanta seis meses. Al séptimo, faltan 2.109 €.</h1>
+  <div class="pills"><div class='pill '><b>17.736 €</b><span>Mes día 1</span></div><div class='pill '><b>14.901 €</b><span>Mes 1</span></div><div class='pill '><b>12.066 €</b><span>Mes 2</span></div><div class='pill '><b>9.231 €</b><span>Mes 3</span></div><div class='pill '><b>6.396 €</b><span>Mes 4</span></div><div class='pill '><b>3.561 €</b><span>Mes 5</span></div><div class='pill '><b>726 €</b><span>Mes 6</span></div><div class='pill bad'><b>−2.109 €</b><span>Mes 7</span></div></div>
+  <p class="note">Cada columna resta 2.835,06 €. Al sexto mes quedan 725,64 €. Al séptimo faltan 2.109,42 €. La emergencia se ve. No es infinita.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>07 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">Qué se compra</p>
+  <h1>Se compra el motor. No el anuncio.</h1>
+  <div class="split">
+    <section class="yes"><h3>Sí</h3><ul>
+      <li>Etiqueta C o ECO, libro de mantenimiento, sin siniestro estructural.</li>
+      <li>Diésel 2.0 de correa seca. BMW solo si el motor es el posterior a la cadena que rompía.</li>
+      <li>Garantía de 12 meses, por escrito, en todas las ventas.</li>
+    </ul></section>
+    <section class="no"><h3>No</h3><ul>
+      <li>PureTech, EcoBoost de correa bañada, 1.2 TCe, diésel Ingenium.</li>
+      <li>BMW N47, la cadena antigua, hasta mediados de 2015.</li>
+      <li>El 116d de 2015 del lote no se transfiere hasta ver qué motor lleva.</li>
+    </ul></section>
+  </div>
+  <footer><span>KHC AUTO IMPORT</span><span>08 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">El programa de gestión</p>
+  <h1>Ya está hecho. Dice que no antes de que salga el dinero.</h1>
+  <p class="lead">En la empresa se llama ERP. No es un Excel ni la página web. Es el programa con el que se compra.</p>
+  <div class="line"><span><b>Antes de pagar.</b> Suma coche, transporte, impuestos y preparación, y dice lo que queda.</span></div>
+  <div class="line"><span><b>El motor.</b> 1.104 versiones de 37 marcas. La prohibida no se puede dar de alta como compra.</span></div>
+  <div class="line"><span><b>El impuesto.</b> Si la factura trae IVA deducible, impide usar el régimen de margen.</span></div>
+  <div class="line"><span><b>La web.</b> khcimport.autos enseña el mismo stock. Reservado o vendido se ve el mismo día. El cliente no ve lo que costó.</span></div>
+  <footer><span>KHC AUTO IMPORT</span><span>09 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">La nave, desde el día 1</p>
+  <h1>San Marcos se abre con el dinero. El taller no paga la cuota.</h1>
+  <div class="grid3">
+    <article><b>1.100 €</b><p>Renta mensual. 550 m², licencia de actividad ya existente.</p></article>
+    <article><b>4.550 €</b><p>Reforma de materiales, pagada el día que se abre.</p></article>
+    <article><b>60 €</b><p>Mano de obra que hoy sale fuera. Aceite 52,70 €. Filtros 63,90 €.</p></article>
+  </div>
+  <p class="note">Pastillas, aceite de caja y neumáticos no tienen tarifa cerrada: se cuentan a 0 €. Dos servicios externos por semana serían 5.760 € al año. Es hipótesis. No está en el 1,72.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>10 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">Si el número se mueve</p>
+  <h1>Cada golpe tiene un resultado.</h1>
+  <div class="line"><span>Doce ventas, impuesto 15 %</span><b>1,72 veces</b></div>
+  <div class="line"><span>Impuesto al 23 %</span><b>1,58 veces</b></div>
+  <div class="line"><span>Dos precios de la web, mil euros debajo</span><b>1,51 veces</b></div>
+  <div class="line"><span>Todos los precios, un 5 % más bajos</span><b>1,06 veces</b></div>
+  <div class="line"><span>Seis meses sin una venta</span><b>725,64 €</b></div>
+  <footer><span>KHC AUTO IMPORT</span><span>11 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">Para qué es el dinero</p>
+  <h1>Los 50.000 € son coches. No son sueldo.</h1>
+  <div class="grid3">
+    <article><b>50.000 €</b><p>Financiación. Circulante para stock.</p></article>
+    <article><b>50.000 €</b><p>Capital propio, al lado.</p></article>
+    <article><b>0 €</b><p>De sueldo. Los 25.000 € familiares están fuera.</p></article>
+  </div>
+  <p class="note">El préstamo se queda en coches. La reforma, 4.550 €, sale del capital propio. El 5,50 % es la hipótesis del plan, no una oferta.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>12 / 14</span></footer>
+</section>
+<section class="slide dark">
+  <p class="kicker">La petición</p>
+  <h1>50.000 € al lado de otros 50.000 €.</h1>
+  <p class="lead">El día que entran, se abre la nave, se compran seis coches y el Mercedes espera en la cuenta. Lo que se pide es una oferta de tipo y de plazo.</p>
+  <div class="stats">
+    <div class="stat"><b>50.000 €</b><span>Financiación</span></div>
+    <div class="stat"><b>17.736 €</b><span>Caja el día 1</span></div>
+    <div class="stat"><b>1,72 veces</b><span>La cuota, con una venta al mes</span></div>
+  </div>
+  <footer><span>KHC AUTO IMPORT</span><span>13 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">De dónde sale cada cifra</p>
+  <h1>Nada de aquí es una venta ya cobrada.</h1>
+  <ul>
+    <li>Lote, nave, reforma y gastos: plan de viabilidad de cuatro páginas.</li>
+    <li>El coste de compra ya incluye transporte y matriculación. No se resta otra vez.</li>
+    <li>Dejar el Mercedes sin comprar es la regla de esta financiación. En las cuatro páginas se compran los siete el mismo día.</li>
+    <li>El equipo de inspección, 822,90 €, está en otro documento. No se ha restado de los 17.736 €.</li>
+    <li>Taller: solo tarifas cerradas. El volumen externo es hipótesis.</li>
+  </ul>
+  <footer><span>KHC AUTO IMPORT</span><span>14 / 14</span></footer>
+</section>
 <div class="hint">Flechas para avanzar · F para pantalla completa</div>
 <script>
   const slides = [...document.querySelectorAll('.slide')];
@@ -86,23 +217,19 @@
     i = Math.max(0, Math.min(slides.length - 1, n));
     slides.forEach((s, k) => s.classList.toggle('active', k === i));
     bar.style.width = ((i + 1) / slides.length * 100) + '%';
-    history.replaceState(null, '', '#' + (i + 1));
   }
   addEventListener('keydown', (e) => {
-    if (['ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); show(i + 1); }
-    if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); show(i - 1); }
-    if (e.key === 'Home') show(0);
-    if (e.key === 'End') show(slides.length - 1);
+    if (['ArrowRight','PageDown',' '].includes(e.key)) { e.preventDefault(); show(i + 1); }
+    if (['ArrowLeft','PageUp','Backspace'].includes(e.key)) { e.preventDefault(); show(i - 1); }
     if (e.key === 'f' || e.key === 'F') {
       if (!document.fullscreenElement) document.documentElement.requestFullscreen();
       else document.exitFullscreen();
     }
   });
   addEventListener('click', (e) => {
-    if (e.target.closest('a, button')) return;
-    show(e.clientX > innerWidth / 2 ? i + 1 : i - 1);
+    if (e.clientX > innerWidth * 0.2) show(i + 1); else show(i - 1);
   });
-  show(Math.max(0, (parseInt(location.hash.slice(1), 10) || 1) - 1));
+  show(0);
 </script>
 </body>
 </html>

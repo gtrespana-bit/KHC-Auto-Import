@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Plan de negocio en formato de presentación.
+"""Presentación para conseguir 50.000 € de financiación.
 
-Dos regímenes, sin mezclarlos:
-- Piloto de 75 días: particular, IRPF, sin nave. Cifras cerradas de plan-negocio/03.
-- Sociedad: lote del plan de viabilidad. El coste de compra ya incluye
-  coche, transporte, matriculación y puesta a la venta.
+Una sola operación, desde el día en que entra el dinero:
+sociedad, nave abierta, seis coches comprados, el más caro en espera
+hasta el primer cobro. El coste de cada coche ya incluye transporte,
+matriculación y puesta a la venta. No se resta otra vez.
 
-El taller es una línea nueva. Solo se monetiza lo que tiene tarifa cerrada.
+El taller no entra en la cobertura. Solo se cuenta lo que tiene tarifa cerrada,
+y se marca como hipótesis.
 """
 
 from __future__ import annotations
@@ -15,12 +16,9 @@ import json
 from pathlib import Path
 
 from reportlab.lib.colors import Color, white
-from reportlab.lib.pagesizes import landscape
-from reportlab.lib.units import mm
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
-from reportlab.lib.utils import ImageReader
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
@@ -47,48 +45,113 @@ RED = Color(0.549, 0.227, 0.227)
 COVER = Color(33 / 255, 34 / 255, 40 / 255)
 CARD = Color(1, 1, 1)
 LINE = Color(0.855, 0.835, 0.788)
-
-# Piloto cerrado. Columna de 50.000 €. Particular, no sociedad.
-PILOT = [
-    ("0", "Capital en la cuenta", "—", "50.000"),
-    ("1", "Arranque cerrado: Launch, medidor, historial, imagen", "−823", "49.177"),
-    ("4", "Focus ST 280, compra y bajada rodando", "−18.880", "30.297"),
-    ("11", "ITV, modelo 576, DGT y placas del Focus", "−1.831", "28.466"),
-    ("14", "Compra del Golf GTI en Alemania", "−19.400", "9.066"),
-    ("25", "Camión, 576 y taller del GTI. Valle de caja", "−2.812", "6.254"),
-    ("28", "Cobro del Focus, 24.490 €, menos reserva", "+23.444", "29.699"),
-    ("44", "Cobro del GTI, 26.290 €, menos reserva", "+25.183", "54.881"),
-    ("47", "Cayenne E-Hybrid / Q7 TFSIe. Impuesto 576 a cero", "−29.500", "25.381"),
-    ("60", "Camión y matriculación del híbrido", "−1.840", "23.542"),
-    ("75", "Cobro 36.900 €, menos IRPF, garantía y SIM", "+35.310", "58.852"),
-]
+SOFT = Color(0.955, 0.949, 0.935)
 
 
-def eur(n, d=0):
-    neg = float(n) < 0
-    n = abs(float(n))
+def eur(n, cents=False):
+    n = float(n)
+    neg = n < 0
+    n = abs(n)
+    d = 2 if cents else 0
     s = f"{n:,.{d}f}".replace(",", "X").replace(".", ",").replace("X", ".")
-    return ("−" + s if neg else s) + " €"
+    return ("−" if neg else "") + s + " €"
+
+
+def money(n, cents=False):
+    """Signed amount for a movement, with the sign explicit."""
+    n = float(n)
+    body = eur(abs(n), cents)
+    if n > 0:
+        return "+" + body
+    if n < 0:
+        return "−" + body[1:] if body.startswith("−") else "−" + body
+    return body
+
+
+def r2(n):
+    return round(float(n) + 1e-9, 2)
+
+
+def build_numbers():
+    lot = MODEL["lot"]
+    held = max(lot, key=lambda u: u["cost"])
+    bought = [u for u in lot if u["name"] != held["name"]]
+    o = MODEL["opex_month"]
+    loan = MODEL["loan"]
+    stress = MODEL["scenarios"]["stress_12"]
+    tax23 = MODEL["scenarios"]["stress_23"]
+    price5 = MODEL["scenarios"]["price_5"]
+    web = MODEL["scenarios"]["web_prices"]
+    thin = min(lot, key=lambda u: u["net"])
+    capital = 50000.0
+    financing = 50000.0
+    reform = 4550.0
+    bought_cost = r2(sum(u["cost"] for u in bought))
+    cash0 = r2(capital + financing - bought_cost - reform)
+    month = r2(o["structure"] + loan["payment_exact"])
+    silence = [r2(cash0 - i * month) for i in range(8)]
+    # Primer cobro: el que menos deja. Luego se compra el que esperaba.
+    after_cost = r2(cash0 - month)
+    after_sale = r2(after_cost + thin["sell"])
+    after_vat = r2(after_sale - thin["rebu"])
+    after_buy = r2(after_vat - held["cost"])
+    gti = next(u for u in lot if "GTI" in u["name"])
+    after_gti = r2(after_cost + gti["sell"] - gti["rebu"] - held["cost"])
+    audi_left = r2(thin["net"] - month)
+    avg_left = r2(MODEL["totals"]["avg_net"] - month)
+    assert bought_cost == r2(MODEL["totals"]["cost"] - held["cost"])
+    assert cash0 == 17736.00
+    assert abs(month - 2835.06) < 0.001
+    assert abs(audi_left - 86.43) < 0.02
+    return {
+        "lot": lot,
+        "held": held,
+        "bought": bought,
+        "thin": thin,
+        "gti": gti,
+        "o": o,
+        "loan": loan,
+        "stress": stress,
+        "tax23": tax23,
+        "price5": price5,
+        "web": web,
+        "totals": MODEL["totals"],
+        "capital": capital,
+        "financing": financing,
+        "reform": reform,
+        "bought_cost": bought_cost,
+        "cash0": cash0,
+        "month": month,
+        "silence": silence,
+        "after_cost": after_cost,
+        "after_sale": after_sale,
+        "after_vat": after_vat,
+        "after_buy": after_buy,
+        "after_gti": after_gti,
+        "audi_left": audi_left,
+        "avg_left": avg_left,
+        "be": MODEL["break_even_sales"]["dscr_130_15"],
+    }
+
+
+N = build_numbers()
+
+
+def short(name):
+    return name.replace("Mercedes-Benz ", "").replace("Volkswagen ", "")
 
 
 def footer(c, n, total, dark=False):
+    c.setFillColor(GOLD)
+    c.rect(0, 0, 4, H, fill=1, stroke=0)
     c.setFillColor(GOLD if dark else GOLD_DEEP)
     c.setFont("DejaVu", 7.5)
     c.drawString(36, 18, "KHC AUTO IMPORT")
     c.setFillColor(Color(0.72, 0.70, 0.64) if dark else SLATE)
-    c.drawCentredString(W / 2, 18, "Plan de negocio  ·  octubre 2026  ·  cifras del propio proyecto")
+    c.drawCentredString(W / 2, 18, "Solicitud de financiación  ·  50.000 €  ·  octubre 2026")
     c.setFillColor(GOLD if dark else INK)
     c.setFont("DejaVuBold", 8)
     c.drawRightString(W - 36, 18, f"{n:02d}  /  {total:02d}")
-    c.setStrokeColor(GOLD)
-    c.setLineWidth(2.2 if dark else 1.4)
-    c.line(0, H - 0 if False else H, 0, 0)
-
-
-def hairline(c, y, dark=False):
-    c.setStrokeColor(GOLD if not dark else Color(0.55, 0.45, 0.24))
-    c.setLineWidth(0.6)
-    c.line(36, y, W - 36, y)
 
 
 def kicker(c, text, x, y, dark=False):
@@ -117,807 +180,542 @@ def wrap(c, text, font, size, x, y, width, leading, color, max_lines=6):
     return len(lines) * leading
 
 
-class Deck:
-    def __init__(self):
-        self.slides = []
-
-    def add(self, kind, **kw):
-        self.slides.append({"kind": kind, **kw})
-
-
-def build_deck():
-    m = MODEL
-    t = m["totals"]
-    stress = m["scenarios"]["stress_12"]
-    base = m["scenarios"]["base_30"]
-    tax23 = m["scenarios"]["stress_23"]
-    price5 = m["scenarios"]["price_5"]
-    web = m["scenarios"]["web_prices"]
-    f = m["funds"]
-    d = Deck()
-
-    d.add(
-        "cover",
-        kicker="Plan de negocio",
-        title="Vehículos seleccionados,\ncon el coste ya cerrado.",
-        sub="Para banco, aval o capital privado. Galicia, octubre 2026.",
-        stats=[
-            ("3.781 €", "Margen neto real\npor coche del lote"),
-            ("822,90 €", "Para arrancar\nequipados"),
-            ("1,72×", "RCSD con una venta\nal mes y la nave"),
-        ],
-    )
-    d.add(
-        "statement",
-        kicker="La tesis",
-        title="El margen no se negocia en el anuncio.\nSe decide antes de pagar.",
-        body="Galicia compra etiqueta C o ECO, motor que un mecánico recomendaría a su familia, y un precio entre 16.000 y 23.000 €. Lo demás se deja en Alemania. El ERP ya impide comprar lo que rompe la garantía.",
-        stats=[
-            ("12–20 días", "Rotación de los modelos que el estudio de mercado da por ganadores"),
-            ("26.467 €", "Margen neto del lote de siete, después de coste completo e IVA REBU"),
-            ("0 €", "De sueldo. Los 25.000 € familiares no entran en la sociedad"),
-        ],
-    )
-    d.add(
-        "cards",
-        kicker="Qué se vende",
-        title="No se vende una importación. Se vende un coche revisado.",
-        cards=[
-            ("01", "Seleccionado", "Nacional o importado, sin jerarquía. Se compra donde el número cierra: Alemania, Bélgica, Italia o España.", "El simulador compara las dos orillas antes de reservar el vuelo."),
-            ("02", "Con historial", "Libro de mantenimiento, kilometraje correlativo y ausencia de siniestro estructural. Si no se acredita, no se paga.", "Si el kilometraje no cuadra con el libro, no hay transferencia."),
-            ("03", "Con garantía", "Mínimo 12 meses, por escrito, en todas las ventas. Es la promesa pública de khcimport.autos.", "Va dentro del coste cerrado. No se resta otra vez del margen."),
-        ],
-    )
-    d.add(
-        "split",
-        kicker="Mercado",
-        title="Cuatro coches que Galicia ya compra.",
-        left_title="Lo que rota",
-        left=[
-            "Golf 7.5 2.0 TDI — 12 a 18 días. Impuesto de matriculación al 0 %.",
-            "BMW X1 18d — 12 a 25 días. El SUV que pide la lluvia.",
-            "Mercedes Clase A W177 — 14 a 22 días. Interior que cierra la visita.",
-            "BMW 320d Touring, solo con pocos kilómetros. A 162.000 km el catálogo ya no da margen.",
-        ],
-        right_title="Lo que no entra",
-        right=[
-            "PureTech, 1.2 TCe, EcoBoost de correa bañada, N47, Ingenium diésel.",
-            "Diésel anterior a septiembre de 2015. Etiqueta B, y las ZBE ya están.",
-            "SUV grande de gasolina o diésel alto en CO₂. El 576 se come el expediente.",
-            "El kilómetro manda más que el modelo. Dos ganadores de la matriz pierden a 162.000 km.",
-        ],
-    )
-    d.add(
-        "modules",
-        kicker="El sistema, ya construido",
-        title="El control existe antes de pedir el dinero.",
-        items=[
-            ("1.104", "Variantes en catálogo, con fiabilidad y precio de las dos orillas", "El motor prohibido no se puede marcar como comprable."),
-            ("Flota", "Coste real, no precio de anuncio. Del prospecto a la entrega", "El estado del coche y lo que ha costado viven en la misma ficha."),
-            ("Impuestos", "REBU, régimen general, ITP e IEDMT, calculados en la ficha", "Si la factura trae IVA deducible, el REBU queda bloqueado."),
-            ("Viaje", "Peajes, combustible y tres rutas antes de subir al avión", "La ruta se elige con el número, no al llegar al peaje."),
-            ("Inspección", "Launch, espesor de pintura y los seis papeles alemanes", "La pintura gruesa o el fallo en diagnosis paran la compra."),
-            ("Web", "Stock vivo en khcimport.autos. Si se reserva, se marca el mismo día", "Lo que se enseña al cliente sale del mismo sistema."),
-        ],
-    )
-    d.add(
-        "money",
-        kicker="Día 0",
-        title="822,90 € para no comprar a ciegas.\nEl resto es stock.",
-        rows=[
-            ("Diagnosis Launch, medidor de pintura y arrancador", "476,18 €"),
-            ("Diez informes de historial", "145,08 €"),
-            ("Imagen de entrega: tapamatrículas, carpetas, cerámica", "136,64 €"),
-            ("Línea de negocio y una consulta con la gestoría", "65,00 €"),
-        ],
-        note="Con 50.000 € propios quedan 49.177 € para coches. Un mes sin compra, en el piloto, cuesta entre 100 y 245 €.",
-    )
-    d.add(
-        "lot",
-        kicker="La unidad de la sociedad",
-        title="Compra, venta y margen. El aterrizaje ya está dentro.",
-        note="Venta menos coste completo, menos el IVA del REBU, que va dentro del margen. El transporte no se resta otra vez.",
-        rows=m["lot"],
-        totals=t,
-    )
-    d.add(
-        "pilot",
-        kicker="Flujo desde el día 1  ·  sin nave  ·  particular",
-        title="75 días. Tres coches. Todo descontado.",
-        rows=PILOT,
-        foot="Tabla redondeada al euro. Al día 75 la cuenta operativa tiene 58.851,94 € y la subcuenta de IRPF y garantía, 3.727,93 €. Total en el banco: 62.579,87 €. Beneficio neto: 8.851,94 €. Régimen de particular: no es el de la sociedad.",
-    )
-    d.add(
-        "two",
-        kicker="Capital",
-        title="Dos maneras de entrar. Una sola disciplina.",
-        a_title="Piloto, capital propio",
-        a=[
-            "45.000 a 50.000 €. Sin deuda y sin nave.",
-            "Tres coches en 75 días, uno de ellos híbrido enchufable para no pagar el 576.",
-            "Valle de caja: 6.254 €. No se compra el tercero antes de cobrar el segundo.",
-            "Después, autónomo REBU a 284,14 € al mes, todavía sin local.",
-        ],
-        b_title="Sociedad, con financiación",
-        b=[
-            "50.000 € propios y 50.000 € ajenos. Aval, préstamo o las dos cosas.",
-            "Siete coches a coste cerrado: 95.380 €. Caja el día 1: 4.620 €.",
-            "Nave de San Marcos en el plan: 1.100 € al mes. La reforma, con el primer cobro.",
-            "RCSD de 1,72× vendiendo un coche al mes. El taller no hace falta para que cuadre.",
-        ],
-    )
-    d.add(
-        "nave",
-        kicker="La nave y el taller",
-        title="El local no es un capricho. Tampoco se abre el mismo día.",
-        cards=[
-            ("1.100 €", "Renta de San Marcos en el plan. Otras naves del roadmap: 750 a 1.300 €."),
-            ("4.550 €", "Reforma de materiales. Con el primer cobro. Si se adelanta, la caja baja a 2.461 €."),
-            ("60 €", "Mano de obra que hoy sale fuera. Aceite, 52,70. Filtros, 63,90."),
-        ],
-        services=[
-            ("Aceite y cuatro filtros", "116,60 €", "60 €", "176,60 €", "60 €"),
-            ("Aceite de caja", "sin tarifa", "—", "al abrir", "0 €"),
-            ("Pastillas de freno", "sin tarifa", "—", "al abrir", "0 €"),
-            ("Neumáticos", "después", "—", "más tarde", "0 €"),
-        ],
-        body="Hipótesis, no facturación: dos servicios externos por semana. Mano de obra, 5.760 € al año, más 720 € en los doce coches propios. Total, 6.480 €, fuera del 1,72×. El recambio se cobra a coste.",
-    )
-    d.add(
-        "ledger",
-        kicker="Gastos e impuestos",
-        title="Lo fijo, al mes. El impuesto, sin mezclarlo.",
-        left_title="Estructura de la sociedad",
-        left=[
-            ("San Marcos, 550 m²", "1.100 €"),
-            ("Autónomo societario", "380 €"),
-            ("Portales y gestoría", "250 €"),
-            ("Suministros", "150 €"),
-            ("Estructura, sin la cuota", "1.880 €"),
-            ("Cuota exacta, 5,50 % y 60 meses", "955,06 €"),
-        ],
-        right_title="Impuestos, cada uno en su sitio",
-        right=[
-            ("IVA del REBU, dentro del margen del lote", "5.558 €"),
-            ("Sociedades al 15 % en el año de estrés", "3.043 €"),
-            ("Sociedades al 23 %, el mismo año", "4.666 €"),
-            ("IRPF del piloto, apartado y no gastado", "2.677,93 €"),
-            ("Modelo 576 del híbrido enchufable", "0 €"),
-            ("Cuota de autónomo REBU, camino sin nave", "284,14 €"),
-        ],
-        note="La cuota no es un gasto de explotación: va al denominador del RCSD, no dentro de los 1.880 €. El impuesto al 23 % son 4.666 € y el ratio baja a 1,58×. No se rompe.",
-    )
-    d.add(
-        "ratio",
-        kicker="El año de la sociedad",
-        title="Una venta al mes ya cubre la nave y la cuota.",
-        rows=[
-            ("Una venta al mes, impuesto 15 %", "12", "1,72×", "El suelo con el que se pide el dinero"),
-            ("La misma venta, impuesto al 23 %", "12", "1,58×", "Si el tipo de nueva creación no aplica"),
-            ("Dos precios de la web, mil euros debajo", "12", "1,51×", "116d a 12.475 € y 318d a 17.250 €"),
-            ("Precio de venta un 5 % por debajo", "12", "1,06×", "Cubre la cuota. Queda bajo 1,30×"),
-            ("Objetivo del plan, 2,5 coches al mes", "30", "6,77×", "Siete coches a 90 días dan unas 28 ventas"),
-        ],
-        note=f"Estructura mensual del plan, sin la cuota: 1.880 €. Cuota exacta al 5,50 % y 60 meses: 955,06 €. Hacen falta {m['break_even_sales']['dscr_130_15']} ventas al año para el 1,30×.",
-    )
-    d.add(
-        "cash",
-        kicker="Caja de la sociedad, año 1",
-        title="Se compran los siete. Se repone uno al mes.",
-        series_a=[r["end"] for r in m["cash_base"]],
-        series_b=[r["end"] for r in m["cash_reform_m1"]],
-        note="El mes más justo es el Audi: 2.921 € de margen contra 2.835 € de estructura y cuota. Cubre. No sobra.",
-    )
-    d.add(
-        "uses",
-        kicker="Destino del dinero",
-        title="Cien mil euros. Un solo uso el día 1.",
-        big=[
-            ("95.380 €", "Siete coches, coste ya completo"),
-            ("4.620 €", "Caja que no se toca hasta cobrar"),
-            ("0 €", "De reforma, de sueldo y de taller nuevo"),
-        ],
-        body="El aval o el préstamo de 50.000 € rota existencias. La reforma, el elevador y el utillaje de frenos salen de la caja que generan las ventas. El 5,50 % a 60 meses es la hipótesis del plan, no una oferta: si el tipo es otro, se sustituye la cuota y se vuelve a mirar el 1,72×.",
-    )
-    d.add(
-        "risks",
-        kicker="Lo que puede fallar",
-        title="Cuatro golpes, y la respuesta ya está escrita.",
-        rows=[
-            ("El precio cede un 5 %", "El ratio baja a 1,06×. Se deja de reponer y se adelgaza la deuda."),
-            ("Un motor de la lista negra", "No se compra. El catálogo lo marca prohibido antes de la transferencia."),
-            ("Hace falta un sueldo", "No sale de la sociedad. El administrador vive de los 25.000 € personales."),
-            ("La nave tienta el día 1", "La renta cabe en el 1,72×. La reforma, no, hasta el primer cobro."),
-        ],
-    )
-    d.add(
-        "close",
-        kicker="Para la reunión",
-        title="50.000 € al lado\nde otros 50.000 €.",
-        body="El papel que se firma es un circulante para siete coches cuyo coste ya está cerrado, con una nave que se paga con la explotación y un taller que es margen de más, no la tesis. Lo que se pide en la sala es una oferta de tipo, no una rebaja del margen.",
-        stats=[
-            ("50.000 €", "Financiación"),
-            ("3.781 €", "Por coche"),
-            ("1,72×", "En el suelo"),
-        ],
-    )
-    d.add(
-        "sources",
-        kicker="De dónde sale cada cifra",
-        title="Nada de esta presentación es una venta cobrada.",
-        items=[
-            "Piloto de 75 días: plan-negocio/03, columna de 50.000 €. Particular e IRPF.",
-            "Lote de siete y gastos de la nave: plan de viabilidad de cuatro páginas. Coste de compra ya completo.",
-            "Contraste ERP: borrador del Golf VIII, 14.611,82 € frente a 14.617 € del plan.",
-            "Mercado y motores: estudio Alemania / Galicia, guía de fiabilidad y matriz de ganadores, con la corrección de kilometraje del 24 de septiembre de 2026.",
-            "Arranque: 822,90 € cerrados en el presupuesto de día 0, con proveedor.",
-            "Taller: aceite 52,70 € y filtros 63,90 € del escandallo. La mano de obra de 60 € es la que hoy se paga fuera. Dos servicios externos por semana son hipótesis, no facturación.",
-            "Web: precios públicos de khcimport.autos a 11 de octubre de 2026.",
-        ],
-    )
-    return d
-
-
-def draw_bg(c, dark=False):
+def bg(c, dark=False):
     c.setFillColor(COVER if dark else IVORY)
     c.rect(0, 0, W, H, fill=1, stroke=0)
     c.setFillColor(GOLD)
     c.rect(0, H - 4, W, 4, fill=1, stroke=0)
 
 
-def draw_cover(c, s, n, total):
-    draw_bg(c, True)
+def title(c, text, y, size=24):
+    c.setFillColor(INK)
+    c.setFont("DejaVuSerif", size)
+    c.drawString(36, y, text)
+
+
+def card(c, x, y, w, h, top=GOLD):
+    c.setFillColor(CARD)
+    c.setStrokeColor(LINE)
+    c.setLineWidth(0.4)
+    c.roundRect(x, y, w, h, 3, fill=1, stroke=1)
+    c.setFillColor(top)
+    c.rect(x, y + h - 2.2, w, 2.2, fill=1, stroke=0)
+
+
+def draw_cover(c, n, total):
+    bg(c, True)
     c.setFillColor(GOLD)
     c.rect(0, 0, W, 4, fill=1, stroke=0)
     logo = HERE / "presentacion" / "logo_flat.png"
     if logo.exists():
-        c.drawImage(str(logo), 36, 392, width=168, height=72, mask=None, preserveAspectRatio=True, anchor="w")
-    kicker(c, s["kicker"], 36, 368, True)
+        c.drawImage(str(logo), 36, 400, width=156, height=68, mask=None, preserveAspectRatio=True, anchor="w")
+    kicker(c, "Solicitud de financiación", 36, 372, True)
     c.setFillColor(WHITE)
-    c.setFont("DejaVuSerif", 32)
-    y = 328
-    for line in s["title"].split("\n"):
-        c.drawString(36, y, line)
-        y -= 38
+    c.setFont("DejaVuSerif", 30)
+    c.drawString(36, 328, "50.000 € para abrir la nave")
+    c.drawString(36, 290, "y comprar seis coches.")
     c.setFillColor(Color(0.78, 0.76, 0.70))
     c.setFont("DejaVu", 12)
-    c.drawString(36, y - 6, s["sub"])
+    c.drawString(36, 258, "Otros 50.000 € son capital propio. Santiago de Compostela, nave de San Marcos.")
+    c.drawString(36, 240, "El séptimo coche no se paga hasta que entra el primer cobro.")
+    stats = [
+        ("50.000 €", "Lo que se pide"),
+        ("17.736 €", "Caja el día 1, nave abierta"),
+        ("3.781 €", "Lo que deja un coche, de media"),
+    ]
     x = 36
-    for val, lab in s["stats"]:
+    for val, lab in stats:
         c.setStrokeColor(GOLD)
-        c.setLineWidth(0.6)
         c.setFillColor(Color(0.16, 0.17, 0.20))
-        c.roundRect(x, 78, 270, 78, 3, fill=1, stroke=1)
-        c.setFillColor(GOLD)
-        c.rect(x, 154, 270, 2.2, fill=1, stroke=0)
-        c.setFillColor(WHITE)
-        c.setFont("DejaVuSerif", 20)
-        c.drawString(x + 16, 118, val)
-        c.setFillColor(Color(0.75, 0.73, 0.66))
-        c.setFont("DejaVu", 8.5)
-        yy = 100
-        for bit in lab.split("\n"):
-            c.drawString(x + 16, yy, bit)
-            yy -= 11
-        x += 286
-    footer(c, n, total, True)
-
-
-def draw_statement(c, s, n, total):
-    draw_bg(c)
-    kicker(c, s["kicker"], 36, 490)
-    c.setFillColor(INK)
-    c.setFont("DejaVuSerif", 26)
-    y = 448
-    for line in s["title"].split("\n"):
-        c.drawString(36, y, line)
-        y -= 32
-    wrap(c, s["body"], "DejaVu", 12, 36, y - 8, 860, 16, SLATE, 4)
-    x = 36
-    for val, lab in s["stats"]:
-        c.setFillColor(CARD)
-        c.setStrokeColor(LINE)
-        c.setLineWidth(0.4)
-        c.roundRect(x, 48, 286, 92, 3, fill=1, stroke=1)
-        c.setFillColor(GOLD)
-        c.rect(x, 138, 286, 2.2, fill=1, stroke=0)
-        c.setFillColor(INK)
-        c.setFont("DejaVuSerif", 16)
-        c.drawString(x + 14, 108, val)
-        wrap(c, lab, "DejaVu", 8.5, x + 14, 90, 256, 11, SLATE, 3)
-        x += 302
-    footer(c, n, total)
-
-
-def draw_cards(c, s, n, total):
-    draw_bg(c)
-    kicker(c, s["kicker"], 36, 490)
-    c.setFillColor(INK)
-    c.setFont("DejaVuSerif", 24)
-    c.drawString(36, 452, s["title"])
-    x = 36
-    for num, title, body, proof in s["cards"]:
-        c.setFillColor(CARD)
-        c.setStrokeColor(LINE)
-        c.roundRect(x, 70, 286, 340, 3, fill=1, stroke=1)
-        c.setFillColor(GOLD)
-        c.rect(x, 408, 286, 2.2, fill=1, stroke=0)
-        c.setFillColor(GOLD_DEEP)
-        c.setFont("DejaVuBold", 11)
-        c.drawString(x + 18, 372, num)
-        c.setFillColor(INK)
-        c.setFont("DejaVuSerif", 18)
-        c.drawString(x + 18, 338, title)
-        wrap(c, body, "DejaVu", 11, x + 18, 300, 250, 15, SLATE, 6)
-        c.setFillColor(Color(0.965, 0.945, 0.905))
-        c.rect(x + 1, 71, 284, 72, fill=1, stroke=0)
-        c.setFillColor(GOLD)
-        c.rect(x + 18, 128, 28, 1.4, fill=1, stroke=0)
-        wrap(c, proof, "DejaVu", 9.5, x + 18, 112, 250, 13, INK, 3)
-        x += 302
-    footer(c, n, total)
-
-
-def draw_split(c, s, n, total):
-    draw_bg(c)
-    kicker(c, s["kicker"], 36, 490)
-    c.setFillColor(INK)
-    c.setFont("DejaVuSerif", 24)
-    c.drawString(36, 452, s["title"])
-    boxes = [(36, s["left_title"], s["left"], GREEN), (492, s["right_title"], s["right"], RED)]
-    for x, title, items, tone in boxes:
-        c.setFillColor(CARD)
-        c.setStrokeColor(LINE)
-        c.roundRect(x, 48, 432, 380, 3, fill=1, stroke=1)
-        c.setFillColor(tone)
-        c.rect(x, 426, 432, 2.2, fill=1, stroke=0)
-        c.setFillColor(tone)
-        c.setFont("DejaVuBold", 11)
-        c.drawString(x + 18, 396, title.upper())
-        y = 360
-        for item in items:
-            c.setFillColor(tone)
-            c.circle(x + 24, y + 3, 2.4, fill=1, stroke=0)
-            h = wrap(c, item, "DejaVu", 11, x + 36, y, 376, 14.5, INK, 3)
-            y -= h + 14
-    footer(c, n, total)
-
-
-def draw_modules(c, s, n, total):
-    draw_bg(c)
-    kicker(c, s["kicker"], 36, 490)
-    c.setFillColor(INK)
-    c.setFont("DejaVuSerif", 24)
-    c.drawString(36, 452, s["title"])
-    positions = [(36, 250), (332, 250), (628, 250), (36, 56), (332, 56), (628, 56)]
-    for (x, y), (num, text, proof) in zip(positions, s["items"]):
-        c.setFillColor(CARD)
-        c.setStrokeColor(LINE)
-        c.roundRect(x, y, 280, 168, 3, fill=1, stroke=1)
-        c.setFillColor(GOLD)
-        c.rect(x, y + 166, 280, 2.2, fill=1, stroke=0)
-        c.setFillColor(INK)
-        c.setFont("DejaVuSerif", 18)
-        c.drawString(x + 16, y + 128, num)
-        wrap(c, text, "DejaVu", 10, x + 16, y + 104, 248, 13, SLATE, 3)
-        c.setFillColor(GOLD)
-        c.rect(x + 16, y + 52, 24, 1.3, fill=1, stroke=0)
-        wrap(c, proof, "DejaVu", 8.5, x + 16, y + 38, 248, 11.5, INK, 2)
-    footer(c, n, total)
-
-
-def draw_money(c, s, n, total):
-    draw_bg(c)
-    kicker(c, s["kicker"], 36, 490)
-    c.setFillColor(INK)
-    c.setFont("DejaVuSerif", 26)
-    y = 448
-    for line in s["title"].split("\n"):
-        c.drawString(36, y, line)
-        y -= 32
-    top = y - 16
-    for i, (name, amount) in enumerate(s["rows"]):
-        yy = top - i * 52
-        c.setFillColor(CARD)
-        c.roundRect(36, yy - 28, 888, 44, 3, fill=1, stroke=0)
-        c.setFillColor(GOLD)
-        c.rect(36, yy - 28, 3, 44, fill=1, stroke=0)
-        c.setFillColor(INK)
-        c.setFont("DejaVu", 12)
-        c.drawString(52, yy - 12, name)
-        c.setFont("DejaVuSerif", 14)
-        c.drawRightString(908, yy - 12, amount)
-    c.setFillColor(COVER)
-    c.roundRect(36, 48, 888, 52, 3, fill=1, stroke=0)
-    c.setFillColor(GOLD)
-    c.setFont("DejaVuSerif", 14)
-    c.drawString(52, 68, "822,90 €")
-    c.setFillColor(Color(0.82, 0.80, 0.74))
-    c.setFont("DejaVu", 10)
-    c.drawString(150, 70, "El 1,6 % de 50.000 €. El 98,4 % queda para coches.")
-    footer(c, n, total)
-
-
-def short_name(name):
-    return (name.replace("Mercedes-Benz ", "").replace("Volkswagen ", ""))
-
-
-def draw_lot(c, s, n, total):
-    draw_bg(c)
-    kicker(c, s["kicker"], 36, 498)
-    c.setFillColor(INK)
-    c.setFont("DejaVuSerif", 20)
-    c.drawString(36, 472, s["title"])
-    wrap(c, s["note"], "DejaVu", 8.5, 36, 452, 888, 11, SLATE, 2)
-    headers = ["Unidad", "Coste", "Venta", "Neto", ""]
-    xs = [48, 330, 410, 490, 575]
-    c.setFillColor(INK)
-    c.rect(36, 412, 888, 18, fill=1, stroke=0)
-    c.setFillColor(WHITE)
-    c.setFont("DejaVuBold", 7.5)
-    c.drawString(xs[0], 417, headers[0])
-    for x, h in zip(xs[1:4], headers[1:4]):
-        c.drawRightString(x + 52, 417, h)
-    max_net = max(u["net"] for u in s["rows"])
-    for i, u in enumerate(s["rows"]):
-        y = 390 - i * 36
-        if i % 2 == 0:
-            c.setFillColor(CARD)
-            c.rect(36, y - 8, 888, 32, fill=1, stroke=0)
-        c.setFillColor(INK)
-        c.setFont("DejaVu", 9)
-        c.drawString(48, y, short_name(u["name"]))
-        c.setFont("DejaVu", 9)
-        c.drawRightString(382, y, eur(u["cost"]))
-        c.drawRightString(462, y, eur(u["sell"]))
-        c.setFont("DejaVuBold", 9)
-        c.setFillColor(GREEN)
-        c.drawRightString(542, y, eur(u["net"]))
-        c.setFillColor(GREEN)
-        c.roundRect(560, y - 2, 340 * (u["net"] / max_net), 11, 1, fill=1, stroke=0)
-    t = s["totals"]
-    c.setFillColor(COVER)
-    c.rect(36, 128, 888, 22, fill=1, stroke=0)
-    c.setFillColor(WHITE)
-    c.setFont("DejaVuBold", 8.5)
-    c.drawString(48, 135, "Lote de siete")
-    c.drawRightString(382, 135, eur(t["cost"]))
-    c.drawRightString(462, 135, eur(t["sell"]))
-    c.setFillColor(GOLD)
-    c.drawRightString(542, 135, eur(t["net"]))
-    c.setFillColor(SLATE)
-    c.setFont("DejaVu", 8)
-    c.drawString(36, 100, "Media 3.781 €. IVA ya descontado: " + eur(t["rebu"], 0) + ". En la web el 116d está a 12.475 € y el 318d a 17.250 €; el neto medio baja a 3.545 €.")
-    footer(c, n, total)
-
-
-def draw_pilot(c, s, n, total):
-    draw_bg(c)
-    kicker(c, s["kicker"], 36, 508)
-    c.setFillColor(INK)
-    c.setFont("DejaVuSerif", 20)
-    c.drawString(36, 482, s["title"])
-    headers = ["Día", "Qué ocurre", "Movimiento", "Caja"]
-    xs = [44, 90, 700, 860]
-    c.setFillColor(INK)
-    c.rect(36, 456, 888, 18, fill=1, stroke=0)
-    c.setFillColor(WHITE)
-    c.setFont("DejaVuBold", 7.5)
-    for x, h in zip(xs, headers):
-        c.drawString(x, 461, h)
-    for i, (day, what, move, cash) in enumerate(s["rows"]):
-        y = 438 - i * 28
-        if i % 2 == 0:
-            c.setFillColor(Color(1, 1, 1))
-            c.rect(36, y - 6, 888, 26, fill=1, stroke=0)
-        c.setFillColor(GOLD_DEEP)
-        c.setFont("DejaVuBold", 8.5)
-        c.drawString(44, y, day)
-        c.setFillColor(INK)
-        c.setFont("DejaVu", 8.5)
-        c.drawString(90, y, what)
-        c.setFont("DejaVuBold", 8.5)
-        c.setFillColor(GREEN if move.startswith("+") else INK)
-        c.drawRightString(780, y, move + " €" if move != "—" else "—")
-        c.setFillColor(INK)
-        c.drawRightString(912, y, cash + " €")
-    wrap(c, s["foot"], "DejaVu", 8.5, 36, 78, 888, 11, SLATE, 2)
-    footer(c, n, total)
-
-
-def draw_two(c, s, n, total):
-    draw_bg(c)
-    kicker(c, s["kicker"], 36, 490)
-    c.setFillColor(INK)
-    c.setFont("DejaVuSerif", 24)
-    c.drawString(36, 452, s["title"])
-    for x, title, items, tone in ((36, s["a_title"], s["a"], INK), (492, s["b_title"], s["b"], GOLD_DEEP)):
-        c.setFillColor(CARD)
-        c.setStrokeColor(LINE)
-        c.roundRect(x, 48, 432, 380, 3, fill=1, stroke=1)
-        c.setFillColor(tone)
-        c.rect(x, 426, 432, 2.2, fill=1, stroke=0)
-        c.setFont("DejaVuBold", 12)
-        c.drawString(x + 18, 396, title.upper())
-        y = 356
-        for item in items:
-            c.setFillColor(GOLD)
-            c.circle(x + 26, y + 3, 2.3, fill=1, stroke=0)
-            h = wrap(c, item, "DejaVu", 11.5, x + 38, y, 372, 15, INK, 3)
-            y -= h + 16
-    footer(c, n, total)
-
-
-def draw_nave(c, s, n, total):
-    draw_bg(c)
-    kicker(c, s["kicker"], 36, 500)
-    c.setFillColor(INK)
-    c.setFont("DejaVuSerif", 18)
-    c.drawString(36, 476, s["title"])
-    x = 36
-    for val, lab in s["cards"]:
-        c.setFillColor(CARD)
-        c.setStrokeColor(LINE)
-        c.roundRect(x, 368, 286, 96, 3, fill=1, stroke=1)
-        c.setFillColor(GOLD)
-        c.rect(x, 462, 286, 2.2, fill=1, stroke=0)
-        c.setFillColor(INK)
-        c.setFont("DejaVuSerif", 16)
-        c.drawString(x + 12, 430, val)
-        wrap(c, lab, "DejaVu", 7.5, x + 12, 412, 262, 9.5, SLATE, 4)
-        x += 302
-    headers = ["Servicio", "Recambio", "Mano de obra", "Ticket", "Beneficio contado"]
-    widths = [250, 140, 150, 140, 168]
-    c.setFillColor(INK)
-    c.rect(36, 338, 888, 18, fill=1, stroke=0)
-    c.setFillColor(WHITE)
-    c.setFont("DejaVuBold", 7.5)
-    hx = 48
-    for h, w in zip(headers, widths):
-        c.drawString(hx, 343, h)
-        hx += w
-    for i, row in enumerate(s["services"]):
-        y = 316 - i * 28
-        if i % 2 == 0:
-            c.setFillColor(CARD)
-            c.rect(36, y - 8, 888, 26, fill=1, stroke=0)
-        c.setFillColor(INK if row[-1] != "0 €" else SLATE)
-        c.setFont("DejaVuBold" if i == 0 else "DejaVu", 9)
-        hx = 48
-        for cell, w in zip(row, widths):
-            c.drawString(hx, y, cell)
-            hx += w
-    wrap(c, s["body"], "DejaVu", 9.5, 36, 178, 888, 13, INK, 3)
-    footer(c, n, total)
-
-
-def draw_ledger(c, s, n, total):
-    draw_bg(c)
-    kicker(c, s["kicker"], 36, 498)
-    c.setFillColor(INK)
-    c.setFont("DejaVuSerif", 22)
-    c.drawString(36, 466, s["title"])
-    for x, title, rows, tone in (
-        (36, s["left_title"], s["left"], INK),
-        (492, s["right_title"], s["right"], GOLD_DEEP),
-    ):
-        c.setFillColor(tone)
-        c.setFont("DejaVuBold", 9)
-        c.drawString(x, 438, title.upper())
-        for i, (name, amount) in enumerate(rows):
-            y = 404 - i * 46
-            c.setFillColor(CARD)
-            c.roundRect(x, y - 10, 432, 38, 3, fill=1, stroke=0)
-            c.setFillColor(GOLD)
-            c.rect(x, y - 10, 3, 38, fill=1, stroke=0)
-            c.setFillColor(INK)
-            c.setFont("DejaVu", 9)
-            c.drawString(x + 14, y + 2, name)
-            c.setFont("DejaVuSerif", 11)
-            c.drawRightString(x + 416, y + 2, amount)
-    wrap(c, s["note"], "DejaVu", 9, 36, 78, 888, 12, SLATE, 2)
-    footer(c, n, total)
-
-
-def draw_ratio(c, s, n, total):
-    draw_bg(c)
-    kicker(c, s["kicker"], 36, 490)
-    c.setFillColor(INK)
-    c.setFont("DejaVuSerif", 22)
-    c.drawString(36, 454, s["title"])
-    c.setFillColor(INK)
-    c.rect(36, 412, 888, 20, fill=1, stroke=0)
-    c.setFillColor(WHITE)
-    c.setFont("DejaVuBold", 8)
-    for x, h in ((48, "Lectura"), (470, "Ventas"), (560, "RCSD"), (640, "Qué significa")):
-        c.drawString(x, 418, h)
-    for i, (name, sales, ratio, meaning) in enumerate(s["rows"]):
-        y = 378 - i * 52
-        c.setFillColor(CARD if i % 2 == 0 else Color(0.955, 0.949, 0.935))
-        c.roundRect(36, y - 10, 888, 44, 2, fill=1, stroke=0)
-        c.setFillColor(INK)
-        c.setFont("DejaVu", 10)
-        c.drawString(48, y + 4, name)
-        c.drawString(478, y + 4, sales)
-        c.setFont("DejaVuSerif", 14)
-        c.setFillColor(GREEN if ratio not in ("1,06×",) else GOLD_DEEP)
-        c.drawString(552, y + 2, ratio)
-        c.setFillColor(SLATE)
-        c.setFont("DejaVu", 9)
-        c.drawString(640, y + 4, meaning)
-    wrap(c, s["note"], "DejaVu", 10, 36, 78, 888, 13, SLATE, 2)
-    footer(c, n, total)
-
-
-def draw_cash(c, s, n, total):
-    draw_bg(c)
-    kicker(c, s["kicker"], 36, 498)
-    c.setFillColor(INK)
-    c.setFont("DejaVuSerif", 20)
-    c.drawString(36, 472, s["title"])
-    a, b = s["series_a"], s["series_b"]
-    max_v = 20000
-    left, right, bottom, top = 92, 880, 156, 410
-
-    def xy(i, v):
-        return left + i * ((right - left) / 11), bottom + (v / max_v) * (top - bottom)
-
-    c.setFont("DejaVu", 7)
-    for tick in (0, 5000, 10000, 15000, 20000):
-        y = bottom + (tick / max_v) * (top - bottom)
-        c.setStrokeColor(LINE)
-        c.setLineWidth(0.5)
-        c.line(left, y, right, y)
-        c.setFillColor(SLATE)
-        c.drawRightString(left - 8, y - 2, "0" if tick == 0 else f"{tick // 1000} mil")
-    for series, color in ((a, INK), (b, GOLD_DEEP)):
-        c.setStrokeColor(color)
-        c.setFillColor(color)
-        c.setLineWidth(2.2)
-        path = c.beginPath()
-        for i, v in enumerate(series):
-            x, y = xy(i, v)
-            if i == 0:
-                path.moveTo(x, y)
-            else:
-                path.lineTo(x, y)
-        c.drawPath(path, stroke=1, fill=0)
-        for i, v in enumerate(series):
-            x, y = xy(i, v)
-            c.circle(x, y, 2.5, fill=1, stroke=0)
-    c.setFont("DejaVuBold", 8)
-    x, y = xy(0, a[0])
-    c.setFillColor(INK)
-    c.drawString(x + 10, y + 14, eur(round(a[0])))
-    x, y = xy(0, b[0])
-    c.setFillColor(GOLD_DEEP)
-    c.drawString(x + 10, y - 14, eur(round(b[0])))
-    x, y = xy(11, a[-1])
-    c.setFillColor(INK)
-    c.drawRightString(x - 8, y + 8, eur(round(a[-1])))
-    x, y = xy(11, b[-1])
-    c.setFillColor(GOLD_DEEP)
-    c.drawRightString(x - 8, y - 12, eur(round(b[-1])))
-    c.setFillColor(SLATE)
-    c.setFont("DejaVu", 7.5)
-    for i in range(12):
-        x, _ = xy(i, 0)
-        c.drawCentredString(x, 140, f"M{i + 1}")
-    c.setFillColor(INK)
-    c.rect(92, 116, 16, 3, fill=1, stroke=0)
-    c.setFont("DejaVu", 8)
-    c.drawString(114, 113, "Reforma después del primer cobro")
-    c.setFillColor(GOLD_DEEP)
-    c.rect(340, 116, 16, 3, fill=1, stroke=0)
-    c.setFillColor(INK)
-    c.drawString(362, 113, "Reforma pagada en el mes 1")
-    wrap(c, s["note"], "DejaVu", 9, 36, 96, 888, 12, SLATE, 2)
-    footer(c, n, total)
-
-
-def draw_uses(c, s, n, total):
-    draw_bg(c)
-    kicker(c, s["kicker"], 36, 490)
-    c.setFillColor(INK)
-    c.setFont("DejaVuSerif", 24)
-    c.drawString(36, 452, s["title"])
-    x = 36
-    for val, lab in s["big"]:
-        c.setFillColor(COVER)
-        c.roundRect(x, 280, 286, 140, 3, fill=1, stroke=0)
-        c.setFillColor(GOLD)
-        c.rect(x, 418, 286, 2.2, fill=1, stroke=0)
+        c.roundRect(x, 78, 286, 86, 3, fill=1, stroke=1)
         c.setFillColor(WHITE)
         c.setFont("DejaVuSerif", 22)
-        c.drawString(x + 16, 360, val)
-        wrap(c, lab, "DejaVu", 10, x + 16, 332, 254, 13, Color(0.82, 0.80, 0.74), 2)
-        x += 302
-    wrap(c, s["body"], "DejaVu", 12.5, 36, 230, 888, 17, INK, 5)
-    footer(c, n, total)
-
-
-def draw_risks(c, s, n, total):
-    draw_bg(c)
-    kicker(c, s["kicker"], 36, 490)
-    c.setFillColor(INK)
-    c.setFont("DejaVuSerif", 24)
-    c.drawString(36, 452, s["title"])
-    for i, (risk, answer) in enumerate(s["rows"]):
-        y = 360 - i * 78
-        c.setFillColor(CARD)
-        c.roundRect(36, y, 888, 66, 3, fill=1, stroke=0)
-        c.setFillColor(GOLD)
-        c.rect(36, y, 3.2, 66, fill=1, stroke=0)
-        c.setFillColor(INK)
-        c.setFont("DejaVuBold", 12)
-        c.drawString(54, y + 38, risk)
-        c.setFillColor(SLATE)
-        c.setFont("DejaVu", 11)
-        c.drawString(54, y + 16, answer)
-    footer(c, n, total)
-
-
-def draw_close(c, s, n, total):
-    draw_bg(c, True)
-    c.setFillColor(GOLD)
-    c.rect(0, 0, W, 4, fill=1, stroke=0)
-    kicker(c, s["kicker"], 36, 470, True)
-    c.setFillColor(WHITE)
-    c.setFont("DejaVuSerif", 32)
-    y = 420
-    for line in s["title"].split("\n"):
-        c.drawString(36, y, line)
-        y -= 38
-    wrap(c, s["body"], "DejaVu", 12, 36, y - 8, 860, 16, Color(0.78, 0.76, 0.70), 4)
-    x = 36
-    for val, lab in s["stats"]:
-        c.setStrokeColor(GOLD)
-        c.setFillColor(Color(0.16, 0.17, 0.20))
-        c.roundRect(x, 78, 270, 72, 3, fill=1, stroke=1)
-        c.setFillColor(WHITE)
-        c.setFont("DejaVuSerif", 18)
-        c.drawString(x + 16, 112, val)
+        c.drawString(x + 16, 118, val)
         c.setFillColor(GOLD)
         c.setFont("DejaVu", 9)
-        c.drawString(x + 16, 94, lab.upper())
-        x += 286
+        c.drawString(x + 16, 96, lab.upper())
+        x += 302
     footer(c, n, total, True)
 
 
-def draw_sources(c, s, n, total):
-    draw_bg(c)
-    kicker(c, s["kicker"], 36, 490)
+def draw_day(c, n, total):
+    bg(c)
+    kicker(c, "El día que entra el dinero", 36, 498)
+    title(c, "Quedan 17.736 € en el banco. La nave ya está abierta.", 462, 20)
+    rows = [
+        ("Capital propio, ya en la cuenta", "+50.000 €", False),
+        ("Financiación que se pide", "+50.000 €", False),
+        ("Seis coches, coste ya completo", "−77.714 €", False),
+        ("Reforma de la nave, para abrirla ese día", "−4.550 €", False),
+        ("Caja que no se toca", "17.736 €", True),
+    ]
+    y = 408
+    for name, amount, last in rows:
+        c.setFillColor(COVER if last else CARD)
+        c.roundRect(36, y, 888, 42, 3, fill=1, stroke=0)
+        if not last:
+            c.setFillColor(GOLD)
+            c.rect(36, y, 3, 42, fill=1, stroke=0)
+        c.setFillColor(GOLD if last else INK)
+        c.setFont("DejaVuBold" if last else "DejaVu", 12)
+        c.drawString(54, y + 14, name)
+        c.setFont("DejaVuSerif", 14)
+        c.drawRightString(908, y + 13, amount)
+        y -= 52
+    wrap(
+        c,
+        "El Mercedes Clase C, 17.666 €, no se compra ese día. No porque sobre: es el más caro, y su precio es la caja de emergencia. Se paga cuando entra el primer cobro. El coste de cada coche ya incluye transporte, matriculación y puesta a la venta.",
+        "DejaVu", 10.5, 36, 128, 888, 14, SLATE, 3,
+    )
+    footer(c, n, total)
+
+
+def draw_thin(c, n, total):
+    bg(c)
+    kicker(c, "Cómo se gana un coche", 36, 498)
+    title(c, "El que menos deja cubre el mes. Sobran 86 €.", 462, 22)
+    thin = N["thin"]
+    steps = [
+        ("1", "Coste", eur(thin["cost"]), "Coche, transporte, matriculación y puesta a punto. Ya está dentro."),
+        ("2", "Venta", eur(thin["sell"]), "Precio del plan. En la web, este Audi está a ese mismo precio."),
+        ("3", "IVA", eur(thin["rebu"], True), "Solo sobre la ganancia, no sobre los 15.990 €. Va dentro del margen."),
+        ("4", "Quedan", eur(thin["net"], True), "Esto es lo que el coche aporta. No se le resta el transporte otra vez."),
+    ]
+    x = 36
+    for num, name, val, note in steps:
+        card(c, x, 250, 216, 180)
+        c.setFillColor(GOLD_DEEP)
+        c.setFont("DejaVuBold", 9)
+        c.drawString(x + 14, 400, num)
+        c.setFillColor(SLATE)
+        c.setFont("DejaVu", 9)
+        c.drawString(x + 32, 400, name.upper())
+        c.setFillColor(INK)
+        c.setFont("DejaVuSerif", 18)
+        c.drawString(x + 14, 358, val)
+        wrap(c, note, "DejaVu", 8.5, x + 14, 330, 188, 11.5, SLATE, 4)
+        x += 228
+    c.setFillColor(COVER)
+    c.roundRect(36, 56, 888, 168, 3, fill=1, stroke=0)
+    c.setFillColor(GOLD)
+    c.setFont("DejaVuBold", 8)
+    c.drawString(54, 196, "EL MES, AL LADO DEL COCHE")
+    lines = [
+        ("Nave, autónomo, portales y luz", eur(N["o"]["structure"])),
+        ("Cuota del préstamo, 5,50 % y 60 meses", eur(N["loan"]["payment_exact"], True)),
+        ("El mes", eur(N["month"], True)),
+        ("Este Audi, después del mes", eur(N["audi_left"], True)),
+    ]
+    y = 166
+    for name, amount in lines:
+        c.setFillColor(Color(0.82, 0.80, 0.74))
+        c.setFont("DejaVu", 11)
+        c.drawString(54, y, name)
+        c.setFillColor(WHITE)
+        c.setFont("DejaVuSerif", 13)
+        c.drawRightString(900, y, amount)
+        y -= 28
+    footer(c, n, total)
+
+
+def draw_lot(c, n, total):
+    bg(c)
+    kicker(c, "Los siete del plan", 36, 500)
+    title(c, "Seis se compran el día 1. El Mercedes espera.", 468, 22)
+    headers = ["Coche", "Coste", "Venta", "IVA de la ganancia", "Quedan", "Día 1"]
+    c.setFillColor(INK)
+    c.rect(36, 430, 888, 20, fill=1, stroke=0)
+    c.setFillColor(WHITE)
+    c.setFont("DejaVuBold", 7.5)
+    xs = [48, 300, 390, 500, 640, 760]
+    for x, h in zip(xs, headers):
+        c.drawString(x, 436, h)
+    rows = sorted(N["lot"], key=lambda u: -u["net"])
+    for i, u in enumerate(rows):
+        y = 400 - i * 36
+        waiting = u["name"] == N["held"]["name"]
+        c.setFillColor(Color(0.965, 0.945, 0.905) if waiting else (CARD if i % 2 == 0 else SOFT))
+        c.rect(36, y - 8, 888, 32, fill=1, stroke=0)
+        c.setFillColor(GOLD_DEEP if waiting else INK)
+        c.setFont("DejaVuBold" if waiting else "DejaVu", 9)
+        c.drawString(48, y, short(u["name"]))
+        c.setFont("DejaVu", 9)
+        c.setFillColor(INK)
+        c.drawRightString(360, y, eur(u["cost"]))
+        c.drawRightString(450, y, eur(u["sell"]))
+        c.drawRightString(590, y, eur(u["rebu"], True))
+        c.setFillColor(GREEN)
+        c.setFont("DejaVuBold", 9)
+        c.drawRightString(710, y, eur(u["net"], True))
+        c.setFillColor(GOLD_DEEP if waiting else SLATE)
+        c.setFont("DejaVuBold" if waiting else "DejaVu", 8)
+        c.drawString(760, y, "Espera" if waiting else "Se compra")
+    c.setFillColor(COVER)
+    c.rect(36, 132, 888, 24, fill=1, stroke=0)
+    c.setFillColor(WHITE)
+    c.setFont("DejaVuBold", 8.5)
+    c.drawString(48, 140, "Los seis que se pagan")
+    c.drawRightString(360, 140, eur(N["bought_cost"]))
+    c.setFillColor(GOLD)
+    c.drawString(760, 140, "El Mercedes, no")
+    wrap(
+        c,
+        "Media de los siete: 3.781 €. Hoy, en khcimport.autos, el 116d está a 12.475 € y el 318d a 17.250 €, mil euros bajo el plan. Con esos dos precios, la cobertura de una venta al mes pasa de 1,72 a 1,51. Sigue por encima de 1,30.",
+        "DejaVu", 9.5, 36, 108, 888, 13, SLATE, 3,
+    )
+    footer(c, n, total)
+
+
+def draw_month(c, n, total):
+    bg(c)
+    kicker(c, "Cada mes, con la nave abierta", 36, 498)
+    title(c, "Una venta paga el mes. Sobran 946 €.", 462, 24)
+    left = [
+        ("Nave de San Marcos, 550 m²", "1.100 €"),
+        ("Autónomo del administrador", "380 €"),
+        ("Portales y gestoría", "250 €"),
+        ("Luz, agua y tasas del local", "150 €"),
+        ("Cuota, 5,50 % y 60 meses", "955,06 €"),
+        ("Sale cada mes, venda o no venda", "2.835,06 €"),
+    ]
+    y = 418
+    for i, (name, amount) in enumerate(left):
+        last = i == len(left) - 1
+        c.setFillColor(COVER if last else CARD)
+        c.roundRect(36, y - 28, 430, 36, 3, fill=1, stroke=0)
+        c.setFillColor(GOLD if last else INK)
+        c.setFont("DejaVu", 9)
+        c.drawString(50, y - 16, name)
+        c.setFont("DejaVuSerif", 11)
+        c.drawRightString(452, y - 16, amount)
+        y -= 42
+    card(c, 492, 168, 432, 250, GREEN)
+    c.setFillColor(GREEN)
+    c.setFont("DejaVuBold", 8)
+    c.drawString(508, 390, "UNA VENTA MEDIA")
+    c.setFillColor(INK)
+    c.setFont("DejaVuSerif", 28)
+    c.drawString(508, 348, "3.781 €")
+    c.setFont("DejaVu", 12)
+    c.setFillColor(SLATE)
+    c.drawString(508, 318, "entran")
     c.setFillColor(INK)
     c.setFont("DejaVuSerif", 22)
-    c.drawString(36, 454, s["title"])
+    c.drawString(508, 278, "− 2.835 €")
+    c.setFillColor(SLATE)
+    c.setFont("DejaVu", 12)
+    c.drawString(508, 252, "sale el mes")
+    c.setFillColor(GREEN)
+    c.setFont("DejaVuSerif", 22)
+    c.drawString(508, 206, "Sobran 946 €")
+    wrap(
+        c,
+        "El plan de cuatro páginas divide 3.781 entre 2.846 y escribe 1,32. Usa la cuota redondeada a 966 € y no quita el impuesto. El banco mira otra cuenta: doce ventas, se paga el impuesto, y lo que queda se divide entre las doce cuotas. Eso da 1,72. Es el mismo margen. No es otro negocio.",
+        "DejaVu", 10, 36, 118, 888, 13.5, INK, 4,
+    )
+    footer(c, n, total)
+
+
+def draw_first(c, n, total):
+    bg(c)
+    kicker(c, "El primer cobro", 36, 498)
+    title(c, "Aunque sea el Audi, se compra el Mercedes y sobra caja.", 462, 20)
+    steps = [
+        ("Día 1", "Nave abierta y seis coches pagados", eur(N["cash0"], True)),
+        ("Pasa un mes", "Nave, autónomo, portales, luz y cuota", eur(N["after_cost"], True)),
+        ("Se cobra el Audi", "Entran 15.990 €, el precio de venta", eur(N["after_sale"], True)),
+        ("Se aparta el IVA", "613,51 €, solo de la ganancia de ese coche", eur(N["after_vat"], True)),
+        ("Se compra el Mercedes", "17.666 €. El que esperaba, ya está pagado", eur(N["after_buy"], True)),
+    ]
+    y = 408
+    for i, (when, what, cash) in enumerate(steps):
+        last = i == len(steps) - 1
+        c.setFillColor(COVER if last else CARD)
+        c.roundRect(36, y, 888, 46, 3, fill=1, stroke=0)
+        c.setFillColor(GOLD)
+        c.rect(36, y, 3.2, 46, fill=1, stroke=0)
+        c.setFillColor(GOLD if last else GOLD_DEEP)
+        c.setFont("DejaVuBold", 8)
+        c.drawString(54, y + 26, when.upper())
+        c.setFillColor(WHITE if last else INK)
+        c.setFont("DejaVu", 11)
+        c.drawString(54, y + 10, what)
+        c.setFont("DejaVuSerif", 13)
+        c.drawRightString(908, y + 15, cash)
+        y -= 56
+    wrap(
+        c,
+        "La caja queda en 12.611,43 €, con el Mercedes ya comprado y el mes pagado. Si el primero es el Golf GTI, queda en " + eur(N["after_gti"], True) + ". En los dos casos se puede comprar el coche que esperaba.",
+        "DejaVu", 10, 36, 108, 888, 13, SLATE, 2,
+    )
+    footer(c, n, total)
+
+
+def draw_silence(c, n, total):
+    bg(c)
+    kicker(c, "Si no entra ningún cobro", 36, 498)
+    title(c, "La caja aguanta seis meses. Al séptimo, faltan 2.109 €.", 462, 20)
+    c.setFillColor(SLATE)
+    c.setFont("DejaVu", 11)
+    c.drawString(36, 432, "Cada mes salen 2.835,06 €. No entra ninguna venta. El Mercedes sigue sin comprarse.")
+    labels = ["Día 1", "Mes 1", "Mes 2", "Mes 3", "Mes 4", "Mes 5", "Mes 6", "Mes 7"]
+    vals = N["silence"]
+    x = 36
+    for i, (lab, val) in enumerate(zip(labels, vals)):
+        neg = val < 0
+        c.setFillColor(Color(0.55, 0.23, 0.23) if neg else (COVER if i == 0 else CARD))
+        c.roundRect(x, 168, 104, 230, 3, fill=1, stroke=0)
+        c.setFillColor(GOLD if not neg else WHITE)
+        c.rect(x, 396, 104, 2.2, fill=1, stroke=0)
+        c.setFillColor(WHITE if i == 0 or neg else INK)
+        c.setFont("DejaVuBold", 8)
+        c.drawCentredString(x + 52, 360, lab.upper())
+        c.setFont("DejaVuSerif", 8)
+        c.drawCentredString(x + 52, 292, eur(val, True))
+        c.setFillColor(GOLD if i == 0 else (WHITE if neg else GREEN))
+        c.setFont("DejaVu", 7.5)
+        c.drawCentredString(x + 52, 200, "Falta" if neg else "Aguanta")
+        x += 114
+    wrap(
+        c,
+        "Seis meses de nave y de cuota, sin vender un coche, dejan 725,64 €. El séptimo mes no se cubre. Esa es la caja de emergencia: no es infinita, y se ve el día en que se acaba.",
+        "DejaVu", 11, 36, 120, 888, 15, INK, 2,
+    )
+    footer(c, n, total)
+
+
+def draw_engines(c, n, total):
+    bg(c)
+    kicker(c, "Qué se compra", 36, 498)
+    title(c, "Se compra el motor. No el anuncio.", 462, 24)
+    card(c, 36, 56, 432, 380, GREEN)
+    card(c, 492, 56, 432, 380, RED)
+    c.setFillColor(GREEN)
+    c.setFont("DejaVuBold", 11)
+    c.drawString(54, 400, "SÍ")
+    c.setFillColor(RED)
+    c.setFont("DejaVuBold", 11)
+    c.drawString(510, 400, "NO")
+    yes = [
+        "Etiqueta C o ECO, libro de mantenimiento y sin siniestro estructural.",
+        "Diésel 2.0 con correa seca, el que un mecánico recomienda.",
+        "BMW diésel solo si el motor es el posterior a la cadena que rompía.",
+        "Mercedes del lote: se verifica el código del motor antes de pagar.",
+        "Garantía de 12 meses, por escrito, en todas las ventas.",
+    ]
+    no = [
+        "PureTech y EcoBoost de correa bañada en aceite. Rompen.",
+        "1.2 TCe. Bebe aceite. El diésel Ingenium de Jaguar y Land Rover.",
+        "BMW con la cadena antigua, el N47, hasta mediados de 2015.",
+        "Diésel de antes de septiembre de 2015. Etiqueta B, y las ZBE ya están.",
+        "El 116d de 2015 del lote no se transfiere hasta ver qué motor lleva.",
+    ]
+    for items, x in ((yes, 54), (no, 510)):
+        y = 360
+        for item in items:
+            c.setFillColor(GOLD)
+            c.circle(x + 4, y + 3, 2.2, fill=1, stroke=0)
+            h = wrap(c, item, "DejaVu", 10.5, x + 16, y, 380, 13.5, INK, 3)
+            y -= h + 12
+    footer(c, n, total)
+
+
+def draw_program(c, n, total):
+    bg(c)
+    kicker(c, "El programa de gestión", 36, 498)
+    title(c, "Ya está hecho. Dice que no antes de que salga el dinero.", 462, 20)
+    c.setFillColor(SLATE)
+    c.setFont("DejaVu", 11)
+    c.drawString(36, 432, "En la empresa se llama ERP. No es un Excel ni la web. Es el programa con el que se compra.")
+    items = [
+        ("Antes de pagar", "Suma coche, transporte, impuestos y preparación, y dice lo que queda a ese precio de venta. Si no sale, no se compra."),
+        ("El motor", "1.104 versiones, de 37 marcas. Cada una está marcada: fiable, correcta, con precaución o prohibida. La prohibida no se puede dar de alta como compra."),
+        ("El impuesto", "Pregunta a quién se compra. Si la factura trae un IVA que se puede descontar, impide calcular el impuesto solo sobre la ganancia. Así no se aplica el que no toca."),
+        ("La ficha y la web", "Cada coche pasa de «lo estamos mirando» a «entregado», con los papeles que faltan. khcimport.autos enseña el mismo stock. Reservado o vendido se ve el mismo día. El cliente no ve lo que costó."),
+    ]
+    y = 388
+    for head, body in items:
+        c.setFillColor(CARD)
+        c.roundRect(36, y - 62, 888, 74, 3, fill=1, stroke=0)
+        c.setFillColor(GOLD)
+        c.rect(36, y - 62, 3.2, 74, fill=1, stroke=0)
+        c.setFillColor(INK)
+        c.setFont("DejaVuBold", 11)
+        c.drawString(54, y - 4, head)
+        wrap(c, body, "DejaVu", 10, 54, y - 24, 850, 13, SLATE, 2)
+        y -= 84
+    footer(c, n, total)
+
+
+def draw_nave(c, n, total):
+    bg(c)
+    kicker(c, "La nave, desde el día 1", 36, 498)
+    title(c, "San Marcos se abre con el dinero. El taller no paga la cuota.", 462, 20)
+    facts = [
+        ("550 m²", "San Marcos, Santiago. La licencia de actividad ya existe. La renta es 1.100 € al mes, desde el día 1."),
+        ("4.550 €", "Reforma de materiales: suelo, luz, aseos y extintores. La hace el promotor. Se paga el día que se abre."),
+        ("60 €", "Mano de obra que hoy se paga a un taller de fuera, por cada coche. Aceite 52,70 €. Cuatro filtros 63,90 €."),
+    ]
+    x = 36
+    for val, lab in facts:
+        card(c, x, 318, 286, 120)
+        c.setFillColor(INK)
+        c.setFont("DejaVuSerif", 18)
+        c.drawString(x + 14, 400, val)
+        wrap(c, lab, "DejaVu", 8.5, x + 14, 376, 258, 11.5, SLATE, 4)
+        x += 302
+    headers = ["Trabajo en la nave", "Lo que se sabe", "Lo que se cuenta"]
+    c.setFillColor(INK)
+    c.rect(36, 280, 888, 18, fill=1, stroke=0)
+    c.setFillColor(WHITE)
+    c.setFont("DejaVuBold", 8)
+    for x, h in ((48, headers[0]), (360, headers[1]), (680, headers[2])):
+        c.drawString(x, 285, h)
+    jobs = [
+        ("Aceite y cuatro filtros, a un cliente", "Recambio 116,60 €. Mano de obra 60 €.", "60 € por servicio"),
+        ("El mismo trabajo, en un coche propio", "Hoy esos 60 € salen a un taller de fuera.", "60 € que se quedan"),
+        ("Aceite de caja y pastillas", "No hay tarifa cerrada.", "0 €"),
+        ("Neumáticos", "Más adelante. No hay precio.", "0 €"),
+    ]
+    for i, row in enumerate(jobs):
+        y = 252 - i * 28
+        if i % 2 == 0:
+            c.setFillColor(CARD)
+            c.rect(36, y - 6, 888, 26, fill=1, stroke=0)
+        c.setFillColor(INK)
+        c.setFont("DejaVu", 8.5)
+        c.drawString(48, y, row[0])
+        c.setFillColor(SLATE)
+        c.drawString(360, y, row[1])
+        c.setFillColor(GREEN if row[2] != "0 €" else SLATE)
+        c.setFont("DejaVuBold", 8.5)
+        c.drawString(680, y, row[2])
+    wrap(
+        c,
+        "Dos servicios a clientes por semana serían 5.760 € al año, más 720 € en doce coches propios. Es hipótesis, no facturación. No está dentro del 1,72. El recambio se cobra a coste.",
+        "DejaVu", 10, 36, 108, 888, 13, INK, 2,
+    )
+    footer(c, n, total)
+
+
+def draw_stress(c, n, total):
+    bg(c)
+    kicker(c, "Si el número se mueve", 36, 498)
+    title(c, "Cada golpe tiene un resultado. No hay que imaginarlo.", 462, 22)
+    rows = [
+        ("Doce ventas, impuesto al 15 %", "1,72 veces", "Cubre la cuota. Es el número con el que se pide el dinero."),
+        ("El mismo año, impuesto al 23 %", "1,58 veces", "Si el tipo de empresa nueva no aplica. Sigue cubriendo."),
+        ("Dos coches, mil euros más baratos", "1,51 veces", "El precio que hoy tienen en la web el 116d y el 318d."),
+        ("Todos los precios, un 5 % más bajos", "1,06 veces", "La cuota se paga. No queda el colchón de 1,30."),
+        ("Seis meses sin una venta", "725,64 €", "Eso queda en el banco. Al séptimo mes faltan 2.109 €."),
+    ]
+    y = 400
+    for name, num, meaning in rows:
+        c.setFillColor(CARD)
+        c.roundRect(36, y - 18, 888, 52, 3, fill=1, stroke=0)
+        c.setFillColor(GOLD)
+        c.rect(36, y - 18, 3.2, 52, fill=1, stroke=0)
+        c.setFillColor(INK)
+        c.setFont("DejaVu", 11)
+        c.drawString(54, y + 12, name)
+        c.setFillColor(SLATE)
+        c.setFont("DejaVu", 9.5)
+        c.drawString(54, y - 6, meaning)
+        c.setFillColor(INK)
+        c.setFont("DejaVuSerif", 16)
+        c.drawRightString(908, y + 4, num)
+        y -= 64
+    footer(c, n, total)
+
+
+def draw_uses(c, n, total):
+    bg(c)
+    kicker(c, "Para qué es el dinero", 36, 498)
+    title(c, "Los 50.000 € son coches. No son sueldo ni reforma.", 462, 22)
+    blocks = [
+        ("50.000 €", "Financiación", "Circulante para stock. Entra el mismo día que se abre la nave."),
+        ("50.000 €", "Capital propio", "La otra mitad. Ya está comprometida al lado del préstamo."),
+        ("0 €", "De sueldo", "El administrador no cobra. Los 25.000 € familiares están fuera de la sociedad."),
+    ]
+    x = 36
+    for val, name, note in blocks:
+        c.setFillColor(COVER)
+        c.roundRect(x, 250, 286, 180, 3, fill=1, stroke=0)
+        c.setFillColor(GOLD)
+        c.rect(x, 428, 286, 2.2, fill=1, stroke=0)
+        c.setFillColor(WHITE)
+        c.setFont("DejaVuSerif", 22)
+        c.drawString(x + 16, 370, val)
+        c.setFillColor(GOLD)
+        c.setFont("DejaVuBold", 9)
+        c.drawString(x + 16, 346, name.upper())
+        wrap(c, note, "DejaVu", 10, x + 16, 318, 254, 13.5, Color(0.82, 0.80, 0.74), 4)
+        x += 302
+    wrap(
+        c,
+        "El préstamo se queda en coches. La reforma, 4.550 €, sale del capital propio. El 5,50 % a 60 meses es la hipótesis de este plan, no una oferta: la cuota exacta es 955,06 €. Si el tipo es otro, se cambia esa línea y se vuelve a mirar el 1,72.",
+        "DejaVu", 12, 36, 200, 888, 16, INK, 4,
+    )
+    footer(c, n, total)
+
+
+def draw_close(c, n, total):
+    bg(c, True)
+    c.setFillColor(GOLD)
+    c.rect(0, 0, W, 4, fill=1, stroke=0)
+    kicker(c, "La petición", 36, 430, True)
+    c.setFillColor(WHITE)
+    c.setFont("DejaVuSerif", 32)
+    c.drawString(36, 378, "50.000 € al lado")
+    c.drawString(36, 338, "de otros 50.000 €.")
+    wrap(
+        c,
+        "El día que entran, se abre la nave de San Marcos, se compran seis coches cuyo coste ya está cerrado y el Mercedes espera en la cuenta. Lo que se pide es una oferta de tipo y de plazo. No una rebaja del margen.",
+        "DejaVu", 13, 36, 290, 860, 18, Color(0.78, 0.76, 0.70), 3,
+    )
+    stats = [("50.000 €", "Financiación"), ("17.736 €", "Caja el día 1"), ("1,72 veces", "La cuota, con una venta al mes")]
+    x = 36
+    for val, lab in stats:
+        c.setStrokeColor(GOLD)
+        c.setFillColor(Color(0.16, 0.17, 0.20))
+        c.roundRect(x, 78, 286, 78, 3, fill=1, stroke=1)
+        c.setFillColor(WHITE)
+        c.setFont("DejaVuSerif", 20)
+        c.drawString(x + 16, 116, val)
+        c.setFillColor(GOLD)
+        c.setFont("DejaVu", 8.5)
+        c.drawString(x + 16, 96, lab.upper())
+        x += 302
+    footer(c, n, total, True)
+
+
+def draw_sources(c, n, total):
+    bg(c)
+    kicker(c, "De dónde sale cada cifra", 36, 498)
+    title(c, "Nada de aquí es una venta ya cobrada.", 462, 22)
+    items = [
+        "Lote, nave, reforma y gastos mensuales: plan de viabilidad de cuatro páginas. San Marcos, 550 m², licencia ya existente.",
+        "El coste de compra de ese plan ya incluye coche, transporte, matriculación y puesta a la venta. No se resta otra vez.",
+        "La cuota de 955,06 € es la exacta al 5,50 % y 60 meses. El plan la redondea a 966 € y por eso imprime 1,32, no 1,72.",
+        "La regla de dejar un coche sin comprar es de esta financiación. El que espera es el Mercedes, porque es el más caro. En las cuatro páginas se compran los siete el mismo día.",
+        "El 116d a 12.475 € y el 318d a 17.250 € son los precios públicos de khcimport.autos a 11 de octubre de 2026.",
+        "Taller: aceite 52,70 € y filtros 63,90 €, tarifas cerradas. Los 60 € son la mano de obra que hoy se paga fuera. Dos servicios por semana son hipótesis.",
+        "El equipo de inspección, 822,90 €, está presupuestado en otro documento. No se ha restado de los 17.736 €.",
+    ]
     y = 410
-    for item in s["items"]:
+    for item in items:
         c.setFillColor(GOLD)
         c.circle(46, y + 3, 2.2, fill=1, stroke=0)
         h = wrap(c, item, "DejaVu", 11, 60, y, 860, 14.5, INK, 3)
-        y -= h + 12
+        y -= h + 10
     footer(c, n, total)
 
 
-DRAW = {
-    "cover": draw_cover,
-    "statement": draw_statement,
-    "cards": draw_cards,
-    "split": draw_split,
-    "modules": draw_modules,
-    "money": draw_money,
-    "lot": draw_lot,
-    "pilot": draw_pilot,
-    "two": draw_two,
-    "nave": draw_nave,
-    "ledger": draw_ledger,
-    "ratio": draw_ratio,
-    "cash": draw_cash,
-    "uses": draw_uses,
-    "risks": draw_risks,
-    "close": draw_close,
-    "sources": draw_sources,
-}
+SLIDES = [
+    draw_cover, draw_day, draw_thin, draw_lot, draw_month, draw_first,
+    draw_silence, draw_engines, draw_program, draw_nave, draw_stress,
+    draw_uses, draw_close, draw_sources,
+]
 
 
 def flatten_logo():
@@ -956,211 +754,243 @@ def flatten_logo():
     bg.save(dest / "logo_flat.png", "PNG")
 
 
-def write_pdf(deck):
+def write_pdf():
     c = canvas.Canvas(str(OUT_PDF), pagesize=(W, H))
-    c.setTitle("Plan de negocio — KHC Auto Import")
+    c.setTitle("Solicitud de financiación — KHC Auto Import")
     c.setAuthor("KHC Auto Import")
-    total = len(deck.slides)
-    for i, slide in enumerate(deck.slides, 1):
-        DRAW[slide["kind"]](c, slide, i, total)
+    total = len(SLIDES)
+    for i, fn in enumerate(SLIDES, 1):
+        fn(c, i, total)
         c.showPage()
     c.save()
 
 
 def esc(s):
-    return (str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+    return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def write_html(deck):
-    parts = []
-    for i, s in enumerate(deck.slides):
-        kind = s["kind"]
-        inner = ""
-        if kind == "cover":
-            stats = "".join(f"<div class='stat'><b>{esc(a)}</b><span>{esc(b).replace(chr(10), '<br>')}</span></div>" for a, b in s["stats"])
-            inner = f"<img class='logo' src='logo_flat.png' alt='KHC Auto Import'><p class='kicker'>{esc(s['kicker'])}</p><h1>{esc(s['title']).replace(chr(10), '<br>')}</h1><p class='sub'>{esc(s['sub'])}</p><div class='stats'>{stats}</div>"
-            cls = "dark"
-        elif kind == "statement":
-            stats = "".join(f"<div class='stat light'><b>{esc(a)}</b><span>{esc(b)}</span></div>" for a, b in s["stats"])
-            inner = f"<p class='kicker'>{esc(s['kicker'])}</p><h1>{esc(s['title']).replace(chr(10), '<br>')}</h1><p class='lead'>{esc(s['body'])}</p><div class='stats'>{stats}</div>"
-            cls = ""
-        elif kind == "cards":
-            cards = "".join(f"<article><em>{esc(n)}</em><h3>{esc(t)}</h3><p>{esc(b)}</p><small>{esc(p)}</small></article>" for n, t, b, p in s["cards"])
-            inner = f"<p class='kicker'>{esc(s['kicker'])}</p><h1>{esc(s['title'])}</h1><div class='grid3'>{cards}</div>"
-            cls = ""
-        elif kind == "split":
-            left = "".join(f"<li>{esc(x)}</li>" for x in s["left"])
-            right = "".join(f"<li>{esc(x)}</li>" for x in s["right"])
-            inner = f"<p class='kicker'>{esc(s['kicker'])}</p><h1>{esc(s['title'])}</h1><div class='split'><section class='good'><h3>{esc(s['left_title'])}</h3><ul>{left}</ul></section><section class='bad'><h3>{esc(s['right_title'])}</h3><ul>{right}</ul></section></div>"
-            cls = ""
-        elif kind == "modules":
-            items = "".join(f"<article><b>{esc(a)}</b><p>{esc(b)}</p><small>{esc(p)}</small></article>" for a, b, p in s["items"])
-            inner = f"<p class='kicker'>{esc(s['kicker'])}</p><h1>{esc(s['title'])}</h1><div class='grid3'>{items}</div>"
-            cls = ""
-        elif kind == "money":
-            rows = "".join(f"<div class='line'><span>{esc(a)}</span><b>{esc(b)}</b></div>" for a, b in s["rows"])
-            inner = f"<p class='kicker'>{esc(s['kicker'])}</p><h1>{esc(s['title']).replace(chr(10), '<br>')}</h1>{rows}<p class='note'>{esc(s['note'])}</p>"
-            cls = ""
-        elif kind == "lot":
-            max_net = max(u["net"] for u in s["rows"])
-            rows = "".join(
-                f"<tr><td>{esc(short_name(u['name']))}</td><td class='num'>{esc(eur(u['cost']))}</td><td class='num'>{esc(eur(u['sell']))}</td><td class='num ratio'>{esc(eur(u['net']))}</td><td><i class='mini' style='width:{u['net']/max_net*100:.0f}%'></i></td></tr>"
-                for u in s["rows"]
-            )
-            t = s["totals"]
-            inner = f"<p class='kicker'>{esc(s['kicker'])}</p><h1>{esc(s['title'])}</h1><p class='note'>{esc(s['note'])}</p><table><thead><tr><th>Unidad</th><th>Coste</th><th>Venta</th><th>Neto</th><th></th></tr></thead><tbody>{rows}<tr class='total'><td>Lote de siete</td><td class='num'>{esc(eur(t['cost']))}</td><td class='num'>{esc(eur(t['sell']))}</td><td class='num'>{esc(eur(t['net']))}</td><td></td></tr></tbody></table>"
-            cls = ""
-        elif kind == "pilot":
-            rows = "".join(
-                f"<tr><td>{esc(a)}</td><td>{esc(b)}</td><td class='num'>{esc(c)}</td><td class='num'>{esc(d)} €</td></tr>"
-                for a, b, c, d in s["rows"]
-            )
-            inner = f"<p class='kicker'>{esc(s['kicker'])}</p><h1>{esc(s['title'])}</h1><table><thead><tr><th>Día</th><th>Qué ocurre</th><th>Movimiento</th><th>Caja</th></tr></thead><tbody>{rows}</tbody></table><p class='note'>{esc(s['foot'])}</p>"
-            cls = ""
-        elif kind == "two":
-            aa = "".join(f"<li>{esc(x)}</li>" for x in s["a"])
-            bb = "".join(f"<li>{esc(x)}</li>" for x in s["b"])
-            inner = f"<p class='kicker'>{esc(s['kicker'])}</p><h1>{esc(s['title'])}</h1><div class='split'><section><h3>{esc(s['a_title'])}</h3><ul>{aa}</ul></section><section class='gold'><h3>{esc(s['b_title'])}</h3><ul>{bb}</ul></section></div>"
-            cls = ""
-        elif kind == "nave":
-            cards = "".join(f"<article><b>{esc(a)}</b><p>{esc(b)}</p></article>" for a, b in s["cards"])
-            rows = "".join(f"<tr>{''.join(f'<td>{esc(cell)}</td>' for cell in row)}</tr>" for row in s["services"])
-            inner = f"<p class='kicker'>{esc(s['kicker'])}</p><h1>{esc(s['title'])}</h1><div class='grid3'>{cards}</div><table><thead><tr><th>Servicio</th><th>Recambio</th><th>Mano de obra</th><th>Ticket</th><th>Beneficio contado</th></tr></thead><tbody>{rows}</tbody></table><p class='note'>{esc(s['body'])}</p>"
-            cls = ""
-        elif kind == "ledger":
-            def lines(rows):
-                return "".join(f"<div class='line{' last' if i == len(rows)-1 else ''}'><span>{esc(a)}</span><b>{esc(b)}</b></div>" for i, (a, b) in enumerate(rows))
-            inner = f"<p class='kicker'>{esc(s['kicker'])}</p><h1>{esc(s['title'])}</h1><div class='split'><section><h3>{esc(s['left_title'])}</h3>{lines(s['left'])}</section><section><h3>{esc(s['right_title'])}</h3>{lines(s['right'])}</section></div><p class='note'>{esc(s['note'])}</p>"
-            cls = ""
-        elif kind == "ratio":
-            rows = "".join(
-                f"<tr><td>{esc(a)}</td><td class='num'>{esc(b)}</td><td class='num ratio'>{esc(c)}</td><td>{esc(d)}</td></tr>"
-                for a, b, c, d in s["rows"]
-            )
-            inner = f"<p class='kicker'>{esc(s['kicker'])}</p><h1>{esc(s['title'])}</h1><table><thead><tr><th>Lectura</th><th>Ventas</th><th>RCSD</th><th>Qué significa</th></tr></thead><tbody>{rows}</tbody></table><p class='note'>{esc(s['note'])}</p>"
-            cls = ""
-        elif kind == "cash":
-            max_v = 20000
-            def poly(series):
-                pts = []
-                for i, v in enumerate(series):
-                    x = 70 + i * (680 / 11)
-                    y = 210 - (v / max_v) * 170
-                    pts.append(f"{x:.1f},{y:.1f}")
-                return " ".join(pts)
-            def dots(series, css):
-                out = []
-                for i, v in enumerate(series):
-                    x = 70 + i * (680 / 11)
-                    y = 210 - (v / max_v) * 170
-                    out.append(f"<circle cx='{x:.1f}' cy='{y:.1f}' r='3.2' class='{css}'/>")
-                return "".join(out)
-            grid = "".join(
-                f"<line x1='70' y1='{210 - tick/max_v*170:.1f}' x2='750' y2='{210 - tick/max_v*170:.1f}' class='grid'/><text x='62' y='{214 - tick/max_v*170:.1f}' class='axis'>{'0' if tick==0 else str(tick//1000)+' mil'}</text>"
-                for tick in (0, 5000, 10000, 15000, 20000)
-            )
-            labels = "".join(f"<span>M{i}</span>" for i in range(1, 13))
-            a0, a1 = eur(round(s["series_a"][0])), eur(round(s["series_a"][-1]))
-            b0, b1 = eur(round(s["series_b"][0])), eur(round(s["series_b"][-1]))
-            inner = f"<p class='kicker'>{esc(s['kicker'])}</p><h1>{esc(s['title'])}</h1><svg viewBox='0 0 800 240' class='chart'>{grid}<polyline points='{poly(s['series_a'])}' class='ink'/>{dots(s['series_a'], 'inkdot')}<polyline points='{poly(s['series_b'])}' class='goldline'/>{dots(s['series_b'], 'golddot')}<text x='84' y='{210 - s['series_a'][0]/max_v*170 - 8:.0f}' class='tag'>{esc(a0)}</text><text x='84' y='{210 - s['series_b'][0]/max_v*170 + 16:.0f}' class='tag goldtext'>{esc(b0)}</text><text x='740' y='{210 - s['series_a'][-1]/max_v*170 - 8:.0f}' text-anchor='end' class='tag'>{esc(a1)}</text><text x='740' y='{210 - s['series_b'][-1]/max_v*170 + 16:.0f}' text-anchor='end' class='tag goldtext'>{esc(b1)}</text></svg><div class='months'>{labels}</div><p class='legend'><i class='inkswatch'></i> Reforma después del primer cobro <i class='goldswatch'></i> Reforma pagada en el mes 1</p><p class='note'>{esc(s['note'])}</p>"
-            cls = ""
-        elif kind == "uses":
-            cards = "".join(f"<article class='darkcard'><b>{esc(a)}</b><p>{esc(b)}</p></article>" for a, b in s["big"])
-            inner = f"<p class='kicker'>{esc(s['kicker'])}</p><h1>{esc(s['title'])}</h1><div class='grid3'>{cards}</div><p class='lead'>{esc(s['body'])}</p>"
-            cls = ""
-        elif kind == "risks":
-            rows = "".join(f"<article><b>{esc(a)}</b><p>{esc(b)}</p></article>" for a, b in s["rows"])
-            inner = f"<p class='kicker'>{esc(s['kicker'])}</p><h1>{esc(s['title'])}</h1><div class='stack'>{rows}</div>"
-            cls = ""
-        elif kind == "close":
-            stats = "".join(f"<div class='stat'><b>{esc(a)}</b><span>{esc(b)}</span></div>" for a, b in s["stats"])
-            inner = f"<p class='kicker'>{esc(s['kicker'])}</p><h1>{esc(s['title']).replace(chr(10), '<br>')}</h1><p class='lead light'>{esc(s['body'])}</p><div class='stats'>{stats}</div>"
-            cls = "dark"
-        else:
-            items = "".join(f"<li>{esc(x)}</li>" for x in s["items"])
-            inner = f"<p class='kicker'>{esc(s['kicker'])}</p><h1>{esc(s['title'])}</h1><ul class='sources'>{items}</ul>"
-            cls = ""
-        parts.append(f"<section class='slide {cls}' data-i='{i}'>{inner}<footer><span>KHC AUTO IMPORT</span><span>{i+1:02d} / {len(deck.slides):02d}</span></footer></section>")
-
+def write_html():
+    thin = N["thin"]
+    lot_rows = []
+    for u in sorted(N["lot"], key=lambda u: -u["net"]):
+        waiting = u["name"] == N["held"]["name"]
+        lot_rows.append(
+            f"<tr class='{'wait' if waiting else ''}'><td>{esc(short(u['name']))}</td><td class='num'>{esc(eur(u['cost']))}</td><td class='num'>{esc(eur(u['sell']))}</td><td class='num'>{esc(eur(u['net'], True))}</td><td>{'Espera' if waiting else 'Se compra'}</td></tr>"
+        )
+    silence = "".join(
+        f"<div class='pill {'bad' if v < 0 else ''}'><b>{esc(eur(v))}</b><span>Mes {i if i else 'día 1'}</span></div>"
+        for i, v in enumerate(N["silence"])
+    )
     html = f"""<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Plan de negocio — KHC Auto Import</title>
+<title>Financiación 50.000 € — KHC Auto Import</title>
 <style>
   :root {{ --ink:#0a1020; --gold:#b3934e; --ivory:#f7f6f2; --cover:#212228; --slate:#4a5872; --green:#1f6b4a; --line:#e4dfd4; }}
   * {{ box-sizing:border-box; }}
-  html, body {{ margin:0; height:100%; background:var(--cover); color:var(--ink); font-family: "Segoe UI", Helvetica, Arial, sans-serif; }}
-  .slide {{ display:none; min-height:100vh; padding:7vh 7vw 8vh; flex-direction:column; background:var(--ivory); }}
+  html, body {{ margin:0; background:var(--cover); color:var(--ink); font-family:"Segoe UI", Helvetica, Arial, sans-serif; }}
+  .slide {{ display:none; min-height:100vh; padding:7vh 8vw 9vh; flex-direction:column; background:var(--ivory); }}
   .slide.active {{ display:flex; }}
   .slide.dark {{ background:var(--cover); color:#f4f1ea; }}
-  .logo {{ width:168px; height:auto; margin:0 0 18px; }}
-  .kicker {{ letter-spacing:.14em; font-size:12px; font-weight:700; color:var(--gold); margin:0 0 12px; }}
-  h1 {{ font-family: Georgia, "Times New Roman", serif; font-weight:500; font-size:clamp(28px, 3.6vw, 46px); line-height:1.08; margin:0 0 18px; max-width:28ch; }}
-  .slide.dark h1 {{ max-width:16ch; }}
-  .sub, .lead {{ font-size:18px; line-height:1.45; max-width:62ch; color:var(--slate); }}
-  .lead.light, .slide.dark .sub {{ color:#cfc8ba; }}
-  .stats, .grid3, .split {{ display:grid; gap:16px; margin-top:28px; }}
-  .stats {{ grid-template-columns:repeat(3, 1fr); }}
-  .grid3 {{ grid-template-columns:repeat(3, 1fr); }}
-  .split {{ grid-template-columns:1fr 1fr; }}
-  .stat, article, section {{ background:#fff; border:1px solid var(--line); border-top:3px solid var(--gold); border-radius:8px; padding:18px 18px 16px; }}
-  .slide.dark .stat {{ background:#2a2b32; border-color:#3a3b44; color:#f4f1ea; }}
-  .stat b, article b, .darkcard b {{ display:block; font-family:Georgia, serif; font-size:28px; font-weight:500; margin-bottom:6px; }}
-  .stat span, article p, section li {{ color:var(--slate); font-size:15px; line-height:1.4; }}
+  .kicker {{ letter-spacing:.14em; font-size:12px; font-weight:700; color:var(--gold); margin:0 0 10px; }}
+  h1 {{ font-family:Georgia, serif; font-weight:500; font-size:clamp(28px, 3.6vw, 46px); line-height:1.08; margin:0 0 16px; max-width:22ch; }}
+  .lead, .note {{ font-size:18px; line-height:1.45; max-width:68ch; color:var(--slate); }}
+  .slide.dark .lead {{ color:#cfc8ba; }}
+  .stats, .grid3 {{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:22px; }}
+  .stat, article {{ background:#fff; border-top:3px solid var(--gold); border-radius:8px; padding:16px 18px; }}
+  .slide.dark .stat {{ background:#2a2b32; color:#f4f1ea; }}
+  .stat b, article b {{ display:block; font-family:Georgia, serif; font-size:28px; font-weight:500; }}
+  .stat span, article p {{ color:var(--slate); font-size:15px; line-height:1.4; }}
   .slide.dark .stat span {{ color:#cfc8ba; }}
-  .good {{ border-top-color:var(--green); }}
-  .bad {{ border-top-color:#8c3a3a; }}
-  .gold {{ border-top-color:var(--gold); }}
-  h3 {{ margin:0 0 10px; font-size:13px; letter-spacing:.08em; text-transform:uppercase; }}
-  ul {{ margin:0; padding-left:18px; }}
-  li {{ margin:0 0 10px; line-height:1.4; }}
-  .line {{ display:flex; justify-content:space-between; gap:24px; background:#fff; border-left:3px solid var(--gold); padding:14px 16px; margin:8px 0; }}
-  .bars {{ margin-top:18px; }}
-  .bar {{ display:grid; grid-template-columns:220px 1fr 90px; align-items:center; gap:12px; margin:8px 0; font-size:14px; }}
-  .bar i {{ display:block; height:12px; background:var(--green); border-radius:2px; }}
-  table {{ width:100%; border-collapse:collapse; font-size:14px; margin-top:8px; }}
+  .line {{ display:flex; justify-content:space-between; gap:16px; background:#fff; border-left:3px solid var(--gold); padding:12px 16px; margin:8px 0; }}
+  .line.total {{ background:#212228; color:#f4f1ea; }}
+  .line.total b {{ color:#b3934e; }}
+  table {{ width:100%; border-collapse:collapse; font-size:15px; margin-top:8px; }}
   th {{ text-align:left; background:var(--ink); color:#fff; padding:8px 10px; font-size:12px; }}
-  td {{ padding:7px 10px; border-bottom:1px solid var(--line); }}
+  td {{ padding:8px 10px; border-bottom:1px solid var(--line); }}
+  tr.wait td {{ background:#f6efe2; font-weight:700; }}
   .num {{ text-align:right; font-variant-numeric:tabular-nums; }}
-  .ratio {{ font-family:Georgia, serif; font-size:18px; }}
-  .note {{ color:var(--slate); font-size:14px; line-height:1.45; margin-top:14px; }}
-  .chart {{ width:100%; height:220px; margin-top:10px; }}
-  .ink {{ fill:none; stroke:#0a1020; stroke-width:2.5; }}
-  .goldline {{ fill:none; stroke:#b3934e; stroke-width:2.5; }}
-  .inkdot {{ fill:#0a1020; }}
-  .golddot {{ fill:#b3934e; }}
-  .grid {{ stroke:#e4dfd4; stroke-width:1; }}
-  .axis {{ fill:#4a5872; font-size:11px; text-anchor:end; }}
-  .tag {{ fill:#0a1020; font-size:12px; font-weight:700; }}
-  .goldtext {{ fill:#755d2b; }}
-  .legend {{ color:#4a5872; font-size:14px; display:flex; gap:18px; align-items:center; }}
-  .inkswatch, .goldswatch {{ display:inline-block; width:22px; height:3px; margin-right:6px; }}
-  .inkswatch {{ background:#0a1020; }}
-  .goldswatch {{ background:#b3934e; }}
-  .mini {{ display:block; height:10px; background:#1f6b4a; border-radius:2px; }}
-  tr.total td {{ background:#212228; color:#f4f1ea; font-weight:700; }}
-  article small {{ display:block; margin-top:14px; color:#0a1020; font-size:14px; border-top:1px solid var(--line); padding-top:10px; }}
-  .line.last {{ background:#212228; color:#f4f1ea; }}
-  .line.last b {{ color:#b3934e; }}
-  .months {{ display:flex; justify-content:space-between; color:var(--slate); font-size:12px; padding:0 4% 0 5%; }}
-  .darkcard {{ background:var(--cover); color:#f4f1ea; border:0; }}
-  .darkcard p {{ color:#cfc8ba; }}
-  .stack article {{ margin-bottom:12px; }}
-  .sources li {{ font-size:16px; }}
-  footer {{ margin-top:auto; display:flex; justify-content:space-between; padding-top:18px; font-size:12px; letter-spacing:.08em; color:var(--gold); }}
-  .progress {{ position:fixed; left:0; top:0; height:3px; background:var(--gold); width:0; }}
-  .hint {{ position:fixed; right:18px; bottom:14px; color:#8a8172; font-size:12px; }}
-  @media (max-width: 800px) {{
-    .stats, .grid3, .split, .bar {{ grid-template-columns:1fr; }}
-    h1 {{ font-size:32px; }}
-  }}
+  .split {{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }}
+  .yes {{ border-top:3px solid var(--green); background:#fff; border-radius:8px; padding:16px 20px; }}
+  .no {{ border-top:3px solid #8c3a3a; background:#fff; border-radius:8px; padding:16px 20px; }}
+  ul {{ margin:8px 0 0; padding-left:18px; }}
+  li {{ margin:0 0 8px; line-height:1.4; }}
+  .pills {{ display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; }}
+  .pill {{ background:#fff; border-radius:8px; padding:12px; min-width:100px; border-top:3px solid var(--green); }}
+  .pill.bad {{ border-top-color:#8c3a3a; }}
+  .pill b {{ display:block; font-family:Georgia, serif; font-size:18px; }}
+  .pill span {{ color:var(--slate); font-size:12px; }}
+  .logo {{ width:160px; margin-bottom:12px; }}
+  footer {{ margin-top:auto; display:flex; justify-content:space-between; padding-top:18px; color:var(--gold); font-size:12px; letter-spacing:.08em; }}
+  .progress {{ position:fixed; left:0; top:0; height:3px; background:var(--gold); }}
+  .hint {{ position:fixed; right:16px; bottom:12px; color:#8a8172; font-size:12px; }}
+  @media (max-width: 800px) {{ .stats, .grid3, .split {{ grid-template-columns:1fr; }} }}
 </style>
 </head>
 <body>
 <div class="progress" id="bar"></div>
-{''.join(parts)}
+<section class="slide dark">
+  <img class="logo" src="logo_flat.png" alt="KHC">
+  <p class="kicker">Solicitud de financiación</p>
+  <h1>50.000 € para abrir la nave y comprar seis coches.</h1>
+  <p class="lead">Otros 50.000 € son capital propio. Santiago de Compostela. El Mercedes no se paga hasta el primer cobro.</p>
+  <div class="stats">
+    <div class="stat"><b>50.000 €</b><span>Lo que se pide</span></div>
+    <div class="stat"><b>17.736 €</b><span>Caja el día 1, nave abierta</span></div>
+    <div class="stat"><b>3.781 €</b><span>Lo que deja un coche, de media</span></div>
+  </div>
+  <footer><span>KHC AUTO IMPORT</span><span>01 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">El día que entra el dinero</p>
+  <h1>Quedan 17.736 € en el banco. La nave ya está abierta.</h1>
+  <div class="line"><span>Capital propio</span><b>+50.000 €</b></div>
+  <div class="line"><span>Financiación</span><b>+50.000 €</b></div>
+  <div class="line"><span>Seis coches, coste ya completo</span><b>−77.714 €</b></div>
+  <div class="line"><span>Reforma, para abrir la nave ese día</span><b>−4.550 €</b></div>
+  <div class="line total"><span>Caja que no se toca</span><b>17.736 €</b></div>
+  <p class="note">El Mercedes, 17.666 €, espera. No porque sobre: es el más caro, y ese dinero es la caja de emergencia. Se paga con el primer cobro.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>02 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">Cómo se gana un coche</p>
+  <h1>El que menos deja cubre el mes. Sobran 86 €.</h1>
+  <div class="stats">
+    <div class="stat"><b>{esc(eur(thin['cost']))}</b><span>Coste del Audi. Transporte y matriculación ya dentro.</span></div>
+    <div class="stat"><b>{esc(eur(thin['sell']))}</b><span>Venta. El IVA, {esc(eur(thin['rebu'], True))}, solo grava la ganancia.</span></div>
+    <div class="stat"><b>{esc(eur(thin['net'], True))}</b><span>Quedan. El mes cuesta 2.835,06 €. Sobran 86,43 €.</span></div>
+  </div>
+  <p class="note">El IVA no se paga sobre los 15.990 €. Se paga sobre la ganancia. Ya está restado. No se vuelve a restar el transporte.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>03 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">Los siete del plan</p>
+  <h1>Seis se compran el día 1. El Mercedes espera.</h1>
+  <table><thead><tr><th>Coche</th><th>Coste</th><th>Venta</th><th>Quedan</th><th>Día 1</th></tr></thead><tbody>{''.join(lot_rows)}</tbody></table>
+  <p class="note">Los seis cuestan 77.714 €. En la web, el 116d está a 12.475 € y el 318d a 17.250 €. Con esos precios la cobertura baja de 1,72 a 1,51.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>04 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">Cada mes</p>
+  <h1>Una venta paga el mes. Sobran 946 €.</h1>
+  <div class="split">
+    <div>
+      <div class="line"><span>Nave</span><b>1.100 €</b></div>
+      <div class="line"><span>Autónomo</span><b>380 €</b></div>
+      <div class="line"><span>Portales y gestoría</span><b>250 €</b></div>
+      <div class="line"><span>Luz y tasas</span><b>150 €</b></div>
+      <div class="line"><span>Cuota exacta</span><b>955,06 €</b></div>
+      <div class="line total"><span>El mes</span><b>2.835,06 €</b></div>
+    </div>
+    <article>
+      <b>1,72</b>
+      <p>Doce ventas, pagado el impuesto, dividido entre las doce cuotas. El 1,32 de las cuatro páginas es el margen partido por nave más cuota redondeada, sin quitar el impuesto. Mismo margen. Otra cuenta.</p>
+    </article>
+  </div>
+  <footer><span>KHC AUTO IMPORT</span><span>05 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">El primer cobro</p>
+  <h1>Aunque sea el Audi, se compra el Mercedes y sobra caja.</h1>
+  <div class="line"><span>Día 1</span><b>17.736,00 €</b></div>
+  <div class="line"><span>Un mes de nave y cuota</span><b>14.900,94 €</b></div>
+  <div class="line"><span>Cobro del Audi, 15.990 €</span><b>30.890,94 €</b></div>
+  <div class="line"><span>IVA de esa ganancia, 613,51 €</span><b>30.277,43 €</b></div>
+  <div class="line total"><span>Compra del Mercedes, 17.666 €</span><b>12.611,43 €</b></div>
+  <p class="note">Si el primero es el Golf GTI, la caja queda en {esc(eur(N['after_gti'], True))}.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>06 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">Si no entra ningún cobro</p>
+  <h1>La caja aguanta seis meses. Al séptimo, faltan 2.109 €.</h1>
+  <div class="pills">{silence}</div>
+  <p class="note">Cada columna resta 2.835,06 €. Al sexto mes quedan 725,64 €. Al séptimo faltan 2.109,42 €. La emergencia se ve. No es infinita.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>07 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">Qué se compra</p>
+  <h1>Se compra el motor. No el anuncio.</h1>
+  <div class="split">
+    <section class="yes"><h3>Sí</h3><ul>
+      <li>Etiqueta C o ECO, libro de mantenimiento, sin siniestro estructural.</li>
+      <li>Diésel 2.0 de correa seca. BMW solo si el motor es el posterior a la cadena que rompía.</li>
+      <li>Garantía de 12 meses, por escrito, en todas las ventas.</li>
+    </ul></section>
+    <section class="no"><h3>No</h3><ul>
+      <li>PureTech, EcoBoost de correa bañada, 1.2 TCe, diésel Ingenium.</li>
+      <li>BMW N47, la cadena antigua, hasta mediados de 2015.</li>
+      <li>El 116d de 2015 del lote no se transfiere hasta ver qué motor lleva.</li>
+    </ul></section>
+  </div>
+  <footer><span>KHC AUTO IMPORT</span><span>08 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">El programa de gestión</p>
+  <h1>Ya está hecho. Dice que no antes de que salga el dinero.</h1>
+  <p class="lead">En la empresa se llama ERP. No es un Excel ni la página web. Es el programa con el que se compra.</p>
+  <div class="line"><span><b>Antes de pagar.</b> Suma coche, transporte, impuestos y preparación, y dice lo que queda.</span></div>
+  <div class="line"><span><b>El motor.</b> 1.104 versiones de 37 marcas. La prohibida no se puede dar de alta como compra.</span></div>
+  <div class="line"><span><b>El impuesto.</b> Si la factura trae IVA deducible, impide usar el régimen de margen.</span></div>
+  <div class="line"><span><b>La web.</b> khcimport.autos enseña el mismo stock. Reservado o vendido se ve el mismo día. El cliente no ve lo que costó.</span></div>
+  <footer><span>KHC AUTO IMPORT</span><span>09 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">La nave, desde el día 1</p>
+  <h1>San Marcos se abre con el dinero. El taller no paga la cuota.</h1>
+  <div class="grid3">
+    <article><b>1.100 €</b><p>Renta mensual. 550 m², licencia de actividad ya existente.</p></article>
+    <article><b>4.550 €</b><p>Reforma de materiales, pagada el día que se abre.</p></article>
+    <article><b>60 €</b><p>Mano de obra que hoy sale fuera. Aceite 52,70 €. Filtros 63,90 €.</p></article>
+  </div>
+  <p class="note">Pastillas, aceite de caja y neumáticos no tienen tarifa cerrada: se cuentan a 0 €. Dos servicios externos por semana serían 5.760 € al año. Es hipótesis. No está en el 1,72.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>10 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">Si el número se mueve</p>
+  <h1>Cada golpe tiene un resultado.</h1>
+  <div class="line"><span>Doce ventas, impuesto 15 %</span><b>1,72 veces</b></div>
+  <div class="line"><span>Impuesto al 23 %</span><b>1,58 veces</b></div>
+  <div class="line"><span>Dos precios de la web, mil euros debajo</span><b>1,51 veces</b></div>
+  <div class="line"><span>Todos los precios, un 5 % más bajos</span><b>1,06 veces</b></div>
+  <div class="line"><span>Seis meses sin una venta</span><b>725,64 €</b></div>
+  <footer><span>KHC AUTO IMPORT</span><span>11 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">Para qué es el dinero</p>
+  <h1>Los 50.000 € son coches. No son sueldo.</h1>
+  <div class="grid3">
+    <article><b>50.000 €</b><p>Financiación. Circulante para stock.</p></article>
+    <article><b>50.000 €</b><p>Capital propio, al lado.</p></article>
+    <article><b>0 €</b><p>De sueldo. Los 25.000 € familiares están fuera.</p></article>
+  </div>
+  <p class="note">El préstamo se queda en coches. La reforma, 4.550 €, sale del capital propio. El 5,50 % es la hipótesis del plan, no una oferta.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>12 / 14</span></footer>
+</section>
+<section class="slide dark">
+  <p class="kicker">La petición</p>
+  <h1>50.000 € al lado de otros 50.000 €.</h1>
+  <p class="lead">El día que entran, se abre la nave, se compran seis coches y el Mercedes espera en la cuenta. Lo que se pide es una oferta de tipo y de plazo.</p>
+  <div class="stats">
+    <div class="stat"><b>50.000 €</b><span>Financiación</span></div>
+    <div class="stat"><b>17.736 €</b><span>Caja el día 1</span></div>
+    <div class="stat"><b>1,72 veces</b><span>La cuota, con una venta al mes</span></div>
+  </div>
+  <footer><span>KHC AUTO IMPORT</span><span>13 / 14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">De dónde sale cada cifra</p>
+  <h1>Nada de aquí es una venta ya cobrada.</h1>
+  <ul>
+    <li>Lote, nave, reforma y gastos: plan de viabilidad de cuatro páginas.</li>
+    <li>El coste de compra ya incluye transporte y matriculación. No se resta otra vez.</li>
+    <li>Dejar el Mercedes sin comprar es la regla de esta financiación. En las cuatro páginas se compran los siete el mismo día.</li>
+    <li>El equipo de inspección, 822,90 €, está en otro documento. No se ha restado de los 17.736 €.</li>
+    <li>Taller: solo tarifas cerradas. El volumen externo es hipótesis.</li>
+  </ul>
+  <footer><span>KHC AUTO IMPORT</span><span>14 / 14</span></footer>
+</section>
 <div class="hint">Flechas para avanzar · F para pantalla completa</div>
 <script>
   const slides = [...document.querySelectorAll('.slide')];
@@ -1170,23 +1000,19 @@ def write_html(deck):
     i = Math.max(0, Math.min(slides.length - 1, n));
     slides.forEach((s, k) => s.classList.toggle('active', k === i));
     bar.style.width = ((i + 1) / slides.length * 100) + '%';
-    history.replaceState(null, '', '#' + (i + 1));
   }}
   addEventListener('keydown', (e) => {{
-    if (['ArrowRight', 'PageDown', ' '].includes(e.key)) {{ e.preventDefault(); show(i + 1); }}
-    if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) {{ e.preventDefault(); show(i - 1); }}
-    if (e.key === 'Home') show(0);
-    if (e.key === 'End') show(slides.length - 1);
+    if (['ArrowRight','PageDown',' '].includes(e.key)) {{ e.preventDefault(); show(i + 1); }}
+    if (['ArrowLeft','PageUp','Backspace'].includes(e.key)) {{ e.preventDefault(); show(i - 1); }}
     if (e.key === 'f' || e.key === 'F') {{
       if (!document.fullscreenElement) document.documentElement.requestFullscreen();
       else document.exitFullscreen();
     }}
   }});
   addEventListener('click', (e) => {{
-    if (e.target.closest('a, button')) return;
-    show(e.clientX > innerWidth / 2 ? i + 1 : i - 1);
+    if (e.clientX > innerWidth * 0.2) show(i + 1); else show(i - 1);
   }});
-  show(Math.max(0, (parseInt(location.hash.slice(1), 10) || 1) - 1));
+  show(0);
 </script>
 </body>
 </html>
@@ -1197,11 +1023,11 @@ def write_html(deck):
 
 def main():
     flatten_logo()
-    deck = build_deck()
-    write_pdf(deck)
-    write_html(deck)
-    print(OUT_PDF, OUT_PDF.stat().st_size)
-    print(OUT_HTML, OUT_HTML.stat().st_size, "slides", len(deck.slides))
+    write_pdf()
+    write_html()
+    print("cash0", N["cash0"], "month", N["month"], "silence", N["silence"])
+    print("first sale ends", N["after_buy"], "gti", N["after_gti"])
+    print(OUT_PDF, OUT_PDF.stat().st_size, "slides", len(SLIDES))
 
 
 if __name__ == "__main__":

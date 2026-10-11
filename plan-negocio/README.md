@@ -36,7 +36,7 @@
    - Guía paso a paso para auditar espesores de pintura con el **GOYOJO CTG-2**, cazar afeitados de kilómetros en 5 centralitas con el **Launch CRP919E BT**, revisar los 6 documentos alemanes obligatorios y tramitar las placas rojas en la *Zulassungsstelle* en 45 minutos.
 
 6. **[`Plan_Negocio_KHC_Presentacion.pdf`](./Plan_Negocio_KHC_Presentacion.pdf)** *(17 láminas, para banco, aval o capital privado)*
-   - Presentación del proyecto completo: qué se compra y qué no, el ERP, el flujo de 75 días, el lote de siete a coste cerrado, la nave, el taller y el destino de los 50.000 €. Se regenera con `generar_presentacion.py`. Para proyectarla en el navegador: `presentacion/index.html`.
+   - Solicitud de 50.000 €. Con el dinero se abre la nave el día 1, se compran seis coches y el Mercedes espera al primer cobro. Se regenera con `generar_presentacion.py`. Para proyectarla: `presentacion/index.html`.
 
 7. **[`DOCUMENTOS LEGALES KHC IMPORT/Dossier_Aval_Sogarpo_KHC.pdf`](./DOCUMENTOS%20LEGALES%20KHC%20IMPORT/Dossier_Aval_Sogarpo_KHC.pdf)** *(desarrolla el plan de 4 páginas, no rebaja sus márgenes)*
    - El coste de compra del plan ya incluye coche, transporte, matriculación y puesta a la venta. El margen neto real medio del lote es **3.781 €**. Solicitud: **50.000 €** junto a 50.000 € de capital. Con una venta al mes y la nave abierta, el RCSD es **1,72×**. La reforma de 4.550 € se paga con el primer cobro, no el mismo día de la compra. Se regenera con `generar_dossier.py`.
