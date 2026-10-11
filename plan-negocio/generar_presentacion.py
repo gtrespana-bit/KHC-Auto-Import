@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Solicitud de financiación, en el orden en que se entiende.
+"""Solicitud de 50.000 €. El primer año, mes a mes, con gráficos.
 
-Primero el negocio, después los coches, después el programa, y solo entonces
-el dinero. El mes 1 abre la nave y compra seis. Cada venta posterior compra
-el siguiente coche en el mismo mes. La caja no acumula el precio de venta.
+El fondo son tres meses de gastos. Cada venta compra el siguiente coche.
+Si la caja supera el fondo en el coste de un coche del plan, se compra
+el más barato que quepa, al coste ya cerrado. No se inventa un modelo.
 """
 
 from __future__ import annotations
@@ -37,13 +37,18 @@ IVORY = Color(0.969, 0.965, 0.953)
 WHITE = white
 SLATE = Color(0.290, 0.345, 0.447)
 GREEN = Color(0.122, 0.420, 0.290)
+GREEN_SOFT = Color(0.86, 0.93, 0.89)
 RED = Color(0.549, 0.227, 0.227)
 COVER = Color(33 / 255, 34 / 255, 40 / 255)
 CARD = Color(1, 1, 1)
 LINE = Color(0.855, 0.835, 0.788)
 SOFT = Color(0.955, 0.949, 0.935)
+GRID = Color(0.91, 0.89, 0.85)
 MONTH = 2835.06
 REFORM = 4550.0
+RENT, RETA, MKT, UTIL = 1100.0, 380.0, 250.0, 150.0
+QUOTA = 955.06
+STRUCT = 1880.0
 
 
 def r2(n):
@@ -56,6 +61,13 @@ def eur(n, cents=False):
     d = 2 if cents or abs(n - round(n)) > 0.001 else 0
     s = f"{abs(n):,.{d}f}".replace(",", "X").replace(".", ",").replace("X", ".")
     return ("−" if neg else "") + s + " €"
+
+
+def k(n):
+    """Etiqueta corta de eje, sin céntimos."""
+    n = float(n)
+    s = f"{abs(n):,.0f}".replace(",", ".")
+    return ("−" if n < 0 else "") + s
 
 
 def short(name):
@@ -71,64 +83,129 @@ def short(name):
     )
 
 
-def build():
-    lot = list(MODEL["lot"])
+def nick(name):
+    s = short(name)
+    for cut in (" 2015", " 2018", " 2019", " 2020", " 2021", " Estate"):
+        s = s.replace(cut, "")
+    return s.strip()
+
+
+def simulate():
+    lot = [dict(u) for u in MODEL["lot"]]
     held = max(lot, key=lambda u: u["cost"])
-    bought = [u for u in lot if u["name"] != held["name"]]
-    bought_cost = r2(sum(u["cost"] for u in bought))
-    cash = r2(100000 - bought_cost - REFORM - MONTH)
+    opening = [u for u in lot if u["name"] != held["name"]]
+    models = sorted(lot, key=lambda u: (u["cost"], u["name"]))
+    floor = r2(MONTH * 3)
+    cash = r2(100000 - sum(u["cost"] for u in opening) - REFORM - MONTH)
+    stock = [dict(u) for u in opening]
+    waiting = False
     months = [{
         "n": 1,
         "what": "Apertura. Seis coches y reforma. Sin venta.",
-        "inn": 100000.0,
-        "out": r2(bought_cost + REFORM + MONTH),
+        "sold": None,
+        "cobro": 100000.0,
+        "gastos": r2(MONTH + REFORM),
+        "iva": 0.0,
+        "compra": r2(sum(u["cost"] for u in opening)),
+        "margen": 0.0,
+        "sobra": r2(-MONTH),
         "end": cash,
+        "stock": 6,
         "kind": "open",
+        "buys": [nick(u["name"]) for u in opening],
     }]
-    # Mes 2: se vende el primero de los seis y se compra el que esperaba.
-    first = bought[0]
-    cash = r2(cash - MONTH + first["sell"] - first["rebu"] - held["cost"])
-    months.append({
-        "n": 2,
-        "what": f"Venta del {short(first['name'])}. Compra del Mercedes.",
-        "inn": first["sell"],
-        "out": r2(MONTH + first["rebu"] + held["cost"]),
-        "end": cash,
-        "kind": "turn",
-    })
-    cycle = bought[1:] + [held] + bought
-    for i, car in enumerate(cycle[:10], start=3):
-        cash = r2(cash - MONTH + car["sell"] - car["rebu"] - car["cost"])
+    for n in range(2, 13):
+        cash = r2(cash - MONTH)
+        car = stock.pop(0)
+        cash = r2(cash + car["sell"] - car["rebu"])
+        buys = []
+        compra = 0.0
+        if not waiting and r2(cash - floor) >= held["cost"]:
+            cash = r2(cash - held["cost"])
+            stock.append(dict(held))
+            waiting = True
+            buys.append(nick(held["name"]))
+            compra = held["cost"]
+            what = f"Venta del {nick(car['name'])}. Compra del Mercedes."
+            kind = "turn"
+        else:
+            cash = r2(cash - car["cost"])
+            stock.append(dict(car))
+            buys.append(nick(car["name"]))
+            compra = car["cost"]
+            what = f"Venta del {nick(car['name'])}. Se repone."
+            kind = "roll"
+        while True:
+            room = r2(cash - floor)
+            fits = [u for u in models if u["cost"] <= room + 1e-6]
+            if not fits:
+                break
+            nxt = fits[0]
+            cash = r2(cash - nxt["cost"])
+            stock.append(dict(nxt))
+            buys.append(nick(nxt["name"]) + " extra")
+            compra = r2(compra + nxt["cost"])
+            what = f"Venta del {nick(car['name'])}. Reposición y otro 116d."
+            kind = "extra"
         months.append({
-            "n": i,
-            "what": f"Venta del {short(car['name'])}. Se repone al mismo coste.",
-            "inn": car["sell"],
-            "out": r2(MONTH + car["rebu"] + car["cost"]),
+            "n": n,
+            "what": what,
+            "sold": nick(car["name"]),
+            "cobro": car["sell"],
+            "gastos": MONTH,
+            "iva": car["rebu"],
+            "compra": compra,
+            "margen": car["net"],
+            "sobra": r2(car["net"] - MONTH),
             "end": cash,
-            "kind": "roll",
+            "stock": len(stock),
+            "kind": kind,
+            "buys": buys,
         })
-    assert len(months) == 12
+    nets = [m["margen"] for m in months if m["n"] > 1]
+    sales = r2(sum(m["cobro"] for m in months if m["n"] > 1))
+    purchases = r2(sum(m["compra"] for m in months))
+    gastos = r2(sum(m["gastos"] for m in months))
+    iva = r2(sum(m["iva"] for m in months))
+    ebitda = r2(sum(nets) - STRUCT * 12)
+    interest = MODEL["loan"]["y1_interest"]
+    taxable = r2(ebitda - interest)
+    tax = r2(taxable * 0.15)
+    service = MODEL["loan"]["y1_service"]
+    dscr = r2((ebitda - tax) / service)
+    identity = r2(100000 + sales - purchases - gastos - iva)
     assert months[0]["end"] == 14900.94
     assert months[1]["end"] == 11888.76
+    assert months[9]["kind"] == "extra"
+    assert months[-1]["end"] == 9684.36
+    assert months[-1]["stock"] == 7
+    assert identity == months[-1]["end"]
+    assert abs(dscr - 1.32) < 0.02
     return {
         "lot": lot,
         "held": held,
-        "bought": bought,
-        "bought_cost": bought_cost,
-        "first": first,
+        "opening": opening,
         "months": months,
-        "o": MODEL["opex_month"],
-        "loan": MODEL["loan"],
-        "totals": MODEL["totals"],
-        "stress": MODEL["scenarios"]["stress_12"],
-        "tax23": MODEL["scenarios"]["stress_23"],
-        "web": MODEL["scenarios"]["web_prices"],
-        "price5": MODEL["scenarios"]["price_5"],
+        "floor": floor,
+        "sales": sales,
+        "purchases": purchases,
+        "gastos": gastos,
+        "iva": iva,
+        "nets": r2(sum(nets)),
+        "ebitda": ebitda,
+        "tax": tax,
+        "free": r2(months[-1]["end"] - tax),
+        "dscr": dscr,
+        "interest": interest,
+        "principal": MODEL["loan"]["y1_principal"],
+        "balance": MODEL["loan"]["y1_balance"],
+        "service": service,
         "thin": min(lot, key=lambda u: u["net"]),
+        "totals": MODEL["totals"],
     }
 
 
-S = build()
+S = simulate()
 
 
 def bg(c, dark=False):
@@ -144,7 +221,7 @@ def footer(c, n, total, dark=False):
     c.setFont("DejaVu", 7.5)
     c.drawString(36, 18, "KHC AUTO IMPORT")
     c.setFillColor(Color(0.72, 0.70, 0.64) if dark else SLATE)
-    c.drawCentredString(W / 2, 18, "Solicitud de financiación  ·  50.000 €  ·  octubre 2026")
+    c.drawCentredString(W / 2, 18, "Solicitud de financiación  ·  50.000 €  ·  primer año")
     c.setFillColor(GOLD if dark else INK)
     c.setFont("DejaVuBold", 8)
     c.drawRightString(W - 36, 18, f"{n:02d}  /  {total:02d}")
@@ -180,8 +257,8 @@ def heading(c, kick, text, y=498, size=22):
     kicker(c, kick, y)
     c.setFillColor(INK)
     c.setFont("DejaVuSerif", size)
-    c.drawString(36, y - 36, text)
-    return y - 36
+    c.drawString(36, y - 32, text)
+    return y - 32
 
 
 def draw_cover(c, n, total):
@@ -199,11 +276,11 @@ def draw_cover(c, n, total):
     c.setFillColor(Color(0.78, 0.76, 0.70))
     c.setFont("DejaVu", 12)
     c.drawString(36, 252, "Otros 50.000 € son capital propio. Santiago de Compostela.")
-    c.drawString(36, 234, "El día que entra el dinero se abre la nave y el stock empieza a rotar.")
+    c.drawString(36, 234, "El primer año está cerrado mes a mes: gastos, ventas y compras.")
     stats = [
         ("50.000 €", "Lo que se pide"),
         ("50.000 €", "Capital propio, al lado"),
-        ("12 meses", "El primer año, con cada venta"),
+        ("12 meses", "Plan cerrado, con gráficos"),
     ]
     x = 36
     for val, lab in stats:
@@ -252,7 +329,7 @@ def draw_method(c, n, total):
     t = S["totals"]
     steps = [
         ("1", "Coste", eur(t["cost"] / 7), "Coche, transporte, matriculación y puesta a punto. Ya está dentro. No se resta otra vez."),
-        ("2", "Venta", eur(t["sell"] / 7), "El precio al que sale. La media de los siete es esta. El detalle, en la lámina siguiente."),
+        ("2", "Venta", eur(t["sell"] / 7), "El precio al que sale. La media de los siete. El detalle, en la lámina siguiente."),
         ("3", "IVA", eur(t["rebu"] / 7), "Solo sobre la ganancia, no sobre la venta. En un usado, a eso se le llama REBU."),
         ("4", "Quedan", "3.781 €", "Venta menos coste menos ese IVA. Es el margen. La media de los siete."),
     ]
@@ -271,11 +348,7 @@ def draw_method(c, n, total):
         c.drawString(x + 14, 308, val)
         wrap(c, note, "DejaVu", 9, x + 14, 276, 188, 12, SLATE, 5)
         x += 228
-    wrap(
-        c,
-        "Es la media de los siete. La lámina siguiente los pone uno a uno, con su coste y su venta.",
-        "DejaVu", 11, 36, 128, 888, 15, INK, 2,
-    )
+    wrap(c, "Es la media de los siete. La lámina siguiente los pone uno a uno, con su coste y su venta.", "DejaVu", 11, 36, 128, 888, 15, INK, 2)
     footer(c, n, total)
 
 
@@ -315,7 +388,7 @@ def draw_lot(c, n, total):
     c.drawRightString(900, 140, eur(S["totals"]["net"], True))
     wrap(
         c,
-        "Hoy, en la web khcimport.autos, el 116d está a 12.475 € y el 318d a 17.250 €. Mil euros bajo esta tabla.",
+        "Hoy, en la web khcimport.autos, el 116d está a 12.475 € y el 318d a 17.250 €. Mil euros bajo esta tabla. El efecto está en la lámina de desvíos, con su número.",
         "DejaVu", 10, 36, 100, 888, 13, SLATE, 2,
     )
     footer(c, n, total)
@@ -328,11 +401,11 @@ def draw_program(c, n, total):
     c.setFont("DejaVu", 10.5)
     c.drawString(36, 430, "En la empresa se llama ERP. Es la aplicación con la que se decide, se compra y se vende. Se usa en este orden.")
     steps = [
-        ("1", "Simulador", "Se mete el coche, a quién se compra y a qué precio se vendería. Devuelve el coste completo, el impuesto y lo que queda. Si no sale, no se compra."),
-        ("2", "Catálogo", "1.104 versiones de 37 marcas. Cada motor está marcado: fiable, correcto, con precaución o prohibido. El prohibido no se puede dar de alta como compra."),
-        ("3", "Ficha", "Si se compra, entra en la flota. Pasa de «lo estamos mirando» a «entregado». Ahí se acumulan gastos, papeles y fotos. El mismo dato en el móvil y en el ordenador."),
-        ("4", "Viaje e impuesto", "Antes del billete, compara traerlo rodando o en camión. El impuesto depende de a quién se compra. Si la factura trae IVA descontable, no deja aplicar el IVA solo sobre la ganancia."),
-        ("5", "Web y factura", "khcimport.autos publica ese coche. Reservado o vendido se ve el mismo día. El cliente no ve el coste ni la matrícula. La factura sale del mismo programa."),
+        ("1", "Simulador", "Se mete el coche, a quién se compra y a qué precio se vendería. Devuelve el coste, el impuesto y lo que queda. Si no sale, no se compra."),
+        ("2", "Catálogo", "1.104 versiones de 37 marcas. Cada motor está marcado: fiable, correcto, con precaución o prohibido. El prohibido no se da de alta."),
+        ("3", "Ficha", "Si se compra, entra en la flota. De «lo estamos mirando» a «entregado». Gastos, papeles y fotos, en el móvil y en el ordenador."),
+        ("4", "Viaje e impuesto", "Antes del billete, compara traerlo rodando o en camión. Si la factura trae IVA descontable, no deja aplicar el IVA solo sobre la ganancia."),
+        ("5", "Web y factura", "khcimport.autos publica ese coche. Reservado o vendido se ve el mismo día. El cliente no ve el coste. La factura sale del mismo programa."),
     ]
     y = 398
     for num, title, body in steps:
@@ -356,7 +429,7 @@ def draw_engines(c, n, total):
     heading(c, "Qué coche entra", "Primero el motor. Después el precio.", size=24)
     c.setFillColor(CARD)
     c.setStrokeColor(LINE)
-    c.roundRect(36, 56, 432, 370, 3, fill=1, stroke=1)
+    c.roundRect(36, 148, 432, 278, 3, fill=1, stroke=1)
     c.setFillColor(GREEN)
     c.rect(36, 424, 432, 2.2, fill=1, stroke=0)
     c.setFillColor(GREEN)
@@ -369,14 +442,14 @@ def draw_engines(c, n, total):
         "El Mercedes de la tabla: se mira el código del motor antes de transferir.",
         "Doce meses de garantía, en todas las ventas, sin excepción.",
     ]
-    y = 360
+    y = 362
     for item in yes:
         c.setFillColor(GOLD)
         c.circle(62, y + 3, 2.2, fill=1, stroke=0)
-        h = wrap(c, item, "DejaVu", 10.5, 74, y, 370, 13.5, INK, 3)
-        y -= h + 10
+        h = wrap(c, item, "DejaVu", 10.5, 74, y, 370, 13.5, INK, 2)
+        y -= h + 8
     c.setFillColor(CARD)
-    c.roundRect(492, 56, 432, 370, 3, fill=1, stroke=1)
+    c.roundRect(492, 148, 432, 278, 3, fill=1, stroke=1)
     c.setFillColor(RED)
     c.rect(492, 424, 432, 2.2, fill=1, stroke=0)
     c.setFillColor(RED)
@@ -389,38 +462,82 @@ def draw_engines(c, n, total):
         "Diésel de antes de septiembre de 2015. Ya no entra en las zonas de bajas emisiones.",
         "El 116d de 2015 de la tabla no se paga hasta ver qué motor lleva.",
     ]
-    y = 360
+    y = 362
     for item in no:
         c.setFillColor(GOLD)
         c.circle(518, y + 3, 2.2, fill=1, stroke=0)
-        h = wrap(c, item, "DejaVu", 10.5, 530, y, 370, 13.5, INK, 3)
-        y -= h + 10
+        h = wrap(c, item, "DejaVu", 10.5, 530, y, 370, 13.5, INK, 2)
+        y -= h + 8
+    footer(c, n, total)
+
+
+def draw_expenses(c, n, total):
+    bg(c)
+    heading(c, "Todos los gastos", "Cinco partidas cada mes. Ninguna está escondida en un total.", size=18)
+    lines = [
+        ("Nave, San Marcos", RENT, "Alquiler. La licencia ya existe."),
+        ("Autónomo del administrador", RETA, "Seguridad Social. No es un sueldo."),
+        ("Portales y gestoría", MKT, "Coches.net, Milanuncios Pro y la gestoría."),
+        ("Luz, agua y vado", UTIL, "Suministros de la nave."),
+        ("Cuota del préstamo", QUOTA, "50.000 €, 5,50 %, 60 meses. Exacta, no los 966 € del plan."),
+    ]
+    maxv = RENT
+    y = 408
+    for name, val, note in lines:
+        c.setFillColor(GOLD)
+        c.roundRect(250, y - 2, 280 * (val / maxv), 14, 2, fill=1, stroke=0)
+        c.setFillColor(INK)
+        c.setFont("DejaVu", 10)
+        c.drawString(36, y, name)
+        c.setFont("DejaVuBold", 10)
+        c.drawRightString(620, y, eur(val, True))
+        c.setFillColor(SLATE)
+        c.setFont("DejaVu", 8.5)
+        c.drawString(636, y, note)
+        y -= 36
+    c.setFillColor(COVER)
+    c.roundRect(36, y - 8, 888, 28, 3, fill=1, stroke=0)
+    c.setFillColor(WHITE)
+    c.setFont("DejaVuBold", 10)
+    c.drawString(48, y, "Cada mes, haya venta o no")
+    c.setFillColor(GOLD)
+    c.drawRightString(908, y, eur(MONTH, True))
+    wrap(
+        c,
+        "De la cuota, en el primer año, 2.527,03 € son intereses y 8.933,69 € reducen la deuda. Al cerrar se deben 41.066,31 €. El mes 1 suma además la reforma: suelo 1.800, luz 1.100, aseos 1.300 y extintores 350. La obra la hace el promotor. No hay factura de contratista.",
+        "DejaVu", 9.5, 36, y - 28, 888, 12.5, INK, 3,
+    )
+    wrap(
+        c,
+        "No está en estos meses, y se dice para que no parezca un olvido: sueldo (los 25.000 € familiares están fuera de la sociedad), taller (aceite y filtros 116,60 € a precio cerrado, sin tarifa de mano de obra al cliente), el equipo de inspección de 822,90 € (está en otro documento, no en las cuatro páginas) y la cuota de una SGR, 1.000 € en el modelo, que solo aplica si el aval es de una SGR y se recupera al cancelar.",
+        "DejaVu", 9, 36, 148, 888, 11.5, SLATE, 3,
+    )
     footer(c, n, total)
 
 
 def draw_rule(c, n, total):
     bg(c)
-    heading(c, "La regla del dinero", "Seis en el suelo. El séptimo se paga con la primera venta.", size=20)
+    heading(c, "La regla del año", "Se vende, se compra. Si la caja pasa del fondo, se compra más.", size=18)
     rules = [
-        ("1", "El mes 1 se abre la nave.", "Entran 100.000 €. Se pagan seis coches y la reforma. El Mercedes, el más caro de la tabla, no se compra todavía."),
-        ("2", "Ese hueco es el fondo.", "17.666 € que no salen el mes 1. No es dinero olvidado: es la compra que espera un cobro."),
-        ("3", "Cuando se cobra, se compra.", "El precio de la venta no se queda en el banco. Ese mismo mes paga el siguiente coche. A partir de ahí, cada venta repone otro igual."),
-        ("4", "La reforma no lleva contratista.", "4.550 € son materiales: suelo 1.800, luz 1.100, aseos 1.300 y extintores 350. La obra la hace el promotor, por su oficio de constructor."),
+        ("1", "El mes 1 caben seis.", "Entran 100.000 €. Se pagan seis coches y la reforma. El Mercedes, el más caro de la tabla, no cabe sin bajar del fondo."),
+        ("2", "El fondo son tres meses.", eur(S["floor"], True) + ". Es 2.835,06 € × 3. Por debajo de esa cifra no se compra un coche."),
+        ("3", "La venta compra en el mismo mes.", "El primer cobro compra el Mercedes. A partir de ahí, cada venta repone ese modelo, al coste que ya tiene en la tabla."),
+        ("4", "Lo que sobra también compra.", "Si después de reponer la caja supera el fondo en el coste de un coche del plan, se compra el más barato que quepa. En este año ocurre una vez: otro 116d, el mes 10, a 9.010 €. No es un modelo nuevo."),
     ]
     y = 400
     for num, title, body in rules:
         c.setFillColor(CARD)
-        c.roundRect(36, y - 64, 888, 76, 3, fill=1, stroke=0)
+        c.roundRect(36, y - 58, 888, 70, 3, fill=1, stroke=0)
         c.setFillColor(GOLD)
-        c.circle(62, y - 16, 11, fill=1, stroke=0)
+        c.circle(62, y - 14, 11, fill=1, stroke=0)
         c.setFillColor(COVER)
         c.setFont("DejaVuBold", 9)
-        c.drawCentredString(62, y - 20, num)
+        c.drawCentredString(62, y - 18, num)
         c.setFillColor(INK)
         c.setFont("DejaVuBold", 12)
-        c.drawString(86, y - 8, title)
-        wrap(c, body, "DejaVu", 10, 86, y - 28, 800, 13, SLATE, 2)
-        y -= 86
+        c.drawString(86, y - 6, title)
+        wrap(c, body, "DejaVu", 10, 86, y - 26, 810, 13, SLATE, 2)
+        y -= 80
     footer(c, n, total)
 
 
@@ -428,16 +545,16 @@ def waterfall(c, rows, top):
     y = top
     for name, amount, last in rows:
         c.setFillColor(COVER if last else CARD)
-        c.roundRect(36, y, 888, 36, 3, fill=1, stroke=0)
+        c.roundRect(36, y, 888, 34, 3, fill=1, stroke=0)
         if not last:
             c.setFillColor(GOLD)
-            c.rect(36, y, 3, 36, fill=1, stroke=0)
+            c.rect(36, y, 3, 34, fill=1, stroke=0)
         c.setFillColor(GOLD if last else INK)
         c.setFont("DejaVuBold" if last else "DejaVu", 11)
-        c.drawString(52, y + 12, name)
+        c.drawString(52, y + 11, name)
         c.setFont("DejaVuSerif", 12)
-        c.drawRightString(908, y + 11, amount)
-        y -= 42
+        c.drawRightString(908, y + 10, amount)
+        y -= 40
     return y
 
 
@@ -448,15 +565,15 @@ def draw_m1(c, n, total):
         ("Capital propio", "+50.000 €", False),
         ("Financiación", "+50.000 €", False),
         ("Seis coches: GTI, 116d, Golf VIII, 318d, XC40 y Audi", "−77.714 €", False),
-        ("Reforma, solo materiales", "−4.550 €", False),
-        ("Nave, autónomo, portales, luz y cuota", "−2.835,06 €", False),
-        ("Caja al cerrar el mes", "14.900,94 €", True),
+        ("Reforma, solo materiales. La obra la hace el promotor.", "−4.550 €", False),
+        ("El mes: nave, autónomo, portales, luz y cuota", "−2.835,06 €", False),
+        ("Caja al cerrar el mes. El Mercedes sigue fuera.", "14.900,94 €", True),
     ]
-    waterfall(c, rows, 400)
+    waterfall(c, rows, 408)
     wrap(
         c,
-        "El mes cuesta 2.835,06 € venda o no venda: nave 1.100, autónomo 380, portales y gestoría 250, luz 150, cuota 955,06. El autónomo no es un sueldo. El administrador no cobra. Los 25.000 € familiares están fuera de la sociedad. El Mercedes sigue sin comprarse.",
-        "DejaVu", 10, 36, 118, 888, 13, SLATE, 4,
+        "Por encima del fondo de " + eur(S["floor"], True) + " quedan 6.395,76 €. No llegan para el Mercedes, que cuesta 17.666 €, ni para el 116d, que cuesta 9.010 €. Por eso el mes 1 no compra un séptimo. El administrador no cobra.",
+        "DejaVu", 10.5, 36, 128, 888, 14, INK, 3,
     )
     footer(c, n, total)
 
@@ -472,110 +589,230 @@ def draw_m2(c, n, total):
         ("Compra del Mercedes, el que esperaba", "−17.666 €", False),
         ("Caja al cerrar el mes", "11.888,76 €", True),
     ]
-    waterfall(c, rows, 400)
+    waterfall(c, rows, 408)
     wrap(
         c,
-        "El precio de la venta no se ha quedado en el banco. Ha pagado el coche que faltaba. En el suelo siguen seis: salió el GTI y entró el Mercedes. La caja baja porque el fondo se ha convertido en un coche.",
-        "DejaVu", 10.5, 36, 118, 888, 14, INK, 3,
+        "El precio no se ha quedado en el banco. Ha pagado el coche que faltaba. En el suelo siguen seis: salió el GTI y entró el Mercedes. La caja baja porque el fondo se ha convertido en un coche. Lo que sobra del mes, después del gasto, son 1.979,82 €.",
+        "DejaVu", 10.5, 36, 128, 888, 14, INK, 3,
     )
     footer(c, n, total)
 
 
-def draw_year(c, n, total):
+def plot_frame(c, x, y, w, h, ymin, ymax, ticks):
+    c.setFillColor(CARD)
+    c.setStrokeColor(LINE)
+    c.roundRect(x, y, w, h, 3, fill=1, stroke=1)
+    c.setFont("DejaVu", 7.5)
+    for t in ticks:
+        yy = y + 28 + (t - ymin) / (ymax - ymin) * (h - 46)
+        c.setStrokeColor(GRID)
+        c.setDash(1, 2)
+        c.line(x + 46, yy, x + w - 14, yy)
+        c.setDash()
+        c.setFillColor(SLATE)
+        c.drawRightString(x + 40, yy - 3, k(t))
+    return x + 46, y + 28, w - 60, h - 46
+
+
+def slot_x(inner_x, inner_w, i, n=12):
+    return inner_x + (i + 0.5) * inner_w / n
+
+
+def draw_gains(c, n, total):
     bg(c)
-    kicker(c, "Doce meses", 500)
-    c.setFillColor(INK)
-    c.setFont("DejaVuSerif", 18)
-    c.drawString(36, 472, "Cada venta compra el siguiente. La caja no guarda el precio.")
-    c.setFillColor(INK)
-    c.rect(36, 444, 888, 18, fill=1, stroke=0)
-    c.setFillColor(WHITE)
-    c.setFont("DejaVuBold", 7.5)
-    c.drawString(44, 449, "Mes")
-    c.drawString(78, 449, "Qué ocurre")
-    c.drawRightString(560, 449, "Entra")
-    c.drawRightString(690, 449, "Sale")
-    c.drawRightString(908, 449, "Caja")
+    heading(c, "Ganancia y gasto, mes a mes", "La barra verde deja más que la dorada. En los once meses con venta.", size=16)
+    x, y, w, h = 36, 78, 888, 340
+    ix, iy, iw, ih = plot_frame(c, x, y, w, h, 0, 6000, [0, 2000, 4000, 6000])
+    bw = 14
     for i, m in enumerate(S["months"]):
-        y = 422 - i * 28
-        if m["kind"] == "turn":
+        cx = slot_x(ix, iw, i)
+        gold_h = MONTH / 6000 * ih
+        c.setFillColor(GOLD)
+        c.rect(cx - bw - 1, iy, bw, gold_h, fill=1, stroke=0)
+        if m["n"] > 1:
+            gh = m["margen"] / 6000 * ih
+            c.setFillColor(GREEN)
+            c.rect(cx + 1, iy, bw, gh, fill=1, stroke=0)
+            c.setFillColor(INK)
+            c.setFont("DejaVuBold", 6.5)
+            c.drawCentredString(cx + 1 + bw / 2, iy + gh + 4, k(m["margen"]))
+        c.setFillColor(SLATE)
+        c.setFont("DejaVu", 7.5)
+        c.drawCentredString(cx, iy - 14, str(m["n"]))
+    c.setFillColor(GOLD)
+    c.rect(48, 58, 10, 8, fill=1, stroke=0)
+    c.setFillColor(SLATE)
+    c.setFont("DejaVu", 8)
+    c.drawString(62, 58, "Gasto del mes, 2.835 €")
+    c.setFillColor(GREEN)
+    c.rect(230, 58, 10, 8, fill=1, stroke=0)
+    c.setFillColor(SLATE)
+    c.drawString(244, 58, "Margen. El mes 1 no vende. La reforma, 4.550 €, está en la tabla, no en la barra. El Audi supera el gasto en 86 €.")
+    footer(c, n, total)
+
+
+def draw_cash_chart(c, n, total):
+    bg(c)
+    heading(c, "La caja del año", "Sube con lo que sobra. Baja cuando se compra.", size=20)
+    x, y, w, h = 36, 86, 888, 332
+    ix, iy, iw, ih = plot_frame(c, x, y, w, h, 0, 20000, [0, 5000, 10000, 15000, 20000])
+    def py(val):
+        return iy + val / 20000 * ih
+    fy = py(S["floor"])
+    c.setStrokeColor(GOLD)
+    c.setDash(3, 2)
+    c.setLineWidth(1.2)
+    c.line(ix, fy, ix + iw, fy)
+    c.setDash()
+    pts = [(slot_x(ix, iw, i), py(m["end"])) for i, m in enumerate(S["months"])]
+    c.setStrokeColor(GREEN)
+    c.setFillColor(GREEN_SOFT)
+    c.setLineWidth(2)
+    p = c.beginPath()
+    p.moveTo(pts[0][0], iy)
+    for px, py_ in pts:
+        p.lineTo(px, py_)
+    p.lineTo(pts[-1][0], iy)
+    p.close()
+    c.drawPath(p, fill=1, stroke=0)
+    c.setStrokeColor(INK)
+    c.setLineWidth(1.8)
+    path = c.beginPath()
+    path.moveTo(pts[0][0], pts[0][1])
+    for px, py_ in pts[1:]:
+        path.lineTo(px, py_)
+    c.drawPath(path, stroke=1, fill=0)
+    for i, m in enumerate(S["months"]):
+        px, py_ = pts[i]
+        c.setFillColor(GOLD if m["kind"] in ("turn", "extra") else INK)
+        c.circle(px, py_, 3.4, fill=1, stroke=0)
+        c.setFillColor(SLATE)
+        c.setFont("DejaVu", 7.5)
+        c.drawCentredString(px, iy - 14, str(m["n"]))
+    labels = {1: (0, 12), 2: (0, -16), 9: (0, 10), 10: (8, -16), 12: (0, 10)}
+    for i, m in enumerate(S["months"]):
+        if m["n"] not in labels:
+            continue
+        dx, dy = labels[m["n"]]
+        c.setFillColor(INK)
+        c.setFont("DejaVuBold", 7.5)
+        c.drawCentredString(pts[i][0] + dx, pts[i][1] + dy, eur(m["end"]))
+    fund = "Fondo  " + eur(S["floor"])
+    c.setFont("DejaVuBold", 8)
+    tw = c.stringWidth(fund, "DejaVuBold", 8)
+    c.setFillColor(WHITE)
+    c.setStrokeColor(GOLD)
+    c.setLineWidth(0.8)
+    c.roundRect(ix + 10, fy - 22, tw + 12, 15, 2, fill=1, stroke=1)
+    c.setFillColor(GOLD_DEEP)
+    c.drawString(ix + 16, fy - 18, fund)
+    c.setFillColor(INK)
+    c.setFont("DejaVu", 8.5)
+    c.drawString(48, 62, "Mes 2: compra del Mercedes, 17.666 €.   Mes 10: otro 116d, 9.010 €, el coste que ya tiene en la tabla.   Mes 12: " + eur(S["months"][-1]["end"], True) + " y siete coches.")
+    footer(c, n, total)
+
+
+def draw_ledger(c, n, total):
+    bg(c)
+    kicker(c, "El primer año", 508)
+    c.setFillColor(INK)
+    c.setFont("DejaVuSerif", 16)
+    c.drawString(36, 484, "Cada mes: qué se cobra, qué se gasta, qué se compra, qué queda.")
+    c.setFillColor(INK)
+    c.rect(28, 460, 904, 16, fill=1, stroke=0)
+    heads = [
+        (36, "Mes", "l"),
+        (68, "Qué ocurre", "l"),
+        (360, "Cobro", "r"),
+        (448, "Gastos", "r"),
+        (530, "IVA", "r"),
+        (628, "Compra", "r"),
+        (724, "Sobra", "r"),
+        (912, "Caja", "r"),
+    ]
+    c.setFillColor(WHITE)
+    c.setFont("DejaVuBold", 7)
+    for x, lab, al in heads:
+        if al == "r":
+            c.drawRightString(x, 464, lab)
+        else:
+            c.drawString(x, 464, lab)
+    for i, m in enumerate(S["months"]):
+        y = 438 - i * 30
+        if m["kind"] == "extra":
+            c.setFillColor(Color(0.90, 0.95, 0.91))
+        elif m["kind"] == "turn":
             c.setFillColor(Color(0.965, 0.945, 0.905))
         elif i % 2 == 0:
             c.setFillColor(CARD)
         else:
             c.setFillColor(SOFT)
-        c.rect(36, y - 6, 888, 26, fill=1, stroke=0)
+        c.rect(28, y - 8, 904, 28, fill=1, stroke=0)
         c.setFillColor(GOLD_DEEP)
         c.setFont("DejaVuBold", 8)
-        c.drawString(44, y, str(m["n"]))
+        c.drawString(36, y, str(m["n"]))
         c.setFillColor(INK)
-        c.setFont("DejaVu", 8)
-        c.drawString(78, y, m["what"])
-        c.drawRightString(560, y, eur(m["inn"]))
-        c.drawRightString(690, y, eur(m["out"], True))
+        c.setFont("DejaVu", 7.5)
+        c.drawString(68, y, m["what"])
+        c.drawRightString(360, y, eur(m["cobro"]))
+        c.drawRightString(448, y, eur(m["gastos"], True))
+        c.drawRightString(530, y, "—" if m["n"] == 1 else eur(m["iva"], True))
+        c.drawRightString(628, y, eur(m["compra"]))
+        c.setFillColor(GREEN if m["sobra"] > 0 else SLATE)
+        c.setFont("DejaVuBold", 7.5)
+        c.drawRightString(724, y, eur(m["sobra"], True))
         c.setFillColor(INK)
-        c.setFont("DejaVuBold", 8)
-        c.drawRightString(908, y, eur(m["end"], True))
+        c.drawRightString(912, y, eur(m["end"], True))
+    c.setFillColor(SLATE)
+    c.setFont("DejaVu", 7.5)
+    c.drawString(36, 52, "La caja es la del mes anterior, más el cobro, menos gastos, IVA y compra. Sobra es el margen menos el mes: no incluye la compra. El mes 1, cobro es el capital.")
+    footer(c, n, total)
+
+
+def draw_year(c, n, total):
+    bg(c)
+    heading(c, "El año, en una cuenta", "Once ventas. Siete coches al cerrar. La cuota, pagada.", size=18)
+    rows = [
+        ("Capital, propio y financiado", "+100.000 €", False),
+        ("Once cobros, del mes 2 al mes 12", "+" + eur(S["sales"]), False),
+        ("Coches comprados, apertura y reposición", "−" + eur(S["purchases"]), False),
+        ("Doce meses de nave, autónomo, portales, luz y cuota, y la reforma", "−" + eur(S["gastos"], True), False),
+        ("IVA de las once ganancias, apartado", "−" + eur(S["iva"], True), False),
+        ("Caja al cerrar diciembre", eur(S["months"][-1]["end"], True), True),
+    ]
+    waterfall(c, rows, 400)
     wrap(
         c,
-        "En el mes 1 entra el capital, no una venta. El suelo sigue en seis: lo vendido se repone al coste de la tabla. La caja sube solo con lo que sobra del mes. Diciembre cierra con " + eur(S["months"][-1]["end"], True) + " y los mismos seis coches.",
-        "DejaVu", 8, 36, 68, 888, 10.5, SLATE, 2,
+        "El margen de las once ventas es " + eur(S["nets"], True) + ". Menos la estructura, " + eur(STRUCT * 12) + ", y los intereses, " + eur(S["interest"], True) + ", el impuesto al 15 % son " + eur(S["tax"], True) + ". No se paga dentro de estos doce meses: se liquida con el impuesto de sociedades. Si se aparta, la caja libre queda en " + eur(S["free"], True) + ", dos meses y medio de gastos. Durante el año la caja no baja del fondo.",
+        "DejaVu", 10, 36, 118, 888, 13, INK, 4,
     )
     footer(c, n, total)
 
 
 def draw_bank(c, n, total):
     bg(c)
-    heading(c, "Lo que mira quien presta", "Una venta paga el mes. Doce ventas cubren la cuota 1,72 veces.", size=18)
+    heading(c, "Lo que mira quien presta", "Este año paga la cuota 1,32 veces. El ritmo de doce, 1,72.", size=18)
     cards = [
-        ("2.835 €", "Sale cada mes, haya venta o no. Nave, autónomo, portales, luz y la cuota de 955,06 €."),
-        ("86 €", "Lo que sobra si el coche es el Audi, el que menos deja de los siete. Cubre, y sobra poco."),
-        ("946 €", "Lo que sobra con el coche medio, 3.781 €. Es la cuenta de un mes normal."),
+        ("1,32", "Este año. Once ventas reales de la tabla, impuesto al 15 % ya restado, partido por las doce cuotas."),
+        ("1,72", "Si hubiera una venta cada mes, doce, del coche medio de 3.781 €. Es el ritmo, no el diario de la apertura."),
+        ("86 €", "Lo que sobra el mes del Audi, el que menos deja. Cubre el mes, y sobra poco."),
     ]
     x = 36
     for val, lab in cards:
         c.setFillColor(CARD)
         c.setStrokeColor(LINE)
-        c.roundRect(x, 268, 286, 130, 3, fill=1, stroke=1)
+        c.roundRect(x, 250, 286, 150, 3, fill=1, stroke=1)
         c.setFillColor(GOLD)
-        c.rect(x, 396, 286, 2.2, fill=1, stroke=0)
+        c.rect(x, 398, 286, 2.2, fill=1, stroke=0)
         c.setFillColor(INK)
-        c.setFont("DejaVuSerif", 22)
-        c.drawString(x + 14, 348, val)
-        wrap(c, lab, "DejaVu", 9, x + 14, 320, 258, 12, SLATE, 4)
+        c.setFont("DejaVuSerif", 28)
+        c.drawString(x + 16, 340, val)
+        wrap(c, lab, "DejaVu", 9.5, x + 16, 310, 254, 13, SLATE, 5)
         x += 302
     wrap(
         c,
-        "Doce ventas del coche medio, pagado el impuesto de sociedades al 15 %, dejan 1,72 veces la cuota del año. El 1,32 de las cuatro páginas es otra división: el margen partido por el mes, con la cuota redondeada a 966 € y sin quitar el impuesto. Mismo margen. El primer año de la tabla anterior tiene once ventas, porque el mes 1 es la apertura. Termina con " + eur(S["months"][-1]["end"], True) + " en el banco, y los seis coches repuestos.",
-        "DejaVu", 10.5, 36, 220, 888, 14, INK, 6,
-    )
-    footer(c, n, total)
-
-
-def draw_workshop(c, n, total):
-    bg(c)
-    heading(c, "El taller, dentro de la nave", "No está en los doce meses. No paga la cuota.", size=22)
-    facts = [
-        ("60 €", "Lo que hoy se paga a un taller de fuera por el aceite y los filtros de un coche propio. Con la nave, ese dinero se queda."),
-        ("116,60 €", "El recambio, a precio cerrado: aceite Castrol 52,70 € y cuatro filtros 63,90 €. Al cliente se cobra a ese coste."),
-        ("0 €", "Aceite de caja, pastillas y neumáticos. Se harán. No tienen tarifa cerrada, así que no entran en la cuenta."),
-    ]
-    x = 36
-    for val, lab in facts:
-        c.setFillColor(CARD)
-        c.setStrokeColor(LINE)
-        c.roundRect(x, 200, 286, 190, 3, fill=1, stroke=1)
-        c.setFillColor(GOLD)
-        c.rect(x, 388, 286, 2.2, fill=1, stroke=0)
-        c.setFillColor(INK)
-        c.setFont("DejaVuSerif", 22)
-        c.drawString(x + 14, 340, val)
-        wrap(c, lab, "DejaVu", 10, x + 14, 300, 258, 13.5, SLATE, 6)
-        x += 302
-    wrap(
-        c,
-        "Si además se hacen dos servicios a clientes por semana, la mano de obra serían 5.760 € al año. Es una hipótesis, no una facturación. No se ha sumado a la caja de los doce meses ni al 1,72.",
-        "DejaVu", 11, 36, 140, 888, 15, INK, 3,
+        "El 1,32 de las cuatro páginas es otra división: el margen medio partido por 2.846 €, con la cuota redondeada a 966 € y sin quitar el impuesto. El 1,32 de esta lámina es la cuenta de los once coches que el año vende de verdad. Misma palabra, dos cuentas. Las dos están escritas.",
+        "DejaVu", 11, 36, 200, 888, 15, INK, 4,
     )
     footer(c, n, total)
 
@@ -585,10 +822,10 @@ def draw_risk(c, n, total):
     heading(c, "Si no sale como en la tabla", "Cada desvío tiene un número. No hay que imaginarlo.", size=20)
     no_sale = r2(S["months"][0]["end"] - MONTH)
     rows = [
-        ("El mes 2 tampoco se vende", eur(no_sale, True) + " en caja. El Mercedes sigue sin comprarse. El fondo aguanta."),
-        ("El impuesto de sociedades es el 23 %", "La cobertura de doce ventas pasa de 1,72 a 1,58 veces. Sigue cubriendo la cuota."),
+        ("El mes 2 tampoco se vende", eur(no_sale, True) + " en caja. El Mercedes sigue sin comprarse. El fondo aguanta, y sobra."),
+        ("El impuesto de sociedades es el 23 %", "La cobertura de doce ventas del coche medio pasa de 1,72 a 1,58 veces. Sigue cubriendo la cuota."),
         ("El 116d y el 318d, al precio de la web", "Mil euros menos cada uno. La cobertura de doce ventas queda en 1,51 veces."),
-        ("Todos los precios, un 5 % más bajos", "La cuota se paga, pero solo sobra un 6 %. No hay colchón."),
+        ("Todos los precios, un 5 % más bajos", "La cuota se paga, pero solo sobra un 6 %. La cobertura de doce ventas queda en 1,06 veces. No hay colchón."),
     ]
     y = 390
     for title, body in rows:
@@ -615,13 +852,13 @@ def draw_close(c, n, total):
     c.drawString(36, 336, "de otros 50.000 €.")
     wrap(
         c,
-        "El mes 1 se abre la nave, se compran seis coches y el Mercedes espera. El mes 2, el primer cobro compra ese Mercedes. A partir de ahí, cada venta compra el siguiente. Lo que se pide es una oferta de tipo y de plazo.",
+        "El mes 1 se abre la nave, se compran seis coches y el Mercedes espera. El mes 2, el primer cobro lo compra. El mes 10, la caja compra otro 116d. Lo que se pide es una oferta de tipo y de plazo.",
         "DejaVu", 13, 36, 286, 880, 18, Color(0.78, 0.76, 0.70), 3,
     )
     stats = [
         ("50.000 €", "Financiación"),
-        ("14.900,94 €", "Caja al cerrar el mes 1"),
-        ("1,72 veces", "La cuota, con doce ventas"),
+        (eur(S["months"][-1]["end"], True), "Caja al cerrar el año"),
+        ("1,32 veces", "La cuota, en este año"),
     ]
     x = 36
     for val, lab in stats:
@@ -642,28 +879,29 @@ def draw_sources(c, n, total):
     bg(c)
     heading(c, "De dónde sale cada cifra", "Nada de esta sala es una venta ya cobrada.", size=22)
     items = [
-        "Los siete coches, la nave, la reforma y los gastos del mes: plan de viabilidad de cuatro páginas.",
+        "Los siete coches, la nave, la reforma y los cinco gastos del mes: plan de viabilidad de cuatro páginas.",
         "El coste de cada coche ya incluye transporte, matriculación y puesta a punto. No se ha restado otra vez.",
-        "Dejar el Mercedes sin comprar el mes 1 es la regla de esta solicitud. En las cuatro páginas se compran los siete el mismo día.",
-        "El orden de las ventas es una hipótesis de trabajo: una al mes, desde el mes 2, en el orden de la tabla. No es una agenda firmada.",
-        "«Se repone al mismo coste» usa el coste que ese modelo ya tiene en el plan. No se ha inventado un octavo coche.",
-        "La cuota de 955,06 € es la exacta al 5,50 % y 60 meses. El plan la redondea a 966 €.",
-        "El programa es el que está construido en este proyecto. La web es khcimport.autos. Los dos precios distintos son los publicados el 11 de octubre de 2026.",
-        "El equipo de inspección, 822,90 €, está en otro documento. No se ha restado de estos meses.",
+        "La cuota de 955,06 € es la exacta al 5,50 % y 60 meses. El plan la redondea a 966 €. Intereses del año: 2.527,03 €.",
+        "El fondo de " + eur(S["floor"], True) + " es tres veces el mes. Es la regla de esta solicitud, no una cifra del plan de cuatro páginas.",
+        "El orden de las ventas es hipótesis: una al mes, desde el mes 2, en el orden de la tabla. No es una agenda firmada.",
+        "El segundo 116d del mes 10 se compra a 9.010 €, el coste que ese modelo ya tiene. No se ha inventado un octavo coche.",
+        "El 1,32 de este año usa las once ventas de la tabla. El 1,72 usa doce veces el coche medio. El 1,32 de las cuatro páginas no quita el impuesto.",
+        "El equipo de inspección, 822,90 €, está en el presupuesto de arranque. No se ha restado: las cuatro páginas no lo incluyen.",
+        "El programa es el que está construido en este proyecto. La web es khcimport.autos, precios del 11 de octubre de 2026.",
     ]
-    y = 400
+    y = 408
     for item in items:
         c.setFillColor(GOLD)
         c.circle(46, y + 3, 2.2, fill=1, stroke=0)
-        h = wrap(c, item, "DejaVu", 10.5, 60, y, 860, 13.5, INK, 2)
-        y -= h + 8
+        h = wrap(c, item, "DejaVu", 10, 60, y, 860, 13, INK, 2)
+        y -= h + 6
     footer(c, n, total)
 
 
 SLIDES = [
     draw_cover, draw_business, draw_method, draw_lot, draw_program, draw_engines,
-    draw_rule, draw_m1, draw_m2, draw_year, draw_bank, draw_workshop, draw_risk,
-    draw_close, draw_sources,
+    draw_expenses, draw_rule, draw_m1, draw_m2, draw_gains, draw_cash_chart,
+    draw_ledger, draw_year, draw_bank, draw_risk, draw_close, draw_sources,
 ]
 
 
@@ -679,16 +917,16 @@ def flatten_logo():
     im = im.crop((4, 4, w - 4, h - 4))
     px = im.load()
     w, h = im.size
-    for y in range(h):
-        for x in range(w):
-            r, g, b, a = px[x, y]
+    for yy in range(h):
+        for xx in range(w):
+            r, g, b, a = px[xx, yy]
             if a < 16:
-                px[x, y] = (0, 0, 0, 0)
+                px[xx, yy] = (0, 0, 0, 0)
                 continue
             silver = r > 68 and g > 68 and b > 68 and abs(r - b) < 48
             goldish = r > 105 and r > b + 18 and g > 55
             if not (silver or goldish):
-                px[x, y] = (0, 0, 0, 0)
+                px[xx, yy] = (0, 0, 0, 0)
     bbox = im.getbbox()
     if not bbox:
         return
@@ -718,13 +956,63 @@ def esc(s):
     return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
+def svg_gains():
+    width, height = 880, 280
+    left, bottom, top = 46, 28, 18
+    iw, ih = width - left - 10, height - bottom - top
+    parts = [f'<svg viewBox="0 0 {width} {height}" width="100%" role="img">']
+    for t in (0, 2000, 4000, 6000):
+        yy = height - bottom - t / 6000 * ih
+        parts.append(f'<line x1="{left}" y1="{yy:.1f}" x2="{width-8}" y2="{yy:.1f}" stroke="#e8e2d6" stroke-dasharray="2 3"/>')
+        parts.append(f'<text x="{left-6}" y="{yy+3:.1f}" text-anchor="end" font-size="11" fill="#4a5872">{k(t)}</text>')
+    bw = 10
+    for i, m in enumerate(S["months"]):
+        cx = left + (i + 0.5) * iw / 12
+        gh = MONTH / 6000 * ih
+        parts.append(f'<rect x="{cx-bw-1:.1f}" y="{height-bottom-gh:.1f}" width="{bw}" height="{gh:.1f}" fill="#b3934e"/>')
+        if m["n"] > 1:
+            mh = m["margen"] / 6000 * ih
+            parts.append(f'<rect x="{cx+1:.1f}" y="{height-bottom-mh:.1f}" width="{bw}" height="{mh:.1f}" fill="#1f6b4a"/>')
+            parts.append(f'<text x="{cx+6:.1f}" y="{height-bottom-mh-4:.1f}" text-anchor="middle" font-size="10" fill="#0a1020">{k(m["margen"])}</text>')
+        parts.append(f'<text x="{cx:.1f}" y="{height-8}" text-anchor="middle" font-size="11" fill="#4a5872">{m["n"]}</text>')
+    parts.append("</svg>")
+    return "".join(parts)
+
+
+def svg_cash():
+    width, height = 880, 280
+    left, bottom, top = 52, 28, 16
+    iw, ih = width - left - 10, height - bottom - top
+    def X(i):
+        return left + (i + 0.5) * iw / 12
+    def Y(v):
+        return height - bottom - v / 20000 * ih
+    parts = [f'<svg viewBox="0 0 {width} {height}" width="100%" role="img">']
+    for t in (0, 5000, 10000, 15000, 20000):
+        yy = Y(t)
+        parts.append(f'<line x1="{left}" y1="{yy:.1f}" x2="{width-8}" y2="{yy:.1f}" stroke="#e8e2d6" stroke-dasharray="2 3"/>')
+        parts.append(f'<text x="{left-6}" y="{yy+3:.1f}" text-anchor="end" font-size="11" fill="#4a5872">{k(t)}</text>')
+    fy = Y(S["floor"])
+    parts.append(f'<line x1="{left}" y1="{fy:.1f}" x2="{width-8}" y2="{fy:.1f}" stroke="#b3934e" stroke-dasharray="4 3"/>')
+    pts = " ".join(f"{X(i):.1f},{Y(m['end']):.1f}" for i, m in enumerate(S["months"]))
+    area = f"{X(0):.1f},{height-bottom} " + pts + f" {X(11):.1f},{height-bottom}"
+    parts.append(f'<polygon points="{area}" fill="#dceee4"/>')
+    parts.append(f'<polyline points="{pts}" fill="none" stroke="#0a1020" stroke-width="2"/>')
+    for i, m in enumerate(S["months"]):
+        color = "#b3934e" if m["kind"] in ("turn", "extra") else "#0a1020"
+        parts.append(f'<circle cx="{X(i):.1f}" cy="{Y(m["end"]):.1f}" r="3.5" fill="{color}"/>')
+        parts.append(f'<text x="{X(i):.1f}" y="{height-8}" text-anchor="middle" font-size="11" fill="#4a5872">{m["n"]}</text>')
+    parts.append("</svg>")
+    return "".join(parts)
+
+
 def write_html():
     lot_rows = "".join(
         f"<tr><td>{esc(short(u['name']))}</td><td class='num'>{esc(eur(u['cost']))}</td><td class='num'>{esc(eur(u['sell']))}</td><td class='num'>{esc(eur(u['net'], True))}</td></tr>"
         for u in S["lot"]
     )
     year_rows = "".join(
-        f"<tr class='{m['kind']}'><td>{m['n']}</td><td>{esc(m['what'])}</td><td class='num'>{esc(eur(m['inn']))}</td><td class='num'>{esc(eur(m['out'], True))}</td><td class='num'><b>{esc(eur(m['end'], True))}</b></td></tr>"
+        f"<tr class='{m['kind']}'><td>{m['n']}</td><td>{esc(m['what'])}</td><td class='num'>{esc(eur(m['cobro']))}</td><td class='num'>{esc(eur(m['gastos'], True))}</td><td class='num'>{'—' if m['n']==1 else esc(eur(m['iva'], True))}</td><td class='num'>{esc(eur(m['compra']))}</td><td class='num'>{esc(eur(m['sobra'], True))}</td><td class='num'><b>{esc(eur(m['end'], True))}</b></td></tr>"
         for m in S["months"]
     )
     html = f"""<!DOCTYPE html>
@@ -734,15 +1022,15 @@ def write_html():
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Financiación 50.000 € — KHC Auto Import</title>
 <style>
-  :root {{ --ink:#0a1020; --gold:#b3934e; --ivory:#f7f6f2; --cover:#212228; --slate:#4a5872; --line:#e4dfd4; }}
+  :root {{ --ink:#0a1020; --gold:#b3934e; --ivory:#f7f6f2; --cover:#212228; --slate:#4a5872; --line:#e4dfd4; --green:#1f6b4a; }}
   * {{ box-sizing:border-box; }}
   body {{ margin:0; background:var(--cover); color:var(--ink); font-family:"Segoe UI", Helvetica, Arial, sans-serif; }}
-  .slide {{ display:none; min-height:100vh; padding:6vh 7vw 8vh; flex-direction:column; background:var(--ivory); }}
+  .slide {{ display:none; min-height:100vh; padding:5vh 6vw 7vh; flex-direction:column; background:var(--ivory); }}
   .slide.active {{ display:flex; }}
   .dark {{ background:var(--cover); color:#f4f1ea; }}
   .kicker {{ letter-spacing:.14em; font-size:12px; font-weight:700; color:var(--gold); margin:0 0 8px; }}
-  h1 {{ font-family:Georgia, serif; font-weight:500; font-size:clamp(26px, 3.4vw, 42px); line-height:1.08; margin:0 0 14px; max-width:24ch; }}
-  p {{ font-size:17px; line-height:1.45; max-width:70ch; }}
+  h1 {{ font-family:Georgia, serif; font-weight:500; font-size:clamp(24px, 3vw, 38px); line-height:1.08; margin:0 0 12px; max-width:28ch; }}
+  p {{ font-size:16px; line-height:1.45; max-width:78ch; }}
   .muted {{ color:var(--slate); }}
   .dark p {{ color:#cfc8ba; }}
   .grid {{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }}
@@ -750,20 +1038,22 @@ def write_html():
   article, .stat {{ background:#fff; border-top:3px solid var(--gold); border-radius:8px; padding:14px 16px; }}
   .dark .stat {{ background:#2a2b32; }}
   article b, .stat b {{ display:block; font-family:Georgia, serif; font-size:26px; font-weight:500; margin-bottom:6px; }}
-  .line {{ display:flex; justify-content:space-between; gap:12px; background:#fff; border-left:3px solid var(--gold); padding:10px 14px; margin:6px 0; }}
+  .line {{ display:flex; justify-content:space-between; gap:12px; background:#fff; border-left:3px solid var(--gold); padding:8px 14px; margin:5px 0; }}
   .line.total {{ background:#212228; color:#f4f1ea; }}
   .line.total b {{ color:#b3934e; }}
-  table {{ width:100%; border-collapse:collapse; font-size:14px; }}
-  th {{ text-align:left; background:var(--ink); color:#fff; padding:7px 8px; font-size:12px; }}
-  td {{ padding:6px 8px; border-bottom:1px solid var(--line); }}
+  table {{ width:100%; border-collapse:collapse; font-size:13px; }}
+  th {{ text-align:left; background:var(--ink); color:#fff; padding:6px 8px; font-size:11px; }}
+  td {{ padding:5px 8px; border-bottom:1px solid var(--line); }}
   tr.turn td {{ background:#f6efe2; }}
+  tr.extra td {{ background:#e7f3ec; }}
   .num {{ text-align:right; font-variant-numeric:tabular-nums; }}
   ol {{ margin:8px 0 0; padding-left:20px; }}
   li {{ margin:0 0 8px; line-height:1.4; }}
   .logo {{ width:150px; margin-bottom:10px; }}
-  footer {{ margin-top:auto; display:flex; justify-content:space-between; padding-top:16px; color:var(--gold); font-size:12px; letter-spacing:.08em; }}
+  footer {{ margin-top:auto; display:flex; justify-content:space-between; padding-top:14px; color:var(--gold); font-size:12px; letter-spacing:.08em; }}
   .bar {{ position:fixed; left:0; top:0; height:3px; background:var(--gold); }}
   .hint {{ position:fixed; right:14px; bottom:10px; color:#8a8172; font-size:12px; }}
+  .chart {{ background:#fff; border-radius:8px; padding:8px 8px 0; }}
 </style>
 </head>
 <body>
@@ -772,21 +1062,21 @@ def write_html():
   <img class="logo" src="logo_flat.png" alt="KHC">
   <p class="kicker">Solicitud de financiación</p>
   <h1>50.000 € para abrir la nave y poner el stock en marcha.</h1>
-  <p>Otros 50.000 € son capital propio. Santiago de Compostela. El día que entra el dinero se abre la nave y el stock empieza a rotar.</p>
+  <p>Otros 50.000 € son capital propio. Santiago de Compostela. El primer año está cerrado mes a mes.</p>
   <div class="grid3">
     <div class="stat"><b>50.000 €</b><span>Lo que se pide</span></div>
     <div class="stat"><b>50.000 €</b><span>Capital propio, al lado</span></div>
-    <div class="stat"><b>12 meses</b><span>El primer año, con cada venta</span></div>
+    <div class="stat"><b>12 meses</b><span>Plan cerrado, con gráficos</span></div>
   </div>
   <footer><span>KHC AUTO IMPORT</span><span>01</span></footer>
 </section>
 <section class="slide">
   <p class="kicker">Qué es la empresa</p>
   <h1>Se venden coches seleccionados. No se vende una importación.</h1>
-  <div class="line"><span><b>El producto.</b> Nacionales o traídos de fuera. Se compra donde el número cierra.</span></div>
-  <div class="line"><span><b>El cliente.</b> Galicia. El precio del plan cae entre 13.000 y 24.000 €.</span></div>
-  <div class="line"><span><b>La promesa.</b> Doce meses de garantía, por escrito. Sin historial, no se paga el coche.</span></div>
-  <div class="line"><span><b>El local.</b> Nave de 550 m² en San Marcos, Santiago. La licencia ya existe. Se abre con el dinero.</span></div>
+  <div class="line"><span>Coches de ocasión, nacionales o de fuera. Se compra donde el número cierra.</span></div>
+  <div class="line"><span>Galicia. Precio del plan entre 13.000 y 24.000 €.</span></div>
+  <div class="line"><span>Doce meses de garantía, por escrito. Sin historial, no se paga el coche.</span></div>
+  <div class="line"><span>Nave de 550 m² en San Marcos. La licencia ya existe. Se abre con el dinero.</span></div>
   <footer><span>KHC AUTO IMPORT</span><span>02</span></footer>
 </section>
 <section class="slide">
@@ -794,9 +1084,9 @@ def write_html():
   <h1>Cuatro restas. Siempre las mismas.</h1>
   <div class="grid">
     <article><b>{esc(eur(S['totals']['cost']/7))}</b><p class="muted">Coste medio. Transporte y matriculación ya dentro.</p></article>
-    <article><b>{esc(eur(S['totals']['sell']/7))}</b><p class="muted">Venta media. El detalle, en la lámina siguiente.</p></article>
+    <article><b>{esc(eur(S['totals']['sell']/7))}</b><p class="muted">Venta media de los siete.</p></article>
     <article><b>{esc(eur(S['totals']['rebu']/7))}</b><p class="muted">IVA solo sobre la ganancia. En un usado se llama REBU.</p></article>
-    <article><b>3.781 €</b><p class="muted">Lo que queda, de media. Venta menos coste menos ese IVA.</p></article>
+    <article><b>3.781 €</b><p class="muted">Lo que queda, de media.</p></article>
   </div>
   <footer><span>KHC AUTO IMPORT</span><span>03</span></footer>
 </section>
@@ -804,19 +1094,18 @@ def write_html():
   <p class="kicker">Los siete coches del plan</p>
   <h1>Esto es el stock.</h1>
   <table><thead><tr><th>Coche</th><th>Coste</th><th>Venta</th><th>Quedan</th></tr></thead><tbody>{lot_rows}</tbody></table>
-  <p class="muted">En la web, el 116d está a 12.475 € y el 318d a 17.250 €. Mil euros bajo esta tabla.</p>
+  <p class="muted">En la web, el 116d está a 12.475 € y el 318d a 17.250 €.</p>
   <footer><span>KHC AUTO IMPORT</span><span>04</span></footer>
 </section>
 <section class="slide">
   <p class="kicker">El programa</p>
   <h1>Lo hemos programado nosotros.</h1>
-  <p class="muted">No es un programa comprado. En la empresa se llama ERP. Se usa en este orden.</p>
   <ol>
-    <li><b>Simulador.</b> Coche, vendedor y precio de venta. Devuelve el coste, el impuesto y lo que queda. Si no sale, no se compra.</li>
-    <li><b>Catálogo.</b> 1.104 versiones de 37 marcas. El motor prohibido no se puede dar de alta como compra.</li>
-    <li><b>Ficha.</b> De «lo estamos mirando» a «entregado». Gastos, papeles y fotos, en el móvil y en el ordenador.</li>
-    <li><b>Viaje e impuesto.</b> Rodando o en camión, antes del billete. Si la factura trae IVA descontable, no deja aplicar el IVA solo sobre la ganancia.</li>
-    <li><b>Web y factura.</b> khcimport.autos publica el coche. Reservado o vendido se ve el mismo día. El cliente no ve el coste.</li>
+    <li><b>Simulador.</b> Coche, vendedor y precio. Si no sale, no se compra.</li>
+    <li><b>Catálogo.</b> 1.104 versiones. El motor prohibido no se da de alta.</li>
+    <li><b>Ficha.</b> De «lo estamos mirando» a «entregado». El mismo dato en el móvil y en el ordenador.</li>
+    <li><b>Viaje e impuesto.</b> Rodando o en camión. Si la factura trae IVA descontable, no deja aplicar el IVA solo sobre la ganancia.</li>
+    <li><b>Web y factura.</b> khcimport.autos. Reservado o vendido se ve el mismo día. El cliente no ve el coste.</li>
   </ol>
   <footer><span>KHC AUTO IMPORT</span><span>05</span></footer>
 </section>
@@ -824,102 +1113,126 @@ def write_html():
   <p class="kicker">Qué coche entra</p>
   <h1>Primero el motor. Después el precio.</h1>
   <div class="grid">
-    <article><b>Se compra</b><p>Etiqueta C o ECO, libro de mantenimiento, diésel 2.0 de correa seca. Un BMW diésel solo si el motor es el posterior a la cadena que rompía. Garantía de 12 meses.</p></article>
-    <article><b>No se compra</b><p>PureTech, EcoBoost de correa bañada, el 1.2 que bebe aceite, el diésel de Jaguar y Land Rover, el BMW de cadena antigua. El 116d de 2015 de la tabla no se paga hasta ver el motor.</p></article>
+    <article><b>Se compra</b><p>Etiqueta C o ECO, libro de mantenimiento, diésel 2.0 de correa seca. Garantía de 12 meses.</p></article>
+    <article><b>No se compra</b><p>PureTech, EcoBoost de correa bañada, el BMW de cadena antigua. El 116d de la tabla no se paga hasta ver el motor.</p></article>
   </div>
   <footer><span>KHC AUTO IMPORT</span><span>06</span></footer>
 </section>
 <section class="slide">
-  <p class="kicker">La regla del dinero</p>
-  <h1>Seis en el suelo. El séptimo se paga con la primera venta.</h1>
-  <div class="line"><span><b>Mes 1.</b> Se abre la nave. Se pagan seis coches y la reforma. El Mercedes no se compra.</span></div>
-  <div class="line"><span><b>El fondo.</b> Esos 17.666 € no están olvidados. Son la compra que espera un cobro.</span></div>
-  <div class="line"><span><b>Cuando se cobra.</b> El precio no se queda en el banco. Ese mes compra el siguiente. Después, cada venta repone otro igual.</span></div>
-  <div class="line"><span><b>La reforma.</b> 4.550 € de materiales: suelo 1.800, luz 1.100, aseos 1.300 y extintores 350. La obra la hace el promotor.</span></div>
+  <p class="kicker">Todos los gastos</p>
+  <h1>Cinco partidas. Cada mes. Haya venta o no.</h1>
+  <div class="line"><span>Nave</span><b>1.100 €</b></div>
+  <div class="line"><span>Autónomo. No es un sueldo.</span><b>380 €</b></div>
+  <div class="line"><span>Portales y gestoría</span><b>250 €</b></div>
+  <div class="line"><span>Luz, agua y vado</span><b>150 €</b></div>
+  <div class="line"><span>Cuota, 5,50 % y 60 meses</span><b>955,06 €</b></div>
+  <div class="line total"><span>El mes</span><b>2.835,06 €</b></div>
+  <p class="muted">El mes 1 suma la reforma, 4.550 € de materiales. La obra la hace el promotor. No están: sueldo, taller, el equipo de 822,90 € y la cuota SGR.</p>
   <footer><span>KHC AUTO IMPORT</span><span>07</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">La regla del año</p>
+  <h1>Se vende, se compra. Si la caja pasa del fondo, se compra más.</h1>
+  <div class="line"><span><b>Mes 1.</b> Seis coches y reforma. El Mercedes no cabe sin bajar del fondo.</span></div>
+  <div class="line"><span><b>Fondo.</b> {esc(eur(S['floor'], True))}. Tres meses de gastos. Por debajo no se compra.</span></div>
+  <div class="line"><span><b>La venta.</b> El primer cobro compra el Mercedes. Después, cada venta repone ese modelo.</span></div>
+  <div class="line"><span><b>Lo que sobra.</b> El mes 10 compra otro 116d, a 9.010 €. El coste que ya tiene. No es un modelo nuevo.</span></div>
+  <footer><span>KHC AUTO IMPORT</span><span>08</span></footer>
 </section>
 <section class="slide">
   <p class="kicker">Mes 1</p>
   <h1>Se abre. Se compra. Todavía no se vende.</h1>
-  <div class="line"><span>Capital propio</span><b>+50.000 €</b></div>
-  <div class="line"><span>Financiación</span><b>+50.000 €</b></div>
+  <div class="line"><span>Capital y financiación</span><b>+100.000 €</b></div>
   <div class="line"><span>Seis coches</span><b>−77.714 €</b></div>
   <div class="line"><span>Reforma, materiales</span><b>−4.550 €</b></div>
   <div class="line"><span>El mes</span><b>−2.835,06 €</b></div>
   <div class="line total"><span>Caja</span><b>14.900,94 €</b></div>
-  <p class="muted">El mes: nave 1.100, autónomo 380, portales 250, luz 150, cuota 955,06. El autónomo no es un sueldo.</p>
-  <footer><span>KHC AUTO IMPORT</span><span>08</span></footer>
+  <footer><span>KHC AUTO IMPORT</span><span>09</span></footer>
 </section>
 <section class="slide">
   <p class="kicker">Mes 2</p>
   <h1>Se cobra el Golf GTI. Ese dinero compra el Mercedes.</h1>
-  <div class="line"><span>Caja de apertura del mes</span><b>14.900,94 €</b></div>
+  <div class="line"><span>Caja</span><b>14.900,94 €</b></div>
   <div class="line"><span>El mes</span><b>−2.835,06 €</b></div>
   <div class="line"><span>Cobro del GTI</span><b>+18.500 €</b></div>
   <div class="line"><span>IVA de esa ganancia</span><b>−1.011,12 €</b></div>
   <div class="line"><span>Compra del Mercedes</span><b>−17.666 €</b></div>
   <div class="line total"><span>Caja</span><b>11.888,76 €</b></div>
-  <p class="muted">El precio no se ha quedado en el banco. Ha pagado el coche que faltaba. La caja baja porque el fondo se ha convertido en un coche.</p>
-  <footer><span>KHC AUTO IMPORT</span><span>09</span></footer>
-</section>
-<section class="slide">
-  <p class="kicker">Doce meses</p>
-  <h1>Cada venta compra el siguiente.</h1>
-  <table><thead><tr><th>Mes</th><th>Qué ocurre</th><th>Entra</th><th>Sale</th><th>Caja</th></tr></thead><tbody>{year_rows}</tbody></table>
-  <p class="muted">En el mes 1 entra el capital, no una venta. El suelo sigue en seis. Diciembre cierra con {esc(eur(S['months'][-1]['end'], True))} y los mismos seis coches.</p>
   <footer><span>KHC AUTO IMPORT</span><span>10</span></footer>
 </section>
 <section class="slide">
-  <p class="kicker">Lo que mira quien presta</p>
-  <h1>Una venta paga el mes. Doce cubren la cuota 1,72 veces.</h1>
-  <div class="grid3">
-    <article><b>2.835 €</b><p class="muted">Sale cada mes, haya venta o no.</p></article>
-    <article><b>86 €</b><p class="muted">Lo que sobra con el Audi, el que menos deja. Cubre, y sobra poco.</p></article>
-    <article><b>946 €</b><p class="muted">Lo que sobra con el coche medio.</p></article>
-  </div>
-  <p class="muted">El 1,32 de las cuatro páginas no quita el impuesto y redondea la cuota. El primer año de la tabla tiene once ventas, porque el mes 1 es la apertura. Termina con {esc(eur(S['months'][-1]['end'], True))}.</p>
+  <p class="kicker">Ganancia y gasto</p>
+  <h1>La barra verde deja más que la dorada.</h1>
+  <div class="chart">{svg_gains()}</div>
+  <p class="muted">Dorada: el mes, 2.835 €. Verde: el margen. El mes 1 no vende. El Audi, el mes 7, supera el gasto en 86 €.</p>
   <footer><span>KHC AUTO IMPORT</span><span>11</span></footer>
 </section>
 <section class="slide">
-  <p class="kicker">El taller</p>
-  <h1>No está en los doce meses. No paga la cuota.</h1>
-  <div class="grid3">
-    <article><b>60 €</b><p class="muted">Mano de obra que hoy sale a un taller de fuera, por coche propio.</p></article>
-    <article><b>116,60 €</b><p class="muted">Aceite y cuatro filtros, a precio cerrado. Al cliente, a ese coste.</p></article>
-    <article><b>0 €</b><p class="muted">Caja, pastillas y neumáticos. Sin tarifa, no entran.</p></article>
-  </div>
+  <p class="kicker">La caja</p>
+  <h1>Sube con lo que sobra. Baja cuando se compra.</h1>
+  <div class="chart">{svg_cash()}</div>
+  <p class="muted">Mes 2, el Mercedes. Mes 10, otro 116d a 9.010 €. Diciembre cierra con {esc(eur(S['months'][-1]['end'], True))} y siete coches.</p>
   <footer><span>KHC AUTO IMPORT</span><span>12</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">El primer año</p>
+  <h1>Mes a mes.</h1>
+  <table><thead><tr><th>Mes</th><th>Qué ocurre</th><th>Cobro</th><th>Gastos</th><th>IVA</th><th>Compra</th><th>Sobra</th><th>Caja</th></tr></thead><tbody>{year_rows}</tbody></table>
+  <p class="muted">Sobra es el margen menos el mes. No incluye la compra. El mes 1, cobro es el capital.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>13</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">El año, en una cuenta</p>
+  <h1>Once ventas. Siete coches. La cuota, pagada.</h1>
+  <div class="line"><span>Capital</span><b>+100.000 €</b></div>
+  <div class="line"><span>Once cobros</span><b>+{esc(eur(S['sales']))}</b></div>
+  <div class="line"><span>Coches comprados</span><b>−{esc(eur(S['purchases']))}</b></div>
+  <div class="line"><span>Gastos y reforma</span><b>−{esc(eur(S['gastos'], True))}</b></div>
+  <div class="line"><span>IVA de las ganancias</span><b>−{esc(eur(S['iva'], True))}</b></div>
+  <div class="line total"><span>Caja en diciembre</span><b>{esc(eur(S['months'][-1]['end'], True))}</b></div>
+  <p class="muted">Impuesto del año, al 15 %: {esc(eur(S['tax'], True))}. No se paga en estos doce meses. Si se aparta, quedan {esc(eur(S['free'], True))}.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>14</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">Lo que mira quien presta</p>
+  <h1>Este año, 1,32 veces. El ritmo de doce, 1,72.</h1>
+  <div class="grid3">
+    <article><b>1,32</b><p class="muted">Once ventas de la tabla, impuesto restado, partido por las doce cuotas.</p></article>
+    <article><b>1,72</b><p class="muted">Doce ventas del coche medio. Es el ritmo, no el diario de la apertura.</p></article>
+    <article><b>86 €</b><p class="muted">Lo que sobra el mes del Audi, el que menos deja.</p></article>
+  </div>
+  <footer><span>KHC AUTO IMPORT</span><span>15</span></footer>
 </section>
 <section class="slide">
   <p class="kicker">Si no sale como en la tabla</p>
   <h1>Cada desvío tiene un número.</h1>
   <div class="line"><span>El mes 2 tampoco se vende</span><b>{esc(eur(S['months'][0]['end']-MONTH, True))}</b></div>
-  <div class="line"><span>Impuesto al 23 %</span><b>1,58 veces</b></div>
+  <div class="line"><span>Impuesto al 23 %, doce ventas medias</span><b>1,58 veces</b></div>
   <div class="line"><span>116d y 318d al precio de la web</span><b>1,51 veces</b></div>
-  <div class="line"><span>Todos los precios, un 5 % más bajos. La cuota se paga, pero solo sobra un 6 %.</span><b>1,06 veces</b></div>
-  <footer><span>KHC AUTO IMPORT</span><span>13</span></footer>
+  <div class="line"><span>Todos los precios, un 5 % más bajos</span><b>1,06 veces</b></div>
+  <footer><span>KHC AUTO IMPORT</span><span>16</span></footer>
 </section>
 <section class="slide dark">
   <p class="kicker">La petición</p>
   <h1>50.000 € al lado de otros 50.000 €.</h1>
-  <p>El mes 1 se abre la nave y se compran seis coches. El mes 2, el primer cobro compra el Mercedes. Después, cada venta compra el siguiente. Lo que se pide es una oferta de tipo y de plazo.</p>
+  <p>El mes 1 abre la nave y compra seis coches. El mes 2 compra el Mercedes. El mes 10, otro 116d. Lo que se pide es una oferta de tipo y de plazo.</p>
   <div class="grid3">
     <div class="stat"><b>50.000 €</b><span>Financiación</span></div>
-    <div class="stat"><b>14.900,94 €</b><span>Caja al cerrar el mes 1</span></div>
-    <div class="stat"><b>1,72 veces</b><span>La cuota, con doce ventas</span></div>
+    <div class="stat"><b>{esc(eur(S['months'][-1]['end'], True))}</b><span>Caja al cerrar el año</span></div>
+    <div class="stat"><b>1,32 veces</b><span>La cuota, en este año</span></div>
   </div>
-  <footer><span>KHC AUTO IMPORT</span><span>14</span></footer>
+  <footer><span>KHC AUTO IMPORT</span><span>17</span></footer>
 </section>
 <section class="slide">
   <p class="kicker">De dónde sale cada cifra</p>
   <h1>Nada de esta sala es una venta ya cobrada.</h1>
   <ul>
-    <li>Coches, nave, reforma y gastos: plan de viabilidad de cuatro páginas.</li>
-    <li>Dejar el Mercedes para el mes 2 es la regla de esta solicitud. En las cuatro páginas se compran los siete el día 1.</li>
-    <li>El orden de las ventas es hipótesis: una al mes, desde el mes 2. «Otro igual» usa el coste ya cerrado. No hay un octavo coche inventado.</li>
-    <li>El programa es el de este proyecto. La web es khcimport.autos.</li>
+    <li>Coches, nave, reforma y gastos: plan de cuatro páginas. La cuota exacta es 955,06 €, no 966 €.</li>
+    <li>El fondo de {esc(eur(S['floor'], True))} es tres veces el mes. Es la regla de esta solicitud.</li>
+    <li>El orden de las ventas es hipótesis. El segundo 116d usa el coste ya cerrado, 9.010 €. No hay un octavo modelo inventado.</li>
+    <li>El 1,32 de este año y el 1,72 del ritmo no son la misma cuenta. El 1,32 de las cuatro páginas no quita el impuesto.</li>
   </ul>
-  <footer><span>KHC AUTO IMPORT</span><span>15</span></footer>
+  <footer><span>KHC AUTO IMPORT</span><span>18</span></footer>
 </section>
 <div class="hint">Flechas · F pantalla completa</div>
 <script>
@@ -949,10 +1262,9 @@ def main():
     flatten_logo()
     write_pdf()
     write_html()
-    print("months", len(S["months"]), "end", S["months"][-1]["end"])
+    print("slides", len(SLIDES), "end", S["months"][-1]["end"], "tax", S["tax"], "dscr", S["dscr"])
     for m in S["months"]:
-        print(m["n"], m["what"], m["end"])
-    print(OUT_PDF, "slides", len(SLIDES))
+        print(m["n"], m["kind"], m["what"], m["end"], "sobra", m["sobra"])
 
 
 if __name__ == "__main__":
