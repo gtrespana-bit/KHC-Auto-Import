@@ -177,6 +177,7 @@ export function movementsFromData({ vehicles = [], expenses = [], sales = [] } =
     const c = v.costs || {};
     if (c.purchase) out.push({ id: `${v.id}-purchase`, date: v.purchaseDate || v.createdAt, type: 'out', category: 'Compra de vehículo', concept: `${v.brand || ''} ${v.model || ''}`.trim(), amount: n(c.purchase ?? v.purchasePrice), vehicleId: v.id });
     [
+      ['marginExtras', 'Comisiones de compra'],
       ['transport', 'Transporte'], ['cocFicha', 'Homologación / COC'], ['itv', 'ITV'], ['iedmt', 'Modelo 576'],
       ['itp', 'Modelo 620'], ['vatPurchase', 'IVA compra'], ['ivtm', 'IVTM'], ['dgt', 'Tasa DGT'],
       ['placas', 'Placas'], ['gestoria', 'Gestoría'], ['recond', 'Reacondicionamiento'],

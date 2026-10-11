@@ -22,16 +22,21 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // la carpeta del coche; el mapa liga carpeta editada → carpeta de originales.
 const ORIGINAL_FOLDER = {
   'volvo v40 editadas/': 'volvo v40/',
+  'fiat 500x editadas/': 'fiat 500x/',
+  'renault talisman editadas/': 'renault talisman/',
   'audi a3 gris editadas/': 'audi a3 gris/',
   'bmw serie 3 touring editadas/': 'bmw serie 3 touring/',
   'golf gris 2022 editadas/': 'golf gris 2022/',
 };
 
-assert.equal(PENDING_VEHICLE_IMPORT_DATA.length, 4);
-const [audi, bmw, golf, volvo] = PENDING_VEHICLE_IMPORT_DATA;
+assert.equal(PENDING_VEHICLE_IMPORT_DATA.length, 6);
+const [audi, bmw, golf, volvo, fiat, renault] = PENDING_VEHICLE_IMPORT_DATA;
 assert.equal(audi.id, 'mobilede-48386412615008');
 assert.equal(bmw.id, 'mobilede-44333260322272');
 assert.equal(golf.id, 'mobilede-460197027');
+assert.equal(volvo.id, 'carreport-11514903');
+assert.equal(fiat.id, 'carreport-11625065');
+assert.equal(renault.id, 'carreport-11662976');
 
 // ---------------------------------------------------------------------------
 // Invariantes comunes a todos los borradores
@@ -187,7 +192,7 @@ assert.ok(
 // ---------------------------------------------------------------------------
 // Deduplicación de borradores pendientes
 // ---------------------------------------------------------------------------
-assert.equal(getPendingVehicleImports(PENDING_VEHICLE_IMPORT_DATA, [], []).length, 4);
+assert.equal(getPendingVehicleImports(PENDING_VEHICLE_IMPORT_DATA, [], []).length, 6);
 assert.equal(
   getPendingVehicleImports([audi], [{ id: 'veh', importDraftId: audi.id }], []).length,
   0,
@@ -406,3 +411,100 @@ assert.equal(volvoCompany.costs.marginExtras, 0, 'no inventar comisiones a parti
 const volvoPnl = vehiclePnl({ ...volvoCompany, sale: { price: 18000, vatRegime: 'rebu' } });
 assert.equal(volvoPnl.vatRegime, 'general', 'la compra con IVA deducible no permite REBU');
 assert.equal(volvoPnl.purchaseCost, 9800);
+
+// ---------------------------------------------------------------------------
+// Fiat 500X 1.6 MultiJet · Openlane CarReport 11625065 (REBU)
+// ---------------------------------------------------------------------------
+assert.equal(fiat.id, 'carreport-11625065');
+assert.equal(fiat.vehicle.brand, 'Fiat');
+assert.equal(fiat.vehicle.model, '500X');
+assert.equal(fiat.vehicle.year, 2018);
+assert.equal(fiat.vehicle.firstRegDate, '2018-04-17');
+assert.equal(fiat.vehicle.firstRegDatePending, false);
+assert.equal(fiat.vehicle.km, 50439);
+assert.equal(fiat.vehicle.cc, 1598);
+assert.equal(fiat.vehicle.cv, 114);
+assert.equal(fiat.vehicle.co2, 109);
+assert.equal(fiat.vehicle.plate, '1EQW549');
+assert.equal(fiat.vehicle.vin, '');
+assert.equal(fiat.vehicle.sellerType, 'pro_eu_rebu');
+assert.equal(fiat.sourceListing.askingPrice, 8300);
+assert.equal(fiat.sourceListing.previousAskingPrice, 8400);
+assert.equal(fiat.sourceListing.advertisedDiscount, 100);
+assert.equal(fiat.sourceListing.countrySpecificCosts, 195);
+assert.equal(fiat.sourceListing.auctionFees, 245);
+assert.equal(fiat.sourceListing.subtotalExclVat, 8740);
+assert.equal(fiat.sourceListing.vatOnFees, 92.4);
+assert.equal(fiat.sourceListing.advertisedTotalInclVat, 8832.4);
+assert.equal(fiat.vehicle.costs.purchase, 8300);
+assert.equal(fiat.vehicle.costs.marginExtras, 440);
+assert.equal(fiat.priceTarget.amount, 12990);
+assert.equal(fiat.vehicle.targetSalePrice, 12990);
+assert.equal(fiat.photos.length, 16);
+assert.equal(fiat.photos.filter((p) => p.backgroundEdited).length, 4);
+assert.ok(existsSync(path.join(root, 'public', decodeURIComponent(fiat.sourceListing.url))));
+for (const buyerIsBusiness of [true, false]) {
+  const importedFiat = buildImportedVehicle(fiat, { buyerIsBusiness, today: '2026-10-11' });
+  assert.equal(importedFiat.status, 'prospeccion');
+  assert.equal(importedFiat.purchaseDate, null);
+  assert.equal(importedFiat.sellerType, 'pro_eu_rebu');
+  assert.equal(importedFiat.costs.purchase, 8300);
+  assert.equal(importedFiat.costs.marginExtras, 440);
+  assert.equal(importedFiat.costs.itp, 0, 'compra a profesional UE en REBU: sin ITP');
+  assert.equal(importedFiat.costs.vatPurchase, 0, 'compra REBU: sin IVA de adquisición sobre el vehículo');
+  assert.equal(importedFiat.costs.iedmt, 0, '109 g/km cae en el tramo 0 % del Modelo 576');
+  assert.equal(importedFiat.costs.itv, 132.59);
+  assert.equal(importedFiat.targetSalePrice, 12990);
+  const fiatPnl = vehiclePnl(importedFiat);
+  assert.equal(fiatPnl.vatRegime, 'rebu', 'compra REBU permite revender por régimen del margen');
+  assert.equal(fiatPnl.purchaseCost, 8300, 'precio REBU del vehículo (8.300 €)');
+  assert.equal(fiatPnl.marginPurchase, 8740, 'base de compra REBU: precio (8.300 €) + comisiones facturadas (440 €)');
+}
+
+// ---------------------------------------------------------------------------
+// Renault Talisman 1.7 dCi Zen · Openlane CarReport 11662976 (REBU)
+// ---------------------------------------------------------------------------
+assert.equal(renault.id, 'carreport-11662976');
+assert.equal(renault.vehicle.brand, 'Renault');
+assert.equal(renault.vehicle.model, 'Talisman');
+assert.equal(renault.vehicle.year, 2020);
+assert.equal(renault.vehicle.firstRegDate, '2020-09-08');
+assert.equal(renault.vehicle.firstRegDatePending, false);
+assert.equal(renault.vehicle.km, 110311);
+assert.equal(renault.vehicle.cc, 1749);
+assert.equal(renault.vehicle.cv, 120);
+assert.equal(renault.vehicle.co2, null);
+assert.equal(renault.vehicle.plate, '1EUN965');
+assert.equal(renault.vehicle.vin, '');
+assert.equal(renault.vehicle.sellerType, 'pro_eu_rebu');
+assert.equal(renault.sourceListing.askingPrice, 10700);
+assert.equal(renault.sourceListing.countrySpecificCosts, 195);
+assert.equal(renault.sourceListing.auctionFees, 300);
+assert.equal(renault.sourceListing.subtotalExclVat, 11195);
+assert.equal(renault.sourceListing.vatOnFees, 103.95);
+assert.equal(renault.sourceListing.advertisedTotalInclVat, 11298.95);
+assert.equal(renault.vehicle.costs.purchase, 10700);
+assert.equal(renault.vehicle.costs.marginExtras, 495);
+assert.equal(renault.priceTarget.amount, 15990);
+assert.equal(renault.vehicle.targetSalePrice, 15990);
+assert.equal(renault.photos.length, 16);
+assert.equal(renault.photos.filter((p) => p.backgroundEdited).length, 4);
+assert.ok(existsSync(path.join(root, 'public', decodeURIComponent(renault.sourceListing.url))));
+for (const buyerIsBusiness of [true, false]) {
+  const importedRenault = buildImportedVehicle(renault, { buyerIsBusiness, today: '2026-10-11' });
+  assert.equal(importedRenault.status, 'prospeccion');
+  assert.equal(importedRenault.purchaseDate, null);
+  assert.equal(importedRenault.sellerType, 'pro_eu_rebu');
+  assert.equal(importedRenault.costs.purchase, 10700);
+  assert.equal(importedRenault.costs.marginExtras, 495);
+  assert.equal(importedRenault.costs.itp, 0, 'compra a profesional UE en REBU: sin ITP');
+  assert.equal(importedRenault.costs.vatPurchase, 0, 'compra REBU: sin IVA de adquisición sobre el vehículo');
+  assert.equal(importedRenault.costs.itv, 132.59);
+  assert.equal(importedRenault.targetSalePrice, 15990);
+  assert.ok(importedRenault.pendingCostFields.includes('iedmt'), 'IEDMT pendiente de verificar CO₂ en COC');
+  const renaultPnl = vehiclePnl(importedRenault);
+  assert.equal(renaultPnl.vatRegime, 'rebu', 'compra REBU permite revender por régimen del margen');
+  assert.equal(renaultPnl.purchaseCost, 10700, 'precio REBU del vehículo (10.700 €)');
+  assert.equal(renaultPnl.marginPurchase, 11195, 'base de compra REBU: precio (10.700 €) + comisiones facturadas (495 €)');
+}
+console.log('OK: Fiat 500X y Renault Talisman en REBU (Openlane), 16 fotos cada uno con 4 exteriores homogeneizados, desglose de subasta y objetivo de venta.');
