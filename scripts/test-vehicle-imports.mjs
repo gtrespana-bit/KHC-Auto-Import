@@ -28,10 +28,11 @@ const ORIGINAL_FOLDER = {
   'bmw serie 3 touring editadas/': 'bmw serie 3 touring/',
   'golf gris 2022 editadas/': 'golf gris 2022/',
   'mercedes c300 editadas/': 'mercedes c300/',
+  'volvo xc40 editadas/': 'volvo xc40/',
 };
 
-assert.equal(PENDING_VEHICLE_IMPORT_DATA.length, 7);
-const [audi, bmw, golf, volvo, fiat, renault, mercedes] = PENDING_VEHICLE_IMPORT_DATA;
+assert.equal(PENDING_VEHICLE_IMPORT_DATA.length, 8);
+const [audi, bmw, golf, volvo, fiat, renault, mercedes, xc40] = PENDING_VEHICLE_IMPORT_DATA;
 assert.equal(audi.id, 'mobilede-48386412615008');
 assert.equal(bmw.id, 'mobilede-44333260322272');
 assert.equal(golf.id, 'mobilede-460197027');
@@ -39,6 +40,7 @@ assert.equal(volvo.id, 'carreport-11514903');
 assert.equal(fiat.id, 'carreport-11625065');
 assert.equal(renault.id, 'carreport-11662976');
 assert.equal(mercedes.id, 'mobilede-49868512964960');
+assert.equal(xc40.id, 'mobilede-46986346608224');
 
 // ---------------------------------------------------------------------------
 // Invariantes comunes a todos los borradores
@@ -194,7 +196,7 @@ assert.ok(
 // ---------------------------------------------------------------------------
 // Deduplicación de borradores pendientes
 // ---------------------------------------------------------------------------
-assert.equal(getPendingVehicleImports(PENDING_VEHICLE_IMPORT_DATA, [], []).length, 7);
+assert.equal(getPendingVehicleImports(PENDING_VEHICLE_IMPORT_DATA, [], []).length, 8);
 assert.equal(
   getPendingVehicleImports([audi], [{ id: 'veh', importDraftId: audi.id }], []).length,
   0,
@@ -572,3 +574,61 @@ for (const buyerIsBusiness of [true, false]) {
   );
 }
 console.log('OK: Mercedes-Benz C 300 d 4MATIC T (mobile.de, particular), 10 fotos con 4 exteriores homogeneizados y CO₂/IEDMT pendientes de COC.');
+
+// ---------------------------------------------------------------------------
+// Volvo XC40 2.0 D3 R-Design AWD · mobile.de 46986346608224 (concesionario IT)
+// ---------------------------------------------------------------------------
+assert.equal(xc40.vehicle.brand, 'Volvo');
+assert.equal(xc40.vehicle.model, 'XC40');
+assert.equal(xc40.vehicle.year, 2020);
+assert.equal(xc40.vehicle.firstRegDate, null);
+assert.equal(xc40.vehicle.firstRegDatePending, true, 'el anuncio solo indica 01/2020');
+assert.equal(xc40.vehicle.km, 132000);
+assert.equal(xc40.vehicle.cc, 1969);
+assert.equal(xc40.vehicle.cv, 150);
+assert.equal(xc40.vehicle.co2, null, 'el anuncio no consigna CO₂');
+assert.equal(xc40.vehicle.cvf, 13.2);
+assert.equal(xc40.vehicle.transmission, 'Manual');
+assert.equal(xc40.vehicle.sellerType, 'pro_eu_vat', 'compra a concesionario italiano');
+assert.equal(xc40.vehicle.itpExemption, false);
+assert.equal(xc40.vehicle.itpExemptionPending, false, 'sin ITP en compra a profesional');
+assert.equal(xc40.sourceListing.askingPrice, 12000);
+assert.equal(xc40.vehicle.costs.purchase, 12000);
+assert.equal(xc40.vehicle.costs.itv, 132.59, 'diésel 52,30 € + ficha 80,29 €');
+assert.equal(xc40.vehicle.costs.cocFicha, 120);
+assert.equal(xc40.vehicle.costs.dgt, 99.77);
+assert.equal(xc40.vehicle.costs.placas, 28);
+assert.equal(xc40.vehicle.costs.gestoria, 180);
+assert.equal(xc40.vehicle.costs.transport, 750);
+assert.equal(xc40.priceTarget.amount, 19990);
+assert.equal(xc40.vehicle.targetSalePrice, 19990);
+assert.equal(xc40.photos.length, 11);
+assert.equal(xc40.photos.filter((photo) => photo.backgroundEdited).length, 6, 'las seis vistas exteriores homogeneizadas');
+assert.deepEqual(xc40.vehicle.pendingCostFields, ['travel', 'insurance', 'other', 'iedmt']);
+assert.ok(
+  xc40.photos[0].assetPath.startsWith('volvo xc40 editadas/'),
+  'la portada del XC40 es la vista homogeneizada a nuestra ubicación',
+);
+assert.ok(
+  xc40.photos.slice(6).every((photo) => photo.assetPath.startsWith('volvo xc40/')),
+  'los interiores del XC40 conservan los originales del anuncio',
+);
+assert.ok(existsSync(path.join(root, 'public', 'images', 'volvo xc40', 'acaa4517-ad89-4ad1-950a-d5d92957788d.avif')));
+
+for (const buyerIsBusiness of [true, false]) {
+  const importedXc40 = buildImportedVehicle(xc40, { buyerIsBusiness, today: '2026-10-11' });
+  assert.equal(importedXc40.status, 'prospeccion');
+  assert.equal(importedXc40.purchaseDate, null);
+  assert.equal(importedXc40.sellerType, 'pro_eu_vat');
+  assert.equal(importedXc40.costs.purchase, 12000);
+  assert.equal(importedXc40.costs.itp, 0, 'compra a profesional UE: sin ITP');
+  assert.equal(importedXc40.costs.itv, 132.59);
+  assert.equal(importedXc40.targetSalePrice, 19990);
+  assert.ok(importedXc40.pendingCostFields.includes('iedmt'), 'IEDMT pendiente de verificar CO₂ en COC');
+  assert.equal(importedXc40.itpExemptionPending, false);
+}
+const xc40Company = buildImportedVehicle(xc40, { buyerIsBusiness: true, today: '2026-10-11' });
+assert.equal(xc40Company.costs.vatPurchase, 0, 'empresa: la AIB se autoliquida y deduce (caja 0 €)');
+const xc40Personal = buildImportedVehicle(xc40, { buyerIsBusiness: false, today: '2026-10-11' });
+assert.equal(xc40Personal.costs.vatPurchase, 2520, 'particular que compra a profesional UE: IVA del 309 (21 %)');
+console.log('OK: Volvo XC40 2.0 D3 R-Design AWD (mobile.de, concesionario italiano), 11 fotos con 6 exteriores homogeneizados y CO₂/IEDMT pendientes de COC.');
