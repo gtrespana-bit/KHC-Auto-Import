@@ -111,6 +111,18 @@ import mercedesC300Photo08 from '../../../public/images/mercedes c300/65c53036-4
 import mercedesC300Photo09 from '../../../public/images/mercedes c300/f284a9f3-ad10-42e7-bba0-3295549e7ac8.avif';
 import mercedesC300Photo10 from '../../../public/images/mercedes c300/e804ae9c-103b-4dec-8206-4ce4daab8f27.avif';
 
+import volvoXc40Photo01 from '../../../public/images/volvo xc40 editadas/volvo-xc40-tres-cuartos-frontal.jpg';
+import volvoXc40Photo02 from '../../../public/images/volvo xc40 editadas/volvo-xc40-tres-cuartos-frontal-2.jpg';
+import volvoXc40Photo03 from '../../../public/images/volvo xc40 editadas/volvo-xc40-frontal.jpg';
+import volvoXc40Photo04 from '../../../public/images/volvo xc40 editadas/volvo-xc40-trasera.jpg';
+import volvoXc40Photo05 from '../../../public/images/volvo xc40 editadas/volvo-xc40-tres-cuartos-trasero.jpg';
+import volvoXc40Photo06 from '../../../public/images/volvo xc40 editadas/volvo-xc40-tres-cuartos-trasero-2.jpg';
+import volvoXc40Photo07 from '../../../public/images/volvo xc40/d3ee2094-a62f-45c6-a921-dbd7f1ccfdcc.avif';
+import volvoXc40Photo08 from '../../../public/images/volvo xc40/364fbd1e-978b-4aec-89a8-c38b0b613dc8.avif';
+import volvoXc40Photo09 from '../../../public/images/volvo xc40/243a7e58-7f53-4d63-89b4-b3f35e4d0432.avif';
+import volvoXc40Photo10 from '../../../public/images/volvo xc40/1ff9110e-aa7d-49d5-af8c-3b2ba4c57372.avif';
+import volvoXc40Photo11 from '../../../public/images/volvo xc40/3e3d2482-01ca-4731-afab-9da7c922fb81.avif';
+
 const PHOTO_ASSETS = {
   'volvo v40 editadas/volvo-v40-frontal.jpg': volvo40Photo01,
   'volvo v40 editadas/volvo-v40-trasera.jpg': volvo40Photo02,
@@ -215,6 +227,18 @@ const PHOTO_ASSETS = {
   'golf gris 2022/7f367c22-813a-43d6-97ab-8e890263767b.jfif': golf8Photo10,
   'golf gris 2022/88b8aaa2-b1d2-48bc-a9a4-23df514e7da2.jfif': golf8Photo11,
   'golf gris 2022/09644f89-fd33-4a7f-b93d-a0cebf1ad342.jfif': golf8Photo12,
+
+  'volvo xc40 editadas/volvo-xc40-tres-cuartos-frontal.jpg': volvoXc40Photo01,
+  'volvo xc40 editadas/volvo-xc40-tres-cuartos-frontal-2.jpg': volvoXc40Photo02,
+  'volvo xc40 editadas/volvo-xc40-frontal.jpg': volvoXc40Photo03,
+  'volvo xc40 editadas/volvo-xc40-trasera.jpg': volvoXc40Photo04,
+  'volvo xc40 editadas/volvo-xc40-tres-cuartos-trasero.jpg': volvoXc40Photo05,
+  'volvo xc40 editadas/volvo-xc40-tres-cuartos-trasero-2.jpg': volvoXc40Photo06,
+  'volvo xc40/d3ee2094-a62f-45c6-a921-dbd7f1ccfdcc.avif': volvoXc40Photo07,
+  'volvo xc40/364fbd1e-978b-4aec-89a8-c38b0b613dc8.avif': volvoXc40Photo08,
+  'volvo xc40/243a7e58-7f53-4d63-89b4-b3f35e4d0432.avif': volvoXc40Photo09,
+  'volvo xc40/1ff9110e-aa7d-49d5-af8c-3b2ba4c57372.avif': volvoXc40Photo10,
+  'volvo xc40/3e3d2482-01ca-4731-afab-9da7c922fb81.avif': volvoXc40Photo11,
 };
 
 const REPORT_URLS = {
