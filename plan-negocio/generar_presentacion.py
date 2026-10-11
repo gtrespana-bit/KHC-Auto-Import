@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""Solicitud de 50.000 €. El primer año, con ambición y cifras cerradas.
+"""Solicitud de 50.000 €. Veinticuatro meses, con cifras cerradas.
 
 Precios de venta: los de khcimport.autos. Costes: los ya cerrados.
-Desde el mes 2 se venden dos coches al mes. Si el mes abre con nueve
-o más, se venden tres. Cada venta se repone en la semana, al mismo coste.
+Se vende una de cada tres unidades con las que abre el mes, y nunca
+menos de dos. Cada venta se repone en la semana, al mismo coste.
 El Mercedes entra cuando cabe sin bajar del fondo. Lo que sobra, después
-del fondo y del impuesto, compra el más barato de la tabla que quepa.
-No se inventa un modelo ni un precio.
+del fondo y de la reserva del 15 %, compra el más barato que quepa.
+El sueldo no es obligatorio. Entra el mes 6, al SMI de 2026 en 12 pagas,
+y sube a 2.083,33 € cuando el mes abre con ocho coches. En el segundo
+año se queda ahí. No se inventa un modelo ni un precio.
 """
 
 from __future__ import annotations
@@ -47,12 +49,22 @@ CARD = Color(1, 1, 1)
 LINE = Color(0.855, 0.835, 0.788)
 SOFT = Color(0.955, 0.949, 0.935)
 GRID = Color(0.91, 0.89, 0.85)
-MONTH = 2835.06
 REFORM = 4550.0
 KIT = 822.90
-RENT, RETA, MKT, UTIL = 1100.0, 380.0, 250.0, 150.0
+RENT, RETA, MKT, UTIL = 1100.0, 448.69, 250.0, 150.0
 QUOTA = 955.06
-STRUCT = 1880.0
+FIXED = 2903.75
+STRUCT = 1948.69
+SMI = 1424.50
+LIVE = 2083.33
+# Retención del administrador en el año 2: 35 %, porque el año 1 factura
+# más de 100.000 €. Este bruto solo iguala el bolsillo del año 1.
+# Es una propuesta, no el plan.
+Y2_GROSS = 2596.15
+SALARY_START = 6
+RISE_STOCK = 8
+WITHHOLD = 0.19
+Y2_WITHHOLD = 0.35
 
 
 def r2(n):
@@ -147,42 +159,101 @@ def apply_web(unit):
     return u
 
 
-def tax_reserve(cum_net, n, interest):
-    ebitda = r2(cum_net - STRUCT * n - KIT)
+def scheduled_salary(n, stock):
+    if n < SALARY_START:
+        return 0.0
+    if stock >= RISE_STOCK:
+        return LIVE
+    return SMI
+
+
+def sales_count(stock):
+    """Una de cada tres unidades en el suelo, y nunca menos de dos."""
+    return max(2, stock // 3)
+
+
+def pocket(gross):
+    return r2(gross - r2(gross * WITHHOLD))
+
+
+def amortize(balance, annual_rate, payment, months=12):
+    rate = annual_rate / 12
+    inte = prin = 0.0
+    bal = balance
+    for _ in range(months):
+        i = r2(bal * rate)
+        p = r2(payment - i)
+        bal = r2(bal - p)
+        inte = r2(inte + i)
+        prin = r2(prin + p)
+    return inte, prin, bal
+
+
+def tax_reserve(cum_net, n, interest, sal_sum):
+    ebitda = r2(cum_net - STRUCT * n - KIT - sal_sum)
     return r2(max(0.0, ebitda - interest) * 0.15)
 
 
-def simulate():
+def simulate(y2_gross=None):
+    assert r2(RENT + RETA + MKT + UTIL + QUOTA) == FIXED
+    assert r2(RENT + RETA + MKT + UTIL) == STRUCT
+    assert r2(25000 / 12) == LIVE
+    assert pocket(LIVE) == 1687.50
+    assert r2(1687.50 / (1 - Y2_WITHHOLD)) == Y2_GROSS
     lot = [apply_web(u) for u in MODEL["lot"]]
     held = max(lot, key=lambda u: u["cost"])
     opening = [u for u in lot if u["name"] != held["name"]]
     models = sorted(lot, key=lambda u: (u["cost"], u["name"]))
-    floor = r2(MONTH * 3)
+    floor = r2(FIXED * 3)
     six = r2(sum(u["cost"] for u in opening))
-    cash = r2(100000 - six - REFORM - KIT - MONTH)
+    cash = r2(100000 - six - REFORM - KIT - FIXED)
     stock = [dict(u) for u in opening]
     mercedes_in = False
     cum_net = 0.0
+    sal_sum = 0.0
+    y_net = 0.0
+    y_sal = 0.0
+    y1_tax = 0.0
+    y1_result = 0.0
     interest = MODEL["loan"]["y1_interest"]
+    y2_interest, y2_principal, y2_balance = amortize(
+        MODEL["loan"]["y1_balance"], MODEL["loan"]["rate"], MODEL["loan"]["payment_exact"]
+    )
     months = [{
         "n": 1,
-        "what": "Apertura. Equipo, seis coches y reforma. Sin venta.",
+        "what": "Apertura. Equipo, reforma y seis coches. Sin venta.",
         "sold": [],
         "cobro": 100000.0,
-        "gastos": r2(MONTH + REFORM + KIT),
+        "fijos": FIXED,
+        "sal": 0.0,
+        "bill": FIXED,
+        "gastos": r2(FIXED + REFORM + KIT),
         "iva": 0.0,
         "compra": six,
         "margen": 0.0,
-        "sobra": r2(-MONTH),
+        "sobra": r2(-FIXED),
         "end": cash,
         "stock": 6,
+        "open_stock": 0,
         "sales": 0,
         "kind": "open",
         "buys": [u["nick"] for u in opening],
+        "extras": [],
     }]
-    for n in range(2, 13):
-        cash = r2(cash - MONTH)
-        k = 3 if len(stock) >= 9 else 2
+    for n in range(2, 25):
+        tax_paid = 0.0
+        if n == 13:
+            y_net = 0.0
+            y_sal = 0.0
+        if n == 19:
+            cash = r2(cash - y1_tax)
+            tax_paid = y1_tax
+        open_stock = len(stock)
+        want = scheduled_salary(n, open_stock)
+        if y2_gross is not None and n >= 13 and open_stock >= RISE_STOCK:
+            want = y2_gross
+        cash = r2(cash - FIXED)
+        k = min(sales_count(len(stock)), len(stock))
         sold, buys, sold_units = [], [], []
         compra = cobro = iva = margen = 0.0
         entered = False
@@ -195,6 +266,7 @@ def simulate():
             iva = r2(iva + car["rebu"])
             margen = r2(margen + car["net"])
             cum_net = r2(cum_net + car["net"])
+            y_net = r2(y_net + car["net"])
             cash = r2(cash - car["cost"])
             compra = r2(compra + car["cost"])
             stock.append(dict(car))
@@ -206,7 +278,17 @@ def simulate():
                 mercedes_in = True
                 entered = True
                 buys.append("Mercedes")
-        tax_now = tax_reserve(cum_net, n, interest)
+        room = r2(cash - floor)
+        sal = want if room + 1e-6 >= want else r2(max(0.0, room))
+        cash = r2(cash - sal)
+        sal_sum = r2(sal_sum + sal)
+        y_sal = r2(y_sal + sal)
+        bill = r2(FIXED + sal)
+        if n <= 12:
+            tax_now = tax_reserve(cum_net, n, interest, sal_sum)
+        else:
+            ebitda_run = r2(y_net - STRUCT * (n - 12) - y_sal)
+            tax_now = r2(max(0.0, ebitda_run - y2_interest) * 0.15)
         extras = []
         if mercedes_in:
             while True:
@@ -227,6 +309,12 @@ def simulate():
             what += ". Otro " + join_names(extras)
         elif not entered:
             what += ". Se reponen"
+        if n == SALARY_START:
+            what += ". Empieza el sueldo"
+        elif sal > months[-1]["sal"] + 0.01:
+            what += ". El sueldo sube"
+        if tax_paid:
+            what += ". Impuesto del año 1"
         if entered and not extras:
             kind = "turn"
         elif extras:
@@ -241,49 +329,110 @@ def simulate():
             "sold": sold,
             "sold_units": sold_units,
             "cobro": cobro,
-            "gastos": MONTH,
+            "fijos": FIXED,
+            "sal": sal,
+            "bill": bill,
+            "gastos": bill,
             "iva": iva,
             "compra": compra,
             "margen": margen,
-            "sobra": r2(margen - MONTH),
+            "sobra": r2(margen - bill),
             "end": cash,
             "stock": len(stock),
+            "open_stock": open_stock,
             "sales": k,
             "kind": kind,
             "buys": buys,
+            "extras": extras,
+            "tax_paid": tax_paid,
         })
-    nets = r2(sum(m["margen"] for m in months if m["n"] > 1))
-    sales = r2(sum(m["cobro"] for m in months if m["n"] > 1))
-    sales_n = sum(m["sales"] for m in months)
-    purchases = r2(sum(m["compra"] for m in months))
-    gastos = r2(sum(m["gastos"] for m in months))
-    iva = r2(sum(m["iva"] for m in months))
-    ebitda = r2(nets - STRUCT * 12 - KIT)
+        if n == 12:
+            ebitda_y1 = r2(cum_net - STRUCT * 12 - KIT - sal_sum)
+            y1_tax = r2(max(0.0, ebitda_y1 - interest) * 0.15)
+            y1_result = r2(ebitda_y1 - interest - y1_tax)
+    y1 = [m for m in months if m["n"] <= 12]
+    y2 = [m for m in months if m["n"] > 12]
+    def year_cut(rows):
+        cut = 0.0
+        for m in rows:
+            for car in m.get("sold_units") or []:
+                cut += (car["sell"] * 0.95 - car["cost"]) / 1.21
+        return cut
+
+    nets = r2(sum(m["margen"] for m in y1 if m["n"] > 1))
+    sales = r2(sum(m["cobro"] for m in y1 if m["n"] > 1))
+    sales_n = sum(m["sales"] for m in y1)
+    purchases = r2(sum(m["compra"] for m in y1))
+    gastos = r2(sum(m["gastos"] for m in y1))
+    iva = r2(sum(m["iva"] for m in y1))
+    sal_year = r2(sum(m["sal"] for m in y1))
+    ebitda = r2(nets - STRUCT * 12 - KIT - sal_year)
     taxable = r2(ebitda - interest)
     tax = r2(max(0.0, taxable) * 0.15)
     tax23 = r2(max(0.0, taxable) * 0.23)
     service = MODEL["loan"]["y1_service"]
     dscr = r2((ebitda - tax) / service)
     dscr23 = r2((ebitda - tax23) / service)
-    cut_nets = 0.0
-    for m in months:
-        for car in m.get("sold_units") or []:
-            cut_nets += (car["sell"] * 0.95 - car["cost"]) / 1.21
-    cut_ebitda = r2(cut_nets - STRUCT * 12 - KIT)
+    cut_ebitda = r2(year_cut(y1) - STRUCT * 12 - KIT - sal_year)
     cut_tax = r2(max(0.0, cut_ebitda - interest) * 0.15)
     dscr5 = r2((cut_ebitda - cut_tax) / service)
-    identity = r2(100000 + sales - purchases - gastos - iva)
-    merc = next(m for m in months if m["kind"] == "turn")
+    identity_y1 = r2(100000 + sales - purchases - gastos - iva)
+    nets2 = r2(sum(m["margen"] for m in y2))
+    sales2 = r2(sum(m["cobro"] for m in y2))
+    sales2_n = sum(m["sales"] for m in y2)
+    sal2 = r2(sum(m["sal"] for m in y2))
+    ebitda2 = r2(nets2 - STRUCT * 12 - sal2)
+    base2 = r2(ebitda2 - y2_interest)
+    # Art. 25 LIS: el incremento computable es el beneficio del año anterior
+    # que no se reparte. No incluye el resultado del propio ejercicio.
+    reduc2 = r2(min(0.20 * y1_result, 0.25 * base2))
+    tax2 = r2(max(0.0, base2 - reduc2) * 0.15)
+    tax2_plain = r2(max(0.0, base2) * 0.15)
+    result2 = r2(ebitda2 - y2_interest - tax2)
+    dscr2 = r2((ebitda2 - tax2) / service)
+    sales_all = r2(sum(m["cobro"] for m in months if m["n"] > 1))
+    purchases_all = r2(sum(m["compra"] for m in months))
+    gastos_all = r2(sum(m["gastos"] for m in months))
+    iva_all = r2(sum(m["iva"] for m in months))
+    identity = r2(100000 + sales_all - purchases_all - gastos_all - iva_all - y1_tax)
+    merc = next(m for m in y1 if m["kind"] == "turn")
     thin = min(lot, key=lambda u: u["net"])
-    weak = min((m for m in months if m["n"] > 1), key=lambda m: m["sobra"])
-    free = r2(months[-1]["end"] - tax)
-    assert months[0]["end"] == r2(100000 - six - REFORM - KIT - MONTH)
+    weak = min((m for m in y1 if m["n"] > 1), key=lambda m: m["sobra"])
+    free = r2(y1[-1]["end"] - tax)
+    free2 = r2(months[-1]["end"] - tax2)
+    spans = []
+    for m in months:
+        if not spans or abs(spans[-1]["sal"] - m["sal"]) > 0.01:
+            spans.append({"from": m["n"], "to": m["n"], "sal": m["sal"]})
+        else:
+            spans[-1]["to"] = m["n"]
+    stock_cost = r2(sum(u["cost"] for u in stock))
+    equity = r2(months[-1]["end"] + stock_cost - y2_balance - tax2)
+    gap = r2(free2 - floor)
+    div_hold = r2(gap * 0.19)
+    div_tax = r2(min(gap, 6000) * 0.19 + max(0.0, gap - 6000) * 0.21)
+    low = min(months, key=lambda m: m["end"])
+    cheap = min(lot, key=lambda u: u["cost"])
+    assert months[0]["end"] == r2(100000 - six - REFORM - KIT - FIXED)
+    assert identity_y1 == y1[-1]["end"]
     assert identity == months[-1]["end"]
     assert min(m["end"] for m in months) >= floor - 0.01
     assert free >= floor - 0.01
-    assert months[-1]["stock"] > 7
-    assert sales_n >= 22
-    assert abs(tax - tax_reserve(nets, 12, interest)) < 0.02
+    assert free2 >= floor - 0.01
+    assert y1[-1]["stock"] == 8
+    assert months[-1]["stock"] > y1[-1]["stock"]
+    assert sales_n == 22
+    assert abs(tax - y1_tax) < 0.02
+    assert abs(y1_result - r2(ebitda - interest - tax)) < 0.02
+    assert all(m["sobra"] > 0 for m in months if m["n"] > 1)
+    for m in months:
+        if m["n"] == 1:
+            continue
+        expected = scheduled_salary(m["n"], m["open_stock"])
+        if y2_gross is not None and m["n"] >= 13 and m["open_stock"] >= RISE_STOCK:
+            expected = y2_gross
+        assert abs(m["sal"] - expected) < 0.02
+    assert abs(y_net - nets2) < 0.02
     totals = {
         "cars": 7,
         "cost": r2(sum(u["cost"] for u in lot)),
@@ -295,12 +444,19 @@ def simulate():
         "lot": lot,
         "held": held,
         "opening": opening,
-        "months": months,
+        "months": y1,
+        "all_months": months,
+        "y2_months": y2,
         "floor": floor,
         "sales": sales,
         "sales_n": sales_n,
         "purchases": purchases,
         "gastos": gastos,
+        "gastos_fijos": r2(gastos - sal_year),
+        "salary": sal_year,
+        "spans": spans,
+        "smi_net": pocket(SMI),
+        "live_net": pocket(LIVE),
         "iva": iva,
         "nets": nets,
         "ebitda": ebitda,
@@ -315,14 +471,45 @@ def simulate():
         "dscr5": dscr5,
         "dscr5_txt": f"{dscr5:.2f}".replace(".", ","),
         "merc_n": merc["n"],
-        "end_stock": months[-1]["stock"],
+        "end_stock": y1[-1]["stock"],
         "kit": KIT,
         "interest": interest,
         "principal": MODEL["loan"]["y1_principal"],
         "balance": MODEL["loan"]["y1_balance"],
+        "y2_interest": y2_interest,
+        "y2_principal": y2_principal,
+        "y2_balance": y2_balance,
+        "y2_sales": sales2,
+        "y2_sales_n": sales2_n,
+        "y2_nets": nets2,
+        "y2_salary": sal2,
+        "y2_ebitda": ebitda2,
+        "y2_base": base2,
+        "y2_reduc": reduc2,
+        "y2_tax": tax2,
+        "y2_tax_plain": tax2_plain,
+        "y2_save": r2(tax2_plain - tax2),
+        "y2_result": result2,
+        "y2_dscr": dscr2,
+        "y2_dscr_txt": f"{dscr2:.2f}".replace(".", ","),
+        "y2_end": months[-1]["end"],
+        "y2_stock": months[-1]["stock"],
+        "y2_stock_cost": stock_cost,
+        "y2_free": free2,
+        "y2_gap": gap,
+        "y2_pocket": r2(LIVE - r2(LIVE * Y2_WITHHOLD)),
+        "div_hold": div_hold,
+        "div_tax": div_tax,
+        "div_pocket": r2(gap - div_tax),
+        "equity": equity,
+        "min_cash": low["end"],
+        "min_n": low["n"],
+        "cheap": cheap,
+        "reform_tax": r2(REFORM * 0.15),
+        "sales_all_n": sales_n + sales2_n,
         "service": service,
         "thin": thin,
-        "thin_gap": r2(thin["net"] - MONTH),
+        "thin_gap": r2(thin["net"] - (FIXED + SMI)),
         "weak": weak,
         "gain_max": 12000,
         "cash_max": 30000,
@@ -335,6 +522,21 @@ def simulate():
 
 
 S = simulate()
+PROBE = simulate(Y2_GROSS)
+assert PROBE["months"][-1]["end"] == S["months"][-1]["end"]
+assert PROBE["tax"] == S["tax"]
+assert PROBE["y2_stock"] == S["y2_stock"] == 14
+assert PROBE["y2_end"] == 22440.39
+assert PROBE["y2_tax"] == 9725.31
+assert PROBE["y2_gap"] == 4003.83
+assert S["y2_gap"] == 7226.21
+assert S["div_hold"] == 1372.98
+assert S["div_tax"] == 1397.50
+assert S["div_pocket"] == 5828.71
+assert S["y2_pocket"] == 1354.16
+assert S["min_cash"] == 11994.48
+assert S["min_n"] == 5
+assert S["reform_tax"] == 682.50
 
 
 def bg(c, dark=False):
@@ -350,7 +552,7 @@ def footer(c, n, total, dark=False):
     c.setFont("DejaVu", 7.5)
     c.drawString(36, 18, "KHC AUTO IMPORT")
     c.setFillColor(Color(0.72, 0.70, 0.64) if dark else SLATE)
-    c.drawCentredString(W / 2, 18, "Solicitud de financiación  ·  50.000 €  ·  primer año")
+    c.drawCentredString(W / 2, 18, "Solicitud de financiación  ·  50.000 €  ·  24 meses")
     c.setFillColor(GOLD if dark else INK)
     c.setFont("DejaVuBold", 8)
     c.drawRightString(W - 36, 18, f"{n:02d}  /  {total:02d}")
@@ -405,11 +607,11 @@ def draw_cover(c, n, total):
     c.setFillColor(Color(0.78, 0.76, 0.70))
     c.setFont("DejaVu", 12)
     c.drawString(36, 252, "Otros 50.000 € son capital propio. Santiago de Compostela.")
-    c.drawString(36, 234, "Dos ventas al mes desde el mes 2. El stock crece. El beneficio queda escrito.")
+    c.drawString(36, 234, "Veinticuatro meses. Más coches en el suelo, más ventas al mes.")
     stats = [
         ("50.000 €", "Lo que se pide"),
-        ("50.000 €", "Capital propio, al lado"),
-        ("2 al mes", "El ritmo de trabajo, desde el mes 2"),
+        ("24 meses", "El plan, desde el día 1"),
+        ("6 → 14", "Coches. El stock no se queda en seis"),
     ]
     x = 36
     for val, lab in stats:
@@ -602,45 +804,104 @@ def draw_engines(c, n, total):
 
 def draw_expenses(c, n, total):
     bg(c)
-    heading(c, "Todos los gastos", "Cinco partidas cada mes. Ninguna está escondida en un total.", size=18)
+    heading(c, "Los gastos que no paran", "Cinco partidas cada mes. El sueldo no está aquí.", size=18)
     lines = [
         ("Nave, San Marcos", RENT, "Alquiler. La licencia ya existe."),
-        ("Autónomo del administrador", RETA, "Seguridad Social. No es un sueldo."),
+        ("Autónomo societario", RETA, "Seguridad Social. No es un sueldo."),
         ("Portales y gestoría", MKT, "Coches.net, Milanuncios Pro y la gestoría."),
         ("Luz, agua y vado", UTIL, "Suministros de la nave."),
-        ("Cuota del préstamo", QUOTA, "50.000 €, 5,50 %, 60 meses. Exacta, no los 966 € del plan."),
+        ("Cuota del préstamo", QUOTA, "50.000 €, 5,50 %, 60 meses. Exacta."),
     ]
     maxv = RENT
-    y = 408
+    y = 400
     for name, val, note in lines:
         c.setFillColor(GOLD)
-        c.roundRect(250, y - 2, 280 * (val / maxv), 14, 2, fill=1, stroke=0)
+        c.roundRect(248, y - 2, 250 * (val / maxv), 14, 2, fill=1, stroke=0)
         c.setFillColor(INK)
-        c.setFont("DejaVu", 10)
+        c.setFont("DejaVu", 11)
         c.drawString(36, y, name)
-        c.setFont("DejaVuBold", 10)
-        c.drawRightString(620, y, eur(val, True))
+        c.setFont("DejaVuBold", 11)
+        c.drawRightString(590, y, eur(val, True))
         c.setFillColor(SLATE)
-        c.setFont("DejaVu", 8.5)
-        c.drawString(636, y, note)
-        y -= 36
+        c.setFont("DejaVu", 9)
+        c.drawString(608, y, note)
+        y -= 38
     c.setFillColor(COVER)
-    c.roundRect(36, y - 8, 888, 28, 3, fill=1, stroke=0)
+    c.roundRect(36, y - 6, 888, 32, 3, fill=1, stroke=0)
     c.setFillColor(WHITE)
-    c.setFont("DejaVuBold", 10)
-    c.drawString(48, y, "Cada mes, haya venta o no")
+    c.setFont("DejaVuBold", 11)
+    c.drawString(48, y + 4, "Cada mes, haya venta o no. Sin el sueldo.")
     c.setFillColor(GOLD)
-    c.drawRightString(908, y, eur(MONTH, True))
+    c.drawRightString(908, y + 4, eur(FIXED, True))
     wrap(
         c,
-        "De la cuota, en el primer año, 2.527,03 € son intereses y 8.933,69 € reducen la deuda. Al cerrar se deben 41.066,31 €. El mes 1, antes de comprar, suma el equipo de revisión, 822,90 €: sin él no se mira un coche. Y la reforma: suelo 1.800, luz 1.100, aseos 1.300 y extintores 350. La obra la hace el promotor.",
-        "DejaVu", 9.5, 36, y - 28, 888, 12.5, INK, 3,
+        "El mes 1, antes de comprar, suma el equipo de revisión, 822,90 €, y la reforma, 4.550 €. La obra la hace el promotor: suelo 1.800, luz 1.100, aseos 1.300 y extintores 350. De la cuota, en el año, 2.527,03 € son intereses y 8.933,69 € reducen la deuda.",
+        "DejaVu", 10, 36, y - 28, 888, 13.5, INK, 3,
     )
     wrap(
         c,
-        "No está, y se dice para que no parezca un olvido: sueldo (los 25.000 € familiares están fuera de la sociedad), taller (aceite y filtros 116,60 € a precio cerrado, sin tarifa de mano de obra) y la cuota de una SGR, 1.000 € en el modelo, solo si el aval es de una SGR, y se recupera al cancelar.",
-        "DejaVu", 9, 36, 148, 888, 11.5, SLATE, 3,
+        "El sueldo va en la lámina siguiente: no empieza el día 1, y sube. No están, y se dice para que no parezca un olvido: el taller (aceite y filtros, 116,60 € a precio cerrado, sin mano de obra) y la cuota de una SGR, 1.000 €, solo si el aval es de una SGR.",
+        "DejaVu", 10, 36, 118, 888, 13.5, SLATE, 3,
     )
+    footer(c, n, total)
+
+
+def span_label(span):
+    if span["from"] == span["to"]:
+        return "MES " + str(span["from"])
+    return "MESES " + str(span["from"]) + "–" + str(span["to"])
+
+
+def span_note(span):
+    if span["sal"] == 0:
+        return "Lo cubre el colchón familiar de 25.000 €. Ese dinero no entra en la empresa."
+    if abs(span["sal"] - SMI) < 0.01:
+        return "Salario mínimo de 2026, en 12 pagas. Él recibe " + eur(S["smi_net"], True) + "."
+    return "Los 25.000 € del proyecto, en doce meses. El bruto se queda. El primer año él recibe " + eur(S["live_net"], True) + ". En el segundo, con el 35 %, " + eur(S["y2_pocket"], True) + "."
+
+
+def draw_salary(c, n, total):
+    bg(c)
+    heading(c, "El sueldo", "La ley no obliga a pagarlo. Se paga para vivir, y sube.", size=18)
+    c.setFillColor(CARD)
+    c.roundRect(36, 352, 888, 78, 3, fill=1, stroke=0)
+    c.setFillColor(GOLD)
+    c.rect(36, 352, 3, 78, fill=1, stroke=0)
+    c.setFillColor(INK)
+    c.setFont("DejaVuBold", 13)
+    c.drawString(52, 404, "No es obligatorio.")
+    wrap(
+        c,
+        "El cargo de administrador es gratuito, salvo que los estatutos digan lo contrario y fijen cómo se paga. La sociedad aún no está hecha: se escribe ahí. Cada año, la junta aprueba el máximo.",
+        "DejaVu", 10, 52, 382, 850, 13, SLATE, 3,
+    )
+    c.setFillColor(CARD)
+    c.roundRect(36, 268, 888, 72, 3, fill=1, stroke=0)
+    c.setFillColor(GOLD)
+    c.rect(36, 268, 3, 72, fill=1, stroke=0)
+    c.setFillColor(INK)
+    c.setFont("DejaVuBold", 13)
+    c.drawString(52, 314, "Lo que sí se paga desde el mes 1: el autónomo, " + eur(RETA, True) + ".")
+    wrap(
+        c,
+        "Es Seguridad Social, no un sueldo. Las cuatro páginas ponían 380 €. El mínimo de 2026, para quien controla la sociedad y trabaja en ella, es este.",
+        "DejaVu", 10, 52, 292, 850, 13, SLATE, 2,
+    )
+    x = 36
+    for span in S["spans"]:
+        c.setFillColor(CARD)
+        c.setStrokeColor(LINE)
+        c.roundRect(x, 78, 286, 176, 3, fill=1, stroke=1)
+        c.setFillColor(GOLD)
+        c.rect(x, 252, 286, 2.2, fill=1, stroke=0)
+        c.setFillColor(GOLD_DEEP)
+        c.setFont("DejaVuBold", 9)
+        c.drawString(x + 16, 228, span_label(span))
+        c.setFillColor(INK)
+        c.setFont("DejaVuSerif", 22)
+        c.drawString(x + 16, 190, eur(span["sal"], True) if span["sal"] else "0 €")
+        wrap(c, span_note(span), "DejaVu", 9.5, x + 16, 164, 254, 13, SLATE, 4)
+        x += 302
     footer(c, n, total)
 
 
@@ -649,9 +910,9 @@ def draw_rule(c, n, total):
     heading(c, "La regla del año", "Dos ventas al mes. Se reponen en la semana. El stock crece.", size=17)
     rules = [
         ("1", "El mes 1 caben seis.", "Primero el equipo, 822,90 €. Después seis coches y la reforma. El Mercedes no cabe sin bajar del fondo. Entra el mes " + str(S["merc_n"]) + "."),
-        ("2", "El fondo son tres meses.", eur(S["floor"], True) + ". Por debajo no se compra. El impuesto del año tampoco se usa para comprar un coche de más."),
+        ("2", "El fondo son tres meses.", eur(S["floor"], True) + ". Nave, autónomo, portales, luz y cuota. El sueldo se paga encima y no se toca este fondo."),
         ("3", "Dos ventas. Reposición en la semana.", "Desde el mes 2. Se pide a los dos días. En una semana está en España, publicado, con matrícula temporal. Se puede ver y probar."),
-        ("4", "Con nueve coches, tres ventas.", "Y lo que sobra compra el más barato de la tabla que quepa, a su coste. Este año cierra con " + str(S["end_stock"]) + " coches. No se inventa un modelo."),
+        ("4", "Más suelo, más ventas.", "Una de cada tres, nunca menos de dos. Este año cierra con " + str(S["end_stock"]) + ". El segundo, con la misma regla, llega a " + str(S["y2_stock"]) + ". No se inventa un modelo."),
     ]
     y = 400
     for num, title, body in rules:
@@ -697,7 +958,7 @@ def draw_m1(c, n, total):
         ("Equipo de revisión, antes de comprar", "−822,90 €", False),
         ("Seis coches: GTI, 116d, Golf VIII, 318d, XC40 y Audi", "−77.714 €", False),
         ("Reforma, solo materiales. La obra la hace el promotor.", "−4.550 €", False),
-        ("El mes: nave, autónomo, portales, luz y cuota", "−2.835,06 €", False),
+        ("El mes: nave, autónomo, portales, luz y cuota. Sin sueldo.", "−" + eur(FIXED, True), False),
         ("Caja al cerrar el mes. El Mercedes sigue fuera.", eur(S["months"][0]["end"], True), True),
     ]
     waterfall(c, rows, 416)
@@ -714,7 +975,7 @@ def draw_m2(c, n, total):
     heading(c, "Mes 2", "Dos ventas. Las dos se reponen en la semana.", size=20)
     m = S["months"][1]
     rows = [("Caja con la que se abre el mes", eur(S["months"][0]["end"], True), False),
-            ("El mes: nave, autónomo, portales, luz y cuota", "−" + eur(MONTH, True), False)]
+            ("El mes: nave, autónomo, portales, luz y cuota. Sin sueldo.", "−" + eur(FIXED, True), False)]
     for car in m["sold_units"]:
         rows.append((car["nick"] + ", cobrado y repuesto", "+" + eur(car["net"], True), False))
     rows.append(("Caja al cerrar el mes. El Mercedes sigue fuera.", eur(m["end"], True), True))
@@ -749,14 +1010,14 @@ def slot_x(inner_x, inner_w, i, n=12):
 
 def draw_gains(c, n, total):
     bg(c)
-    heading(c, "Ganancia y gasto, mes a mes", "Cada mes con venta deja más que el gasto. No es una.", size=16)
+    heading(c, "El primer año", "Verde, lo que dejan las ventas. Dorado, lo que cuesta el mes.", size=16)
     x, y, w, h = 36, 78, 888, 340
     ymax = S["gain_max"]
     ix, iy, iw, ih = plot_frame(c, x, y, w, h, 0, ymax, [0, 4000, 8000, 12000])
     bw = 14
     for i, m in enumerate(S["months"]):
         cx = slot_x(ix, iw, i)
-        gold_h = MONTH / ymax * ih
+        gold_h = m["bill"] / ymax * ih
         c.setFillColor(GOLD)
         c.rect(cx - bw - 1, iy, bw, gold_h, fill=1, stroke=0)
         if m["n"] > 1:
@@ -769,27 +1030,21 @@ def draw_gains(c, n, total):
         c.setFillColor(SLATE)
         c.setFont("DejaVu", 7.5)
         c.drawCentredString(cx, iy - 14, str(m["n"]))
-    gy = iy + MONTH / ymax * ih
-    c.setStrokeColor(GOLD)
-    c.setDash(3, 2)
-    c.setLineWidth(1.1)
-    c.line(ix, gy, ix + iw, gy)
-    c.setDash()
     c.setFillColor(GOLD)
     c.rect(48, 58, 10, 8, fill=1, stroke=0)
     c.setFillColor(SLATE)
     c.setFont("DejaVu", 8)
-    c.drawString(62, 58, "Gasto del mes, 2.835 €")
+    c.drawString(62, 58, "El mes, con el sueldo cuando ya se cobra. Sube el mes 6 y otra vez el mes 10.")
     c.setFillColor(GREEN)
-    c.rect(230, 58, 10, 8, fill=1, stroke=0)
+    c.rect(470, 58, 10, 8, fill=1, stroke=0)
     c.setFillColor(SLATE)
-    c.drawString(244, 58, "Margen del mes. El más flojo, el mes " + str(S["weak"]["n"]) + ", deja " + eur(S["weak"]["sobra"], True) + " después del gasto.")
+    c.drawString(484, 58, "Margen. El más flojo deja " + eur(S["weak"]["sobra"], True) + ".")
     footer(c, n, total)
 
 
 def draw_cash_chart(c, n, total):
     bg(c)
-    heading(c, "La caja del año", "Sube con las ventas. Baja cuando el stock crece.", size=20)
+    heading(c, "La caja del primer año", "Sube con las ventas. Baja cuando el stock crece.", size=18)
     x, y, w, h = 36, 86, 888, 332
     ymax = S["cash_max"]
     ix, iy, iw, ih = plot_frame(c, x, y, w, h, 0, ymax, [0, 10000, 20000, 30000])
@@ -844,9 +1099,11 @@ def draw_cash_chart(c, n, total):
     c.roundRect(ix + 10, fy - 22, tw + 12, 15, 2, fill=1, stroke=1)
     c.setFillColor(GOLD_DEEP)
     c.drawString(ix + 16, fy - 18, fund)
+    extras = [m for m in S["months"] if m["extras"]]
+    extra_txt = ".   ".join("Mes " + str(m["n"]) + ": otro " + join_names(m["extras"]) + ", " + eur(next(u["cost"] for u in S["lot"] if u["nick"] == m["extras"][0])) for m in extras)
     c.setFillColor(INK)
     c.setFont("DejaVu", 8.5)
-    c.drawString(48, 62, "Mes " + str(S["merc_n"]) + ": entra el Mercedes, 17.666 €.   Luego, otro 116d a 9.010 € cuando cabe.   Mes 12: " + eur(S["months"][-1]["end"], True) + " y " + str(S["end_stock"]) + " coches.")
+    c.drawString(48, 62, "Mes " + str(S["merc_n"]) + ": entra el Mercedes, " + eur(S["held"]["cost"]) + ".   " + extra_txt + ".   Mes 12: " + eur(S["months"][-1]["end"], True) + " y " + str(S["end_stock"]) + " coches.")
     footer(c, n, total)
 
 
@@ -855,18 +1112,19 @@ def draw_ledger(c, n, total):
     kicker(c, "El primer año", 508)
     c.setFillColor(INK)
     c.setFont("DejaVuSerif", 16)
-    c.drawString(36, 484, "Cada mes: qué se cobra, qué se gasta, qué se compra, qué queda.")
+    c.drawString(36, 484, "Cada mes: qué entra, qué sale, qué queda.")
     c.setFillColor(INK)
     c.rect(28, 460, 904, 16, fill=1, stroke=0)
     heads = [
         (36, "Mes", "l"),
-        (68, "Qué ocurre", "l"),
-        (360, "Cobro", "r"),
-        (448, "Gastos", "r"),
-        (530, "IVA", "r"),
-        (628, "Compra", "r"),
-        (724, "Sobra", "r"),
-        (912, "Caja", "r"),
+        (60, "Qué ocurre", "l"),
+        (318, "Cobro", "r"),
+        (400, "Gastos", "r"),
+        (482, "Sueldo", "r"),
+        (556, "IVA", "r"),
+        (646, "Compra", "r"),
+        (738, "Sobra", "r"),
+        (916, "Caja", "r"),
     ]
     c.setFillColor(WHITE)
     c.setFont("DejaVuBold", 7)
@@ -890,50 +1148,374 @@ def draw_ledger(c, n, total):
         c.setFont("DejaVuBold", 8)
         c.drawString(36, y, str(m["n"]))
         c.setFillColor(INK)
+        c.setFont("DejaVu", 7)
+        c.drawString(60, y, m["what"])
         c.setFont("DejaVu", 7.5)
-        c.drawString(68, y, m["what"])
-        c.drawRightString(360, y, eur(m["cobro"]))
-        c.drawRightString(448, y, eur(m["gastos"], True))
-        c.drawRightString(530, y, "—" if m["n"] == 1 else eur(m["iva"], True))
-        c.drawRightString(628, y, eur(m["compra"]))
+        c.drawRightString(318, y, eur(m["cobro"]))
+        c.drawRightString(400, y, eur(m["gastos"], True))
+        c.setFillColor(GOLD_DEEP if m["sal"] else SLATE)
+        c.drawRightString(482, y, "—" if m["sal"] == 0 else eur(m["sal"], True))
+        c.setFillColor(INK)
+        c.drawRightString(556, y, "—" if m["n"] == 1 else eur(m["iva"], True))
+        c.drawRightString(646, y, eur(m["compra"]))
         c.setFillColor(GREEN if m["sobra"] > 0 else SLATE)
         c.setFont("DejaVuBold", 7.5)
-        c.drawRightString(724, y, eur(m["sobra"], True))
+        c.drawRightString(738, y, eur(m["sobra"], True))
         c.setFillColor(INK)
-        c.drawRightString(912, y, eur(m["end"], True))
+        c.drawRightString(916, y, eur(m["end"], True))
     c.setFillColor(SLATE)
     c.setFont("DejaVu", 7.5)
-    c.drawString(36, 52, "La caja es la del mes anterior, más el cobro, menos gastos, IVA y compra. Sobra es el margen menos el mes: no incluye la compra. El mes 1, cobro es el capital.")
+    c.drawString(36, 64, "Gastos es el mes y el sueldo. El mes 1 suma el equipo y la reforma. El sueldo se repite al lado: entra el mes 6 y sube el mes 10.")
+    c.drawString(36, 50, "Sobra es el margen menos el mes y el sueldo. No incluye la compra. Caja = caja anterior + cobro − gastos − IVA − compra. El mes 1, cobro es el capital.")
     footer(c, n, total)
 
 
 def draw_year(c, n, total):
     bg(c)
-    heading(c, "El año, en una cuenta", str(S["sales_n"]) + " ventas. El stock pasa de 6 a " + str(S["end_stock"]) + ". La cuota, pagada.", size=16)
+    heading(c, "El primer año, en una cuenta", str(S["sales_n"]) + " ventas. El stock pasa de 6 a " + str(S["end_stock"]) + ". La cuota, pagada.", size=16)
     rows = [
         ("Capital, propio y financiado", "+100.000 €", False),
         (str(S["sales_n"]) + " cobros, del mes 2 al mes 12", "+" + eur(S["sales"]), False),
         ("Coches comprados, apertura, reposición y crecimiento", "−" + eur(S["purchases"]), False),
-        ("Doce meses, la reforma y el equipo de revisión", "−" + eur(S["gastos"], True), False),
+        ("Doce meses, la reforma y el equipo. Sin el sueldo.", "−" + eur(S["gastos_fijos"], True), False),
+        ("Sueldo del año. Mes 6 a 9, el mínimo. Después, sube.", "−" + eur(S["salary"], True), False),
         ("IVA de las " + str(S["sales_n"]) + " ganancias, apartado", "−" + eur(S["iva"], True), False),
         ("Caja al cerrar diciembre", eur(S["months"][-1]["end"], True), True),
     ]
     waterfall(c, rows, 400)
     wrap(
         c,
-        "El beneficio del año son " + eur(S["result"], True) + ". Es el margen, " + eur(S["nets"], True) + ", menos la estructura, el equipo, los intereses y el impuesto del 15 %, " + eur(S["tax"], True) + ". No es un sueldo: no hay sueldo en los gastos. Una parte ha comprado más coches. Apartado el impuesto, por encima del fondo quedan " + eur(S["free_gap"], True) + ". Durante el año la caja no baja del fondo.",
+        "El beneficio del año son " + eur(S["result"], True) + ". El sueldo, " + eur(S["salary"], True) + ", ya está restado. Es el margen, menos la estructura, el sueldo, el equipo, los intereses y el impuesto del 15 %, " + eur(S["tax"], True) + ". Apartado el impuesto, por encima del fondo quedan " + eur(S["free_gap"], True) + ". No es el cierre: el segundo año sigue.",
         "DejaVu", 10, 36, 118, 888, 13, INK, 4,
     )
     footer(c, n, total)
 
 
+def draw_year2(c, n, total):
+    bg(c)
+    heading(c, "El segundo año", "Más coches en el suelo. Más ventas. La misma regla.", size=18)
+    cards = [
+        (str(S["y2_sales_n"]), "Ventas. El primero tuvo " + str(S["sales_n"]) + "."),
+        ("8 → " + str(S["y2_stock"]), "Coches. No se queda en ocho."),
+        (eur(S["y2_result"]), "Beneficio. El sueldo ya está restado."),
+        (S["y2_dscr_txt"], "Veces que se cubre la cuota."),
+    ]
+    x = 36
+    for val, lab in cards:
+        c.setFillColor(CARD)
+        c.setStrokeColor(LINE)
+        c.roundRect(x, 352, 216, 78, 3, fill=1, stroke=1)
+        c.setFillColor(GOLD)
+        c.rect(x, 428, 216, 2.2, fill=1, stroke=0)
+        c.setFillColor(INK)
+        c.setFont("DejaVuSerif", 20)
+        c.drawString(x + 12, 392, val)
+        c.setFillColor(SLATE)
+        c.setFont("DejaVu", 8)
+        c.drawString(x + 12, 368, lab)
+        x += 228
+    bands = [
+        ("6 a 8 al abrir", "2 ventas", "El primer año entero, y el mes 13."),
+        ("9 a 11 al abrir", "3 ventas", "Del mes 14 al mes 21."),
+        ("12 a 14 al abrir", "4 ventas", "Meses 22, 23 y 24. No hay un mes de cinco."),
+    ]
+    y = 318
+    for left, mid, right in bands:
+        c.setFillColor(CARD)
+        c.roundRect(36, y - 28, 888, 40, 3, fill=1, stroke=0)
+        c.setFillColor(GOLD)
+        c.rect(36, y - 28, 3, 40, fill=1, stroke=0)
+        c.setFillColor(INK)
+        c.setFont("DejaVuBold", 11)
+        c.drawString(52, y - 14, left)
+        c.setFillColor(GREEN)
+        c.drawString(250, y - 14, mid)
+        c.setFillColor(SLATE)
+        c.setFont("DejaVu", 10)
+        c.drawString(380, y - 14, right)
+        y -= 48
+    wrap(
+        c,
+        "Una de cada tres, y nunca menos de dos. Cada venta se repone en la semana, al mismo coste. Si después del fondo y de la reserva del 15 % cabe el más barato, el " + S["cheap"]["nick"] + " a " + eur(S["cheap"]["cost"]) + ", se compra. No hay un octavo modelo. El mes 19, antes de las facturas, se paga el impuesto del primer año, " + eur(S["tax"], True) + ". La caja no baja de " + eur(S["floor"], True) + ".",
+        "DejaVu", 10, 36, 148, 888, 13.5, INK, 4,
+    )
+    footer(c, n, total)
+
+
+def draw_tax(c, n, total):
+    bg(c)
+    heading(c, "El impuesto", "Qué lo baja de verdad. Qué solo mueve el dinero.", size=18)
+    c.setFillColor(GREEN)
+    c.roundRect(36, 418, 432, 20, 2, fill=1, stroke=0)
+    c.setFillColor(WHITE)
+    c.setFont("DejaVuBold", 8)
+    c.drawString(48, 424, "ESTO SÍ BAJA EL IMPUESTO")
+    c.setFillColor(RED)
+    c.roundRect(484, 418, 440, 20, 2, fill=1, stroke=0)
+    c.setFillColor(WHITE)
+    c.drawString(496, 424, "ESTO NO LO BAJA")
+    left = [
+        ("No repartir: " + eur(S["y2_save"], True) + " menos.", "El 20 % de los " + eur(S["result"], True) + " del año 1, si se quedan, son " + eur(S["y2_reduc"], True) + ". El impuesto pasa de " + eur(S["y2_tax_plain"], True) + " a " + eur(S["y2_tax"], True) + ". Se mantiene 3 años."),
+        ("Un gasto real, con factura.", "El sueldo lo es. Una herramienta o una obra, si se hacen. No hay precio cerrado de ninguna de las dos. No se inventa."),
+        ("El 15 % dura dos años.", "Sociedad nueva, y los dos ejercicios dan beneficio. El tercero no tendría este 15 %."),
+        ("La reforma, aparte.", eur(REFORM) + " ya salieron de caja y no están en esta base. Si la gestoría la admite, bajaría " + eur(S["reform_tax"], True) + ". No cambia las compras."),
+    ]
+    right = [
+        ("Comprar coches.", "El stock es un activo, no un gasto. La caja baja. El impuesto, no."),
+        ("Pagar el préstamo.", "Solo el interés, " + eur(S["y2_interest"], True) + ", es gasto. El principal, " + eur(S["y2_principal"], True) + ", no."),
+        ("Gastar lo apartado para el impuesto.", "Se calcula sobre el beneficio, no sobre la caja. Gastarlo no lo reduce, y puede faltar al pagarlo."),
+        ("Aplazar o repartir.", "La reserva de nivelación aplaza y se revierte en 5 años. Un dividendo tampoco baja el impuesto: ya tributó."),
+    ]
+    for i, ((lt, lb), (rt, rb)) in enumerate(zip(left, right)):
+        y = 388 - i * 84
+        c.setFillColor(CARD)
+        c.roundRect(36, y - 68, 432, 76, 3, fill=1, stroke=0)
+        c.setFillColor(GREEN)
+        c.rect(36, y - 68, 3, 76, fill=1, stroke=0)
+        c.setFillColor(INK)
+        c.setFont("DejaVuBold", 9.5)
+        c.drawString(50, y - 14, lt)
+        wrap(c, lb, "DejaVu", 8, 50, y - 30, 404, 11, SLATE, 3)
+        c.setFillColor(CARD)
+        c.roundRect(484, y - 68, 440, 76, 3, fill=1, stroke=0)
+        c.setFillColor(RED)
+        c.rect(484, y - 68, 3, 76, fill=1, stroke=0)
+        c.setFillColor(INK)
+        c.setFont("DejaVuBold", 9.5)
+        c.drawString(498, y - 14, rt)
+        wrap(c, rb, "DejaVu", 8, 498, y - 30, 410, 11, SLATE, 3)
+    footer(c, n, total)
+
+
+def draw_pay(c, n, total):
+    bg(c)
+    heading(c, "Sueldo o dividendo", "Para él, y para la empresa. No es lo mismo.", size=18)
+    c.setFillColor(COVER)
+    c.roundRect(36, 418, 888, 26, 3, fill=1, stroke=0)
+    c.setFillColor(GOLD)
+    c.setFont("DejaVuBold", 9.5)
+    c.drawString(48, 426, "Propuesta: no subir el sueldo. No repartir. Los " + eur(S["y2_gap"], True) + " se quedan. No llegan al " + S["cheap"]["nick"] + " de " + eur(S["cheap"]["cost"]) + ".")
+    heads = ["", "EL PLAN", "SUBIR EL BRUTO", "UN DIVIDENDO"]
+    rows = [
+        ("Qué sale", eur(LIVE, True) + " / mes", eur(Y2_GROSS, True) + " / mes", eur(S["y2_gap"], True) + " una vez"),
+        ("Él recibe, año 2", eur(S["y2_pocket"], True) + " / mes", eur(S["live_net"], True) + " / mes", eur(S["div_pocket"], True) + " una vez"),
+        ("Impuesto de la empresa", eur(S["y2_tax"], True), eur(PROBE["y2_tax"], True), eur(S["y2_tax"], True)),
+        ("Caja al cerrar", eur(S["y2_end"], True), eur(PROBE["y2_end"], True), "el fondo, sin colchón"),
+        ("Coches", str(S["y2_stock"]), str(PROBE["y2_stock"]), str(S["y2_stock"]) + ", y sin esos " + eur(S["y2_gap"])),
+        ("¿Se hace?", "Sí. Es el plan.", "No. No está aceptado.", "No. No se reparte."),
+    ]
+    c.setFillColor(INK)
+    c.rect(36, 386, 888, 22, fill=1, stroke=0)
+    c.setFillColor(WHITE)
+    c.setFont("DejaVuBold", 8)
+    xs = [48, 430, 660, 908]
+    for x, lab, al in zip(xs, heads, ["l", "r", "r", "r"]):
+        if al == "r":
+            c.drawRightString(x, 393, lab)
+        else:
+            c.drawString(x, 393, lab)
+    for i, (lab, a, b, d) in enumerate(rows):
+        y = 358 - i * 32
+        last = i == len(rows) - 1
+        c.setFillColor(COVER if last else (CARD if i % 2 == 0 else SOFT))
+        c.rect(36, y - 8, 888, 30, fill=1, stroke=0)
+        c.setFillColor(GOLD if last else INK)
+        c.setFont("DejaVuBold" if last else "DejaVu", 8.5)
+        c.drawString(48, y, lab)
+        c.setFont("DejaVuBold", 8.5)
+        c.setFillColor(GREEN if not last else GOLD)
+        c.drawRightString(430, y, a)
+        c.setFillColor(GOLD if last else SLATE)
+        c.drawRightString(660, y, b)
+        c.drawRightString(908, y, d)
+    notes = [
+        ("Para él", "A 25.000 € el sueldo deja más que el dividendo. A partir de unos 40.000 o 50.000 € brutos, el dividendo gana para el bolsillo. Es una estimación, no una liquidación."),
+        ("Para la empresa", "Ni la subida ni el dividendo compran el siguiente coche. Repartir los " + eur(S["y2_gap"], True) + " deja la caja en el fondo, sin colchón."),
+        ("Lo que es suyo", eur(S["equity"], True) + " dentro: caja más coches, menos préstamo e impuesto. No hace falta sacarlo para que lo sea."),
+    ]
+    x = 36
+    for title, body in notes:
+        c.setFillColor(CARD)
+        c.setStrokeColor(LINE)
+        c.roundRect(x, 46, 286, 100, 3, fill=1, stroke=1)
+        c.setFillColor(GOLD)
+        c.rect(x, 144, 286, 2, fill=1, stroke=0)
+        c.setFillColor(INK)
+        c.setFont("DejaVuBold", 9)
+        c.drawString(x + 12, 124, title)
+        wrap(c, body, "DejaVu", 7.5, x + 12, 108, 262, 10.5, SLATE, 4)
+        x += 302
+    footer(c, n, total)
+
+
+def draw_ledger2(c, n, total):
+    bg(c)
+    kicker(c, "El segundo año", 508)
+    c.setFillColor(INK)
+    c.setFont("DejaVuSerif", 16)
+    c.drawString(36, 484, "Misma regla. Más ventas, porque hay más coches.")
+    c.setFillColor(INK)
+    c.rect(28, 460, 904, 16, fill=1, stroke=0)
+    heads = [
+        (36, "Mes", "l"),
+        (64, "Qué ocurre", "l"),
+        (340, "Cobro", "r"),
+        (418, "Gastos", "r"),
+        (496, "Sueldo", "r"),
+        (566, "IVA", "r"),
+        (656, "Compra", "r"),
+        (748, "Sobra", "r"),
+        (916, "Caja", "r"),
+    ]
+    c.setFillColor(WHITE)
+    c.setFont("DejaVuBold", 7)
+    for x, lab, al in heads:
+        if al == "r":
+            c.drawRightString(x, 464, lab)
+        else:
+            c.drawString(x, 464, lab)
+    for i, m in enumerate(S["y2_months"]):
+        y = 438 - i * 30
+        if m["kind"] == "extra":
+            c.setFillColor(Color(0.90, 0.95, 0.91))
+        elif i % 2 == 0:
+            c.setFillColor(CARD)
+        else:
+            c.setFillColor(SOFT)
+        c.rect(28, y - 8, 904, 28, fill=1, stroke=0)
+        c.setFillColor(GOLD_DEEP)
+        c.setFont("DejaVuBold", 8)
+        c.drawString(36, y, str(m["n"]))
+        c.setFillColor(INK)
+        size = 6.4 if c.stringWidth(m["what"], "DejaVu", 7) > 268 else 7
+        c.setFont("DejaVu", size)
+        c.drawString(64, y, m["what"])
+        c.setFont("DejaVu", 7.5)
+        c.drawRightString(340, y, eur(m["cobro"]))
+        c.drawRightString(418, y, eur(m["gastos"], True))
+        c.setFillColor(GOLD_DEEP)
+        c.drawRightString(496, y, eur(m["sal"], True))
+        c.setFillColor(INK)
+        c.drawRightString(566, y, eur(m["iva"], True))
+        c.drawRightString(656, y, eur(m["compra"]))
+        c.setFillColor(GREEN)
+        c.setFont("DejaVuBold", 7.5)
+        c.drawRightString(748, y, eur(m["sobra"], True))
+        c.setFillColor(INK)
+        c.drawRightString(916, y, eur(m["end"], True))
+    c.setFillColor(SLATE)
+    c.setFont("DejaVu", 7.5)
+    c.drawString(36, 64, "El mes 19 paga el impuesto del año 1, " + eur(S["tax"], True) + ", antes de las facturas. Va en la caja, no en gastos. El sueldo sigue en " + eur(LIVE, True) + ".")
+    c.drawString(36, 50, "Verde: ese mes se compra un " + S["cheap"]["nick"] + " de más, a " + eur(S["cheap"]["cost"]) + ". Cierra con " + str(S["y2_stock"]) + " coches y " + eur(S["y2_end"], True) + ". Por encima del fondo, " + eur(S["y2_gap"], True) + ": no llega.")
+    footer(c, n, total)
+
+
+def draw_cash24(c, n, total):
+    bg(c)
+    heading(c, "Veinticuatro meses de caja", "Sube con las ventas. Baja cuando el stock crece. No se queda parada.", size=16)
+    x, y, w, h = 36, 78, 888, 332
+    ymax = S["cash_max"]
+    ix, iy, iw, ih = plot_frame(c, x, y, w, h, 0, ymax, [0, 10000, 20000, 30000])
+
+    def py(val):
+        return iy + val / ymax * ih
+
+    fy = py(S["floor"])
+    c.setStrokeColor(GOLD)
+    c.setDash(3, 2)
+    c.setLineWidth(1.2)
+    c.line(ix, fy, ix + iw, fy)
+    c.setDash()
+    rows = S["all_months"]
+    pts = [(slot_x(ix, iw, i, 24), py(m["end"])) for i, m in enumerate(rows)]
+    c.setFillColor(GREEN_SOFT)
+    p = c.beginPath()
+    p.moveTo(pts[0][0], iy)
+    for px, py_ in pts:
+        p.lineTo(px, py_)
+    p.lineTo(pts[-1][0], iy)
+    p.close()
+    c.drawPath(p, fill=1, stroke=0)
+    c.setStrokeColor(INK)
+    c.setLineWidth(1.6)
+    path = c.beginPath()
+    path.moveTo(pts[0][0], pts[0][1])
+    for px, py_ in pts[1:]:
+        path.lineTo(px, py_)
+    c.drawPath(path, stroke=1, fill=0)
+    mark = {1: 10, S["min_n"]: -14, 12: 10, 24: 12}
+    for i, m in enumerate(rows):
+        px, py_ = pts[i]
+        c.setFillColor(GOLD if m["n"] in (S["merc_n"], 19) or m["extras"] else INK)
+        c.circle(px, py_, 2.6, fill=1, stroke=0)
+        c.setFillColor(SLATE)
+        c.setFont("DejaVu", 6.5)
+        c.drawCentredString(px, iy - 12, str(m["n"]))
+        if m["n"] in mark:
+            c.setFillColor(INK)
+            c.setFont("DejaVuBold", 7)
+            c.drawCentredString(px, py_ + mark[m["n"]], eur(m["end"]))
+    fund = "Fondo  " + eur(S["floor"])
+    c.setFont("DejaVuBold", 8)
+    tw = c.stringWidth(fund, "DejaVuBold", 8)
+    c.setFillColor(WHITE)
+    c.setStrokeColor(GOLD)
+    c.setLineWidth(0.8)
+    c.roundRect(ix + 8, fy + 6, tw + 12, 14, 2, fill=1, stroke=1)
+    c.setFillColor(GOLD_DEEP)
+    c.drawString(ix + 14, fy + 9, fund)
+    c.setFillColor(SLATE)
+    c.setFont("DejaVu", 8)
+    c.drawString(48, 56, "Mínimo, mes " + str(S["min_n"]) + ": " + eur(S["min_cash"], True) + ".   Mes 19: se paga el impuesto del año 1.   Mes 24: " + eur(S["y2_end"], True) + " y " + str(S["y2_stock"]) + " coches.   Sobran " + eur(S["y2_gap"], True) + ", por debajo del " + S["cheap"]["nick"] + ".")
+    footer(c, n, total)
+
+
+def draw_account(c, n, total):
+    bg(c)
+    heading(c, "Los dos años", "La misma empresa. El segundo ya no es el de arrancar.", size=18)
+    c.setFillColor(INK)
+    c.rect(36, 418, 888, 20, fill=1, stroke=0)
+    c.setFillColor(WHITE)
+    c.setFont("DejaVuBold", 8)
+    c.drawString(52, 424, "")
+    c.drawRightString(620, 424, "AÑO 1")
+    c.drawRightString(900, 424, "AÑO 2")
+    rows = [
+        ("Ventas", str(S["sales_n"]), str(S["y2_sales_n"]), False),
+        ("Cobros", eur(S["sales"]), eur(S["y2_sales"]), False),
+        ("Margen de las ventas", eur(S["nets"], True), eur(S["y2_nets"], True), False),
+        ("Sueldo", eur(S["salary"], True), eur(S["y2_salary"], True), False),
+        ("Intereses del préstamo", eur(S["interest"], True), eur(S["y2_interest"], True), False),
+        ("Impuesto de sociedades", eur(S["tax"], True), eur(S["y2_tax"], True), False),
+        ("Beneficio, sueldo ya restado", eur(S["result"], True), eur(S["y2_result"], True), True),
+        ("Caja al cerrar", eur(S["months"][-1]["end"], True), eur(S["y2_end"], True), False),
+        ("Coches en el suelo", str(S["end_stock"]), str(S["y2_stock"]), False),
+        ("Deuda del préstamo", eur(S["balance"], True), eur(S["y2_balance"], True), False),
+        ("La cuota, veces cubierta", S["dscr_txt"], S["y2_dscr_txt"], False),
+    ]
+    for i, (lab, a, b, last) in enumerate(rows):
+        y = 390 - i * 28
+        c.setFillColor(COVER if last else (CARD if i % 2 == 0 else SOFT))
+        c.rect(36, y - 6, 888, 26, fill=1, stroke=0)
+        c.setFillColor(GOLD if last else INK)
+        c.setFont("DejaVuBold" if last else "DejaVu", 9)
+        c.drawString(52, y, lab)
+        c.setFont("DejaVuBold", 9)
+        c.drawRightString(620, y, a)
+        c.drawRightString(900, y, b)
+    c.setFillColor(SLATE)
+    c.setFont("DejaVu", 8)
+    c.drawString(36, 52, "El impuesto del año 2 ya resta la reserva de capitalización, " + eur(S["y2_save"], True) + ". El del año 1, " + eur(S["tax"], True) + ", se paga el mes 19. Al cerrar, la deuda es " + eur(S["y2_balance"], True) + ".")
+    footer(c, n, total)
+
+
 def draw_bank(c, n, total):
     bg(c)
-    heading(c, "Lo que mira quien presta", "La cuota se paga " + S["dscr_txt"] + " veces. El beneficio, " + eur(S["result"]) + ".", size=16)
+    heading(c, "Lo que mira quien presta", "La cuota se cubre " + S["dscr_txt"] + " veces el primer año y " + S["y2_dscr_txt"] + " el segundo.", size=15)
     cards = [
-        (S["dscr_txt"], "Este año. " + str(S["sales_n"]) + " ventas, el equipo de 822,90 € restado y el impuesto al 15 % ya quitado."),
-        (eur(S["result"]), "Beneficio del año. No es un sueldo. Es lo que queda después de la estructura, el equipo, los intereses y el impuesto."),
-        ("6 → " + str(S["end_stock"]), "Coches en el suelo. Se abre con seis. El Mercedes entra el mes " + str(S["merc_n"]) + ". Al cerrar hay " + str(S["end_stock"]) + "."),
+        (S["dscr_txt"] + "  ·  " + S["y2_dscr_txt"], "Veces que se cubre la cuota. Primero, " + str(S["sales_n"]) + " ventas. Segundo, " + str(S["y2_sales_n"]) + ". Sueldo e impuesto, ya restados."),
+        (eur(S["result"]) + "  ·  " + eur(S["y2_result"]), "Beneficio de cada año. El sueldo ya está pagado. El segundo resta también la reserva de capitalización."),
+        ("6 → " + str(S["end_stock"]) + " → " + str(S["y2_stock"]), "Se abre con seis. El Mercedes, mes " + str(S["merc_n"]) + ". A los 24 meses, " + str(S["y2_stock"]) + "."),
     ]
     x = 36
     for val, lab in cards:
@@ -943,25 +1525,41 @@ def draw_bank(c, n, total):
         c.setFillColor(GOLD)
         c.rect(x, 398, 286, 2.2, fill=1, stroke=0)
         c.setFillColor(INK)
-        c.setFont("DejaVuSerif", 28)
-        c.drawString(x + 16, 340, val)
+        c.setFont("DejaVuSerif", 16)
+        c.drawString(x + 16, 348, val)
         wrap(c, lab, "DejaVu", 9.5, x + 16, 310, 254, 13, SLATE, 5)
         x += 302
     wrap(
         c,
-        "El 318d, el que menos deja, son " + eur(S["thin"]["net"], True) + ". Solo, no cubre el mes: faltan " + eur(abs(S["thin_gap"]), True) + ". Por eso el plan no es una venta al mes. El mes más flojo, con dos, deja " + eur(S["weak"]["sobra"], True) + " después del gasto. Las cuatro páginas usaban otra cuenta. Esta es la de este año.",
-        "DejaVu", 11, 36, 200, 888, 15, INK, 4,
+        "El 318d, el que menos deja, son " + eur(S["thin"]["net"], True) + ". Solo, con el sueldo ya cobrado, no cubre el mes: faltan " + eur(abs(S["thin_gap"]), True) + ". Por eso el plan no es una venta al mes. El mes más flojo, con dos, deja " + eur(S["weak"]["sobra"], True) + " después del sueldo.",
+        "DejaVu", 11, 36, 210, 888, 15, INK, 3,
     )
+    facts = [
+        (eur(S["y2_balance"], True), "Deuda al mes 24"),
+        (eur(S["y2_end"], True), "Caja, con " + str(S["y2_stock"]) + " coches"),
+        (eur(S["y2_gap"], True), "Sobran. No llegan al " + S["cheap"]["nick"]),
+    ]
+    x = 36
+    for val, lab in facts:
+        c.setFillColor(SOFT)
+        c.roundRect(x, 58, 286, 58, 3, fill=1, stroke=0)
+        c.setFillColor(INK)
+        c.setFont("DejaVuSerif", 14)
+        c.drawString(x + 14, 86, val)
+        c.setFillColor(SLATE)
+        c.setFont("DejaVu", 8)
+        c.drawString(x + 14, 68, lab)
+        x += 302
     footer(c, n, total)
 
 
 def draw_risk(c, n, total):
     bg(c)
-    heading(c, "Si no sale como en la tabla", "Cada desvío tiene un número. No hay que imaginarlo.", size=20)
-    no_sale = r2(S["months"][0]["end"] - MONTH)
+    heading(c, "Si no sale como en la tabla", "El primer año. Cada desvío tiene un número.", size=20)
+    no_sale = r2(S["months"][0]["end"] - FIXED)
     rows = [
         ("El mes 2 no se vende", eur(no_sale, True) + " en caja. El fondo aguanta. El Mercedes espera al mes " + str(S["merc_n"]) + "."),
-        ("Un mes solo sale el 318d", "Faltan " + eur(abs(S["thin_gap"]), True) + " para el gasto. El fondo lo absorbe una vez. El plan no se apoya en ese mes."),
+        ("Un mes solo sale el 318d", "Con el sueldo ya cobrado, faltan " + eur(abs(S["thin_gap"]), True) + ". El fondo lo absorbe una vez. El plan no se apoya en una sola venta."),
         ("El impuesto es el 23 %, no el 15 %", "La cobertura pasa de " + S["dscr_txt"] + " a " + S["dscr23_txt"] + " veces. Sigue cubriendo la cuota, con margen."),
         ("Todos los precios, un 5 % más bajos", "La cobertura de estas " + str(S["sales_n"]) + " ventas queda en " + S["dscr5_txt"] + " veces. Sigue habiendo colchón."),
     ]
@@ -990,13 +1588,13 @@ def draw_close(c, n, total):
     c.drawString(36, 336, "de otros 50.000 €.")
     wrap(
         c,
-        "El mes 1 se abre la nave, se paga el equipo y entran seis coches. Desde el mes 2, dos ventas, repuestas en la semana. Con nueve coches, tres. El stock pasa de seis a " + str(S["end_stock"]) + ". Lo que se pide es una oferta de tipo y de plazo.",
+        "El mes 1 se abre la nave, se paga el equipo y entran seis coches. En 24 meses el stock pasa de seis a " + str(S["y2_stock"]) + ". El sueldo entra el mes 6, sube a " + eur(LIVE, True) + " y se queda ahí. El beneficio del segundo año no se reparte. Lo que se pide es una oferta de tipo y de plazo.",
         "DejaVu", 13, 36, 286, 880, 18, Color(0.78, 0.76, 0.70), 3,
     )
     stats = [
         ("50.000 €", "Financiación"),
-        (eur(S["result"], True), "Beneficio del año"),
-        (S["dscr_txt"] + " veces", "La cuota, en este año"),
+        (eur(S["y2_result"], True), "Beneficio del segundo año"),
+        (S["y2_dscr_txt"] + " veces", "La cuota, en ese año"),
     ]
     x = 36
     for val, lab in stats:
@@ -1017,15 +1615,15 @@ def draw_sources(c, n, total):
     bg(c)
     heading(c, "De dónde sale cada cifra", "Nada de esta sala es una venta ya cobrada.", size=22)
     items = [
-        "Los costes, la nave, la reforma y los cinco gastos del mes salen del plan de cuatro páginas. La venta, de la web.",
-        "El coste de cada coche ya incluye transporte, matriculación y puesta a punto. No se ha restado otra vez.",
-        "La cuota de 955,06 € es la exacta al 5,50 % y 60 meses. El plan la redondea a 966 €. Intereses del año: 2.527,03 €.",
-        "El fondo de " + eur(S["floor"], True) + " es tres veces el mes. El impuesto del año no se usa para comprar un coche de más.",
-        "El ritmo es el plan de trabajo: dos ventas al mes desde el mes 2, en el orden en que llevan en el suelo. Con nueve al abrir, tres. No es una agenda firmada, ni dinero ya cobrado.",
-        "Cada venta se pide a los dos días. En una semana está en España y se publica con matrícula temporal, mientras se hace la ITV.",
-        "El Mercedes y cada 116d de más se compran a su coste ya cerrado. No se ha inventado un modelo ni un precio.",
-        "Los precios son los de khcimport.autos el 11 de octubre de 2026. El 116d, 12.475 €. El 318d, 17.250 €. El resto coincide con el plan.",
-        "El equipo, 822,90 €, sale del presupuesto de arranque y se paga el mes 1, antes de comprar. El " + S["dscr_txt"] + " de este año lo resta.",
+        "Costes, nave y reforma: el plan de cuatro páginas. La venta, de khcimport.autos el 11 de octubre de 2026. El coste ya incluye transporte y matriculación. No se resta otra vez.",
+        "La cuota de 955,06 € es la exacta al 5,50 % y 60 meses. El plan la redondea a 966 €. Intereses: " + eur(S["interest"], True) + " el primer año y " + eur(S["y2_interest"], True) + " el segundo. Al mes 24 la deuda es " + eur(S["y2_balance"], True) + ".",
+        "El autónomo, " + eur(RETA, True) + ", es la cuota mínima de 2026: base 1.424,40 € por 31,5 %. Las cuatro páginas usaban 380 €. No es un sueldo.",
+        "El sueldo no lo obliga la ley. El artículo 217 de la Ley de Sociedades de Capital dice que el cargo es gratuito si los estatutos no lo prevén. La sociedad aún no está constituida.",
+        "Entra el mes 6 a " + eur(SMI, True) + ", el SMI de 2026 en 12 pagas, y sube a " + eur(LIVE, True) + " con ocho coches. Se queda ahí. El bruto de " + eur(Y2_GROSS, True) + " es una prueba para no bajar el bolsillo. No es el plan.",
+        "Retención del administrador: 19 % el primer año. El segundo, 35 %, porque el anterior factura " + eur(S["sales"]) + ". Es un anticipo, no el impuesto final.",
+        "Impuesto de sociedades, 15 % los dos primeros ejercicios con beneficio. El tercero no. La reserva de capitalización resta el 20 % del beneficio anterior no repartido. Ahorro del año 2: " + eur(S["y2_save"], True) + ". Se mantiene 3 años. La de nivelación aplaza: no está en el resultado.",
+        "El fondo de " + eur(S["floor"], True) + " es tres meses de los gastos que no paran. El sueldo va encima. La reserva del impuesto no compra coches. La reforma de " + eur(REFORM) + " salió de caja y no está en la base.",
+        "Ventas: una de cada tres, nunca menos de dos. Reposición en la semana. Solo los siete modelos con coste cerrado. El dividendo y el IRPF de la lámina de sueldo son una estimación, no una liquidación.",
     ]
     y = 408
     for item in items:
@@ -1038,8 +1636,9 @@ def draw_sources(c, n, total):
 
 SLIDES = [
     draw_cover, draw_business, draw_method, draw_lot, draw_program, draw_engines,
-    draw_expenses, draw_rule, draw_m1, draw_m2, draw_gains, draw_cash_chart,
-    draw_ledger, draw_year, draw_bank, draw_risk, draw_close, draw_sources,
+    draw_expenses, draw_salary, draw_rule, draw_m1, draw_m2, draw_gains, draw_cash_chart,
+    draw_ledger, draw_year, draw_year2, draw_tax, draw_pay, draw_ledger2,
+    draw_cash24, draw_account, draw_bank, draw_risk, draw_close, draw_sources,
 ]
 
 
@@ -1107,7 +1706,7 @@ def svg_gains():
     bw = 10
     for i, m in enumerate(S["months"]):
         cx = left + (i + 0.5) * iw / 12
-        gh = MONTH / ymax * ih
+        gh = m["bill"] / ymax * ih
         parts.append(f'<rect x="{cx-bw-1:.1f}" y="{height-bottom-gh:.1f}" width="{bw}" height="{gh:.1f}" fill="#b3934e"/>')
         if m["n"] > 1:
             mh = m["margen"] / ymax * ih
@@ -1146,14 +1745,50 @@ def svg_cash():
     return "".join(parts)
 
 
+def svg_cash24():
+    width, height = 880, 260
+    left, bottom, top = 52, 24, 16
+    iw, ih = width - left - 10, height - bottom - top
+    rows = S["all_months"]
+
+    def X(i):
+        return left + (i + 0.5) * iw / 24
+
+    ymax = S["cash_max"]
+
+    def Y(v):
+        return height - bottom - v / ymax * ih
+
+    parts = [f'<svg viewBox="0 0 {width} {height}" width="100%" role="img">']
+    for t in (0, 10000, 20000, 30000):
+        yy = Y(t)
+        parts.append(f'<line x1="{left}" y1="{yy:.1f}" x2="{width-8}" y2="{yy:.1f}" stroke="#e8e2d6" stroke-dasharray="2 3"/>')
+        parts.append(f'<text x="{left-6}" y="{yy+3:.1f}" text-anchor="end" font-size="11" fill="#4a5872">{k(t)}</text>')
+    fy = Y(S["floor"])
+    parts.append(f'<line x1="{left}" y1="{fy:.1f}" x2="{width-8}" y2="{fy:.1f}" stroke="#b3934e" stroke-dasharray="4 3"/>')
+    pts = " ".join(f"{X(i):.1f},{Y(m['end']):.1f}" for i, m in enumerate(rows))
+    area = f"{X(0):.1f},{height-bottom} " + pts + f" {X(23):.1f},{height-bottom}"
+    parts.append(f'<polygon points="{area}" fill="#dceee4"/>')
+    parts.append(f'<polyline points="{pts}" fill="none" stroke="#0a1020" stroke-width="2"/>')
+    for i, m in enumerate(rows):
+        parts.append(f'<circle cx="{X(i):.1f}" cy="{Y(m["end"]):.1f}" r="2.4" fill="#0a1020"/>')
+        parts.append(f'<text x="{X(i):.1f}" y="{height-6}" text-anchor="middle" font-size="9" fill="#4a5872">{m["n"]}</text>')
+    parts.append("</svg>")
+    return "".join(parts)
+
+
 def write_html():
     lot_rows = "".join(
         f"<tr><td>{esc(short(u['name']))}</td><td class='num'>{esc(eur(u['cost']))}</td><td class='num'>{esc(eur(u['sell']))}</td><td class='num'>{esc(eur(u['net'], True))}</td></tr>"
         for u in S["lot"]
     )
     year_rows = "".join(
-        f"<tr class='{m['kind']}'><td>{m['n']}</td><td>{esc(m['what'])}</td><td class='num'>{esc(eur(m['cobro']))}</td><td class='num'>{esc(eur(m['gastos'], True))}</td><td class='num'>{'—' if m['n']==1 else esc(eur(m['iva'], True))}</td><td class='num'>{esc(eur(m['compra']))}</td><td class='num'>{esc(eur(m['sobra'], True))}</td><td class='num'><b>{esc(eur(m['end'], True))}</b></td></tr>"
+        f"<tr class='{m['kind']}'><td>{m['n']}</td><td>{esc(m['what'])}</td><td class='num'>{esc(eur(m['cobro']))}</td><td class='num'>{esc(eur(m['gastos'], True))}</td><td class='num'>{'—' if m['sal']==0 else esc(eur(m['sal'], True))}</td><td class='num'>{'—' if m['n']==1 else esc(eur(m['iva'], True))}</td><td class='num'>{esc(eur(m['compra']))}</td><td class='num'>{esc(eur(m['sobra'], True))}</td><td class='num'><b>{esc(eur(m['end'], True))}</b></td></tr>"
         for m in S["months"]
+    )
+    y2_rows = "".join(
+        f"<tr class='{m['kind']}'><td>{m['n']}</td><td>{esc(m['what'])}</td><td class='num'>{esc(eur(m['cobro']))}</td><td class='num'>{esc(eur(m['gastos'], True))}</td><td class='num'>{esc(eur(m['sal'], True))}</td><td class='num'>{esc(eur(m['iva'], True))}</td><td class='num'>{esc(eur(m['compra']))}</td><td class='num'>{esc(eur(m['sobra'], True))}</td><td class='num'><b>{esc(eur(m['end'], True))}</b></td></tr>"
+        for m in S["y2_months"]
     )
     html = f"""<!DOCTYPE html>
 <html lang="es">
@@ -1202,11 +1837,11 @@ def write_html():
   <img class="logo" src="logo_flat.png" alt="KHC">
   <p class="kicker">Solicitud de financiación</p>
   <h1>50.000 € para abrir la nave y poner el stock en marcha.</h1>
-  <p>Otros 50.000 € son capital propio. Santiago de Compostela. Dos ventas al mes desde el mes 2. El stock crece.</p>
+  <p>Otros 50.000 € son capital propio. Santiago de Compostela. Veinticuatro meses. Más coches en el suelo, más ventas al mes.</p>
   <div class="grid3">
     <div class="stat"><b>50.000 €</b><span>Lo que se pide</span></div>
-    <div class="stat"><b>50.000 €</b><span>Capital propio, al lado</span></div>
-    <div class="stat"><b>2 al mes</b><span>El ritmo, desde el mes 2</span></div>
+    <div class="stat"><b>24 meses</b><span>El plan, desde el día 1</span></div>
+    <div class="stat"><b>6 → 14</b><span>Coches. El stock no se queda en seis</span></div>
   </div>
   <footer><span>KHC AUTO IMPORT</span><span>01</span></footer>
 </section>
@@ -1259,16 +1894,28 @@ def write_html():
   <footer><span>KHC AUTO IMPORT</span><span>06</span></footer>
 </section>
 <section class="slide">
-  <p class="kicker">Todos los gastos</p>
-  <h1>Cinco partidas. Cada mes. Haya venta o no.</h1>
+  <p class="kicker">Los gastos que no paran</p>
+  <h1>Cinco partidas. El sueldo no está aquí.</h1>
   <div class="line"><span>Nave</span><b>1.100 €</b></div>
-  <div class="line"><span>Autónomo. No es un sueldo.</span><b>380 €</b></div>
+  <div class="line"><span>Autónomo societario. No es un sueldo.</span><b>{esc(eur(RETA, True))}</b></div>
   <div class="line"><span>Portales y gestoría</span><b>250 €</b></div>
   <div class="line"><span>Luz, agua y vado</span><b>150 €</b></div>
   <div class="line"><span>Cuota, 5,50 % y 60 meses</span><b>955,06 €</b></div>
-  <div class="line total"><span>El mes</span><b>2.835,06 €</b></div>
-  <p class="muted">El mes 1, antes de comprar, suma el equipo de revisión, 822,90 €, y la reforma, 4.550 €. La obra la hace el promotor. No están: sueldo, taller y la cuota SGR.</p>
+  <div class="line total"><span>Cada mes, sin el sueldo</span><b>{esc(eur(FIXED, True))}</b></div>
+  <p class="muted">El mes 1 suma el equipo, 822,90 €, y la reforma, 4.550 €. La obra la hace el promotor. El sueldo va en la lámina siguiente.</p>
   <footer><span>KHC AUTO IMPORT</span><span>07</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">El sueldo</p>
+  <h1>La ley no obliga a pagarlo. Se paga para vivir, y sube.</h1>
+  <div class="line"><span><b>No es obligatorio.</b> El cargo es gratuito si los estatutos no dicen lo contrario. La sociedad aún no está hecha: se escribe ahí.</span></div>
+  <div class="line"><span><b>Lo que sí es obligatorio:</b> el autónomo societario, {esc(eur(RETA, True))}. No es un sueldo. Las cuatro páginas ponían 380 €.</span></div>
+  <div class="grid3">
+    <article><b>0 €</b><p class="muted">Meses 1 a 5. Lo cubre el colchón familiar de 25.000 €, fuera de la empresa.</p></article>
+    <article><b>{esc(eur(SMI, True))}</b><p class="muted">Meses 6 a 9. SMI de 2026 en 12 pagas. Él recibe {esc(eur(S['smi_net'], True))}.</p></article>
+    <article><b>{esc(eur(LIVE, True))}</b><p class="muted">Desde el mes 10 hasta el 24. El bruto se queda. El primer año él recibe {esc(eur(S['live_net'], True))}. En el segundo, con el 35 %, {esc(eur(S['y2_pocket'], True))}.</p></article>
+  </div>
+  <footer><span>KHC AUTO IMPORT</span><span>08</span></footer>
 </section>
 <section class="slide">
   <p class="kicker">La regla del año</p>
@@ -1276,8 +1923,8 @@ def write_html():
   <div class="line"><span><b>Mes 1.</b> Primero el equipo, 822,90 €. Después seis coches y la reforma. El Mercedes entra el mes {S['merc_n']}.</span></div>
   <div class="line"><span><b>Fondo.</b> {esc(eur(S['floor'], True))}. Tres meses. El impuesto del año no compra coches.</span></div>
   <div class="line"><span><b>La venta.</b> Dos al mes desde el mes 2. Se pide a los dos días. En una semana está publicada, con matrícula temporal.</span></div>
-  <div class="line"><span><b>Con nueve, tres.</b> Lo que sobra compra el más barato de la tabla. Cierra con {S['end_stock']} coches. No se inventa un modelo.</span></div>
-  <footer><span>KHC AUTO IMPORT</span><span>08</span></footer>
+  <div class="line"><span><b>Más suelo, más ventas.</b> Una de cada tres, nunca menos de dos. Este año cierra con {S['end_stock']}. El segundo llega a {S['y2_stock']}. No se inventa un modelo.</span></div>
+  <footer><span>KHC AUTO IMPORT</span><span>09</span></footer>
 </section>
 <section class="slide">
   <p class="kicker">Mes 1</p>
@@ -1286,94 +1933,167 @@ def write_html():
   <div class="line"><span>Equipo de revisión, antes de comprar</span><b>−822,90 €</b></div>
   <div class="line"><span>Seis coches</span><b>−77.714 €</b></div>
   <div class="line"><span>Reforma, materiales</span><b>−4.550 €</b></div>
-  <div class="line"><span>El mes</span><b>−2.835,06 €</b></div>
+  <div class="line"><span>El mes, sin sueldo</span><b>−{esc(eur(FIXED, True))}</b></div>
   <div class="line total"><span>Caja</span><b>{esc(eur(S['months'][0]['end'], True))}</b></div>
-  <footer><span>KHC AUTO IMPORT</span><span>09</span></footer>
+  <footer><span>KHC AUTO IMPORT</span><span>10</span></footer>
 </section>
 <section class="slide">
   <p class="kicker">Mes 2</p>
   <h1>Dos ventas. Las dos se reponen en la semana.</h1>
   <div class="line"><span>Caja al abrir</span><b>{esc(eur(S['months'][0]['end'], True))}</b></div>
-  <div class="line"><span>El mes</span><b>−2.835,06 €</b></div>
+  <div class="line"><span>El mes, sin sueldo</span><b>−{esc(eur(FIXED, True))}</b></div>
   <div class="line"><span>GTI, cobrado y repuesto</span><b>+{esc(eur(S['months'][1]['sold_units'][0]['net'], True))}</b></div>
   <div class="line"><span>116d, cobrado y repuesto</span><b>+{esc(eur(S['months'][1]['sold_units'][1]['net'], True))}</b></div>
   <div class="line total"><span>Caja. El Mercedes sigue fuera.</span><b>{esc(eur(S['months'][1]['end'], True))}</b></div>
-  <footer><span>KHC AUTO IMPORT</span><span>10</span></footer>
-</section>
-<section class="slide">
-  <p class="kicker">Ganancia y gasto</p>
-  <h1>La barra verde deja más que la dorada.</h1>
-  <div class="chart">{svg_gains()}</div>
-  <p class="muted">Dorada: el mes, 2.835 €. Verde: el margen de las ventas. El mes más flojo deja {esc(eur(S['weak']['sobra'], True))} después del gasto.</p>
   <footer><span>KHC AUTO IMPORT</span><span>11</span></footer>
 </section>
 <section class="slide">
-  <p class="kicker">La caja</p>
+  <p class="kicker">El primer año</p>
+  <h1>La barra verde deja más que la dorada.</h1>
+  <div class="chart">{svg_gains()}</div>
+  <p class="muted">Dorada: el mes, con el sueldo cuando ya se cobra. Verde: el margen. El mes más flojo deja {esc(eur(S['weak']['sobra'], True))}.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>12</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">La caja del primer año</p>
   <h1>Sube con lo que sobra. Baja cuando se compra.</h1>
   <div class="chart">{svg_cash()}</div>
   <p class="muted">Mes {S['merc_n']}, entra el Mercedes. Luego, otro 116d a 9.010 € cuando cabe. Diciembre cierra con {esc(eur(S['months'][-1]['end'], True))} y {S['end_stock']} coches.</p>
-  <footer><span>KHC AUTO IMPORT</span><span>12</span></footer>
+  <footer><span>KHC AUTO IMPORT</span><span>13</span></footer>
 </section>
 <section class="slide">
   <p class="kicker">El primer año</p>
   <h1>Mes a mes.</h1>
-  <table><thead><tr><th>Mes</th><th>Qué ocurre</th><th>Cobro</th><th>Gastos</th><th>IVA</th><th>Compra</th><th>Sobra</th><th>Caja</th></tr></thead><tbody>{year_rows}</tbody></table>
-  <p class="muted">Sobra es el margen menos el mes. No incluye la compra. El mes 1, cobro es el capital.</p>
-  <footer><span>KHC AUTO IMPORT</span><span>13</span></footer>
+  <table><thead><tr><th>Mes</th><th>Qué ocurre</th><th>Cobro</th><th>Gastos</th><th>Sueldo</th><th>IVA</th><th>Compra</th><th>Sobra</th><th>Caja</th></tr></thead><tbody>{year_rows}</tbody></table>
+  <p class="muted">El sueldo ya está dentro de gastos. Sobra es el margen menos el mes y el sueldo. El mes 1, cobro es el capital.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>14</span></footer>
 </section>
 <section class="slide">
-  <p class="kicker">El año, en una cuenta</p>
+  <p class="kicker">El primer año, en una cuenta</p>
   <h1>{S['sales_n']} ventas. El stock pasa de 6 a {S['end_stock']}. La cuota, pagada.</h1>
   <div class="line"><span>Capital</span><b>+100.000 €</b></div>
   <div class="line"><span>{S['sales_n']} cobros</span><b>+{esc(eur(S['sales']))}</b></div>
   <div class="line"><span>Coches comprados</span><b>−{esc(eur(S['purchases']))}</b></div>
-  <div class="line"><span>Gastos y reforma</span><b>−{esc(eur(S['gastos'], True))}</b></div>
+  <div class="line"><span>Gastos, reforma y equipo. Sin el sueldo.</span><b>−{esc(eur(S['gastos_fijos'], True))}</b></div>
+  <div class="line"><span>Sueldo del año</span><b>−{esc(eur(S['salary'], True))}</b></div>
   <div class="line"><span>IVA de las ganancias</span><b>−{esc(eur(S['iva'], True))}</b></div>
   <div class="line total"><span>Caja en diciembre</span><b>{esc(eur(S['months'][-1]['end'], True))}</b></div>
-  <p class="muted">Beneficio del año: {esc(eur(S['result'], True))}. Impuesto al 15 %: {esc(eur(S['tax'], True))}. Apartado, por encima del fondo quedan {esc(eur(S['free_gap'], True))}.</p>
-  <footer><span>KHC AUTO IMPORT</span><span>14</span></footer>
-</section>
-<section class="slide">
-  <p class="kicker">Lo que mira quien presta</p>
-  <h1>La cuota, {S['dscr_txt']} veces. El beneficio, {esc(eur(S['result']))}.</h1>
-  <div class="grid3">
-    <article><b>{S['dscr_txt']}</b><p class="muted">{S['sales_n']} ventas, el equipo restado y el impuesto ya quitado.</p></article>
-    <article><b>{esc(eur(S['result']))}</b><p class="muted">Beneficio del año. No es un sueldo.</p></article>
-    <article><b>6 → {S['end_stock']}</b><p class="muted">Coches en el suelo. El Mercedes entra el mes {S['merc_n']}.</p></article>
-  </div>
+  <p class="muted">Beneficio del año: {esc(eur(S['result'], True))}, con el sueldo ya restado. Impuesto al 15 %: {esc(eur(S['tax'], True))}. Por encima del fondo quedan {esc(eur(S['free_gap'], True))}.</p>
   <footer><span>KHC AUTO IMPORT</span><span>15</span></footer>
 </section>
 <section class="slide">
+  <p class="kicker">El segundo año</p>
+  <h1>Más coches en el suelo. Más ventas. La misma regla.</h1>
+  <div class="grid3">
+    <article><b>{S['y2_sales_n']}</b><p class="muted">Ventas. El primero tuvo {S['sales_n']}.</p></article>
+    <article><b>8 → {S['y2_stock']}</b><p class="muted">Coches. No se queda en ocho.</p></article>
+    <article><b>{esc(eur(S['y2_result']))}</b><p class="muted">Beneficio. El sueldo ya está restado.</p></article>
+  </div>
+  <div class="line"><span>6 a 8 al abrir</span><b>2 ventas</b></div>
+  <div class="line"><span>9 a 11 al abrir</span><b>3 ventas</b></div>
+  <div class="line"><span>12 a 14 al abrir</span><b>4 ventas</b></div>
+  <p class="muted">Una de cada tres, nunca menos de dos. El mes 19 se paga el impuesto del primer año, {esc(eur(S['tax'], True))}, antes de las facturas. La cuota se cubre {S['y2_dscr_txt']} veces.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>16</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">El impuesto</p>
+  <h1>Qué lo baja de verdad. Qué solo mueve el dinero.</h1>
+  <div class="grid">
+    <article><b>Sí lo baja</b><p>No repartir: la reserva de capitalización ahorra {esc(eur(S['y2_save'], True))}. Un gasto real, con factura, también. El 15 % dura dos años con beneficio. El tercero no.</p></article>
+    <article><b>No lo baja</b><p>Comprar coches. Pagar el principal del préstamo. Gastar lo apartado para el impuesto. Aplazar con la reserva de nivelación, o repartir un dividendo.</p></article>
+  </div>
+  <p class="muted">La reforma de {esc(eur(REFORM))} ya salió de caja y no está en la base. Si la gestoría la admite, bajaría {esc(eur(S['reform_tax'], True))}. No cambia las compras.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>17</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">Sueldo o dividendo</p>
+  <h1>Para él, y para la empresa. No es lo mismo.</h1>
+  <div class="line total"><span>Propuesta: no subir el sueldo. No repartir. Los {esc(eur(S['y2_gap'], True))} se quedan. No llegan al {S['cheap']['nick']} de {esc(eur(S['cheap']['cost']))}.</span></div>
+  <table>
+    <thead><tr><th></th><th>El plan</th><th>Subir el bruto</th><th>Un dividendo</th></tr></thead>
+    <tbody>
+      <tr><td>Qué sale</td><td class="num">{esc(eur(LIVE, True))} / mes</td><td class="num">{esc(eur(Y2_GROSS, True))} / mes</td><td class="num">{esc(eur(S['y2_gap'], True))} una vez</td></tr>
+      <tr><td>Él recibe, año 2</td><td class="num">{esc(eur(S['y2_pocket'], True))} / mes</td><td class="num">{esc(eur(S['live_net'], True))} / mes</td><td class="num">{esc(eur(S['div_pocket'], True))} una vez</td></tr>
+      <tr><td>Impuesto de la empresa</td><td class="num">{esc(eur(S['y2_tax'], True))}</td><td class="num">{esc(eur(PROBE['y2_tax'], True))}</td><td class="num">{esc(eur(S['y2_tax'], True))}</td></tr>
+      <tr><td>Caja al cerrar</td><td class="num">{esc(eur(S['y2_end'], True))}</td><td class="num">{esc(eur(PROBE['y2_end'], True))}</td><td class="num">el fondo, sin colchón</td></tr>
+      <tr><td>¿Se hace?</td><td class="num">Sí. Es el plan.</td><td class="num">No. No está aceptado.</td><td class="num">No. No se reparte.</td></tr>
+    </tbody>
+  </table>
+  <p class="muted">A 25.000 € el sueldo deja más en el bolsillo que el dividendo. Es una estimación, no una liquidación. Al cerrar, dentro hay {esc(eur(S['equity'], True))}.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>18</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">El segundo año</p>
+  <h1>Mes a mes.</h1>
+  <table><thead><tr><th>Mes</th><th>Qué ocurre</th><th>Cobro</th><th>Gastos</th><th>Sueldo</th><th>IVA</th><th>Compra</th><th>Sobra</th><th>Caja</th></tr></thead><tbody>{y2_rows}</tbody></table>
+  <p class="muted">El mes 19 paga el impuesto del año 1 en la caja, no en gastos. Verde: se compra un {S['cheap']['nick']} de más, a {esc(eur(S['cheap']['cost']))}. Por encima del fondo quedan {esc(eur(S['y2_gap'], True))}: no llega.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>19</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">Veinticuatro meses de caja</p>
+  <h1>Sube con las ventas. Baja cuando el stock crece.</h1>
+  <div class="chart">{svg_cash24()}</div>
+  <p class="muted">Mínimo, mes {S['min_n']}: {esc(eur(S['min_cash'], True))}. Mes 24: {esc(eur(S['y2_end'], True))} y {S['y2_stock']} coches. Sobran {esc(eur(S['y2_gap'], True))}, por debajo del {S['cheap']['nick']}.</p>
+  <footer><span>KHC AUTO IMPORT</span><span>20</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">Los dos años</p>
+  <h1>La misma empresa. El segundo ya no es el de arrancar.</h1>
+  <table>
+    <thead><tr><th></th><th>Año 1</th><th>Año 2</th></tr></thead>
+    <tbody>
+      <tr><td>Ventas</td><td class="num">{S['sales_n']}</td><td class="num">{S['y2_sales_n']}</td></tr>
+      <tr><td>Cobros</td><td class="num">{esc(eur(S['sales']))}</td><td class="num">{esc(eur(S['y2_sales']))}</td></tr>
+      <tr><td>Beneficio</td><td class="num">{esc(eur(S['result'], True))}</td><td class="num">{esc(eur(S['y2_result'], True))}</td></tr>
+      <tr><td>Caja</td><td class="num">{esc(eur(S['months'][-1]['end'], True))}</td><td class="num">{esc(eur(S['y2_end'], True))}</td></tr>
+      <tr><td>Coches</td><td class="num">{S['end_stock']}</td><td class="num">{S['y2_stock']}</td></tr>
+      <tr><td>La cuota, veces</td><td class="num">{S['dscr_txt']}</td><td class="num">{S['y2_dscr_txt']}</td></tr>
+    </tbody>
+  </table>
+  <footer><span>KHC AUTO IMPORT</span><span>21</span></footer>
+</section>
+<section class="slide">
+  <p class="kicker">Lo que mira quien presta</p>
+  <h1>La cuota se cubre {S['dscr_txt']} veces el primer año y {S['y2_dscr_txt']} el segundo.</h1>
+  <div class="grid3">
+    <article><b>{S['dscr_txt']} · {S['y2_dscr_txt']}</b><p class="muted">{S['sales_n']} ventas, luego {S['y2_sales_n']}. Sueldo e impuesto, ya restados.</p></article>
+    <article><b>{esc(eur(S['result']))} · {esc(eur(S['y2_result']))}</b><p class="muted">Beneficio de cada año. El sueldo ya está pagado.</p></article>
+    <article><b>6 → {S['end_stock']} → {S['y2_stock']}</b><p class="muted">Coches. El Mercedes entra el mes {S['merc_n']}.</p></article>
+  </div>
+  <footer><span>KHC AUTO IMPORT</span><span>22</span></footer>
+</section>
+<section class="slide">
   <p class="kicker">Si no sale como en la tabla</p>
-  <h1>Cada desvío tiene un número.</h1>
-  <div class="line"><span>El mes 2 no se vende. El fondo aguanta.</span><b>{esc(eur(S['months'][0]['end']-MONTH, True))}</b></div>
-  <div class="line"><span>Un mes solo sale el 318d. Faltan para el gasto.</span><b>{esc(eur(S['thin_gap'], True))}</b></div>
+  <h1>El primer año. Cada desvío tiene un número.</h1>
+  <div class="line"><span>El mes 2 no se vende. El fondo aguanta.</span><b>{esc(eur(S['months'][0]['end']-FIXED, True))}</b></div>
+  <div class="line"><span>Un mes solo sale el 318d. Con el sueldo ya cobrado, faltan.</span><b>{esc(eur(abs(S['thin_gap']), True))}</b></div>
   <div class="line"><span>Impuesto al 23 %. Sigue cubriendo.</span><b>{S['dscr23_txt']} veces</b></div>
   <div class="line"><span>Precios un 5 % más bajos. Sigue habiendo colchón.</span><b>{S['dscr5_txt']} veces</b></div>
-  <footer><span>KHC AUTO IMPORT</span><span>16</span></footer>
+  <footer><span>KHC AUTO IMPORT</span><span>23</span></footer>
 </section>
 <section class="slide dark">
   <p class="kicker">La petición</p>
   <h1>50.000 € al lado de otros 50.000 €.</h1>
-  <p>Desde el mes 2, dos ventas, repuestas en la semana. Con nueve coches, tres. El stock pasa de seis a {S['end_stock']}. Lo que se pide es una oferta de tipo y de plazo.</p>
+  <p>En 24 meses el stock pasa de seis a {S['y2_stock']}. El sueldo entra el mes 6, sube a {esc(eur(LIVE, True))} y se queda ahí. El beneficio del segundo año no se reparte. Lo que se pide es una oferta de tipo y de plazo.</p>
   <div class="grid3">
     <div class="stat"><b>50.000 €</b><span>Financiación</span></div>
-    <div class="stat"><b>{esc(eur(S['result'], True))}</b><span>Beneficio del año</span></div>
-    <div class="stat"><b>{S['dscr_txt']} veces</b><span>La cuota, en este año</span></div>
+    <div class="stat"><b>{esc(eur(S['y2_result'], True))}</b><span>Beneficio del segundo año</span></div>
+    <div class="stat"><b>{S['y2_dscr_txt']} veces</b><span>La cuota, en ese año</span></div>
   </div>
-  <footer><span>KHC AUTO IMPORT</span><span>17</span></footer>
+  <footer><span>KHC AUTO IMPORT</span><span>24</span></footer>
 </section>
 <section class="slide">
   <p class="kicker">De dónde sale cada cifra</p>
   <h1>Nada de esta sala es una venta ya cobrada.</h1>
   <ul>
-    <li>Coches, nave, reforma y gastos: plan de cuatro páginas. La cuota exacta es 955,06 €, no 966 €.</li>
-    <li>El fondo de {esc(eur(S['floor'], True))} es tres veces el mes. Es la regla de esta solicitud.</li>
-    <li>Dos ventas al mes desde el mes 2. Con nueve coches al abrir, tres. Cada venta se repone en la semana. No es dinero ya cobrado.</li>
-    <li>El Mercedes y cada 116d de más usan su coste ya cerrado. Precios de khcimport.autos, 11 de octubre de 2026. No hay un modelo inventado.</li>
-    <li>El equipo, 822,90 €, se paga el mes 1, antes de comprar. El {S['dscr_txt']} de este año lo resta.</li>
+    <li>Coches, nave y reforma: plan de cuatro páginas. La cuota exacta es 955,06 €, no 966 €. El autónomo, {esc(eur(RETA, True))}, es el mínimo de 2026, no los 380 € de las cuatro páginas.</li>
+    <li>El sueldo no lo obliga la ley. Empieza el mes 6 al SMI, {esc(eur(SMI, True))}, y sube a {esc(eur(LIVE, True))} cuando el mes abre con ocho coches. Ese segundo tramo es el colchón de 25.000 €, en doce meses.</li>
+    <li>El fondo de {esc(eur(S['floor'], True))} es tres meses de los gastos que no paran. El sueldo se paga encima y no se toca.</li>
+    <li>Dos ventas al mes desde el mes 2. Con nueve al abrir, tres. Cada venta se repone en la semana. Precios de la web, 11 de octubre de 2026. No hay un modelo inventado.</li>
+    <li>Impuesto de sociedades, 15 % los dos primeros ejercicios con beneficio. La reserva de capitalización ahorra {esc(eur(S['y2_save'], True))} en el año 2 si el beneficio no se reparte. La de nivelación aplaza: no está en el resultado.</li>
+    <li>Ventas: una de cada tres, nunca menos de dos. El dividendo y el IRPF de la comparación son una estimación, no una liquidación. No hay un modelo inventado.</li>
   </ul>
-  <footer><span>KHC AUTO IMPORT</span><span>18</span></footer>
+  <footer><span>KHC AUTO IMPORT</span><span>25</span></footer>
 </section>
 <div class="hint">Flechas · F pantalla completa</div>
 <script>

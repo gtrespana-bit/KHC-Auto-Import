@@ -35,8 +35,8 @@
 5. **[`05_CHECKLIST_OPERATIVO_COMPRA_Y_VIAJE_ALEMANIA.md`](./05_CHECKLIST_OPERATIVO_COMPRA_Y_VIAJE_ALEMANIA.md)** *(✅ Nuevo — Manual de Campo)*
    - Guía paso a paso para auditar espesores de pintura con el **GOYOJO CTG-2**, cazar afeitados de kilómetros en 5 centralitas con el **Launch CRP919E BT**, revisar los 6 documentos alemanes obligatorios y tramitar las placas rojas en la *Zulassungsstelle* en 45 minutos.
 
-6. **[`Plan_Negocio_KHC_Presentacion.pdf`](./Plan_Negocio_KHC_Presentacion.pdf)** *(18 láminas, para banco, aval o capital privado)*
-   - Solicitud de 50.000 €. Precios de la web. Desde el mes 2, dos ventas al mes; con nueve coches, tres. Cada venta se repone en la semana. El stock crece y el beneficio del año queda escrito. Se regenera con `generar_presentacion.py`. Para proyectarla: `presentacion/index.html`.
+6. **[`Plan_Negocio_KHC_Presentacion.pdf`](./Plan_Negocio_KHC_Presentacion.pdf)** *(25 láminas, para banco, aval o capital privado)*
+   - Solicitud de 50.000 €, a 24 meses. Precios de la web. Se vende una de cada tres unidades al abrir el mes, nunca menos de dos, y se repone en la semana. El sueldo no es obligatorio: entra el mes 6, al SMI, sube a 2.083,33 € con ocho coches y se queda ahí. El beneficio no se reparte. Se regenera con `generar_presentacion.py`. Para proyectarla: `presentacion/index.html`.
 
 7. **[`DOCUMENTOS LEGALES KHC IMPORT/Dossier_Aval_Sogarpo_KHC.pdf`](./DOCUMENTOS%20LEGALES%20KHC%20IMPORT/Dossier_Aval_Sogarpo_KHC.pdf)** *(desarrolla el plan de 4 páginas, no rebaja sus márgenes)*
    - El coste de compra del plan ya incluye coche, transporte, matriculación y puesta a la venta. El margen neto real medio del lote es **3.781 €**. Solicitud: **50.000 €** junto a 50.000 € de capital. Con una venta al mes y la nave abierta, el RCSD es **1,72×**. La reforma de 4.550 € se paga con el primer cobro, no el mismo día de la compra. Se regenera con `generar_dossier.py`.
