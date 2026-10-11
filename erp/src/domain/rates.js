@@ -276,9 +276,10 @@ export const OPERATING_COSTS = {
   fichaReducida: { label: 'Ficha técnica reducida (sin COC)', amount: 90 },
   traduccionJurada: { label: 'Traducción jurada de la documentación', amount: 45 },
   seguroStockMes: { label: 'Seguro de stock / garaje (por vehículo y mes)', amount: 12 },
-  preparacionBasica: { label: 'Preparación y limpieza profesional', amount: 180 },
-  garantiaExternaAnual: { label: 'Póliza de garantía mecánica (por vehículo vendido)', amount: 240 },
-  anuncioPortal: { label: 'Publicación en portales (Coches.net / Wallapop Pro)', amount: 30 },
+  preparacionBasica: { label: 'Preparación y limpieza profesional', amount: 180, unit: '€/vehículo' },
+  mantenimientoPuestaAPunto: { label: 'Mantenimiento de puesta a punto (aceite, filtros, revisión)', amount: 150, unit: '€/vehículo' },
+  garantiaExternaAnual: { label: 'Póliza de garantía mecánica (por vehículo)', amount: 450, unit: '€/vehículo', note: 'Tarifa estándar de la empresa: se imputa a cada coche que entra en flota.' },
+  anuncioPortal: { label: 'Publicación en portales (Coches.net / Wallapop Pro)', amount: 30, unit: '€/vehículo' },
   financionComision: { label: 'Comisión de financiación intermediada', amount: 0 },
 };
 
@@ -315,6 +316,7 @@ export const DEFAULT_TARIFFS = {
   rebaja_venta_pct: OPERATING_COSTS.rebajaVenta.amount,
   gestoria: OPERATING_COSTS.gestoria.amount,
   preparacion: OPERATING_COSTS.preparacionBasica.amount,
+  mantenimiento: OPERATING_COSTS.mantenimientoPuestaAPunto.amount,
   garantia_externa: OPERATING_COSTS.garantiaExternaAnual.amount,
   anuncio_portal: OPERATING_COSTS.anuncioPortal.amount,
   seguro_stock_mes: OPERATING_COSTS.seguroStockMes.amount,
@@ -327,6 +329,41 @@ export const DEFAULT_TARIFFS = {
 
 export function effectiveTariffs(company = {}) {
   return { ...DEFAULT_TARIFFS, ...(company?.tariffs || {}) };
+}
+
+// ---------------------------------------------------------------------------
+// «Puesta a la venta»: costes que se rellenan SOLOS en cada alta de flota
+// ---------------------------------------------------------------------------
+// Todo coche que entra en la flota (formulario de vehículo, borrador de
+// importación o simulador) arranca con estos cuatro importes de tarifa:
+//   reacondicionamiento 180 € · mantenimiento 150 € · póliza de garantía 450 €
+//   publicidad y portales 30 €
+// Son estimaciones estándar y editables en «Ajustes → Tarifas»; se sustituyen
+// por las facturas reales al cerrar cada operación.
+export const SALES_PREP_COST_KEYS = ['recond', 'maintenance', 'guarantee', 'advertising'];
+
+/** Clave de tarifa que alimenta cada coste de puesta a la venta. */
+export const SALES_PREP_TARIFF_KEYS = {
+  recond: 'preparacion',
+  maintenance: 'mantenimiento',
+  guarantee: 'garantia_externa',
+  advertising: 'anuncio_portal',
+};
+
+export const SALES_PREP_LABELS = {
+  recond: 'Reacondicionamiento',
+  maintenance: 'Mantenimiento',
+  guarantee: 'Póliza de garantía',
+  advertising: 'Publicidad y portales',
+};
+
+/** Importes estándar de puesta a la venta según las tarifas vigentes. */
+export function defaultSalesPrepCosts(tariffs) {
+  const t = { ...DEFAULT_TARIFFS, ...(tariffs || {}) };
+  return Object.fromEntries(SALES_PREP_COST_KEYS.map((key) => [
+    key,
+    Math.round((Number(t[SALES_PREP_TARIFF_KEYS[key]]) || 0) * 100) / 100,
+  ]));
 }
 
 export const TARIFF_GROUPS = [
@@ -366,7 +403,8 @@ export const TARIFF_GROUPS = [
       { key: 'transporte_carretera', label: 'Bajada rodando' },
       { key: 'gestoria', label: 'Gestoría' },
       { key: 'placas_matricula', label: 'Placas de matrícula' },
-      { key: 'preparacion', label: 'Preparación y limpieza' },
+      { key: 'preparacion', label: 'Preparación y limpieza (reacondicionamiento)' },
+      { key: 'mantenimiento', label: 'Mantenimiento de puesta a punto' },
       { key: 'garantia_externa', label: 'Póliza de garantía mecánica' },
       { key: 'anuncio_portal', label: 'Anuncio en portales' },
       { key: 'seguro_stock_mes', label: 'Seguro de stock (€/mes)' },

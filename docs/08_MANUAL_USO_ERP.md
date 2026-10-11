@@ -74,9 +74,10 @@ Dos vistas: tabla y tablero por estados. Se puede filtrar, exportar a CSV y abri
 completa haciendo clic en la fila. Si hay un **borrador de importación** preparado en el código,
 aparece un aviso arriba con los datos, las fotos, el anuncio, el tipo de vendedor, los avisos del
 anuncio y el precio objetivo. Los gastos estándar (transporte, COC, ITV de importación, tasa DGT,
-placas, gestoría, preparación, mantenimiento y publicidad) vienen ya rellenados con las tarifas de
-*Ajustes → Tarifas*; solo lo que de verdad no se puede estimar queda a 0 como pendiente y fuera del
-subtotal. *Añadir a mi flota* guarda la ficha y sus fotos en la base de datos, y *Descartar*
+placas y gestoría) vienen ya rellenados con las tarifas de *Ajustes → Tarifas*; solo lo que de
+verdad no se puede estimar (viaje, seguro de stock, otros) queda a 0 como pendiente y fuera del
+subtotal. La **puesta a la venta** se rellena sola en cada alta: reacondicionamiento 180 €,
+mantenimiento 150 €, póliza de garantía 450 € y publicidad y portales 30 €. *Añadir a mi flota* guarda la ficha y sus fotos en la base de datos, y *Descartar*
 recuerda la decisión. El vehículo entra como **Prospección**: no se marca como comprado ni se
 publica en la web. En compras a particular la exención del ITP no se preselecciona: su elegibilidad
 debe confirmarse en la ficha antes de aplicarla (en compras a profesional no hay ITP).
@@ -105,7 +106,10 @@ Al elegir la opción, la aplicación calcula sola el impuesto de la compra, el I
 que presentar. Los cuatro impuestos aparecen con la etiqueta **Auto**: si Hacienda te
 cobra un importe distinto, pulsas la etiqueta para fijarlo a mano, y con
 *Restaurar cálculo automático* vuelves al cálculo. Los gastos fijos (transporte, ITV,
-DGT, placas, preparación…) se precargan desde *Ajustes → Tarifas*.
+DGT, placas…) se precargan desde *Ajustes → Tarifas*, y el bloque **Puesta a la venta**
+nace ya relleno con los importes estándar de la empresa: reacondicionamiento 180 €,
+mantenimiento 150 €, póliza de garantía 450 € y publicidad y portales 30 € (cámbialos en
+*Ajustes → Tarifas* o en la propia ficha cuando tengas la factura real).
 
 ### Catálogo
 1.104 variantes de 37 marcas (101 fichas revisadas a mano + 1.003 generadas por modelo de depreciación). Cada ficha lleva motor, fiabilidad (`Motor roca` / `Correcto` /
