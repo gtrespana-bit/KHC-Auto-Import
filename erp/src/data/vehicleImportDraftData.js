@@ -758,4 +758,518 @@ export const PENDING_VEHICLE_IMPORT_DATA = [
     "notes": "BORRADOR PENDIENTE DE APROBACIÓN: no consta compra formalizada. Precio comunicado posteriormente por el usuario: 9.800 € netos, compra a empresa UE con IVA deducible. El PDF no contiene precio. Datos extraídos del informe, páginas 1–3. Producción 13/05/2019; primera matriculación 17/10/2019; 141.723 km; 2 llaves; Euro 6d-Temp. Documentos belgas completos, certificado de conformidad y registro de mantenimiento declarados disponibles, no verificados. Neumáticos: 5 mm delante y 7 mm detrás. VIN oculto en el informe; no se reconstruye. Cilindros, código motor, CO₂, etiqueta DGT y valor fiscal pendientes de documentación. El cálculo automático de potencia fiscal es orientativo.\n\nPrecio neto confirmado por el usuario: 9.800 € (antes 10.100 €, descuento 300 €). Total anunciado con IVA: 12.390,40 €. A un 21 %, 9.800 € + IVA = 11.858 €: quedan 532,40 € sin desglose. Comisiones y objetivo de venta pendientes; no imputar la diferencia automáticamente como IVA o gasto.\nDaño declarado: arañazos en el parachoques trasero (página 3). Presupuesto de reparación pendiente; revisar el detalle original y no valorar el estado por las imágenes editadas.\nInspección técnica válida hasta el 17/10/2026 según el informe; comprobar vigencia antes del traslado. No equivale a la ITV de importación española.\nCompra a empresa UE con IVA deducible, confirmada por el usuario: pro_eu_vat, sin ITP y venta en régimen general (no REBU). Para comprador empresa con requisitos de AIB, IVA autoliquidado y deducido; confirmar factura y condiciones intracomunitarias. CO₂ y valor fiscal pendientes: el IEDMT calculado a 0 no acredita exención.\nCuatro exteriores con fondo editado por IA; verificar fidelidad antes de publicar. El resto son imágenes del PDF de baja resolución (300 px), sin fotografías documentales en la galería comercial.\n\nCostes estándar estimados según tarifas ERP 2026: transporte 750 €, provisión COC/ficha 120 € (revisar, el informe declara CdC disponible), ITV+ficha 132,59 €, DGT 99,77 €, placas 28 €, gestoría 180 €, preparación 180 €, mantenimiento 150 €, garantía 450 € y publicidad 30 €. Compra prevista: 9.800 € netos. Comisiones, reparación de los arañazos, viaje, seguro de stock y otros sin presupuesto. No hay valoración de mercado ni rentabilidad validada.\n\nOriginales extraídos del PDF conservados en public/images/volvo v40; cuatro exteriores editados con IA en volvo v40 editadas. No acreditar ubicación física con estas imágenes."
   }
 },
+{
+  "id": "carreport-11625065",
+  "title": "Fiat 500X 1.6 MultiJet Pop 114 CV",
+  "reference": "Openlane · CarReport 11625065",
+  "photoCount": 16,
+  "sourceListing": {
+    "marketplace": "CarReport",
+    "auctionPlatform": "Openlane",
+    "listingId": "11625065",
+    "url": "/Fiat%20500X%201.6/CarReport-11625065.pdf",
+    "capturedAt": "2026-10-11",
+    "askingPrice": 8300,
+    "previousAskingPrice": 8400,
+    "advertisedDiscount": 100,
+    "countrySpecificCosts": 195,
+    "auctionFees": 245,
+    "subtotalExclVat": 8740,
+    "vatOnFees": 92.4,
+    "advertisedTotalInclVat": 8832.4,
+    "priceIncludesVat": true,
+    "currency": "EUR",
+    "negotiable": false,
+    "sellerType": "Subasta profesional UE en REBU (Openlane)",
+    "sellerLocation": "Bilzen, Bélgica",
+    "sellerName": "Openlane (puntuación vendedor 4,9/5)",
+    "firstRegistration": "17/04/2018",
+    "productionDate": "2018-02-26",
+    "inspectionValidUntil": "17/04/2026",
+    "vatRegime": "REBU (régimen de margen en el vehículo; IVA 21 % de 92,40 € solo sobre los 440 € de tasas y honorarios de subasta)",
+    "emissionStandard": "EU6b",
+    "co2": 109,
+    "keys": 2,
+    "exteriorColor": "Rojo",
+    "interior": "Tela gris/negra",
+    "equipment": [
+      "Climatizador automático de 2 zonas",
+      "Sistema de navegación Uconnect con pantalla táctil y Bluetooth",
+      "Volante multifunción de cuero con ajuste manual",
+      "Control de crucero",
+      "Sensor de lluvia y sensor de luz",
+      "Luces diurnas y faros antiniebla",
+      "Retrovisor interior con oscurecimiento automático y retrovisores eléctricos",
+      "Llantas de aleación de 16 pulgadas",
+      "Tapicería de tela gris con asientos traseros divididos y apoyabrazos delantero",
+      "Elevalunas eléctricos delanteros y traseros",
+      "Sistema Start & Stop y dirección asistida",
+      "ABS, ESP y airbags"
+    ],
+    "priceSource": "Desglose de subasta Openlane comunicado por el usuario el 11/10/2026."
+  },
+  "priceTarget": {
+    "amount": 12990,
+    "isEstimate": true,
+    "basis": "Modelo del catálogo KHC para Fiat 500X 1.6 MultiJet en España: horquilla 9.772–12.692 € (media 11.232 € para 117.000 km de referencia), ajustada al alza por su kilometraje muy bajo (50.439 km) y equipamiento (climatizador bizona y navegador). Se recomienda salir en 12.990 € (margen neto REBU ~1.345 €) con suelo de rotación rápida en 12.490 € (margen neto REBU ~932 €), reservando ~300 € para retoques estéticos."
+  },
+  "warnings": [
+    "Desglose Openlane en REBU: vehículo 8.300,00 € (antes 8.400 €, ahorro 100 €) + costes específicos del país 195,00 € + honorarios de subasta 245,00 € = subtotal 8.740,00 € + 92,40 € de IVA (21 % sobre los 440 € de comisiones) = 8.832,40 € total con IVA. Confirmar con gestoría si la factura de comisiones lleva inversión del sujeto pasivo / IVA deducible en el 303 o si incrementa la base de compra REBU.",
+    "Daños declarados en el informe (página 3 y fotos 15–16): impactos de piedras y arañazos en parachoques delantero y trasero, impactos de piedras en capó y arañazos con abolladuras en el panel lateral izquierdo. Presupuesto de chapa y pintura pendiente.",
+    "Registro de mantenimiento «No disponible» en el informe: realizar mantenimiento completo al llegar y revisar el estado de la correa de distribución por antigüedad (8 años desde 02/2018) pese a los 50.439 km.",
+    "Inspección técnica belga vencida el 17/04/2026 según el informe: traslado en portacoches y paso por ITV de importación en España antes de matricular.",
+    "Emisiones declaradas en el informe: 109 g/km (EU6b), que caen en el tramo 0 % del Modelo 576 (cuota 0 €). Verificar cifra exacta en el CdC/COC disponible junto con el VIN completo.",
+    "Cuatro vistas exteriores con fondo homogeneizado por IA a la fachada de hormigón y madera; los originales y las 12 fotos de interior y detalle de daños se conservan intactos en public/images/fiat 500x."
+  ],
+  "photos": [
+    {
+      "id": "carreport-11625065-photo-01",
+      "filename": "fiat-500x-frontal.jpg",
+      "assetPath": "fiat 500x editadas/fiat-500x-frontal.jpg",
+      "sourceFilename": "portada.jpeg",
+      "alt": "Fiat 500X 1.6 MultiJet rojo, tres cuartos frontal derecho en la fachada de hormigón y madera; fondo editado con IA",
+      "cover": true,
+      "backgroundEdited": true
+    },
+    {
+      "id": "carreport-11625065-photo-02",
+      "filename": "fiat-500x-lateral-1.jpg",
+      "assetPath": "fiat 500x editadas/fiat-500x-lateral-1.jpg",
+      "sourceFilename": "foto-02.jpeg",
+      "alt": "Fiat 500X 1.6 MultiJet rojo, tres cuartos frontal izquierdo en la fachada de hormigón y madera; fondo editado con IA",
+      "cover": false,
+      "backgroundEdited": true
+    },
+    {
+      "id": "carreport-11625065-photo-03",
+      "filename": "fiat-500x-trasera.jpg",
+      "assetPath": "fiat 500x editadas/fiat-500x-trasera.jpg",
+      "sourceFilename": "foto-03.jpeg",
+      "alt": "Fiat 500X 1.6 MultiJet rojo, tres cuartos trasero derecho en la fachada de hormigón y madera; fondo editado con IA",
+      "cover": false,
+      "backgroundEdited": true
+    },
+    {
+      "id": "carreport-11625065-photo-04",
+      "filename": "fiat-500x-lateral-2.jpg",
+      "assetPath": "fiat 500x editadas/fiat-500x-lateral-2.jpg",
+      "sourceFilename": "foto-04.jpeg",
+      "alt": "Fiat 500X 1.6 MultiJet rojo, tres cuartos trasero izquierdo en la fachada de hormigón y madera; fondo editado con IA",
+      "cover": false,
+      "backgroundEdited": true
+    },
+    {
+      "id": "carreport-11625065-photo-05",
+      "filename": "foto-05.jpeg",
+      "assetPath": "fiat 500x/foto-05.jpeg",
+      "alt": "Fiat 500X: Volante multifunción y salpicadero rojo con pantalla Uconnect (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11625065-photo-06",
+      "filename": "foto-06.jpeg",
+      "assetPath": "fiat 500x/foto-06.jpeg",
+      "alt": "Fiat 500X: Plazas traseras en tela gris y negra (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11625065-photo-07",
+      "filename": "foto-07.jpeg",
+      "assetPath": "fiat 500x/foto-07.jpeg",
+      "alt": "Fiat 500X: Asientos delanteros con bordado 500 (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11625065-photo-08",
+      "filename": "foto-08.jpeg",
+      "assetPath": "fiat 500x/foto-08.jpeg",
+      "alt": "Fiat 500X: Maletero abierto (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11625065-photo-09",
+      "filename": "foto-09.jpeg",
+      "assetPath": "fiat 500x/foto-09.jpeg",
+      "alt": "Fiat 500X: Cuadro de instrumentos con 50.439 km (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11625065-photo-10",
+      "filename": "foto-10.jpeg",
+      "assetPath": "fiat 500x/foto-10.jpeg",
+      "alt": "Fiat 500X: Pantalla multimedia con navegador Uconnect (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11625065-photo-11",
+      "filename": "foto-11.jpeg",
+      "assetPath": "fiat 500x/foto-11.jpeg",
+      "alt": "Fiat 500X: Mandos izquierdos del volante y teléfono (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11625065-photo-12",
+      "filename": "foto-12.jpeg",
+      "assetPath": "fiat 500x/foto-12.jpeg",
+      "alt": "Fiat 500X: Mandos derechos del volante con control de crucero (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11625065-photo-13",
+      "filename": "foto-13.jpeg",
+      "assetPath": "fiat 500x/foto-13.jpeg",
+      "alt": "Fiat 500X: Climatizador automático bizona y tomas USB/AUX (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11625065-photo-14",
+      "filename": "foto-14.jpeg",
+      "assetPath": "fiat 500x/foto-14.jpeg",
+      "alt": "Fiat 500X: Llanta de aleación de 16 pulgadas y neumático (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11625065-photo-15",
+      "filename": "foto-15.jpeg",
+      "assetPath": "fiat 500x/foto-15.jpeg",
+      "alt": "Fiat 500X: Detalle de impacto de piedras en el capó (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11625065-photo-16",
+      "filename": "foto-16.jpeg",
+      "assetPath": "fiat 500x/foto-16.jpeg",
+      "alt": "Fiat 500X: Detalle de arañazo en el panel lateral izquierdo (original del informe)",
+      "cover": false
+    }
+  ],
+  "vehicle": {
+    "brand": "Fiat",
+    "model": "500X",
+    "version": "1.6 MultiJet Pop 114 CV Manual",
+    "engine": "1.6 MultiJet II diésel, 1.598 cc, 84 kW (114 CV)",
+    "engineCode": "",
+    "color": "Rojo",
+    "interior": "Tela gris/negra",
+    "catalogId": "fiat-500x-500x-fiat16mjet120-120-2015",
+    "year": 2018,
+    "firstRegDate": "2018-04-17",
+    "firstRegDatePending": false,
+    "km": 50439,
+    "vin": "",
+    "plate": "1EQW549",
+    "fuel": "Diésel",
+    "transmission": "Manual",
+    "cc": 1598,
+    "cyl": 4,
+    "cv": 114,
+    "co2": 109,
+    "cvf": 11.64,
+    "badge": "C (Verde)",
+    "newPrice": 22500,
+    "segment": "B-SUV",
+    "originCountry": "Bélgica",
+    "originCity": "Bilzen",
+    "sellerType": "pro_eu_rebu",
+    "taxMethod": "tablas",
+    "status": "prospeccion",
+    "purchaseDate": null,
+    "arrivalDate": null,
+    "registrationDate": null,
+    "itpExemption": false,
+    "itpExemptionPending": false,
+    "costs": {
+      "purchase": 8300,
+      "transport": 750,
+      "travel": 0,
+      "marginExtras": 440,
+      "cocFicha": 120,
+      "itv": 132.59,
+      "dgt": 99.77,
+      "placas": 28,
+      "gestoria": 180,
+      "iedmt": 0,
+      "itp": 0,
+      "vatPurchase": 0,
+      "ivtm": 0,
+      "recond": 180,
+      "maintenance": 150,
+      "guarantee": 450,
+      "advertising": 30,
+      "insurance": 0,
+      "other": 0
+    },
+    "pendingCostFields": [
+      "travel",
+      "insurance",
+      "other"
+    ],
+    "taxOverrides": {},
+    "targetSalePrice": 12990,
+    "rotationDays": 55,
+    "documents": {},
+    "inspectionChecks": {},
+    "sale": null,
+    "imageUrl": "",
+    "sourceListing": null,
+    "priceTarget": null,
+    "notes": "BORRADOR PENDIENTE DE REVISIÓN: subasta Openlane (CarReport 11625065) en régimen REBU (pro_eu_rebu). Desglose comunicado por el usuario: precio del vehículo 8.300,00 € (antes 8.400,00 €, ahorro 100,00 €) + costes específicos del país 195,00 € + honorarios de subasta 245,00 € = subtotal 8.740,00 € + IVA 92,40 € (21 % sobre los 440,00 € de comisiones) = total 8.832,40 € (IVA incluido). Sin ITP ni AIB sobre el vehículo y con reventa elegible para REBU.\n\nDatos verificados en el informe PDF (páginas 1–3): primera matriculación 17/04/2018; producción 26/02/2018; 50.439 km; diésel 1.598 cc, 84 kW (114 CV, variante fiscal belga del 1.6 MultiJet); cambio manual de 6 marchas; 109 g/km de CO₂ (EU6b); 2 llaves; recogida en Bilzen (Bélgica); permiso de circulación completo y CdC disponible; registro de mantenimiento no disponible. Inspección técnica belga vencida el 17/04/2026.\n\nDaños declarados en página 3: impactos de piedras y arañazos en parachoques delantero y trasero, impactos de piedras en capó y arañazos/abolladuras en panel lateral izquierdo. Presupuesto de chapa/pintura, seguro de stock y viaje quedan pendientes en 0 €. Costes estándar según tarifas ERP 2026: transporte 750 €, provisión COC/ficha 120 €, ITV diésel + ficha 132,59 €, DGT 99,77 €, placas 28 €, gestoría 180 € y puesta a la venta automática (180 + 150 + 450 + 30 = 810 €). Precio objetivo recomendado: 12.990 € (suelo competitivo 12.490 €)."
+  }
+},
+{
+  "id": "carreport-11662976",
+  "title": "Renault Talisman 1.7 dCi Zen 120 CV",
+  "reference": "Openlane · CarReport 11662976",
+  "photoCount": 16,
+  "sourceListing": {
+    "marketplace": "CarReport",
+    "auctionPlatform": "Openlane",
+    "listingId": "11662976",
+    "url": "/Renault%20Talisman%201.7%20DCI/CarReport-11662976.pdf",
+    "capturedAt": "2026-10-11",
+    "askingPrice": 10700,
+    "countrySpecificCosts": 195,
+    "auctionFees": 300,
+    "subtotalExclVat": 11195,
+    "vatOnFees": 103.95,
+    "advertisedTotalInclVat": 11298.95,
+    "priceIncludesVat": true,
+    "currency": "EUR",
+    "negotiable": false,
+    "sellerType": "Subasta profesional UE en REBU (Openlane)",
+    "sellerLocation": "Bilzen, Bélgica",
+    "sellerName": "Openlane (puntuación vendedor 4,9/5)",
+    "firstRegistration": "08/09/2020",
+    "inspectionValidUntil": "08/09/2026",
+    "vatRegime": "REBU (régimen de margen en el vehículo; IVA 21 % de 103,95 € solo sobre los 495 € de tasas y honorarios de subasta)",
+    "emissionStandard": "EU6d",
+    "keys": 1,
+    "exteriorColor": "Gris metalizado",
+    "interior": "Tela negra",
+    "equipment": [
+      "Climatizador automático de 2 zonas",
+      "Cuadro de instrumentos digital («Cabina digital» / Multi-Sense)",
+      "Sistema de navegación R-Link con pantalla vertical y Bluetooth",
+      "Cámara de visión trasera",
+      "Sensores de aparcamiento delanteros y traseros",
+      "Asistente de control de carril, control de crucero y sensor de lluvia",
+      "Arranque del motor sin llave (tarjeta manos libres)",
+      "Faros LED Pure Vision, luces diurnas LED C-Shape y faros antiniebla",
+      "Llantas de aleación bitono",
+      "Cristales traseros tintados y elevalunas eléctricos delanteros y traseros",
+      "Volante multifunción de cuero y apoyabrazos central",
+      "Retrovisores regulables eléctricamente",
+      "Pintura metalizada, dirección asistida y airbags"
+    ],
+    "priceSource": "Desglose de subasta Openlane comunicado por el usuario el 11/10/2026."
+  },
+  "priceTarget": {
+    "amount": 15990,
+    "isEstimate": true,
+    "basis": "Comparación frente a berlinas diésel del segmento D de 2019–2020 con ~110.000 km en España (Mondeo 2.0 EcoBlue, Passat B8 TDI y 508 BlueHDi en el catálogo KHC entre 13.500 y 18.600 €). Se fija 15.990 € como objetivo de venta realista (margen neto REBU ~1.776 € si IEDMT 0 %, o ~1.346 € si liquida el 4,75 % por CO₂ WLTP) y 16.490 € como precio de salida recomendado en portal."
+  },
+  "warnings": [
+    "Desglose Openlane en REBU: vehículo 10.700,00 € + costes específicos del país 195,00 € + honorarios de subasta 300,00 € = subtotal 11.195,00 € + 103,95 € de IVA (21 % sobre los 495 € de comisiones) = 11.298,95 € total con IVA. Confirmar con gestoría el tratamiento de la factura de comisiones respecto al 303 y al margen REBU.",
+    "CO₂ no impreso en el informe PDF: queda pendiente de verificar en el CdC/COC disponible. Si el COC consigna ≤ 120 g/km la cuota del Modelo 576 es 0 €; si consigna WLTP entre 121 y 159 g/km (~136–142 g/km habituales en esta berlina 2020), el IEDMT sube al 4,75 % (~430 € por tablas).",
+    "Solo 1 llave declarada en el informe y registro de mantenimiento «No disponible»: prever el coste de una segunda tarjeta manos libres Renault (~180 €) y mantenimiento preventivo completo (incluyendo sistema AdBlue/SCR del motor 1.7 Blue dCi R9N).",
+    "Daños declarados en el informe (página 3): impactos de piedras y arañazos en parachoques delantero, parrilla y parachoques trasero, impactos de piedras en capó, arañazos en panel lateral derecho y daño especial por llantas arañadas. Presupuesto de pintura y llantas pendiente.",
+    "Inspección técnica belga vencida el 08/09/2026 según el informe: traslado en portacoches y paso por ITV de importación en España.",
+    "Cuatro vistas exteriores con fondo homogeneizado por IA a la fachada de hormigón y madera; los originales y las 12 fotos de interior y detalle se conservan intactos en public/images/renault talisman."
+  ],
+  "photos": [
+    {
+      "id": "carreport-11662976-photo-01",
+      "filename": "renault-talisman-frontal.jpg",
+      "assetPath": "renault talisman editadas/renault-talisman-frontal.jpg",
+      "sourceFilename": "portada.jpeg",
+      "alt": "Renault Talisman 1.7 dCi Zen gris metalizado, tres cuartos frontal derecho en la fachada de hormigón y madera; fondo editado con IA",
+      "cover": true,
+      "backgroundEdited": true
+    },
+    {
+      "id": "carreport-11662976-photo-02",
+      "filename": "renault-talisman-trasera.jpg",
+      "assetPath": "renault talisman editadas/renault-talisman-trasera.jpg",
+      "sourceFilename": "foto-02.jpeg",
+      "alt": "Renault Talisman 1.7 dCi Zen gris metalizado, tres cuartos trasero derecho en la fachada de hormigón y madera; fondo editado con IA",
+      "cover": false,
+      "backgroundEdited": true
+    },
+    {
+      "id": "carreport-11662976-photo-03",
+      "filename": "renault-talisman-lateral-1.jpg",
+      "assetPath": "renault talisman editadas/renault-talisman-lateral-1.jpg",
+      "sourceFilename": "foto-03.jpeg",
+      "alt": "Renault Talisman 1.7 dCi Zen gris metalizado, vista exterior delantera en la fachada de hormigón y madera; fondo editado con IA",
+      "cover": false,
+      "backgroundEdited": true
+    },
+    {
+      "id": "carreport-11662976-photo-04",
+      "filename": "renault-talisman-lateral-2.jpg",
+      "assetPath": "renault talisman editadas/renault-talisman-lateral-2.jpg",
+      "sourceFilename": "foto-16.jpeg",
+      "alt": "Renault Talisman 1.7 dCi Zen gris metalizado, tres cuartos trasero izquierdo en la fachada de hormigón y madera; fondo editado con IA",
+      "cover": false,
+      "backgroundEdited": true
+    },
+    {
+      "id": "carreport-11662976-photo-05",
+      "filename": "foto-04.jpeg",
+      "assetPath": "renault talisman/foto-04.jpeg",
+      "alt": "Renault Talisman: Volante multifunción, puesto de conducción y consola central (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11662976-photo-06",
+      "filename": "foto-05.jpeg",
+      "assetPath": "renault talisman/foto-05.jpeg",
+      "alt": "Renault Talisman: Plazas traseras en tela negra con salidas de aire (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11662976-photo-07",
+      "filename": "foto-06.jpeg",
+      "assetPath": "renault talisman/foto-06.jpeg",
+      "alt": "Renault Talisman: Asientos delanteros en tela negra (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11662976-photo-08",
+      "filename": "foto-07.jpeg",
+      "assetPath": "renault talisman/foto-07.jpeg",
+      "alt": "Renault Talisman: Maletero abierto (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11662976-photo-09",
+      "filename": "foto-08.jpeg",
+      "assetPath": "renault talisman/foto-08.jpeg",
+      "alt": "Renault Talisman: Llanta de aleación bitono (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11662976-photo-10",
+      "filename": "foto-09.jpeg",
+      "assetPath": "renault talisman/foto-09.jpeg",
+      "alt": "Renault Talisman: Cuadro de instrumentos digital con 110.311 km (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11662976-photo-11",
+      "filename": "foto-10.jpeg",
+      "assetPath": "renault talisman/foto-10.jpeg",
+      "alt": "Renault Talisman: Cámara de visión trasera y sensores de aparcamiento (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11662976-photo-12",
+      "filename": "foto-11.jpeg",
+      "assetPath": "renault talisman/foto-11.jpeg",
+      "alt": "Renault Talisman: Pantalla de navegación y climatizador automático bizona (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11662976-photo-13",
+      "filename": "foto-12.jpeg",
+      "assetPath": "renault talisman/foto-12.jpeg",
+      "alt": "Renault Talisman: Mandos inferiores de consola central con Start & Stop y modo Eco (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11662976-photo-14",
+      "filename": "foto-13.jpeg",
+      "assetPath": "renault talisman/foto-13.jpeg",
+      "alt": "Renault Talisman: Mandos izquierdos del volante con control de crucero (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11662976-photo-15",
+      "filename": "foto-14.jpeg",
+      "assetPath": "renault talisman/foto-14.jpeg",
+      "alt": "Renault Talisman: Mandos derechos del volante y ordenador de a bordo (original del informe)",
+      "cover": false
+    },
+    {
+      "id": "carreport-11662976-photo-16",
+      "filename": "foto-15.jpeg",
+      "assetPath": "renault talisman/foto-15.jpeg",
+      "alt": "Renault Talisman: Detalle del faro delantero LED Pure Vision y luz diurna C-Shape (original del informe)",
+      "cover": false
+    }
+  ],
+  "vehicle": {
+    "brand": "Renault",
+    "model": "Talisman",
+    "version": "1.7 dCi Zen 120 CV Manual",
+    "engine": "1.7 Blue dCi (R9N) diésel, 1.749 cc, 88 kW (120 CV)",
+    "engineCode": "R9N",
+    "color": "Gris metalizado",
+    "interior": "Tela negra",
+    "catalogId": "",
+    "year": 2020,
+    "firstRegDate": "2020-09-08",
+    "firstRegDatePending": false,
+    "km": 110311,
+    "vin": "",
+    "plate": "1EUN965",
+    "fuel": "Diésel",
+    "transmission": "Manual",
+    "cc": 1749,
+    "cyl": 4,
+    "cv": 120,
+    "co2": null,
+    "cvf": 12.29,
+    "badge": "C (Verde)",
+    "newPrice": 33500,
+    "segment": "Berlina",
+    "originCountry": "Bélgica",
+    "originCity": "Bilzen",
+    "sellerType": "pro_eu_rebu",
+    "taxMethod": "tablas",
+    "status": "prospeccion",
+    "purchaseDate": null,
+    "arrivalDate": null,
+    "registrationDate": null,
+    "itpExemption": false,
+    "itpExemptionPending": false,
+    "costs": {
+      "purchase": 10700,
+      "transport": 750,
+      "travel": 0,
+      "marginExtras": 495,
+      "cocFicha": 120,
+      "itv": 132.59,
+      "dgt": 99.77,
+      "placas": 28,
+      "gestoria": 180,
+      "iedmt": 0,
+      "itp": 0,
+      "vatPurchase": 0,
+      "ivtm": 0,
+      "recond": 180,
+      "maintenance": 150,
+      "guarantee": 450,
+      "advertising": 30,
+      "insurance": 0,
+      "other": 0
+    },
+    "pendingCostFields": [
+      "travel",
+      "insurance",
+      "other",
+      "iedmt"
+    ],
+    "taxOverrides": {},
+    "targetSalePrice": 15990,
+    "rotationDays": 60,
+    "documents": {},
+    "inspectionChecks": {},
+    "sale": null,
+    "imageUrl": "",
+    "sourceListing": null,
+    "priceTarget": null,
+    "notes": "BORRADOR PENDIENTE DE REVISIÓN: subasta Openlane (CarReport 11662976) en régimen REBU (pro_eu_rebu). Desglose comunicado por el usuario: precio del vehículo 10.700,00 € + costes específicos del país 195,00 € + honorarios de subasta 300,00 € = subtotal 11.195,00 € + IVA 103,95 € (21 % sobre los 495,00 € de comisiones) = total 11.298,95 € (IVA incluido). Sin ITP ni AIB sobre el vehículo y con reventa elegible para REBU.\n\nDatos verificados en el informe PDF (páginas 1–3): primera matriculación 08/09/2020; 110.311 km; diésel 1.749 cc, 88 kW (120 CV, motor 1.7 Blue dCi R9N monoturbo Euro 6d, distinto del 1.6 dCi BiTurbo); cambio manual de 6 marchas; 1 sola llave declarada; recogida en Bilzen (Bélgica); permiso de circulación completo y CdC disponible; registro de mantenimiento no disponible. Inspección técnica belga vencida el 08/09/2026.\n\nCO₂ no impreso en el PDF: verificar en el CdC/COC (si ≤ 120 g/km la cuota del 576 es 0 €; si declara WLTP entre 121 y 159 g/km la cuota al 4,75 % por tablas ronda los 430 €). Daños declarados en página 3: impactos de piedras y arañazos en parachoques delantero/trasero y parrilla, impactos en capó, arañazos en lateral derecho y llantas arañadas. Presupuesto de pintura/llantas, duplicado de 2.ª llave tarjeta, IEDMT definitivo, seguro de stock y viaje quedan pendientes en 0 €. Precio objetivo recomendado: 15.990 € (salida en portal 16.490 €)."
+  }
+},
 ];

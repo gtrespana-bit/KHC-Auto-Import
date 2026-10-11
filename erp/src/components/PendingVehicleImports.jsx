@@ -166,7 +166,7 @@ export default function PendingVehicleImports() {
                     rel="noreferrer"
                     className="inline-flex items-center gap-1 text-sky-300 hover:text-sky-200 underline underline-offset-2"
                   >
-                    {listing.marketplace === 'CarReport' ? 'Abrir informe PDF' : `Abrir anuncio en ${listing.marketplace || 'origen'}`} <ExternalLink className="w-3 h-3" />
+                    {listing.marketplace === 'CarReport' || String(listing.url || '').toLowerCase().includes('.pdf') ? 'Abrir informe PDF' : `Abrir anuncio en ${listing.marketplace || 'origen'}`} <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
 

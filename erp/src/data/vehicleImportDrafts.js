@@ -36,6 +36,8 @@ import golf8Photo10 from '../../../public/images/golf gris 2022/7f367c22-813a-43
 import golf8Photo11 from '../../../public/images/golf gris 2022/88b8aaa2-b1d2-48bc-a9a4-23df514e7da2.jfif';
 import golf8Photo12 from '../../../public/images/golf gris 2022/09644f89-fd33-4a7f-b93d-a0cebf1ad342.jfif';
 import volvoReport from '../../../public/Volvo V40/CarReport-11514903.pdf?url';
+import fiatReport from '../../../public/Fiat 500X 1.6/CarReport-11625065.pdf?url';
+import renaultReport from '../../../public/Renault Talisman 1.7 DCI/CarReport-11662976.pdf?url';
 import { PENDING_VEHICLE_IMPORT_DATA } from './vehicleImportDraftData.js';
 
 import volvo40Photo01 from '../../../public/images/volvo v40 editadas/volvo-v40-frontal.jpg';
@@ -64,6 +66,40 @@ import volvo40Photo23 from '../../../public/images/volvo v40/foto-30.jpeg';
 import volvo40Photo24 from '../../../public/images/volvo v40/foto-35.jpeg';
 import volvo40Photo25 from '../../../public/images/volvo v40/foto-36.jpeg';
 
+import fiat500xPhoto01 from '../../../public/images/fiat 500x editadas/fiat-500x-frontal.jpg';
+import fiat500xPhoto02 from '../../../public/images/fiat 500x editadas/fiat-500x-lateral-1.jpg';
+import fiat500xPhoto03 from '../../../public/images/fiat 500x editadas/fiat-500x-trasera.jpg';
+import fiat500xPhoto04 from '../../../public/images/fiat 500x editadas/fiat-500x-lateral-2.jpg';
+import fiat500xPhoto05 from '../../../public/images/fiat 500x/foto-05.jpeg';
+import fiat500xPhoto06 from '../../../public/images/fiat 500x/foto-06.jpeg';
+import fiat500xPhoto07 from '../../../public/images/fiat 500x/foto-07.jpeg';
+import fiat500xPhoto08 from '../../../public/images/fiat 500x/foto-08.jpeg';
+import fiat500xPhoto09 from '../../../public/images/fiat 500x/foto-09.jpeg';
+import fiat500xPhoto10 from '../../../public/images/fiat 500x/foto-10.jpeg';
+import fiat500xPhoto11 from '../../../public/images/fiat 500x/foto-11.jpeg';
+import fiat500xPhoto12 from '../../../public/images/fiat 500x/foto-12.jpeg';
+import fiat500xPhoto13 from '../../../public/images/fiat 500x/foto-13.jpeg';
+import fiat500xPhoto14 from '../../../public/images/fiat 500x/foto-14.jpeg';
+import fiat500xPhoto15 from '../../../public/images/fiat 500x/foto-15.jpeg';
+import fiat500xPhoto16 from '../../../public/images/fiat 500x/foto-16.jpeg';
+
+import talismanPhoto01 from '../../../public/images/renault talisman editadas/renault-talisman-frontal.jpg';
+import talismanPhoto02 from '../../../public/images/renault talisman editadas/renault-talisman-trasera.jpg';
+import talismanPhoto03 from '../../../public/images/renault talisman editadas/renault-talisman-lateral-1.jpg';
+import talismanPhoto04 from '../../../public/images/renault talisman editadas/renault-talisman-lateral-2.jpg';
+import talismanPhoto05 from '../../../public/images/renault talisman/foto-04.jpeg';
+import talismanPhoto06 from '../../../public/images/renault talisman/foto-05.jpeg';
+import talismanPhoto07 from '../../../public/images/renault talisman/foto-06.jpeg';
+import talismanPhoto08 from '../../../public/images/renault talisman/foto-07.jpeg';
+import talismanPhoto09 from '../../../public/images/renault talisman/foto-08.jpeg';
+import talismanPhoto10 from '../../../public/images/renault talisman/foto-09.jpeg';
+import talismanPhoto11 from '../../../public/images/renault talisman/foto-10.jpeg';
+import talismanPhoto12 from '../../../public/images/renault talisman/foto-11.jpeg';
+import talismanPhoto13 from '../../../public/images/renault talisman/foto-12.jpeg';
+import talismanPhoto14 from '../../../public/images/renault talisman/foto-13.jpeg';
+import talismanPhoto15 from '../../../public/images/renault talisman/foto-14.jpeg';
+import talismanPhoto16 from '../../../public/images/renault talisman/foto-15.jpeg';
+
 const PHOTO_ASSETS = {
   'volvo v40 editadas/volvo-v40-frontal.jpg': volvo40Photo01,
   'volvo v40 editadas/volvo-v40-trasera.jpg': volvo40Photo02,
@@ -90,6 +126,40 @@ const PHOTO_ASSETS = {
   'volvo v40/foto-30.jpeg': volvo40Photo23,
   'volvo v40/foto-35.jpeg': volvo40Photo24,
   'volvo v40/foto-36.jpeg': volvo40Photo25,
+
+  'fiat 500x editadas/fiat-500x-frontal.jpg': fiat500xPhoto01,
+  'fiat 500x editadas/fiat-500x-lateral-1.jpg': fiat500xPhoto02,
+  'fiat 500x editadas/fiat-500x-trasera.jpg': fiat500xPhoto03,
+  'fiat 500x editadas/fiat-500x-lateral-2.jpg': fiat500xPhoto04,
+  'fiat 500x/foto-05.jpeg': fiat500xPhoto05,
+  'fiat 500x/foto-06.jpeg': fiat500xPhoto06,
+  'fiat 500x/foto-07.jpeg': fiat500xPhoto07,
+  'fiat 500x/foto-08.jpeg': fiat500xPhoto08,
+  'fiat 500x/foto-09.jpeg': fiat500xPhoto09,
+  'fiat 500x/foto-10.jpeg': fiat500xPhoto10,
+  'fiat 500x/foto-11.jpeg': fiat500xPhoto11,
+  'fiat 500x/foto-12.jpeg': fiat500xPhoto12,
+  'fiat 500x/foto-13.jpeg': fiat500xPhoto13,
+  'fiat 500x/foto-14.jpeg': fiat500xPhoto14,
+  'fiat 500x/foto-15.jpeg': fiat500xPhoto15,
+  'fiat 500x/foto-16.jpeg': fiat500xPhoto16,
+
+  'renault talisman editadas/renault-talisman-frontal.jpg': talismanPhoto01,
+  'renault talisman editadas/renault-talisman-trasera.jpg': talismanPhoto02,
+  'renault talisman editadas/renault-talisman-lateral-1.jpg': talismanPhoto03,
+  'renault talisman editadas/renault-talisman-lateral-2.jpg': talismanPhoto04,
+  'renault talisman/foto-04.jpeg': talismanPhoto05,
+  'renault talisman/foto-05.jpeg': talismanPhoto06,
+  'renault talisman/foto-06.jpeg': talismanPhoto07,
+  'renault talisman/foto-07.jpeg': talismanPhoto08,
+  'renault talisman/foto-08.jpeg': talismanPhoto09,
+  'renault talisman/foto-09.jpeg': talismanPhoto10,
+  'renault talisman/foto-10.jpeg': talismanPhoto11,
+  'renault talisman/foto-11.jpeg': talismanPhoto12,
+  'renault talisman/foto-12.jpeg': talismanPhoto13,
+  'renault talisman/foto-13.jpeg': talismanPhoto14,
+  'renault talisman/foto-14.jpeg': talismanPhoto15,
+  'renault talisman/foto-15.jpeg': talismanPhoto16,
 
   'audi a3 gris editadas/audi-a3-frontal.jpg': audi3Photo01,
   'audi a3 gris editadas/audi-a3-trasera.jpg': audi3Photo02,
@@ -125,11 +195,17 @@ const PHOTO_ASSETS = {
   'golf gris 2022/09644f89-fd33-4a7f-b93d-a0cebf1ad342.jfif': golf8Photo12,
 };
 
+const REPORT_URLS = {
+  'carreport-11514903': volvoReport,
+  'carreport-11625065': fiatReport,
+  'carreport-11662976': renaultReport,
+};
+
 export const PENDING_VEHICLE_IMPORTS = PENDING_VEHICLE_IMPORT_DATA.map((draft) => ({
   ...draft,
   // Vite empaqueta el PDF bajo /erp/assets/ para que funcione también en el dominio app.
-  sourceListing: draft.id === 'carreport-11514903'
-    ? { ...draft.sourceListing, url: volvoReport }
+  sourceListing: REPORT_URLS[draft.id]
+    ? { ...draft.sourceListing, url: REPORT_URLS[draft.id] }
     : draft.sourceListing,
   photos: draft.photos.map((photo) => ({
     ...photo,

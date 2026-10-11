@@ -497,6 +497,7 @@ export function calcPurchaseTax({
 // ---------------------------------------------------------------------------
 export function landingCost(v = {}, tariffs = DEFAULT_TARIFFS) {
   const purchase = n(v.costs?.purchase ?? v.purchasePrice);
+  const marginExtras = n(v.costs?.marginExtras);
   const transport = n(v.costs?.transport ?? v.transportCost);
   const cocFicha = n(v.costs?.cocFicha ?? v.cocOrFichaCost);
   const itv = n(v.costs?.itv ?? v.itvCost);
@@ -522,9 +523,10 @@ export function landingCost(v = {}, tariffs = DEFAULT_TARIFFS) {
   const puestaVenta = round2(recond + maintenance + guarantee + advertising + insurance);
   const logistica = round2(transport + travel);
 
-  const total = round2(purchase + logistica + homologacion + impuestos + administracion + puestaVenta + other);
+  const total = round2(purchase + marginExtras + logistica + homologacion + impuestos + administracion + puestaVenta + other);
   return {
     purchase,
+    marginExtras,
     logistica,
     homologacion,
     impuestos,
@@ -534,6 +536,7 @@ export function landingCost(v = {}, tariffs = DEFAULT_TARIFFS) {
     total,
     lines: [
       { key: 'purchase', label: 'Precio de compra del vehículo', amount: purchase },
+      { key: 'marginExtras', label: 'Comisiones y gastos facturados en origen', amount: marginExtras },
       { key: 'transport', label: 'Transporte / desplazamiento', amount: logistica },
       { key: 'cocFicha', label: 'COC, ficha reducida y traducciones', amount: cocFicha },
       { key: 'itv', label: 'ITV de importación', amount: itv },
