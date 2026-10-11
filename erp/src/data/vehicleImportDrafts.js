@@ -100,6 +100,17 @@ import talismanPhoto14 from '../../../public/images/renault talisman/foto-13.jpe
 import talismanPhoto15 from '../../../public/images/renault talisman/foto-14.jpeg';
 import talismanPhoto16 from '../../../public/images/renault talisman/foto-15.jpeg';
 
+import mercedesC300Photo01 from '../../../public/images/mercedes c300 editadas/mercedes-c300-tres-cuartos-frontal.jpg';
+import mercedesC300Photo02 from '../../../public/images/mercedes c300 editadas/mercedes-c300-tres-cuartos-frontal-izquierdo.jpg';
+import mercedesC300Photo03 from '../../../public/images/mercedes c300 editadas/mercedes-c300-tres-cuartos-trasero.jpg';
+import mercedesC300Photo04 from '../../../public/images/mercedes c300 editadas/mercedes-c300-trasera.jpg';
+import mercedesC300Photo05 from '../../../public/images/mercedes c300/3227bc2d-04aa-441b-a383-7786d8e362b9.avif';
+import mercedesC300Photo06 from '../../../public/images/mercedes c300/2cd33963-07fa-419f-bb5d-c85bef41c025.avif';
+import mercedesC300Photo07 from '../../../public/images/mercedes c300/c2ab4492-23d8-48c6-a682-f95334e23375.avif';
+import mercedesC300Photo08 from '../../../public/images/mercedes c300/65c53036-47ac-4610-a906-775b1755258c.avif';
+import mercedesC300Photo09 from '../../../public/images/mercedes c300/f284a9f3-ad10-42e7-bba0-3295549e7ac8.avif';
+import mercedesC300Photo10 from '../../../public/images/mercedes c300/e804ae9c-103b-4dec-8206-4ce4daab8f27.avif';
+
 const PHOTO_ASSETS = {
   'volvo v40 editadas/volvo-v40-frontal.jpg': volvo40Photo01,
   'volvo v40 editadas/volvo-v40-trasera.jpg': volvo40Photo02,
@@ -160,6 +171,17 @@ const PHOTO_ASSETS = {
   'renault talisman/foto-13.jpeg': talismanPhoto14,
   'renault talisman/foto-14.jpeg': talismanPhoto15,
   'renault talisman/foto-15.jpeg': talismanPhoto16,
+
+  'mercedes c300 editadas/mercedes-c300-tres-cuartos-frontal.jpg': mercedesC300Photo01,
+  'mercedes c300 editadas/mercedes-c300-tres-cuartos-frontal-izquierdo.jpg': mercedesC300Photo02,
+  'mercedes c300 editadas/mercedes-c300-tres-cuartos-trasero.jpg': mercedesC300Photo03,
+  'mercedes c300 editadas/mercedes-c300-trasera.jpg': mercedesC300Photo04,
+  'mercedes c300/3227bc2d-04aa-441b-a383-7786d8e362b9.avif': mercedesC300Photo05,
+  'mercedes c300/2cd33963-07fa-419f-bb5d-c85bef41c025.avif': mercedesC300Photo06,
+  'mercedes c300/c2ab4492-23d8-48c6-a682-f95334e23375.avif': mercedesC300Photo07,
+  'mercedes c300/65c53036-47ac-4610-a906-775b1755258c.avif': mercedesC300Photo08,
+  'mercedes c300/f284a9f3-ad10-42e7-bba0-3295549e7ac8.avif': mercedesC300Photo09,
+  'mercedes c300/e804ae9c-103b-4dec-8206-4ce4daab8f27.avif': mercedesC300Photo10,
 
   'audi a3 gris editadas/audi-a3-frontal.jpg': audi3Photo01,
   'audi a3 gris editadas/audi-a3-trasera.jpg': audi3Photo02,

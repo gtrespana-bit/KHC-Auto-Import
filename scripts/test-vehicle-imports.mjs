@@ -27,16 +27,18 @@ const ORIGINAL_FOLDER = {
   'audi a3 gris editadas/': 'audi a3 gris/',
   'bmw serie 3 touring editadas/': 'bmw serie 3 touring/',
   'golf gris 2022 editadas/': 'golf gris 2022/',
+  'mercedes c300 editadas/': 'mercedes c300/',
 };
 
-assert.equal(PENDING_VEHICLE_IMPORT_DATA.length, 6);
-const [audi, bmw, golf, volvo, fiat, renault] = PENDING_VEHICLE_IMPORT_DATA;
+assert.equal(PENDING_VEHICLE_IMPORT_DATA.length, 7);
+const [audi, bmw, golf, volvo, fiat, renault, mercedes] = PENDING_VEHICLE_IMPORT_DATA;
 assert.equal(audi.id, 'mobilede-48386412615008');
 assert.equal(bmw.id, 'mobilede-44333260322272');
 assert.equal(golf.id, 'mobilede-460197027');
 assert.equal(volvo.id, 'carreport-11514903');
 assert.equal(fiat.id, 'carreport-11625065');
 assert.equal(renault.id, 'carreport-11662976');
+assert.equal(mercedes.id, 'mobilede-49868512964960');
 
 // ---------------------------------------------------------------------------
 // Invariantes comunes a todos los borradores
@@ -192,7 +194,7 @@ assert.ok(
 // ---------------------------------------------------------------------------
 // Deduplicación de borradores pendientes
 // ---------------------------------------------------------------------------
-assert.equal(getPendingVehicleImports(PENDING_VEHICLE_IMPORT_DATA, [], []).length, 6);
+assert.equal(getPendingVehicleImports(PENDING_VEHICLE_IMPORT_DATA, [], []).length, 7);
 assert.equal(
   getPendingVehicleImports([audi], [{ id: 'veh', importDraftId: audi.id }], []).length,
   0,
@@ -508,3 +510,65 @@ for (const buyerIsBusiness of [true, false]) {
   assert.equal(renaultPnl.marginPurchase, 11195, 'base de compra REBU: precio (10.700 €) + comisiones facturadas (495 €)');
 }
 console.log('OK: Fiat 500X y Renault Talisman en REBU (Openlane), 16 fotos cada uno con 4 exteriores homogeneizados, desglose de subasta y objetivo de venta.');
+
+// ---------------------------------------------------------------------------
+// Mercedes-Benz C 300 d 4MATIC T · mobile.de 49868512964960 (particular DE)
+// ---------------------------------------------------------------------------
+assert.equal(mercedes.id, 'mobilede-49868512964960');
+assert.equal(mercedes.vehicle.brand, 'Mercedes-Benz');
+assert.equal(mercedes.vehicle.model, 'Clase C Estate');
+assert.equal(mercedes.vehicle.year, 2019);
+assert.equal(mercedes.vehicle.firstRegDate, null);
+assert.equal(mercedes.vehicle.firstRegDatePending, true, 'el anuncio solo indica 07/2019');
+assert.equal(mercedes.vehicle.km, 142500);
+assert.equal(mercedes.vehicle.cc, 1950);
+assert.equal(mercedes.vehicle.cv, 245);
+assert.equal(mercedes.vehicle.co2, null, 'el anuncio no consigna CO₂');
+assert.equal(mercedes.vehicle.cvf, 13.12);
+assert.equal(mercedes.vehicle.transmission, 'Automático');
+assert.equal(mercedes.vehicle.color, 'Blanco Metálico');
+assert.equal(mercedes.vehicle.interior, 'Piel parcial negra');
+assert.equal(mercedes.vehicle.sellerType, 'private_eu', 'compra a particular en Alemania');
+assert.equal(mercedes.vehicle.itpExemption, false);
+assert.equal(mercedes.vehicle.itpExemptionPending, true, 'la exención de revendedor queda por confirmar');
+assert.equal(mercedes.sourceListing.askingPrice, 15000);
+assert.equal(mercedes.sourceListing.negotiable, true);
+assert.equal(mercedes.sourceListing.firstRegistration, '07/2019');
+assert.equal(mercedes.vehicle.costs.purchase, 15000);
+assert.equal(mercedes.vehicle.costs.itv, 132.59, 'diésel 52,30 € + ficha 80,29 €');
+assert.equal(mercedes.vehicle.costs.cocFicha, 120);
+assert.equal(mercedes.vehicle.costs.dgt, 99.77);
+assert.equal(mercedes.vehicle.costs.placas, 28);
+assert.equal(mercedes.vehicle.costs.gestoria, 180);
+assert.equal(mercedes.vehicle.costs.transport, 750);
+assert.equal(mercedes.priceTarget.amount, 24990);
+assert.equal(mercedes.vehicle.targetSalePrice, 24990);
+assert.equal(mercedes.photos.length, 10);
+assert.equal(mercedes.photos.filter((photo) => photo.backgroundEdited).length, 4, 'las cuatro vistas exteriores homogeneizadas');
+assert.deepEqual(mercedes.vehicle.pendingCostFields, ['travel', 'insurance', 'other', 'iedmt']);
+assert.ok(
+  mercedes.photos[0].assetPath.startsWith('mercedes c300 editadas/'),
+  'la portada del Mercedes es la vista homogeneizada a nuestra ubicación',
+);
+assert.ok(
+  mercedes.photos.slice(4).every((photo) => photo.assetPath.startsWith('mercedes c300/')),
+  'interiores y detalle del Mercedes conservan los originales del anuncio',
+);
+assert.ok(existsSync(path.join(root, 'public', 'images', 'mercedes c300', 'aca1ead1-0ab5-4d1c-aaac-db40060db164.avif')));
+
+for (const buyerIsBusiness of [true, false]) {
+  const importedMercedes = buildImportedVehicle(mercedes, { buyerIsBusiness, today: '2026-10-11' });
+  assert.equal(importedMercedes.status, 'prospeccion');
+  assert.equal(importedMercedes.purchaseDate, null);
+  assert.equal(importedMercedes.sellerType, 'private_eu');
+  assert.equal(importedMercedes.costs.purchase, 15000);
+  assert.equal(importedMercedes.costs.itv, 132.59);
+  assert.equal(importedMercedes.targetSalePrice, 24990);
+  assert.ok(importedMercedes.pendingCostFields.includes('iedmt'), 'IEDMT pendiente de verificar CO₂ en COC');
+  assert.equal(
+    importedMercedes.itpExemptionPending,
+    buyerIsBusiness,
+    'solo la empresa revendedora puede acabar exenta de ITP; la exención nunca se presume',
+  );
+}
+console.log('OK: Mercedes-Benz C 300 d 4MATIC T (mobile.de, particular), 10 fotos con 4 exteriores homogeneizados y CO₂/IEDMT pendientes de COC.');
