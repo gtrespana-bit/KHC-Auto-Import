@@ -11,6 +11,10 @@ import {
   VEHICLE_IMPORT_ADDED,
   VEHICLE_IMPORT_DISMISSED,
 } from '../erp/src/lib/vehicleImports.js';
+import { DEFAULT_TARIFFS, SALES_PREP_COST_KEYS, defaultSalesPrepCosts } from '../erp/src/domain/rates.js';
+
+// Importes estándar de «Puesta a la venta» que se rellenan en cada alta de flota.
+const SALES_PREP_DEFAULTS = { recond: 180, maintenance: 150, guarantee: 450, advertising: 30 };
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -72,6 +76,21 @@ for (const draft of PENDING_VEHICLE_IMPORT_DATA) {
   assert.ok(v.costs.placas > 0, `${draft.id}: las placas se rellenan con tarifa`);
   assert.ok(v.costs.gestoria > 0, `${draft.id}: la gestoría se rellena con tarifa`);
   assert.ok(v.costs.transport > 0, `${draft.id}: el transporte se rellena con tarifa`);
+
+  // «Puesta a la venta»: reacondicionamiento, mantenimiento, póliza de garantía
+  // y publicidad se rellenan solos con las tarifas estándar en cada alta.
+  for (const key of SALES_PREP_COST_KEYS) {
+    assert.equal(
+      v.costs[key],
+      SALES_PREP_DEFAULTS[key],
+      `${draft.id}: ${key} se rellena con la tarifa estándar de puesta a la venta`,
+    );
+    assert.ok(
+      !v.pendingCostFields.includes(key),
+      `${draft.id}: ${key} ya no es un coste pendiente`,
+    );
+  }
+
   for (const key of v.pendingCostFields) {
     assert.equal(v.costs[key], 0, `${draft.id}: ${key} queda pendiente a 0`);
   }
@@ -89,7 +108,7 @@ assert.equal(audi.vehicle.firstRegDatePending, true);
 assert.equal(audi.vehicle.costs.purchase, 10650);
 assert.equal(audi.priceTarget.amount, 15990);
 assert.equal(audi.photos.filter((photo) => photo.backgroundEdited).length, 4);
-assert.deepEqual(audi.vehicle.pendingCostFields, ['travel', 'guarantee', 'insurance', 'other']);
+assert.deepEqual(audi.vehicle.pendingCostFields, ['travel', 'insurance', 'other']);
 assert.equal(audi.vehicle.costs.itv, 124.05, 'gasolina 43,76 € + ficha 80,29 €');
 assert.equal(audi.vehicle.costs.cocFicha, 120);
 assert.equal(audi.vehicle.costs.dgt, 99.77);
@@ -114,7 +133,7 @@ assert.equal(bmw.vehicle.costs.purchase, 12990);
 assert.equal(bmw.priceTarget.amount, 16990);
 assert.equal(bmw.photos.length, 11);
 assert.equal(bmw.photos.filter((photo) => photo.backgroundEdited).length, 6, 'las seis vistas exteriores homogeneizadas');
-assert.deepEqual(bmw.vehicle.pendingCostFields, ['travel', 'guarantee', 'insurance', 'other']);
+assert.deepEqual(bmw.vehicle.pendingCostFields, ['travel', 'insurance', 'other']);
 assert.equal(bmw.vehicle.costs.itv, 132.59, 'diésel 52,30 € + ficha 80,29 €');
 assert.equal(bmw.vehicle.costs.cocFicha, 120);
 assert.equal(bmw.vehicle.costs.dgt, 99.77);
@@ -149,7 +168,7 @@ assert.equal(golf.vehicle.costs.purchase, 12500);
 assert.equal(golf.priceTarget.amount, 18700);
 assert.equal(golf.photos.length, 12);
 assert.equal(golf.photos.filter((photo) => photo.backgroundEdited).length, 6, 'las seis vistas exteriores homogeneizadas');
-assert.deepEqual(golf.vehicle.pendingCostFields, ['travel', 'guarantee', 'insurance', 'other']);
+assert.deepEqual(golf.vehicle.pendingCostFields, ['travel', 'insurance', 'other']);
 assert.equal(golf.vehicle.costs.itv, 124.05, 'gasolina 43,76 € + ficha 80,29 €');
 assert.equal(golf.vehicle.costs.cocFicha, 120);
 assert.equal(golf.vehicle.costs.dgt, 99.77);
@@ -204,7 +223,11 @@ assert.equal(audiCompany.costs.cocFicha, 120, 'el COC estimado se conserva al im
 assert.equal(audiCompany.costs.itv, 124.05, 'la ITV de importación se conserva al importar');
 assert.equal(audiCompany.costs.dgt, 99.77, 'la tasa DGT se conserva al importar');
 assert.equal(audiCompany.costs.placas, 28);
-for (const key of ['travel', 'guarantee', 'insurance', 'other']) {
+for (const key of SALES_PREP_COST_KEYS) {
+  assert.equal(audiCompany.costs[key], SALES_PREP_DEFAULTS[key], `${key} entra en flota con la tarifa estándar`);
+  assert.ok(!audiCompany.pendingCostFields.includes(key), `${key} no queda pendiente al importar`);
+}
+for (const key of ['travel', 'insurance', 'other']) {
   assert.equal(audiCompany.costs[key], 0, `${key} queda pendiente, sin coste inventado`);
   assert.ok(audiCompany.pendingCostFields.includes(key), `${key} aparece como pendiente`);
 }
@@ -233,6 +256,15 @@ const omittedButPendingDraft = {
 const omittedButPendingImport = buildImportedVehicle(omittedButPendingDraft, { buyerIsBusiness: false });
 assert.equal(omittedButPendingImport.costs.dgt, 0, 'un coste pendiente no hereda la tarifa por defecto de DGT');
 assert.equal(omittedButPendingImport.costs.placas, 0, 'un coste pendiente no hereda la tarifa por defecto de placas');
+assert.equal(
+  omittedButPendingImport.costs.guarantee,
+  SALES_PREP_DEFAULTS.guarantee,
+  'la póliza de garantía marcada como pendiente se rellena con la tarifa estándar',
+);
+assert.ok(
+  !omittedButPendingImport.pendingCostFields.includes('guarantee'),
+  'la puesta a la venta sale de la lista de pendientes al rellenarse',
+);
 
 const confirmedExemption = buildImportedVehicle({
   ...audi,
@@ -288,7 +320,8 @@ assert.ok(volvo.vehicle.pendingCostFields.includes('marginExtras'));
 assert.equal(volvo.sourceListing.advertisedTotalInclVat, 12390.40);
 assert.equal(volvo.sourceListing.previousAskingPrice, 10100);
 assert.equal(volvo.sourceListing.advertisedDiscount, 300);
-assert.ok(volvo.vehicle.pendingCostFields.includes('recond'));
+assert.ok(!volvo.vehicle.pendingCostFields.includes('recond'), 'la preparación estándar ya no es un pendiente');
+assert.ok(volvo.vehicle.pendingCostFields.includes('other'), 'la reparación de los arañazos sigue pendiente en otros gastos');
 assert.equal(volvo.photos.filter(p => p.backgroundEdited).length, 4);
 assert.equal(volvo.photos.length, 25);
 assert.ok(existsSync(path.join(root, 'public', decodeURIComponent(volvo.sourceListing.url))));
@@ -298,7 +331,9 @@ for (const buyerIsBusiness of [true, false]) {
   assert.equal(imported.status, 'prospeccion');
   assert.equal(imported.purchaseDate, null);
   assert.equal(imported.costs.purchase, 9800);
-  assert.equal(imported.costs.recond, 0);
+  assert.equal(imported.costs.recond, 180, 'preparación estándar al entrar en flota');
+  assert.equal(imported.costs.guarantee, 450, 'póliza de garantía estándar al entrar en flota');
+  assert.equal(imported.costs.other, 0, 'la reparación presupuestada aparte sigue pendiente');
   assert.equal(imported.costs.itv, 132.59);
   assert.equal(imported.sourceListing.askingPrice, 9800);
   assert.equal(imported.targetSalePrice, null);
@@ -306,6 +341,61 @@ for (const buyerIsBusiness of [true, false]) {
   assert.equal(getPendingVehicleImports([volvo], [imported], []).length, 0);
 }
 console.log('OK: Volvo V40 pendiente de aprobación, 25 fotos, precios y datos desconocidos pendientes.');
+
+// ---------------------------------------------------------------------------
+// Puesta a la venta automática en cualquier alta de flota
+// ---------------------------------------------------------------------------
+assert.deepEqual(defaultSalesPrepCosts(), SALES_PREP_DEFAULTS, 'las tarifas estándar son 180/150/450/30 €');
+assert.deepEqual(
+  defaultSalesPrepCosts(DEFAULT_TARIFFS),
+  SALES_PREP_DEFAULTS,
+  'DEFAULT_TARIFFS alimenta los costes de puesta a la venta',
+);
+
+// Un borrador futuro que no traiga estos conceptos los recibe igualmente.
+const bareDraft = {
+  ...audi,
+  vehicle: {
+    ...audi.vehicle,
+    costs: { purchase: 8000 },
+    pendingCostFields: ['travel', 'recond', 'maintenance', 'guarantee', 'advertising', 'insurance', 'other'],
+  },
+};
+const bareImport = buildImportedVehicle(bareDraft, { buyerIsBusiness: true, today: '2026-10-10' });
+for (const key of SALES_PREP_COST_KEYS) {
+  assert.equal(bareImport.costs[key], SALES_PREP_DEFAULTS[key], `${key} se rellena solo aunque el borrador no lo traiga`);
+}
+assert.deepEqual(bareImport.pendingCostFields, ['travel', 'insurance', 'other']);
+
+// Un importe real confirmado en el borrador manda sobre la tarifa estándar.
+const confirmedRecondImport = buildImportedVehicle({
+  ...audi,
+  vehicle: { ...audi.vehicle, costs: { ...audi.vehicle.costs, recond: 940 } },
+}, { buyerIsBusiness: true, today: '2026-10-10' });
+assert.equal(confirmedRecondImport.costs.recond, 940, 'un presupuesto real de chapa y pintura no se pisa');
+assert.equal(confirmedRecondImport.costs.guarantee, 450, 'el resto de la puesta a la venta sigue con la tarifa');
+
+// Las tarifas de la empresa (Ajustes → Tarifas) mandan cuando el borrador no
+// trae importe propio; si lo trae, se respeta lo escrito en el borrador.
+const customTariffs = { ...DEFAULT_TARIFFS, garantia_externa: 520, preparacion: 200 };
+const customTariffImport = buildImportedVehicle(bareDraft, {
+  buyerIsBusiness: true,
+  today: '2026-10-10',
+  tariffs: customTariffs,
+});
+assert.equal(customTariffImport.costs.guarantee, 520, 'la póliza sigue la tarifa configurada por la empresa');
+assert.equal(customTariffImport.costs.recond, 200, 'el reacondicionamiento sigue la tarifa configurada');
+assert.equal(customTariffImport.costs.maintenance, 150);
+assert.equal(customTariffImport.costs.advertising, 30);
+const draftValueWins = buildImportedVehicle(audi, {
+  buyerIsBusiness: true,
+  today: '2026-10-10',
+  tariffs: customTariffs,
+});
+assert.equal(draftValueWins.costs.guarantee, 450, 'el importe consignado en el borrador no se pisa con la tarifa');
+assert.equal(draftValueWins.costs.recond, 180, 'el importe consignado en el borrador no se pisa con la tarifa');
+
+console.log('OK: puesta a la venta automática (reacondicionamiento 180 €, mantenimiento 150 €, póliza de garantía 450 €, publicidad 30 €) en todas las altas de flota.');
 
 const volvoCompany = buildImportedVehicle(volvo, { buyerIsBusiness: true });
 const volvoTaxes = recalcVehicleTaxes(volvoCompany);

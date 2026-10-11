@@ -5,6 +5,7 @@ import { useStore } from '../lib/store.jsx';
 import { uid, todayISO, eur, eur0, pct as pctFmt, round2 } from '../lib/format.js';
 import { STATUS_FLOW, vehiclePnl, financeOffer } from '../domain/finance.js';
 import { landingCost, recalcVehicleTaxes, computeCvf, SELLER_TYPES, allowedSaleRegimes, rebuEligibility, canonicalSellerType } from '../domain/taxes.js';
+import { defaultSalesPrepCosts } from '../domain/rates.js';
 import { DOCUMENT_CHECKLIST } from '../domain/compliance.js';
 import { searchVehicles, VEHICLE_DB, RELIABILITY_META } from '../data/vehicleDatabase.js';
 import { getVehicleInspectionGuide, searchInspectionPresets } from '../data/vehicleInspection.js';
@@ -41,6 +42,7 @@ const COST_GROUPS = [
   },
   {
     title: 'Puesta a la venta',
+    hint: 'Reacondicionamiento, mantenimiento, póliza de garantía y publicidad se rellenan solos con las tarifas estándar de la empresa (180 € / 150 € / 450 € / 30 €). Ajústalos aquí cuando tengas las facturas reales.',
     keys: [
       ['recond', 'Reacondicionamiento'],
       ['maintenance', 'Mantenimiento'],
@@ -90,10 +92,10 @@ const emptyVehicle = ({ tariffs, buyerIsBusiness }) => ({
     gestoria: 0,
     // Los impuestos (576, ITP, IVA, IVTM) se calculan solos al guardar.
     iedmt: 0, itp: 0, vatPurchase: 0, ivtm: 0,
-    recond: Number(tariffs.preparacion) || 180,
-    maintenance: 150,
-    guarantee: 0,
-    advertising: Number(tariffs.anuncio_portal) || 30,
+    // Puesta a la venta: se rellena sola con las tarifas estándar de la
+    // empresa (reacondicionamiento 180 €, mantenimiento 150 €, póliza de
+    // garantía 450 € y publicidad 30 €) en cada alta de flota.
+    ...defaultSalesPrepCosts(tariffs),
     insurance: 0,
     other: 0,
   },
@@ -619,6 +621,7 @@ export default function VehicleForm({ open, onClose, vehicle, onSaved, initialTa
           {COST_GROUPS.map((group) => (
             <Card key={group.title} className="p-3.5">
               <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2.5">{group.title}</p>
+              {group.hint && <p className="text-[11px] text-slate-500 -mt-1 mb-3 leading-snug">{group.hint}</p>}
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {group.keys.map(([key, label]) => (
                   <Field key={key} label={label}><Money value={draft.costs?.[key] ?? 0} onChange={(v) => setCost(key, v)} /></Field>

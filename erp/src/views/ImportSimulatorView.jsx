@@ -4,6 +4,7 @@ import { Card, Button, Field, Input, Money, Select, Stat, SectionTitle, Tabs, Ba
 import { useStore } from '../lib/store.jsx';
 import { eur, eur0, num, numEs, todayISO, download } from '../lib/format.js';
 import { recalcVehicleTaxes, landingCost, breakEvenPrice, calcSaleVat, resolveSaleRegime, allowedSaleRegimes, marginPurchaseCost, rebuEligibility, SELLER_TYPES } from '../domain/taxes.js';
+import { defaultSalesPrepCosts } from '../domain/rates.js';
 import { suggestedPrice, vehiclePnl } from '../domain/finance.js';
 import { searchVehicles } from '../data/vehicleDatabase.js';
 import { getVehicleInspectionGuide } from '../data/vehicleInspection.js';
@@ -47,7 +48,10 @@ export default function ImportSimulatorView({ seed, initialTab = 'simulador' }) 
     brand: '', model: '', version: '', year: new Date().getFullYear() - 4, km: 120000, cc: 1600, co2: 118,
     fuel: 'Diésel', newPrice: 32000, purchase: 9000,
     sellerType: 'pro_eu_vat', saleRegime: state.company.vatRegime === 'general' ? 'general' : 'rebu',
-    transport: 750, cocFicha: 90, gestoria: 0, recond: 250, maintenance: 150, guarantee: 0, advertising: 30, insurance: 0, other: 0,
+    transport: 750, cocFicha: 90, gestoria: 0, insurance: 0, other: 0,
+    // Puesta a la venta con las tarifas estándar (180 / 150 / 450 / 30 €): si la
+    // simulación se guarda en la flota, el coche ya entra con estos importes.
+    ...defaultSalesPrepCosts(tariffs),
     salePrice: 0, targetMargin: 12,
     // El catálogo (o una ficha de la flota) puede lanzar la simulación precargada
     ...(seed ? fromSeed(seed) : {}),

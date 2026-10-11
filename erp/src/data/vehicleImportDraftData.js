@@ -9,10 +9,13 @@
 //
 //  COSTES: rellena con el precio anunciado, facturas/presupuestos confirmados
 //  o los importes de tarifas configuradas (Ajustes → Tarifas, ejercicio 2026):
-//  transporte en camión, COC, ITV de importación + ficha, tasa DGT, placas,
-//  gestoría, preparación, mantenimiento y publicidad. Solo quedan a 0 y en
+//  transporte en camión, COC, ITV de importación + ficha, tasa DGT, placas y
+//  gestoría. La «Puesta a la venta» se rellena SOLA al añadir el coche a la
+//  flota (reacondicionamiento 180 €, mantenimiento 150 €, póliza de garantía
+//  450 € y publicidad y portales 30 €): consigna aquí esos mismos importes para
+//  que el borrador y la ficha importada coincidan. Solo quedan a 0 y en
 //  `pendingCostFields` los conceptos que de verdad no se puedan estimar
-//  (viaje, garantía, seguro de stock, otros): 0 significa pendiente, no gratis.
+//  (viaje, seguro de stock, otros): 0 significa pendiente, no gratis.
 // ============================================================================
 
 export const PENDING_VEHICLE_IMPORT_DATA = [
@@ -133,13 +136,13 @@ export const PENDING_VEHICLE_IMPORT_DATA = [
         ivtm: 0,
         recond: 180,
         maintenance: 150,
-        guarantee: 0,
+        guarantee: 450,
         advertising: 30,
         insurance: 0,
         other: 0,
       },
       // Solo lo que de verdad no se puede estimar antes de la inspección.
-      pendingCostFields: ['travel', 'guarantee', 'insurance', 'other'],
+      pendingCostFields: ['travel', 'insurance', 'other'],
       taxOverrides: {},
       targetSalePrice: 15990,
       rotationDays: 55,
@@ -147,7 +150,7 @@ export const PENDING_VEHICLE_IMPORT_DATA = [
       inspectionChecks: {},
       sale: null,
       imageUrl: '',
-      notes: 'BORRADOR DE PROSPECCIÓN: el coche aún no se ha comprado. Anuncio de particular por 10.650 € negociables. El vendedor declara 3 propietarios, sin accidentes y mantenimiento completo; ITV/HU hasta 07/2027. Declara un pequeño daño de granizo en el techo y otros defectos estéticos visibles en las fotos; la inspección precompra y el coste de chapa/pintura están pendientes. Venta particular sin garantía ni devolución, según el anuncio.\n\nEl catálogo KHC aporta como orientación 114 g/km de CO₂, etiqueta C y 36.500 € de valor nuevo; verificar CO₂, etiqueta, fecha exacta de primera matriculación, acabado, código motor y VIN con el COC/documentación alemana antes de cerrar impuestos. Los costes estándar (transporte 750 €, COC 120 €, ITV+ficha 124,05 €, tasa DGT 99,77 €, placas 28 €, gestoría 180 €, preparación 180 €, mantenimiento 150 € y publicidad 30 €) son las tarifas 2026 del ERP y siguen siendo estimaciones hasta recibir factura; quedan pendientes de estimar viaje, garantía, seguro de stock y otros (0 € no significa gratis). Solo el objetivo de venta es una estimación.',
+      notes: 'BORRADOR DE PROSPECCIÓN: el coche aún no se ha comprado. Anuncio de particular por 10.650 € negociables. El vendedor declara 3 propietarios, sin accidentes y mantenimiento completo; ITV/HU hasta 07/2027. Declara un pequeño daño de granizo en el techo y otros defectos estéticos visibles en las fotos; la inspección precompra y el coste de chapa/pintura están pendientes. Venta particular sin garantía ni devolución, según el anuncio.\n\nEl catálogo KHC aporta como orientación 114 g/km de CO₂, etiqueta C y 36.500 € de valor nuevo; verificar CO₂, etiqueta, fecha exacta de primera matriculación, acabado, código motor y VIN con el COC/documentación alemana antes de cerrar impuestos. Los costes estándar (transporte 750 €, COC 120 €, ITV+ficha 124,05 €, tasa DGT 99,77 €, placas 28 €, gestoría 180 €, preparación 180 €, mantenimiento 150 €, garantía 450 € y publicidad 30 €) son las tarifas 2026 del ERP y siguen siendo estimaciones hasta recibir factura; quedan pendientes de estimar viaje, seguro de stock y otros (0 € no significa gratis). Solo el objetivo de venta es una estimación.',
       sourceListing: null,
       priceTarget: null,
     },
@@ -273,13 +276,13 @@ export const PENDING_VEHICLE_IMPORT_DATA = [
         ivtm: 0,
         recond: 180,
         maintenance: 150,
-        guarantee: 0,
+        guarantee: 450,
         advertising: 30,
         insurance: 0,
         other: 0,
       },
       // Solo lo que de verdad no se puede estimar antes de la compra.
-      pendingCostFields: ['travel', 'guarantee', 'insurance', 'other'],
+      pendingCostFields: ['travel', 'insurance', 'other'],
       taxOverrides: {},
       targetSalePrice: 16990,
       rotationDays: 55,
@@ -287,7 +290,7 @@ export const PENDING_VEHICLE_IMPORT_DATA = [
       inspectionChecks: {},
       sale: null,
       imageUrl: '',
-      notes: 'BORRADOR DE PROSPECCIÓN: el coche aún no se ha comprado. Anuncio de concesionario (Autohaus Goldenbühl, Villingen-Schwenningen) por 12.990 €; venden neto para exportación y ayudan con aduana y placas de exportación. Declarado: 2 propietarios, sin accidentes, HU recién pasada, historial completo BMW con servicio nuevo y llantas M. Compra a profesional UE (pro_eu_vat): sin ITP; comprando como empresa la operación es una AIB autoliquidada y deducida en el 303/349 (caja 0 €) y la reventa va en régimen general; como particular el ERP carga el 21 % con el Modelo 309.\n\nEl CO₂ anunciado (109 g/km combinado) parece de ciclo NEDC: el COC puede declarar más de 120 g/km y el Modelo 576 pasar del 0 % al 4,75 %; verificar con el COC junto con VIN, código de motor (B47 esperado), día exacto de primera matriculación y acabado antes de cerrar impuestos. Los costes estándar (transporte 750 €, COC 120 €, ITV+ficha 132,59 €, tasa DGT 99,77 €, placas 28 €, gestoría 180 €, preparación 180 €, mantenimiento 150 € y publicidad 30 €) son las tarifas 2026 del ERP y siguen siendo estimaciones hasta recibir factura; quedan pendientes de estimar viaje, garantía, seguro de stock y otros (0 € no significa gratis). El objetivo de venta es una estimación.',
+      notes: 'BORRADOR DE PROSPECCIÓN: el coche aún no se ha comprado. Anuncio de concesionario (Autohaus Goldenbühl, Villingen-Schwenningen) por 12.990 €; venden neto para exportación y ayudan con aduana y placas de exportación. Declarado: 2 propietarios, sin accidentes, HU recién pasada, historial completo BMW con servicio nuevo y llantas M. Compra a profesional UE (pro_eu_vat): sin ITP; comprando como empresa la operación es una AIB autoliquidada y deducida en el 303/349 (caja 0 €) y la reventa va en régimen general; como particular el ERP carga el 21 % con el Modelo 309.\n\nEl CO₂ anunciado (109 g/km combinado) parece de ciclo NEDC: el COC puede declarar más de 120 g/km y el Modelo 576 pasar del 0 % al 4,75 %; verificar con el COC junto con VIN, código de motor (B47 esperado), día exacto de primera matriculación y acabado antes de cerrar impuestos. Los costes estándar (transporte 750 €, COC 120 €, ITV+ficha 132,59 €, tasa DGT 99,77 €, placas 28 €, gestoría 180 €, preparación 180 €, mantenimiento 150 €, garantía 450 € y publicidad 30 €) son las tarifas 2026 del ERP y siguen siendo estimaciones hasta recibir factura; quedan pendientes de estimar viaje, seguro de stock y otros (0 € no significa gratis). El objetivo de venta es una estimación.',
       sourceListing: null,
       priceTarget: null,
     },
@@ -345,7 +348,7 @@ export const PENDING_VEHICLE_IMPORT_DATA = [
       'Datos contradictorios en el anuncio: «Ruedas ligeras» frente a «Stahlfelgen 6x15» (llantas de acero) en el texto; «cambio con levas» con caja manual; «Vehículo de no fumador» junto a «Paquete de fumador»; y la categoría «Sedán» para un 5 puertas. Revisar en persona antes de comprar.',
       'CO₂: el anuncio da 104 g/km (WLTP) y el catálogo KHC 112 g/km para este motor. Ambos quedan por debajo de 120 g/km, pero verificar con el COC: si supera los 120 g/km, el Modelo 576 pasa del 0 % al 4,75 %.',
       'Historial no declarado: el anuncio no dice que el coche esté libre de accidentes (sí declara 2 propietarios, mantenimiento completo y TÜV/AU nuevos). Pedir informe de historial y de accidentes, y la factura de la última revisión: el texto solo remite a las fotos, sin fecha ni kilometraje.',
-      'Garantía no indicada en el anuncio: confirmar qué garantía da el concesionario antes de comprar; la póliza propia queda pendiente (0 € hasta decidir).',
+      'Garantía no indicada en el anuncio: confirmar qué garantía da el concesionario antes de comprar; la póliza propia se presupuesta con la tarifa estándar de 450 €.',
     ],
     photos: [
       { id: 'mobilede-460197027-photo-01', filename: 'vw-golf-viii-tres-cuartos-frontal.jpg', assetPath: 'golf gris 2022 editadas/vw-golf-viii-tres-cuartos-frontal.jpg', sourceFilename: 'd583f37f-f09f-454e-93eb-e784ea7993f5.avif', alt: 'Volkswagen Golf VIII gris, tres cuartos frontal en la fachada de hormigón y madera', cover: true, backgroundEdited: true },
@@ -416,13 +419,13 @@ export const PENDING_VEHICLE_IMPORT_DATA = [
         ivtm: 0,
         recond: 180,
         maintenance: 150,
-        guarantee: 0,
+        guarantee: 450,
         advertising: 30,
         insurance: 0,
         other: 0,
       },
       // Solo lo que de verdad no se puede estimar antes de la compra.
-      pendingCostFields: ['travel', 'guarantee', 'insurance', 'other'],
+      pendingCostFields: ['travel', 'insurance', 'other'],
       taxOverrides: {},
       targetSalePrice: 18700,
       rotationDays: 53,
@@ -430,7 +433,7 @@ export const PENDING_VEHICLE_IMPORT_DATA = [
       inspectionChecks: {},
       sale: null,
       imageUrl: '',
-      notes: 'BORRADOR DE PROSPECCIÓN: el coche aún no se ha comprado. Anuncio del concesionario Pllana Automobile (Isernhagen, Hannover) por 12.500 €, sin indicación de negociación; mobile.de lo marca como «Buen precio». Declarado: 2 propietarios, 122.500 km, mantenimiento completo, TÜV y AU nuevos, climatizador, faros LED y sensores de aparcamiento delante y detrás. Compra a profesional UE (pro_eu_vat): sin ITP; comprando como empresa la operación es una AIB autoliquidada y deducida en el 303/349 (caja 0 €), y como particular el ERP carga el 21 % con el Modelo 309 (2.625 €).\n\nEl CO₂ anunciado (104 g/km WLTP) y el catálogo KHC (112 g/km) quedan por debajo de 120 g/km. Verificar con el COC, junto con VIN, código de motor, día exacto de primera matriculación, acabado y la conversión a GLP, antes de cerrar impuestos y la etiqueta DGT. Cilindros (3), CVF (7,83), etiqueta DGT (C), PVP de nuevo (34.900 €) y segmento vienen del catálogo KHC, no del anuncio: confirmarlos con el COC y la ficha técnica. En Alemania el catálogo estima 16.298 € para este coche a 2021 y 122.500 km (14.994 € con el descuento de compra), así que el precio anunciado queda por debajo.\n\nLos costes estándar (transporte 750 €, COC 120 €, ITV+ficha 124,05 €, tasa DGT 99,77 €, placas 28 €, gestoría 180 €, preparación 180 €, mantenimiento 150 € y publicidad 30 €) son las tarifas 2026 del ERP y siguen siendo estimaciones hasta recibir factura. Quedan pendientes de estimar viaje, garantía, seguro de stock y otros (0 € no significa gratis). El objetivo de venta de 18.700 € es una estimación: el catálogo da 19.296 € en España para 2021 y 122.500 km y se aplica una rebaja prudente del 3 %.\n\nLas vistas exteriores llevan el fondo homogeneizado con IA (fachada de hormigón y madera, matrícula tapada y sin rótulos del vendedor). Los originales del anuncio están en la carpeta golf gris 2022 y las fotos de interior y maletero no se han alterado. Hay que comprobar que las vistas editadas coinciden con el coche real. La descripción del vendedor se guarda en extracto; el anuncio completo tiene el detalle de equipamiento.',
+      notes: 'BORRADOR DE PROSPECCIÓN: el coche aún no se ha comprado. Anuncio del concesionario Pllana Automobile (Isernhagen, Hannover) por 12.500 €, sin indicación de negociación; mobile.de lo marca como «Buen precio». Declarado: 2 propietarios, 122.500 km, mantenimiento completo, TÜV y AU nuevos, climatizador, faros LED y sensores de aparcamiento delante y detrás. Compra a profesional UE (pro_eu_vat): sin ITP; comprando como empresa la operación es una AIB autoliquidada y deducida en el 303/349 (caja 0 €), y como particular el ERP carga el 21 % con el Modelo 309 (2.625 €).\n\nEl CO₂ anunciado (104 g/km WLTP) y el catálogo KHC (112 g/km) quedan por debajo de 120 g/km. Verificar con el COC, junto con VIN, código de motor, día exacto de primera matriculación, acabado y la conversión a GLP, antes de cerrar impuestos y la etiqueta DGT. Cilindros (3), CVF (7,83), etiqueta DGT (C), PVP de nuevo (34.900 €) y segmento vienen del catálogo KHC, no del anuncio: confirmarlos con el COC y la ficha técnica. En Alemania el catálogo estima 16.298 € para este coche a 2021 y 122.500 km (14.994 € con el descuento de compra), así que el precio anunciado queda por debajo.\n\nLos costes estándar (transporte 750 €, COC 120 €, ITV+ficha 124,05 €, tasa DGT 99,77 €, placas 28 €, gestoría 180 €, preparación 180 €, mantenimiento 150 €, garantía 450 € y publicidad 30 €) son las tarifas 2026 del ERP y siguen siendo estimaciones hasta recibir factura. Quedan pendientes de estimar viaje, seguro de stock y otros (0 € no significa gratis). El objetivo de venta de 18.700 € es una estimación: el catálogo da 19.296 € en España para 2021 y 122.500 km y se aplica una rebaja prudente del 3 %.\n\nLas vistas exteriores llevan el fondo homogeneizado con IA (fachada de hormigón y madera, matrícula tapada y sin rótulos del vendedor). Los originales del anuncio están en la carpeta golf gris 2022 y las fotos de interior y maletero no se han alterado. Hay que comprobar que las vistas editadas coinciden con el coche real. La descripción del vendedor se guarda en extracto; el anuncio completo tiene el detalle de equipamiento.',
       sourceListing: null,
       priceTarget: null,
     },
@@ -729,9 +732,9 @@ export const PENDING_VEHICLE_IMPORT_DATA = [
       "itp": 0,
       "vatPurchase": 0,
       "ivtm": 0,
-      "recond": 0,
+      "recond": 180,
       "maintenance": 150,
-      "guarantee": 0,
+      "guarantee": 450,
       "advertising": 30,
       "insurance": 0,
       "other": 0
@@ -739,8 +742,6 @@ export const PENDING_VEHICLE_IMPORT_DATA = [
     "pendingCostFields": [
       "marginExtras",
       "travel",
-      "recond",
-      "guarantee",
       "insurance",
       "other",
       "iedmt"
@@ -754,7 +755,7 @@ export const PENDING_VEHICLE_IMPORT_DATA = [
     "imageUrl": "",
     "sourceListing": null,
     "priceTarget": null,
-    "notes": "BORRADOR PENDIENTE DE APROBACIÓN: no consta compra formalizada. Precio comunicado posteriormente por el usuario: 9.800 € netos, compra a empresa UE con IVA deducible. El PDF no contiene precio. Datos extraídos del informe, páginas 1–3. Producción 13/05/2019; primera matriculación 17/10/2019; 141.723 km; 2 llaves; Euro 6d-Temp. Documentos belgas completos, certificado de conformidad y registro de mantenimiento declarados disponibles, no verificados. Neumáticos: 5 mm delante y 7 mm detrás. VIN oculto en el informe; no se reconstruye. Cilindros, código motor, CO₂, etiqueta DGT y valor fiscal pendientes de documentación. El cálculo automático de potencia fiscal es orientativo.\n\nPrecio neto confirmado por el usuario: 9.800 € (antes 10.100 €, descuento 300 €). Total anunciado con IVA: 12.390,40 €. A un 21 %, 9.800 € + IVA = 11.858 €: quedan 532,40 € sin desglose. Comisiones y objetivo de venta pendientes; no imputar la diferencia automáticamente como IVA o gasto.\nDaño declarado: arañazos en el parachoques trasero (página 3). Presupuesto de reparación pendiente; revisar el detalle original y no valorar el estado por las imágenes editadas.\nInspección técnica válida hasta el 17/10/2026 según el informe; comprobar vigencia antes del traslado. No equivale a la ITV de importación española.\nCompra a empresa UE con IVA deducible, confirmada por el usuario: pro_eu_vat, sin ITP y venta en régimen general (no REBU). Para comprador empresa con requisitos de AIB, IVA autoliquidado y deducido; confirmar factura y condiciones intracomunitarias. CO₂ y valor fiscal pendientes: el IEDMT calculado a 0 no acredita exención.\nCuatro exteriores con fondo editado por IA; verificar fidelidad antes de publicar. El resto son imágenes del PDF de baja resolución (300 px), sin fotografías documentales en la galería comercial.\n\nCostes estándar estimados según tarifas ERP 2026: transporte 750 €, provisión COC/ficha 120 € (revisar, el informe declara CdC disponible), ITV+ficha 132,59 €, DGT 99,77 €, placas 28 €, gestoría 180 €, mantenimiento 150 € y publicidad 30 €. Compra prevista: 9.800 € netos. Comisiones, reparación, viaje, garantía, seguro y otros sin presupuesto. No hay valoración de mercado ni rentabilidad validada.\n\nOriginales extraídos del PDF conservados en public/images/volvo v40; cuatro exteriores editados con IA en volvo v40 editadas. No acreditar ubicación física con estas imágenes."
+    "notes": "BORRADOR PENDIENTE DE APROBACIÓN: no consta compra formalizada. Precio comunicado posteriormente por el usuario: 9.800 € netos, compra a empresa UE con IVA deducible. El PDF no contiene precio. Datos extraídos del informe, páginas 1–3. Producción 13/05/2019; primera matriculación 17/10/2019; 141.723 km; 2 llaves; Euro 6d-Temp. Documentos belgas completos, certificado de conformidad y registro de mantenimiento declarados disponibles, no verificados. Neumáticos: 5 mm delante y 7 mm detrás. VIN oculto en el informe; no se reconstruye. Cilindros, código motor, CO₂, etiqueta DGT y valor fiscal pendientes de documentación. El cálculo automático de potencia fiscal es orientativo.\n\nPrecio neto confirmado por el usuario: 9.800 € (antes 10.100 €, descuento 300 €). Total anunciado con IVA: 12.390,40 €. A un 21 %, 9.800 € + IVA = 11.858 €: quedan 532,40 € sin desglose. Comisiones y objetivo de venta pendientes; no imputar la diferencia automáticamente como IVA o gasto.\nDaño declarado: arañazos en el parachoques trasero (página 3). Presupuesto de reparación pendiente; revisar el detalle original y no valorar el estado por las imágenes editadas.\nInspección técnica válida hasta el 17/10/2026 según el informe; comprobar vigencia antes del traslado. No equivale a la ITV de importación española.\nCompra a empresa UE con IVA deducible, confirmada por el usuario: pro_eu_vat, sin ITP y venta en régimen general (no REBU). Para comprador empresa con requisitos de AIB, IVA autoliquidado y deducido; confirmar factura y condiciones intracomunitarias. CO₂ y valor fiscal pendientes: el IEDMT calculado a 0 no acredita exención.\nCuatro exteriores con fondo editado por IA; verificar fidelidad antes de publicar. El resto son imágenes del PDF de baja resolución (300 px), sin fotografías documentales en la galería comercial.\n\nCostes estándar estimados según tarifas ERP 2026: transporte 750 €, provisión COC/ficha 120 € (revisar, el informe declara CdC disponible), ITV+ficha 132,59 €, DGT 99,77 €, placas 28 €, gestoría 180 €, preparación 180 €, mantenimiento 150 €, garantía 450 € y publicidad 30 €. Compra prevista: 9.800 € netos. Comisiones, reparación de los arañazos, viaje, seguro de stock y otros sin presupuesto. No hay valoración de mercado ni rentabilidad validada.\n\nOriginales extraídos del PDF conservados en public/images/volvo v40; cuatro exteriores editados con IA en volvo v40 editadas. No acreditar ubicación física con estas imágenes."
   }
 },
 ];

@@ -906,8 +906,10 @@ check('Catálogo: GTI 230 distingue resultado central positivo del prudente nega
     dePrice: [golf.dePrice[1], golf.dePrice[1]],
     esPrice: [golf.esPrice[0], golf.esPrice[0]],
   }, DEFAULT_TARIFFS, refDate, { regime: 'rebu' });
-  assert.equal(central.profit, 2649);
-  assert.equal(prudent.profit, -620);
+  // Con la póliza de garantía estándar de 450 € (antes 240 €) el resultado
+  // central baja 210 € y el prudente se aleja otros 210 € en negativo.
+  assert.equal(central.profit, 2439);
+  assert.equal(prudent.profit, -830);
   assert.equal(profitLevel(central.profit).tone, 'emerald');
   assert.equal(profitLevel(prudent.profit).tone, 'rose');
 });

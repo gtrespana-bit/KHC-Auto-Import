@@ -1,4 +1,5 @@
 import { recalcVehicleTaxes } from '../domain/taxes.js';
+import { defaultSalesPrepCosts, SALES_PREP_COST_KEYS } from '../domain/rates.js';
 import { fileToDataUrl } from './db.js';
 import { todayISO } from './format.js';
 
@@ -37,6 +38,17 @@ export function buildImportedVehicle(draft, {
   (source.pendingCostFields || []).forEach((key) => {
     source.costs[key] = 0;
   });
+  // «Puesta a la venta»: todo coche que entra en flota arranca con los importes
+  // estándar (reacondicionamiento 180 €, mantenimiento 150 €, póliza de
+  // garantía 450 € y publicidad 30 €). Se respeta cualquier importe real ya
+  // confirmado en el borrador y dejan de contar como pendientes.
+  const prepDefaults = defaultSalesPrepCosts(tariffs);
+  SALES_PREP_COST_KEYS.forEach((key) => {
+    const confirmed = Number(source.costs[key]) || 0;
+    source.costs[key] = confirmed > 0 ? confirmed : prepDefaults[key];
+  });
+  source.pendingCostFields = (source.pendingCostFields || [])
+    .filter((key) => !SALES_PREP_COST_KEYS.includes(key));
   const sellerIsPrivate = ['private_eu', 'private_es'].includes(source.sellerType);
   const itpExemption = Boolean(source.itpExemption);
   const candidate = {
