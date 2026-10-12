@@ -51,10 +51,11 @@ SOFT = Color(0.955, 0.949, 0.935)
 GRID = Color(0.91, 0.89, 0.85)
 REFORM = 4550.0
 KIT = 822.90
-RENT, RETA, MKT, UTIL = 1100.0, 448.69, 250.0, 150.0
+RENT, RETA, MKT, UTIL = 1200.0, 448.69, 250.0, 150.0  # Nave O Milladoiro (465 m²)
 QUOTA = 955.06
-FIXED = 2903.75
-STRUCT = 1948.69
+STRUCT = RENT + RETA + MKT + UTIL  # 2048.69 €/mes (sin cuota)
+FIXED = STRUCT + QUOTA  # 3003.75 €/mes (con cuota préstamo)
+REFORM = 5115.0  # Fase 1 completa: suelo epóxico, pintura, LED, señalización, mobiliario, seguridad
 SMI = 1424.50
 LIVE = 2083.33
 # El 35 % es fijo: no mira a las hijas y no se cobra a fin de mes.
@@ -861,7 +862,7 @@ def draw_expenses(c, n, total):
     bg(c)
     heading(c, "Los gastos que no paran", "Cinco partidas cada mes. El sueldo no está aquí.", size=18)
     lines = [
-        ("Nave, San Marcos", RENT, "Alquiler. La licencia ya existe."),
+        ("Nave, O Milladoiro (465 m²)", RENT, "Alquiler. Buena ubicación junto autopista."),
         ("Autónomo societario", RETA, "Seguridad Social. No es un sueldo."),
         ("Portales y gestoría", MKT, "Coches.net, Milanuncios Pro y la gestoría."),
         ("Luz, agua y vado", UTIL, "Suministros de la nave."),
