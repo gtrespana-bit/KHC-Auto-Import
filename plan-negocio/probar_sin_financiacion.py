@@ -276,7 +276,7 @@ def ledger(opening, nave_from, salary_at, wait_mercedes=True):
         nave = True
     fx = fixed_of(nave)
     for label, amount in (
-        ("Nave, San Marcos", g.RENT if nave else 0.0),
+        ("Nave, O Milladoiro (465 m²)", g.RENT if nave else 0.0),
         ("Autónomo", g.RETA),
         ("Portales y gestoría", g.MKT),
         ("Luz, agua y vado", g.UTIL if nave else 0.0),
