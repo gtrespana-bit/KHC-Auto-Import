@@ -597,6 +597,51 @@ De ahí las dos reglas de control que acompañan a esta decisión:
 
 ---
 
+### 7.d Cuántos coches caben en O Milladoiro (y qué está calculado hoy)
+
+La ficha de la nave (`ANALISIS_NAVE_SANTIAGO_MILLADOIRO.md`) reparte los 465 m² así:
+
+| Zona | m² | Coches simultáneos |
+|---|---|---|
+| Exposición interior (zona noble, luz LED) | 200 | 8-10 |
+| Detallado / preparación | 80 | 2-3 |
+| Taller técnico | 60 | 1 |
+| Almacén logístico | 60 | — |
+| **Planta baja (400 m²)** | | **11-14** |
+| Patio delantero (clientes, camión, exposición extra) | 100 | 6-8 |
+| Patio trasero (lavadero, residuos) | 30 | — |
+| **Total ficha** | **465** | **14-18** |
+
+**Lo que hay calculado ahora mismo: 14 plazas.** El modelo trabaja en el suelo
+prudente del rango documentado (14 de 14-18) y deja el patio para clientes y
+maniobra del camión. Con ese supuesto: **209 ventas, 494.519 € P50, 4,0 % de
+meses en descubierto, la nave llena 16 de los 36 meses y 300.012 € ociosos por
+encima del fondo al cerrar** — es decir, en el mes 36 el límite vuelve a ser la
+capacidad, no el dinero.
+
+Y hay un techo que conviene tener delante: con la regla de diversificación
+**«máximo 2 unidades del mismo modelo» y 8 modelos de catálogo, el stock no puede
+pasar de 16 coches**, por muchas plazas que tenga el local. Medido:
+
+| Supuesto de capacidad | ventas | P10 | P50 | caja<0 | meses lleno | ocioso al mes 36 |
+|---|---|---|---|---|---|---|
+| **14 plazas (lo calculado)** | **209** | **398.654 €** | **494.519 €** | **4,0 %** | 16/36 | 300.012 € |
+| 16 plazas (usar parte del patio) | 224 | 427.216 € | 521.708 € | 4,0 % | 14/36 | 298.761 € |
+| 17 plazas y 3 unidades por modelo | 258 | 532.791 € | 638.172 € | 6,4 % | 17/36 | 411.485 € |
+| 18 plazas y 3 unidades por modelo | 267 | 563.778 € | 668.973 € | 6,4 % | 16/36 | 424.621 € |
+
+Lectura: **cada plaza extra sigue valiendo 25.000-45.000 €** al mes 36. Pasar de
+14 a 16 es gratis (no cambia ninguna regla, sólo usa parte del patio) y sube el
+resultado 27.189 € con el mismo riesgo. Pasar a 17-18 exige permitir tres
+unidades del mismo modelo: el modelo las trata como independientes (así lo pidió
+el dueño: cada coche vende a su ritmo) y con tres iguales eso es **optimista**,
+así que ese número hay que tomarlo como techo, no como previsión.
+
+Si se confirma en la visita que el patio aguanta stock sin comerse la maniobra,
+el objetivo de flota pasa a 16 y las cifras del plan suben a la fila de 16.
+
+---
+
 ## 8. Lo que este modelo no dice (y hay que saber)
 
 - **No es una previsión, es un modelo.** Los días de venta llevan fuente y fecha;

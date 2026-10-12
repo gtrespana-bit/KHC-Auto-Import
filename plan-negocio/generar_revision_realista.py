@@ -834,7 +834,10 @@ def p_limites(c, n, t):
         ("No es una previsión, es un modelo", "Los días de venta llevan fuente y fecha; la rampa del negocio (65 % al principio) y la estacionalidad son supuestos declarados. Los escenarios de las secciones anteriores enseñan el rango."),
         ("No incluye financiación", "Los 50.000 € son propios. Con aval y póliza el arranque cambia por completo (dossier de Sogarpo): es otro escenario."),
         ("El viaje no siempre sale bien", "El modelo da por hecho que cada viaje acaba con un coche bueno comprado. Volver con las manos vacías cuesta un vuelo (135 € + 39 €) y, sobre todo, tiempo."),
-        ("Las naves no están negociadas", "Los precios son de anuncios de octubre de 2026: faltan visita, estado real, potencia eléctrica y contrato."),
+        ("Las naves no están negociadas", "Los precios son de anuncios de octubre de 2026: faltan visita, estado real, potencia eléctrica y contrato. Y el patio: si no se puede usar para stock, la nave son 11-14 coches, no 14-18."),
+        ("La capacidad de O Milladoiro", "La ficha de la nave da 11-14 plazas dentro (exposición 8-10, detallado 2-3, taller 1) y 6-8 en el patio: 14-18 simultáneos. "
+                                          "El modelo trabaja con 14 y el patio libre para clientes y camión. Si el stock sube a 16, el patrimonio P50 pasa de 494.519 € a 521.708 €; "
+                                          "con 17-18 haría falta permitir 3 unidades del mismo modelo (638.172-668.973 €, pero el modelo trata las unidades iguales como independientes y eso es optimista)."),
         ("La fiscalidad de los escenarios sin sociedad", "Está aproximada con el mismo motor. La gestoría debe confirmarla."),
         ("Dos palancas que no recoge", "Vender con señal un coche antes de comprarlo, y comprar en subasta de flota (BCA, Autorola) en vez de anuncio: baja el coste de compra un 5-10 %."),
     ]
@@ -844,7 +847,7 @@ def p_limites(c, n, t):
         c.setFont("DejaVuBold", 9)
         c.drawString(36, y, "· " + tit)
         wrap(c, txt, 36, y - 14, 880, size=9, leading=12, color=SLATE, max_lines=3)
-        y -= 58
+        y -= 50
 
 
 @page
