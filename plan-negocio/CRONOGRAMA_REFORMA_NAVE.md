@@ -1,4 +1,6 @@
 #  Cronograma Reforma Nave O Milladoiro - KHC Auto Import
+
+> ⚠️ **Cifras económicas superadas.** El presupuesto válido de la reforma es **5.115,47 €** (`REFORMA_FASE1_COMPLETA.md`), los gastos fijos son **2.098,69 €/mes** (con internet) y el día 1 queda en **7.604,94 €**. Ver `RESUMEN_CAMBIOS_NAVE.md` y `Analisis_Sin_Financiacion.pdf`.
 ## 465 m² | Mano de Obra: Propia | Presupuesto: 6.213 € (materiales)
 
 **Fecha inicio**: A confirmar tras firma contrato  
