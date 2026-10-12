@@ -19,7 +19,7 @@ r2 = g.r2
 
 
 def fixed_of(nave: bool) -> float:
-    return r2(g.RETA + g.MKT + (g.RENT + g.UTIL if nave else 0.0))
+    return r2(g.RETA + g.MKT + (g.RENT + g.UTIL + g.NET if nave else 0.0))
 
 
 def fund_of(nave: bool) -> float:
@@ -34,8 +34,11 @@ def n_sales(stock: int) -> int:
     return max(2, stock // 3)
 
 
-def simulate(opening, nave_from, salary_at, wait_mercedes=True):
-    cash = 50000.0
+def simulate(opening, nave_from, salary_at, wait_mercedes=True, keep_tax=False, deposit=0.0):
+    """keep_tax: el impuesto del año anterior se aparta hasta pagarlo (mes 19 y 31).
+    deposit: fianza del alquiler. Sale de caja el día 1, no es gasto y se recupera.
+    """
+    cash = r2(50000.0 - deposit)
     stock = []
     nave = False
     nave_opened = None
@@ -146,6 +149,10 @@ def simulate(opening, nave_from, salary_at, wait_mercedes=True):
         gastos = r2(gastos + sal)
         y_sal = r2(y_sal + sal)
         reserve = tax_now(year, y_net, y_sal)
+        if keep_tax and 13 <= n < 19:
+            reserve = r2(reserve + y1_tax)
+        elif keep_tax and 25 <= n < 31:
+            reserve = r2(reserve + y2_tax)
         if mercedes_in or not wait_mercedes:
             while True:
                 room = r2(cash - floor - reserve)
@@ -177,7 +184,7 @@ def simulate(opening, nave_from, salary_at, wait_mercedes=True):
     reduc3 = r2(min(0.20 * max(0.0, y2_result), 0.25 * max(0.0, ebitda3)))
     tax3 = apply_rate(r2(max(0.0, ebitda3 - reduc3)))
     result3 = r2(ebitda3 - tax3)
-    identity = r2(50000 + cobros - purchases - gastos - iva_all - taxes_paid)
+    identity = r2(50000 - deposit + cobros - purchases - gastos - iva_all - taxes_paid)
     if abs(identity - months[-1]["end"]) > 0.05:
         raise SystemExit(f"identidad {identity} != {months[-1]['end']}")
     stock_cost = r2(sum(u["cost"] for u in stock))
@@ -192,7 +199,7 @@ def simulate(opening, nave_from, salary_at, wait_mercedes=True):
         "nave": nave_opened,
         "stock": months[-1]["stock"],
         "cash": months[-1]["end"],
-        "equity": r2(months[-1]["end"] + stock_cost - tax3),
+        "equity": r2(months[-1]["end"] + stock_cost + deposit - tax3),
         "tax3": tax3,
         "stock_cost": stock_cost,
         "y1_result": y1_result,
@@ -234,7 +241,7 @@ def pocket_of(n, gross):
     return r2(gross - r2(gross * rate))
 
 
-def ledger(opening, nave_from, salary_at, wait_mercedes=True):
+def ledger(opening, nave_from, salary_at, wait_mercedes=True, keep_tax=False):
     """Misma caja que simulate(), con cada entrada y cada salida en orden."""
     cash = 50000.0
     stock = []
@@ -280,6 +287,7 @@ def ledger(opening, nave_from, salary_at, wait_mercedes=True):
         ("Autónomo", g.RETA),
         ("Portales y gestoría", g.MKT),
         ("Luz, agua y vado", g.UTIL if nave else 0.0),
+        ("Internet y teléfono", g.NET if nave else 0.0),
     ):
         if amount:
             moves.append((label, -amount))
@@ -314,10 +322,11 @@ def ledger(opening, nave_from, salary_at, wait_mercedes=True):
         fx = fixed_of(True)
         floor = fund_of(True)
         for label, amount in (
-            ("Nave, San Marcos", g.RENT),
+            ("Nave, O Milladoiro (465 m²)", g.RENT),
             ("Autónomo", g.RETA),
             ("Portales y gestoría", g.MKT),
             ("Luz, agua y vado", g.UTIL),
+            ("Internet y teléfono", g.NET),
         ):
             moves.append((label, -amount))
         cash = r2(cash - fx)
@@ -356,6 +365,10 @@ def ledger(opening, nave_from, salary_at, wait_mercedes=True):
         cash = r2(cash - sal)
         y_sal = r2(y_sal + sal)
         reserve = tax_now(year, y_net, y_sal)
+        if keep_tax and 13 <= n < 19:
+            reserve = r2(reserve + y1_tax)
+        elif keep_tax and 25 <= n < 31:
+            reserve = r2(reserve + y2_tax)
         if mercedes_in or not wait_mercedes:
             while True:
                 room = r2(cash - floor - reserve)
@@ -385,7 +398,7 @@ def ledger(opening, nave_from, salary_at, wait_mercedes=True):
             y2_tax = apply_rate(r2(max(0.0, ebitda - reduc)))
             y2_result = r2(ebitda - y2_tax)
 
-    check = simulate(opening, nave_from, salary_at, wait_mercedes)
+    check = simulate(opening, nave_from, salary_at, wait_mercedes, keep_tax)
     for a, b in zip(months, check["months"]):
         if abs(a["end"] - b["end"]) > 0.02 or a["stock"] != b["stock"] or abs(a["sal"] - b["sal"]) > 0.02:
             raise SystemExit(f"libro distinto en el mes {a['n']}: {a['end']} vs {b['end']}")

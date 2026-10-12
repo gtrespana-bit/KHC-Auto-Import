@@ -49,13 +49,14 @@ CARD = Color(1, 1, 1)
 LINE = Color(0.855, 0.835, 0.788)
 SOFT = Color(0.955, 0.949, 0.935)
 GRID = Color(0.91, 0.89, 0.85)
-REFORM = 4550.0
 KIT = 822.90
-RENT, RETA, MKT, UTIL = 1200.0, 448.69, 250.0, 150.0  # Nave O Milladoiro (465 m²)
+# Nave O Milladoiro, Ames (465 m²). Internet y teléfono de la nave: 50 €/mes
+# (REFORMA_FASE1_COMPLETA.md). El desglose está en datos_nave_milladoiro.py.
+RENT, RETA, MKT, UTIL, NET = 1200.0, 448.69, 250.0, 150.0, 50.0
 QUOTA = 955.06
-STRUCT = RENT + RETA + MKT + UTIL  # 2048.69 €/mes (sin cuota)
-FIXED = STRUCT + QUOTA  # 3003.75 €/mes (con cuota préstamo)
-REFORM = 5115.0  # Fase 1 completa: suelo epóxico, pintura, LED, señalización, mobiliario, seguridad
+STRUCT = round(RENT + RETA + MKT + UTIL + NET, 2)  # 2.098,69 €/mes (sin cuota)
+FIXED = round(STRUCT + QUOTA, 2)  # 3.053,75 €/mes (con cuota del préstamo)
+REFORM = 5115.47  # Fase 1, materiales exactos con IVA, mano de obra propia (datos_nave_milladoiro.py)
 SMI = 1424.50
 LIVE = 2083.33
 # El 35 % es fijo: no mira a las hijas y no se cobra a fin de mes.
@@ -209,8 +210,8 @@ def tax_reserve(cum_net, n, interest, sal_sum):
 
 
 def simulate(y2_gross=None):
-    assert r2(RENT + RETA + MKT + UTIL + QUOTA) == FIXED
-    assert r2(RENT + RETA + MKT + UTIL) == STRUCT
+    assert r2(RENT + RETA + MKT + UTIL + NET + QUOTA) == FIXED
+    assert r2(RENT + RETA + MKT + UTIL + NET) == STRUCT
     assert r2(25000 / 12) == LIVE
     assert pocket(LIVE) == POCKET_Y1
     assert r2(POCKET_Y2 / (1 - Y2_WITHHOLD)) == GROSS_Y2
@@ -589,10 +590,19 @@ def simulate(y2_gross=None):
     }
 
 
-S = simulate()
-assert S["y2_pocket"] == POCKET_Y2
-assert S["y3_pocket"] == POCKET_Y3
-assert S["reform_tax"] == 682.50
+# El plan con préstamo se calcula solo al generar su PDF. Importar este
+# archivo (lo hace el plan sin financiación) solo trae cifras y reglas.
+S = None
+
+
+def load_financed():
+    global S
+    if S is None:
+        S = simulate()
+        assert S["y2_pocket"] == POCKET_Y2
+        assert S["y3_pocket"] == POCKET_Y3
+        assert S["reform_tax"] == r2(REFORM * 0.15)
+    return S
 
 
 def bg(c, dark=False):
@@ -691,7 +701,7 @@ def draw_business(c, n, total):
         ("01", "El producto", "Coches de ocasión, nacionales o traídos de fuera. Se compra donde el número cierra. No hay un país de bandera."),
         ("02", "El cliente", "Galicia, y envío a toda España. El precio publicado va de 12.000 a 24.000 €: se decide y se financia en días."),
         ("03", "La promesa", "Doce meses de garantía, por escrito, en todas las ventas. Si el historial no se acredita, no se paga el coche."),
-        ("04", "El local", "Nave de 550 m² en San Marcos, Santiago. La licencia de actividad ya existe. Se abre el día que entra el dinero."),
+        ("04", "El local", "Nave de 465 m² en O Milladoiro (Ames), junto a la autopista. 400 m² de almacén y 60 m² de oficinas. Se abre el día que entra el dinero."),
     ]
     y = 400
     for num, title, body in rows:
@@ -860,12 +870,13 @@ def draw_engines(c, n, total):
 
 def draw_expenses(c, n, total):
     bg(c)
-    heading(c, "Los gastos que no paran", "Cinco partidas cada mes. El sueldo no está aquí.", size=18)
+    heading(c, "Los gastos que no paran", "Seis partidas cada mes. El sueldo no está aquí.", size=18)
     lines = [
         ("Nave, O Milladoiro (465 m²)", RENT, "Alquiler. Buena ubicación junto autopista."),
         ("Autónomo societario", RETA, "Seguridad Social. No es un sueldo."),
         ("Portales y gestoría", MKT, "Coches.net, Milanuncios Pro y la gestoría."),
         ("Luz, agua y vado", UTIL, "Suministros de la nave."),
+        ("Internet y teléfono", NET, "Fibra y línea de la nave."),
         ("Cuota del préstamo", QUOTA, "50.000 €, 5,50 %, 60 meses. Exacta."),
     ]
     maxv = RENT
@@ -1917,7 +1928,7 @@ def write_html():
   <div class="line"><span>Coches de ocasión, nacionales o de fuera. Se compra donde el número cierra.</span></div>
   <div class="line"><span>Galicia, y envío a toda España. Precio publicado entre 12.000 y 24.000 €.</span></div>
   <div class="line"><span>Doce meses de garantía, por escrito. Sin historial, no se paga el coche.</span></div>
-  <div class="line"><span>Nave de 550 m² en San Marcos. La licencia ya existe. Se abre con el dinero.</span></div>
+  <div class="line"><span>Nave de 465 m² en O Milladoiro (Ames), junto a la autopista. Se abre con el dinero.</span></div>
   <footer><span>KHC AUTO IMPORT</span><span>02</span></footer>
 </section>
 <section class="slide">
@@ -2183,6 +2194,7 @@ def write_html():
 
 
 def main():
+    load_financed()
     flatten_logo()
     write_pdf()
     write_html()

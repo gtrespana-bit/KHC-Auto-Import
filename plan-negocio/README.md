@@ -39,10 +39,10 @@
    - Solicitud de 50.000 €, a 36 meses. Precios de la web. Se vende una de cada tres unidades al abrir el mes, nunca menos de dos, y se repone en la semana. El sueldo no es obligatorio. Entra el mes 6: 1.687,50 € en el bolsillo. Desde el mes 13, 2.500 €. Desde el mes 25, 3.000 €, si el año anterior se cobró entero y el stock no bajó. El beneficio no se reparte. Se regenera con `generar_presentacion.py`. Para proyectarla: `presentacion/index.html`.
 
 7. **[`Plan_Detallado_50mil.pdf`](./Plan_Detallado_50mil.pdf)** *(42 láminas, el plan con 50.000 € propios)*
-   - Desde el día que se llega a A Coruña. Equipo, reforma y gastos fijos, partida a partida. Cada mes, hasta el 24, con lo que entra y lo que sale. Del 34 al 36, solo el cierre. Sin préstamo. Se regenera con `generar_plan_detallado.py`.
+   - Desde el día que se llega a A Coruña. Equipo, reforma de la nave de O Milladoiro (7 partidas, 5.115,47 €) y gastos fijos (2.098,69 €/mes), partida a partida. Cada mes, hasta el 24, con lo que entra y lo que sale. Del 34 al 36, solo el cierre. Sin préstamo. Se regenera con `generar_plan_detallado.py`.
 
-8. **[`Analisis_Sin_Financiacion.pdf`](./Analisis_Sin_Financiacion.pdf)** *(6 láminas, no es la solicitud)*
-   - Arranque con 50.000 € propios, sin préstamo: dos GTI y un 116d, kit, reforma y nave el día 1. El sueldo de la familia no se recorta. A 36 meses la empresa vale más que en la solicitud y no debe nada. Se regenera con `generar_sin_financiacion.py`.
+8. **[`Analisis_Sin_Financiacion.pdf`](./Analisis_Sin_Financiacion.pdf)** *(13 láminas, el plan que vale: sin préstamo)*
+   - Nave O Milladoiro (465 m², 1.200 €/mes) con fotos, plano y zonas; reforma hecha por él con la lista de materiales exacta (**5.115,47 €**, IVA incluido), cronograma de 14 días, equipo de revisión (822,90 €), gastos fijos con internet (**2.098,69 €/mes**), día 1 (**7.604,94 €** en caja, 1.308,87 € sobre el fondo), comparación con San Marcos a 36 meses, la fianza legal de 2.400 € y los riesgos. Se regenera con `generar_sin_financiacion.py`. Los datos de la nave están en `datos_nave_milladoiro.py`.
 
 8. **[`DOCUMENTOS LEGALES KHC IMPORT/Dossier_Aval_Sogarpo_KHC.pdf`](./DOCUMENTOS%20LEGALES%20KHC%20IMPORT/Dossier_Aval_Sogarpo_KHC.pdf)** *(desarrolla el plan de 4 páginas, no rebaja sus márgenes)*
    - El coste de compra del plan ya incluye coche, transporte, matriculación y puesta a la venta. El margen neto real medio del lote es **3.781 €**. Solicitud: **50.000 €** junto a 50.000 € de capital. Con una venta al mes y la nave abierta, el RCSD es **1,72×**. La reforma de 4.550 € se paga con el primer cobro, no el mismo día de la compra. Se regenera con `generar_dossier.py`.
