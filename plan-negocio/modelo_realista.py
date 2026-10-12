@@ -227,6 +227,10 @@ def estrategia(nombre, nave, coches, reforma_a, reforma_b, **kw):
     return dict(
         nombre=nombre, nave=nave, coches=list(coches), reforma_a=reforma_a,
         reforma_b=reforma_b, reforma_b_mes=kw.pop("reforma_b_mes", 4),
+        # Meses de gastos fijos EXTRA que tienen que sobrar por encima del fondo
+        # antes de pagar la obra aplazada. Con 0 se paga en cuanto la caja cubre
+        # el fondo; con 2, sólo si además sobran dos meses de gastos.
+        reforma_margen=kw.pop("reforma_margen", 0.0),
         nave_desde_mes=kw.pop("nave_desde_mes", None),
         floor_meses=kw.pop("floor_meses", 3.0), reta=kw.pop("reta", g.RETA),
         constitucion=kw.pop("constitucion", CONSTITUCION_SL),
@@ -289,6 +293,11 @@ ESTRATEGIAS = {
         NAVES["pequena"], ["116d", "A3", "GTI"], REFORMA_PEQ_A, REFORMA_PEQ_B,
         reforma_b_mes=5, nave_destino=NAVES["milladoiro"], nave_destino_mes=15,
         tope_modelo=2,          # ya con sitio: 2 unidades del mismo modelo como máximo
+    ),
+    "decision": estrategia(
+        "DECISIÓN: O Milladoiro sin obra, reforma cuando la caja la aguante",
+        NAVES["milladoiro"], ["116d", "A3", "GTI"], 0.0, g.REFORM,
+        reforma_b_mes=4, reforma_margen=2.0, tope_modelo=2,
     ),
     "milladoiro_sin_reforma": estrategia(
         "O Milladoiro, SIN reforma, 3 coches de rotación",
@@ -473,8 +482,13 @@ def simular(est, rng):
                     nave = objetivo
                     nave_mes = mes
                     reforma_pend = est["reforma_b"]
-            if nave is not None and mes == est["reforma_b_mes"] and reforma_pend > 0:
-                if caja - reforma_pend + 1e-6 >= floor():
+            # La obra aplazada no se paga en una fecha fija: se paga en el primer
+            # mes en que, además de cubrir el fondo, sobran `reforma_margen`
+            # meses de gastos fijos. Si un mes no llega, se reintenta al
+            # siguiente en lugar de quedarse pendiente para siempre.
+            if nave is not None and mes >= est["reforma_b_mes"] and reforma_pend > 0:
+                margen = est["reforma_margen"] * fijos(nave)
+                if caja - reforma_pend - margen + 1e-6 >= floor():
                     caja = r2(caja - reforma_pend)
                     reforma_pend = 0.0
                     reforma_pagada_mes = mes
@@ -643,6 +657,7 @@ def simular(est, rng):
         patrimonio=r2(caja + coste_flota - impuesto[3]),
         sueldos=r2(sum(m["sueldo"] for m in meses)), reducidos=reducidos,
         comprados=coches_comprados, pagado=pagado, nave_mes=nave_mes,
+        reforma_mes=reforma_pagada_mes, reforma_pend=r2(reforma_pend),
         averias_total=r2(averia_total[0]),
         ciclo_medio=r2(sum(ciclos) / len(ciclos)) if ciclos else 0.0,
         detalle_ventas=detalle_ventas,

@@ -537,6 +537,66 @@ hacer obra. Si eso no existe en el mercado del día, nave de paso de 220 m² a
 
 ---
 
+### 7.b La decisión tomada (12/10/2026) y su calendario de obra
+
+**Decidido: O Milladoiro desde el día 1, sin reforma al abrir, y la obra completa
+(5.115,47 €) cuando la caja la aguante sin riesgo para el fondo.**
+
+La regla que se grabó en el modelo (`ESTRATEGIAS["decision"]`) es exactamente la
+del dueño: la obra se paga en el primer mes en que la caja cubra **a la vez** el
+fondo de 3 meses, el importe de la obra y **dos meses más de gastos fijos**; si un
+mes no llega, se reintenta al siguiente. Y hay un detalle importante del motor:
+la obra se paga **después** de las compras de coches del mes, así que no le quita
+un coche a la nave.
+
+| Variante | ventas | P10 | P50 | caja<0 | obra pagada | mes mediano |
+|---|---|---|---|---|---|---|
+| Sin obra nunca | 216 | 415.702 € | **515.093 €** | 3,2 % | — | — |
+| Obra completa el día 1 (plan de hoy) | 207 | 388.831 € | 486.881 € | **17,2 %** | 100 % | día 1 |
+| Sin obra, sólo el fondo (sin margen) | 208 | 387.533 € | 492.432 € | 8,0 % | 100 % | mes 5 |
+| Sin obra, desde el mes 6 (+2 meses) | 211 | 399.322 € | 497.429 € | 4,4 % | 100 % | mes 9 |
+| **DECISIÓN: sin obra, mes 4 + 2 meses de gastos** | **209** | **398.654 €** | **494.519 €** | **4,0 %** | 100 % | **mes 8** |
+| Sin obra, desde el mes 9 (+2 meses) | 213 | 412.704 € | 500.126 € | 3,6 % | 100 % | mes 11 |
+| Sin obra, desde el mes 4 (+4 meses) | 213 | 401.281 € | 505.184 € | 3,2 % | 100 % | mes 13 |
+
+Lo que dicen los números, sin adornos:
+
+- **La regla cumple lo que pide el dueño**: la caja mínima mediana con la decisión
+  es 2.446 € y **ningún escenario se queda por debajo del fondo** al pagar la obra.
+  La obra se paga siempre, y de mediana **en el mes 8** (el 10 % antes del mes 5).
+- **Cuesta ~20.600 € de patrimonio al mes 36** frente a no hacer obra nunca
+  (494.519 € vs 515.093 €), a cambio de una nave presentable y de que el gasto no
+  toque el capital de arranque. Es un precio defendible; lo que no es defendible
+  es pagarla el día 1 (**486.881 € y 17,2 % de meses en descubierto**).
+- **Cuanto más se espera, mejor sale en el modelo** (mes 9: 500.126 €). Eso es un
+  artefacto: el modelo no cobra la pérdida de imagen de una nave sin arreglar.
+  Por eso la recomendación práctica es **mes 4-6, no mes 9**, y con una excepción.
+- **Si el mercado cae un 40 %**, la obra se paga igual en el 98 % de los casos y de
+  mediana en el **mes 13**: se retrasa sola cuando hay que retrasarla. Eso es
+  exactamente lo que se buscaba con la regla.
+
+### 7.c Lo único que el modelo no mide: la imagen (y es lo que más puede costar)
+
+La decisión de no arreglar al abrir tiene un riesgo que **no es de dinero gastado,
+es de velocidad**: una nave sin suelo ni pintura vende peor. Medido:
+
+| Si el aspecto de la nave cuesta… | ventas | ciclo | P10 | P50 | caja<0 |
+|---|---|---|---|---|---|
+| Nada (base) | 209 | 48,2 d | 398.654 € | 494.519 € | 4,0 % |
+| +3 días por coche (+10 %) | 187 | 51,0 d | 335.163 € | 431.749 € | 9,6 % |
+| +6 días por coche (+20 %) | 170 | 54,0 d | 264.818 € | 382.710 € | 12,0 % |
+
+**Diez puntos de días de venta valen seis veces más que los 5.115 € de la obra.**
+De ahí las dos reglas de control que acompañan a esta decisión:
+
+1. **Medir en el ERP, desde el primer coche, los días reales de compra → anuncio →
+   cobro** (el modelo ya tiene el campo preparado en el plan de control).
+2. **Si los días pasan de ~50 de mediana, adelantar la pintura (479 €) y el suelo
+   (905 €)**, que es lo barato y lo que se ve, antes que la obra entera. Nunca al
+   revés.
+
+---
+
 ## 8. Lo que este modelo no dice (y hay que saber)
 
 - **No es una previsión, es un modelo.** Los días de venta llevan fuente y fecha;

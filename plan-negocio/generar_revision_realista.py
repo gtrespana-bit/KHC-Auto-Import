@@ -72,6 +72,10 @@ def medir(est, sims=SIM):
         recortes=sum(r["reducidos"] for r in rs) / len(rs),
         ciclo=sum(tot) / len(tot), rs=rs,
         dia1=sorted(r["meses"][0]["caja"] for r in rs)[len(rs) // 2],
+        obra_mes=(sorted(m for m in (r["reforma_mes"] for r in rs) if m)[
+            max(0, sum(1 for r in rs if r["reforma_mes"]) // 2 - 1)] if any(r["reforma_mes"] for r in rs) else None),
+        obra_pct=100 * sum(1 for r in rs if r["reforma_mes"]) / len(rs),
+        min_caja=sorted(r["min_caja"] for r in rs)[len(rs) // 2],
     )
 
 
@@ -119,6 +123,19 @@ M["local"] = {
     "obra_todo": medir(dict(mr.ESTRATEGIAS["milladoiro_fases"])),
     "plan_hoy": M["plan"],
 }
+# --- la decisión tomada (12/10/2026): O Milladoiro sin obra al abrir ---
+DEC = dict(mr.ESTRATEGIAS["decision"], objetivo_flota=14)
+M["dec"] = medir(DEC)
+M["dec_mes9"] = medir(dict(DEC, reforma_b_mes=9))
+M["dec_mes6"] = medir(dict(DEC, reforma_b_mes=6))
+M["dec_margen0"] = medir(dict(DEC, reforma_margen=0.0))
+M["dec_margen4"] = medir(dict(DEC, reforma_margen=4.0))
+M["dec_nunca"] = medir(dict(mr.ESTRATEGIAS["milladoiro_sin_reforma"], objetivo_flota=14))
+M["dec_obradia1"] = M["plan"]
+M["dec_mal"] = medir(dict(DEC, demanda=0.6))
+M["dec_img10"] = medir(dict(DEC, dias=1.10))
+M["dec_img20"] = medir(dict(DEC, dias=1.20))
+
 M["local_mal"] = {
     "peq_muda": medir(dict(mr.ESTRATEGIAS["pequena_sin_reforma"], objetivo_flota=12,
                            nave_destino=mr.NAVES["milladoiro"], nave_destino_mes=15,
@@ -704,12 +721,12 @@ def p_sens(c, n, t):
 @page
 def p_reco(c, n, t):
     bg(c)
-    heading(c, "Recomendación", "O Milladoiro desde el día 1, sin obra y con salida a 12 meses")
+    heading(c, "Recomendación", "O Milladoiro, sin obra al abrir y obra cuando la caja la aguante")
     items = [
         ("1. Local", "O Milladoiro, 465 m² a 1.200 €/mes: 14 plazas y 86 €/plaza, los mismos que la nave de 220 m² a 600 €. Decidir por €/plaza, no por cuota: la pequeña no ahorra precio, sólo techo."),
         ("2. Día 1", f"O Milladoiro sin obra: {eur(M['local']['grande14']['dia1'], True)} € en caja frente a {eur(DIA1_PLAN, True)} € del plan. Sin obra, el riesgo de descubierto baja del 16,0 % al 3,2 %."),
-        ("3. Actividad y obra", "Inocua (compraventa, exposición, almacén), taller fuera. Cero suelo, pintura y mobiliario antes de facturar: sólo luces, alarma y extintores."),
-        ("4. Los tres primeros coches", "BMW 116d (9.010 €), Audi A3 (12.455 €) y Golf GTI (12.674 €). Después, Golf VIII y Seat León: los de más giro (32 días)."),
+        ("3. Actividad y obra", "Inocua (compraventa, exposición, almacén), taller fuera. Al abrir, sólo luces, alarma y extintores. La obra (5.115 €) se paga cuando la caja cubra el fondo + la obra + 2 meses; mediana, el mes 8."),
+        ("4. Los tres primeros coches", "BMW 116d (9.010 €), Audi A3 (12.455 €) y Golf GTI (12.674 €). Después, Golf VIII y Seat León: los de más giro (32 días). Y medir los días reales en el ERP: son la señal de si la nave sin arreglar frena la venta."),
         ("5. Stock", "Llenar las plazas y mantenerlas llenas, una plaza un modelo. Medido con la nave grande: 8 plazas 326.725 € · 12 → 465.106 € · 14 → 515.093 €."),
         ("6. El 318d no se compra", "Es el peor retorno del catálogo (102 €/mes por cada 1.000 € inmovilizados). El XC40 solo cuando la nave ya esté llena."),
         ("7. La nave de paso, plan B", "Sólo si el precio real de la grande pasa de ~1.700 €/mes (≈125 €/plaza) o no hay salida a 12 meses: 220 m² a 600 €, sin obra, y mudanza en el mes 15-18. Es un seguro: cuesta ~4.300 € y en el escenario malo vale 24.000."),
@@ -723,6 +740,58 @@ def p_reco(c, n, t):
         c.drawString(36, y, tit)
         wrap(c, txt, 200, y, 716, size=9, leading=12, color=INK, max_lines=2)
         y -= 34
+
+
+@page
+def p_decision(c, n, t):
+    bg(c)
+    heading(c, "La decisión", "O Milladoiro sin obra al abrir · la obra cuando la caja la aguante")
+    D, DM = M["dec"], M["dec_mal"]
+    wrap(c, "Regla de pago de la obra (fase única, 5.115 €): se paga en el primer mes en que la caja cubra, a la vez, "
+            "el fondo de 3 meses, el importe de la obra y dos meses más de gastos fijos. Si un mes no llega, se intenta al "
+            "siguiente. El fondo de emergencia nunca se toca.",
+         36, 440, 890, size=9.5, leading=13, max_lines=3)
+    table(c, 36, 392, ["Variante de la obra", "ventas", "P10", "P50", "caja<0", "obra pagada", "mes mediano"],
+          [["Sin obra nunca", str(M["dec_nunca"]["ventas"]), eur(M["dec_nunca"]["p10"]), eur(M["dec_nunca"]["p50"]),
+            f"{100*M['dec_nunca']['riesgo']:.1f} %", "—", "—"],
+           ["Obra completa el día 1 (plan de hoy)", str(M["dec_obradia1"]["ventas"]), eur(M["dec_obradia1"]["p10"]),
+            eur(M["dec_obradia1"]["p50"]), f"{100*M['dec_obradia1']['riesgo']:.1f} %", "100 %", "día 1"],
+           ["Sin obra al abrir, sólo el fondo (sin margen)", str(M["dec_margen0"]["ventas"]), eur(M["dec_margen0"]["p10"]),
+            eur(M["dec_margen0"]["p50"]), f"{100*M['dec_margen0']['riesgo']:.1f} %",
+            f"{M['dec_margen0']['obra_pct']:.0f} %", f"mes {M['dec_margen0']['obra_mes']}"],
+           ["Sin obra, desde el mes 6 (+2 meses de gastos)", str(M["dec_mes6"]["ventas"]), eur(M["dec_mes6"]["p10"]),
+            eur(M["dec_mes6"]["p50"]), f"{100*M['dec_mes6']['riesgo']:.1f} %",
+            f"{M['dec_mes6']['obra_pct']:.0f} %", f"mes {M['dec_mes6']['obra_mes']}"],
+           ["DECISIÓN: sin obra, mes 4 + 2 meses de gastos", str(D["ventas"]), eur(D["p10"]), eur(D["p50"]),
+            f"{100*D['riesgo']:.1f} %", f"{D['obra_pct']:.0f} %", f"mes {D['obra_mes']}"],
+           ["Sin obra, desde el mes 9 (+2 meses de gastos)", str(M["dec_mes9"]["ventas"]), eur(M["dec_mes9"]["p10"]),
+            eur(M["dec_mes9"]["p50"]), f"{100*M['dec_mes9']['riesgo']:.1f} %",
+            f"{M['dec_mes9']['obra_pct']:.0f} %", f"mes {M['dec_mes9']['obra_mes']}"],
+           ["Sin obra, desde el mes 4 (+4 meses de gastos)", str(M["dec_margen4"]["ventas"]), eur(M["dec_margen4"]["p10"]),
+            eur(M["dec_margen4"]["p50"]), f"{100*M['dec_margen4']['riesgo']:.1f} %",
+            f"{M['dec_margen4']['obra_pct']:.0f} %", f"mes {M['dec_margen4']['obra_mes']}"]],
+          [244, 54, 84, 84, 66, 76, 78], size=8, hrow=17, bold_rows=(4,),
+          aligns=["l", "c", "r", "r", "c", "c", "c"])
+    wrap(c, f"Con la decisión, el día 1 cierra con {eur(D['dia1'])} € en caja y la obra se paga en el mes {D['obra_mes']} "
+            f"(el 10 % de los casos antes del mes 5). Ni un solo escenario se queda sin fondo: la caja mínima mediana es "
+            f"{eur(D['min_caja'])} €. Y si el mercado cae un 40 %, la obra se paga igual en el {DM['obra_pct']:.0f} % "
+            f"de los casos (mes {DM['obra_mes']}): se retrasa sola cuando hay que retrasarla.",
+         36, 250, 890, size=8.5, leading=12, color=SLATE, max_lines=3)
+    c.setFillColor(RED)
+    c.setFont("DejaVuBold", 9)
+    c.drawString(36, 198, "LO ÚNICO QUE EL MODELO NO MIDE: LA IMAGEN")
+    wrap(c, "La nave sin arreglar puede frenar la venta y eso sí que vale dinero. Si el aspecto costara sólo un 10 % más de "
+            "días por coche, el patrimonio caería de "
+            f"{eur(D['p50'])} € a {eur(M['dec_img10']['p50'])} € (~{eur(D['p50'] - M['dec_img10']['p50'])} €); con un 20 %, a "
+            f"{eur(M['dec_img20']['p50'])} €. Por eso: 1) medir los días reales de venta en el ERP desde el primer coche; "
+            "2) si pasan de 50, adelantar la pintura (479 €) antes que la obra entera, que es lo barato y lo que se ve.",
+         36, 182, 890, size=8.5, leading=12, color=INK, max_lines=3)
+    card(c, 36, 84, 284, 70, "Caja el día 1 (decisión)", f"{eur(D['dia1'])} €",
+         f"plan de hoy: {eur(M['dec_obradia1']['dia1'])} €", acento=GREEN)
+    card(c, 336, 84, 284, 70, "Obra pagada (mediana)", f"mes {D['obra_mes']}",
+         f"antes del mes 5 en el 10 % de los casos", acento=GOLD)
+    card(c, 636, 84, 288, 70, "Patrimonio al mes 36", f"{eur(D['p50'])} €",
+         f"con la obra el día 1: {eur(M['dec_obradia1']['p50'])} €", acento=GOLD)
 
 
 @page
@@ -786,13 +855,14 @@ def p_final(c, n, t):
     c.setFont("DejaVuSerif", 24)
     c.drawString(36, H - 76, "En una frase")
     y = 380
-    wrap(c, "El plan de hoy no falla por vender poco: falla por pagar la nave grande, la fianza y la reforma completa antes de tener coches que facturen.",
+    wrap(c, "El plan de hoy no falla por vender poco: falla por pagar la nave, la fianza y la reforma antes de tener coches que facturen.",
          36, y, 880, size=13, leading=19, color=GOLD, max_lines=3)
-    y -= 74
+    y -= 66
     for txt in (
-        f"Quitar la obra del día 1 es el cambio más barato y el que más pesa: el mismo local pasa de {eur(M['local']['plan_hoy']['p50'])} € de patrimonio y 16,0 % de descubiertos a {eur(M['local']['grande14']['p50'])} € y 3,2 %.",
-        f"La nave de paso no ahorra precio (86 €/plaza, igual que O Milladoiro): compra un seguro contra el escenario malo. Cuesta ~4.300 € y paga ~24.000 € si el mercado cae un 40 %.",
-        f"Con la operación comprometida (unidades vistas, ciclo de una semana, placas temporales) y 14 plazas sin obra: 216 ventas y {eur(M['local']['grande14']['p50'])} € de patrimonio al mes 36.",
+        f"Decision tomada: O Milladoiro desde el día 1, sin obra al abrir, y la obra (5.115 €) pagada por la caja cuando cubra el fondo y dos meses más. "
+        f"Mediana: mes {M['dec']['obra_mes']}. Caja mínima, 2.446 €.",
+        f"Con la operación comprometida (unidades vistas, ciclo de una semana, placas temporales) y 14 plazas: 209 ventas y {eur(M['dec']['p50'])} € de patrimonio al mes 36, con la obra ya pagada.",
+        f"Y un aviso: diez puntos de días de venta valen seis veces más que la obra. Si la nave sin arreglar frena la venta, se adelanta la pintura, no la obra entera.",
     ):
         wrap(c, txt, 36, y, 880, size=10.5, leading=15, color=Color(0.86, 0.85, 0.82), max_lines=3)
         y -= 40
