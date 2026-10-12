@@ -11,6 +11,12 @@ spec = importlib.util.spec_from_file_location(
 g = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(g)
 
+import sys  # noqa: E402
+from pathlib import Path  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import datos_nave_milladoiro as d  # noqa: E402
+
 LOT = [g.apply_web(u) for u in g.MODEL["lot"]]
 BY = {u["nick"]: u for u in LOT}
 CHEAP = sorted(LOT, key=lambda u: (u["cost"], u["name"]))
@@ -34,10 +40,14 @@ def n_sales(stock: int) -> int:
     return max(2, stock // 3)
 
 
-def simulate(opening, nave_from, salary_at, wait_mercedes=True, keep_tax=False, deposit=0.0):
+def simulate(opening, nave_from, salary_at, wait_mercedes=True, keep_tax=False, deposit=0.0, later=0.0):
     """keep_tax: el impuesto del año anterior se aparta hasta pagarlo (mes 19 y 31).
     deposit: fianza del alquiler. Sale de caja el día 1, no es gasto y se recupera.
+    later: parte de la reforma que no se paga el día 1. Se paga el primer mes en
+    que cabe entera sin tocar el fondo ni el sueldo de ese mes, antes de otro coche.
     """
+    pending = r2(later)
+    later_n = None
     cash = r2(50000.0 - deposit)
     stock = []
     nave = False
@@ -78,8 +88,8 @@ def simulate(opening, nave_from, salary_at, wait_mercedes=True, keep_tax=False, 
         purchases = r2(purchases + car["cost"])
         stock.append(dict(car))
     if nave_from == 1:
-        cash = r2(cash - g.REFORM)
-        gastos = r2(gastos + g.REFORM)
+        cash = r2(cash - r2(g.REFORM - pending))
+        gastos = r2(gastos + r2(g.REFORM - pending))
         nave = True
         nave_opened = 1
     fx = fixed_of(nave)
@@ -121,6 +131,7 @@ def simulate(opening, nave_from, salary_at, wait_mercedes=True, keep_tax=False, 
         k = min(n_sales(len(stock)), len(stock))
         sold = []
         margen = cobro = 0.0
+        want_now = salary_at(n)
         for _ in range(k):
             car = stock.pop(0)
             sold.append(car["nick"])
@@ -133,6 +144,12 @@ def simulate(opening, nave_from, salary_at, wait_mercedes=True, keep_tax=False, 
             cash = r2(cash - car["cost"])
             purchases = r2(purchases + car["cost"])
             stock.append(dict(car))
+            if pending and r2(cash - floor - want_now) + 1e-6 >= pending:
+                cash = r2(cash - pending)
+                gastos = r2(gastos + pending)
+                pending = 0.0
+                later_n = n
+                sold.append("+reforma")
             if not mercedes_in and r2(cash - floor) + 1e-6 >= MERC["cost"]:
                 cash = r2(cash - MERC["cost"])
                 purchases = r2(purchases + MERC["cost"])
@@ -200,6 +217,10 @@ def simulate(opening, nave_from, salary_at, wait_mercedes=True, keep_tax=False, 
         "stock": months[-1]["stock"],
         "cash": months[-1]["end"],
         "equity": r2(months[-1]["end"] + stock_cost + deposit - tax3),
+        "deposit": deposit,
+        "later": later,
+        "later_n": later_n,
+        "pending": pending,
         "tax3": tax3,
         "stock_cost": stock_cost,
         "y1_result": y1_result,
@@ -241,9 +262,25 @@ def pocket_of(n, gross):
     return r2(gross - r2(gross * rate))
 
 
-def ledger(opening, nave_from, salary_at, wait_mercedes=True, keep_tax=False):
+def arranque(opening):
+    """Fianza el día 1. Lo que falte para el fondo sale de la reforma y se aplaza."""
+    deposit = r2(d.FIANZA_MESES * g.RENT)
+    cars = r2(sum(BY[nk]["cost"] for nk in opening))
+    before = r2(50000.0 - deposit - g.KIT - cars - fixed_of(True))
+    room = r2(before - fund_of(True))
+    falta = r2(max(0.0, g.REFORM - room))
+    lines = d.lineas_aplazadas(falta)
+    later = r2(sum(a for _, _, a in lines))
+    return {
+        "deposit": deposit, "cars": cars, "room": room, "falta": falta,
+        "lines": lines, "later": later, "now": r2(g.REFORM - later),
+    }
+
+
+def ledger(opening, nave_from, salary_at, wait_mercedes=True, keep_tax=False, deposit=0.0, later=0.0):
     """Misma caja que simulate(), con cada entrada y cada salida en orden."""
     cash = 50000.0
+    pending = r2(later)
     stock = []
     nave = False
     mercedes_in = "Mercedes" in opening
@@ -270,7 +307,11 @@ def ledger(opening, nave_from, salary_at, wait_mercedes=True, keep_tax=False):
         return g.micro_tax(ebitda)
 
     start = cash
-    moves = [("Equipo de revisión, antes de comprar", -g.KIT)]
+    moves = []
+    if deposit:
+        moves.append(("Fianza de la nave, dos meses (se recupera)", -deposit))
+        cash = r2(cash - deposit)
+    moves.append(("Equipo de revisión, antes de comprar", -g.KIT))
     cash = r2(cash - g.KIT)
     for nick in opening:
         car = BY[nick]
@@ -278,8 +319,8 @@ def ledger(opening, nave_from, salary_at, wait_mercedes=True, keep_tax=False):
         cash = r2(cash - car["cost"])
         stock.append(dict(car))
     if nave_from == 1:
-        moves.append(("Reforma, materiales, hecha por él", -g.REFORM))
-        cash = r2(cash - g.REFORM)
+        moves.append(("Reforma, materiales, hecha por él" + (", parte del día 1" if pending else ""), -r2(g.REFORM - pending)))
+        cash = r2(cash - r2(g.REFORM - pending))
         nave = True
     fx = fixed_of(nave)
     for label, amount in (
@@ -298,7 +339,7 @@ def ledger(opening, nave_from, salary_at, wait_mercedes=True, keep_tax=False):
         "n": 1, "start": start, "end": cash, "stock": len(stock), "sales": 0,
         "sal": 0.0, "want": 0.0, "pocket": 0.0, "floor": floor, "cobro": 0.0,
         "rebu": 0.0, "compra": r2(sum(BY[n]["cost"] for n in opening)),
-        "tax_paid": 0.0, "reserve": 0.0, "moves": moves,
+        "tax_paid": 0.0, "reserve": 0.0, "moves": moves, "later": 0.0,
         "sold": [], "bought": [dict(BY[n]) for n in opening],
         "floor_cars": [u["nick"] for u in stock],
     })
@@ -335,6 +376,8 @@ def ledger(opening, nave_from, salary_at, wait_mercedes=True, keep_tax=False):
         sold = []
         bought = []
         margen = cobro = rebu = compra = 0.0
+        later_now = 0.0
+        want_now = salary_at(n)
         for _ in range(k):
             car = stock.pop(0)
             sold.append(dict(car))
@@ -350,6 +393,11 @@ def ledger(opening, nave_from, salary_at, wait_mercedes=True, keep_tax=False):
             compra = r2(compra + car["cost"])
             stock.append(dict(car))
             bought.append(dict(car))
+            if pending and r2(cash - floor - want_now) + 1e-6 >= pending:
+                moves.append(("Resto de la reforma, ahora que cabe", -pending))
+                cash = r2(cash - pending)
+                later_now = pending
+                pending = 0.0
             if not mercedes_in and r2(cash - floor) + 1e-6 >= MERC["cost"]:
                 moves.append(("Entra el Mercedes Clase C", -MERC["cost"]))
                 cash = r2(cash - MERC["cost"])
@@ -385,7 +433,7 @@ def ledger(opening, nave_from, salary_at, wait_mercedes=True, keep_tax=False):
             "n": n, "start": start, "end": cash, "stock": len(stock), "sales": k,
             "sal": sal, "want": want, "pocket": pocket_of(n, sal), "floor": floor,
             "cobro": cobro, "rebu": rebu, "compra": compra, "margen": margen,
-            "tax_paid": tax_paid, "reserve": reserve, "moves": moves,
+            "tax_paid": tax_paid, "reserve": reserve, "moves": moves, "later": later_now,
             "sold": sold, "bought": bought, "floor_cars": [u["nick"] for u in stock],
         })
         if n == 12:
@@ -398,7 +446,7 @@ def ledger(opening, nave_from, salary_at, wait_mercedes=True, keep_tax=False):
             y2_tax = apply_rate(r2(max(0.0, ebitda - reduc)))
             y2_result = r2(ebitda - y2_tax)
 
-    check = simulate(opening, nave_from, salary_at, wait_mercedes, keep_tax)
+    check = simulate(opening, nave_from, salary_at, wait_mercedes, keep_tax, deposit, later)
     for a, b in zip(months, check["months"]):
         if abs(a["end"] - b["end"]) > 0.02 or a["stock"] != b["stock"] or abs(a["sal"] - b["sal"]) > 0.02:
             raise SystemExit(f"libro distinto en el mes {a['n']}: {a['end']} vs {b['end']}")
@@ -411,7 +459,10 @@ def ledger(opening, nave_from, salary_at, wait_mercedes=True, keep_tax=False):
 
 
 if __name__ == "__main__":
-    res = simulate(["GTI", "GTI", "116d"], 1, FAM)
+    A = arranque(["GTI", "GTI", "116d"])
+    print("fianza", A["deposit"], "falta", A["falta"], "aplazado", A["later"], "dia 1", A["now"])
+    res = simulate(["GTI", "GTI", "116d"], 1, FAM, deposit=A["deposit"], later=A["later"])
+    print("reforma pendiente pagada en el mes", res["later_n"])
     print("cuts", res["cuts"], "nave", res["nave"], "stock", res["stock"], "equity", res["equity"])
     print("sales", res["sales_y"], "pocket", res["pocket"], "cash", res["cash"], "tax3", res["tax3"])
     print("results", res["y1_result"], res["y2_result"], res["result3"])

@@ -60,8 +60,21 @@ assert g.r2(sum(a for _, a in KIT_LINES)) == g.KIT
 assert g.r2(sum(a for _, a in REFORM_LINES)) == g.REFORM
 assert g.r2(sum(a for _, a in FIXED_LINES)) == p.fixed_of(True)
 
-MONTHS = p.ledger(["GTI", "GTI", "116d"], 1, p.FAM)
-OWN = p.simulate(["GTI", "GTI", "116d"], 1, p.FAM)
+# Fianza de dos meses el día 1. Lo que falte para el fondo sale de la
+# reforma y se paga cuando cabe (probar_sin_financiacion.arranque).
+A = p.arranque(["GTI", "GTI", "116d"])
+DEPOSIT, LATER, REFORM_NOW, LATER_LINES = A["deposit"], A["later"], A["now"], A["lines"]
+MONTHS = p.ledger(["GTI", "GTI", "116d"], 1, p.FAM, deposit=DEPOSIT, later=LATER)
+OWN = p.simulate(["GTI", "GTI", "116d"], 1, p.FAM, deposit=DEPOSIT, later=LATER)
+assert OWN and OWN["pending"] == 0.0
+LATER_N = OWN["later_n"]
+TAX_MONTHS = [m["n"] for m in MONTHS if m["tax_paid"]]
+REFORM_NOW_LINES = [
+    (pt["partida"], g.r2(pt["total"] - sum(a for q, _, a in LATER_LINES if q == pt["partida"])))
+    for pt in d.REFORMA
+]
+LATER_ROWS = [(lab + "  ·  " + pt, a) for pt, lab, a in LATER_LINES]
+assert g.r2(sum(a for _, a in REFORM_NOW_LINES)) == REFORM_NOW
 assert abs(MONTHS[-1]["end"] - OWN["cash"]) < 0.05
 CUTS = [m for m in OWN["months"] if m["sal"] + 0.02 < m["want"]]
 
@@ -178,11 +191,13 @@ def month_title(m):
     if m["n"] == 1:
         return "Se abre. Este mes no se vende."
     bits = []
-    if m["tax_paid"] and m["n"] == 19:
+    if m.get("later"):
+        bits.append("Se termina la reforma.")
+    if m["tax_paid"] and m["n"] == TAX_MONTHS[0]:
         bits.append("Se paga el impuesto del año 1.")
     if m["sal"] + 0.02 < m["want"]:
         bits.append("El sueldo baja este mes.")
-    if m["tax_paid"] and m["n"] == 31:
+    if m["tax_paid"] and m["n"] == TAX_MONTHS[1]:
         bits.append("Se paga el impuesto del año 2.")
     if any(lab.startswith("Entra el Mercedes") for lab, _ in m["moves"]):
         bits.append("Entra el Mercedes.")
@@ -192,8 +207,8 @@ def month_title(m):
         bits.append("El bolsillo pasa a 2.500 €.")
     elif m["n"] == 25:
         bits.append("El bolsillo pasa a 3.000 €.")
-    if not bits:
-        return f"Se venden {m['sales']}. Se reponen en la semana."
+    if not bits or bits == ["Se termina la reforma."]:
+        return f"Se venden {m['sales']}. Se reponen en la semana." + (" " + bits[0] if bits else "")
     return " ".join(bits)
 
 
@@ -211,7 +226,7 @@ def draw_cover(c, n, total):
     c.drawString(36, 314, "Desde el día que llegas.")
     wrap(
         c,
-        "Sin préstamo. Nave O Milladoiro, 465 m². Dos Golf GTI y un BMW 116d. Kit, reforma y nave el día 1. Cada gasto, y cada euro que entra, hasta el mes 24. Del 34 al 36, solo el cierre.",
+        "Sin préstamo. Nave O Milladoiro, 465 m², con su fianza de " + eur(DEPOSIT) + ". Dos Golf GTI y un BMW 116d. Kit y " + eur(REFORM_NOW) + " de reforma el día 1; el resto, " + eur(LATER) + ", el mes " + str(LATER_N) + ". Cada gasto, y cada euro que entra, hasta el mes 24. Del 34 al 36, solo el cierre.",
         "DejaVu", 12, 36, 270, 860, 16, Color(0.78, 0.76, 0.70), 3,
     )
     stats = [
@@ -242,10 +257,11 @@ def draw_steps(c, n, total):
         ("02", "Web y ERP", "khcimport.autos y el programa ya funcionan. 0 €. El ERP decide, compra y vende. La lámina del programa lo dice."),
         ("03", "El equipo, antes del coche", "822,90 €. No se mira un anuncio sin la máquina, el medidor y los informes. Partida a partida, a continuación."),
         ("04", "La nave, en O Milladoiro", "Ames, junto a la autopista. 465 m²: 400 de almacén y 60 de oficinas. 1.200 € al mes. No hay un precio de ir y volver: no se suma."),
-        ("05", "La reforma la haces tú", eur(g.REFORM) + " de materiales, IVA incluido. Epoxi, pintura, 15 LED, rótulos, oficina, cámaras y herramienta."),
-        ("06", "El primer mes de la nave", eur(p.fixed_of(True)) + ": alquiler, autónomo, portales, luz e internet. El autónomo no es un sueldo."),
-        ("07", "Entonces, los tres coches", "Dos Golf GTI y un BMW 116d. El coste ya incluye coche, transporte, matriculación y puesta a la venta."),
-        ("08", "Una semana, no cuatro", "La importación tarda como máximo una semana. Placas temporales desde el día uno. No hay un mes en blanco de espera."),
+        ("05", "La fianza, al firmar", eur(DEPOSIT) + ": dos mensualidades, como pide la ley en un local. No es gasto y se recupera al irse, pero sale el día 1."),
+        ("06", "La reforma la haces tú", eur(REFORM_NOW) + " el día 1: lo que hace falta para abrir. El resto, " + eur(LATER) + " en " + str(len(LATER_LINES)) + " líneas, el mes " + str(LATER_N) + ", con la primera venta."),
+        ("07", "El primer mes de la nave", eur(p.fixed_of(True)) + ": alquiler, autónomo, portales, luz e internet. El autónomo no es un sueldo."),
+        ("08", "Entonces, los tres coches", "Dos Golf GTI y un BMW 116d. El coste ya incluye coche, transporte, matriculación y puesta a la venta."),
+        ("09", "Una semana, no cuatro", "La importación tarda como máximo una semana. Placas temporales desde el día uno. No hay un mes en blanco de espera."),
     ]
     y = 428
     for num, title, body in steps:
@@ -256,7 +272,7 @@ def draw_steps(c, n, total):
         c.setFont("DejaVuBold", 10)
         c.drawString(68, y, title)
         wrap(c, body, "DejaVu", 9, 250, y, 670, 11, SLATE, 1)
-        y -= 46
+        y -= 40
     footer(c, n, total)
 
 
@@ -328,7 +344,7 @@ def draw_not(c, n, total):
         ("Dentro del coste del coche", "Anuncio, transporte, matriculación y puesta a la venta. El manual de campo tiene precios de ITV, DGT y placas. No se restan otra vez: no hay un desglose que sume exactamente el coste cerrado. Partirlo sería inventar."),
         ("Aceite y filtros, 116,60 €", "Precio cerrado de taller, sin mano de obra, en la nave. No es una línea mensual. No se añade otra vez a la caja."),
         ("Notaría", "La sociedad aún no está hecha. No hay un precio cerrado. No se pone. El cargo de administrador es gratuito si los estatutos no dicen lo contrario."),
-("Fianza y licencia de Ames", "La ley pide dos meses de fianza en un local: " + eur(2 * g.RENT) + ". Se recupera, pero sale el día 1, y con esta apertura no cabe sobre el fondo. Está en el análisis de la nave. La tasa de licencia de Ames no tiene precio cerrado: no se pone."),
+        ("Licencia de actividad y seguro del local", "La tasa de licencia de Ames y el seguro de la nave no tienen precio cerrado: no se ponen. La fianza, en cambio, sí está: " + eur(DEPOSIT) + " el día 1, y por eso parte de la reforma espera al mes " + str(LATER_N) + "."),
     ]
     y = 400
     for title, body in rows:
@@ -729,18 +745,21 @@ def draw_close(c, n, total):
     lines = [
         ("Caja", eur(OWN["cash"])),
         ("Coches, a coste", eur(OWN["stock_cost"])),
+        ("Fianza de la nave, se recupera al irse", eur(DEPOSIT)),
         ("Impuesto del año 3, reservado, aún no pagado", "−" + eur(OWN["tax3"])),
         ("Lo que es suyo dentro", eur(OWN["equity"])),
     ]
-    y = 360
+    assert abs(g.r2(OWN["cash"] + OWN["stock_cost"] + DEPOSIT - OWN["tax3"]) - OWN["equity"]) < 0.05
+    y = 366
     for i, (lab, val) in enumerate(lines):
         c.setFillColor(Color(0.16, 0.17, 0.20))
         c.roundRect(36, y - 14, 888, 40, 3, fill=1, stroke=0)
-        c.setFillColor(GOLD if i == 3 else WHITE)
-        c.setFont("DejaVuBold" if i == 3 else "DejaVu", 12)
+        last = i == len(lines) - 1
+        c.setFillColor(GOLD if last else WHITE)
+        c.setFont("DejaVuBold" if last else "DejaVu", 12)
         c.drawString(52, y, lab)
         c.drawRightString(900, y, val)
-        y -= 52
+        y -= 46
     wrap(
         c,
         "La caja todavía lleva dentro el impuesto del año 3. Libre, " + eur(free) + ", por encima del fondo de " + eur(p.fund_of(True)) + ". El bolsillo de los 36 meses, " + eur(OWN["pocket"]) + ". " + ("Cero recortes." if not CUTS else "El sueldo se recorta en el mes " + ", ".join(str(m["n"]) for m in CUTS) + ", cuando se paga el impuesto.") + " Cero deuda. El préstamo no está en este plan.",
@@ -760,8 +779,13 @@ def main():
         ),
         lambda c, n, t: draw_lines(
             c, n, t, "La nave, el mismo día", "La reforma la hace él. Solo materiales.",
-            REFORM_LINES, "Reforma, el día 1", g.REFORM,
-            "Siete partidas, " + eur(g.REFORM) + " con IVA. Detalle en REFORMA_FASE1_COMPLETA.md. Sin contratista. Sale de caja y no entra en la base del impuesto. Si la gestoría la admite, bajaría el impuesto.",
+            REFORM_NOW_LINES, "Reforma, el día 1", REFORM_NOW,
+            "De " + eur(g.REFORM) + " con IVA, el día 1 se pagan " + eur(REFORM_NOW) + ": suelo, pintura, luz, puertas, seguridad y lo básico de la oficina. Sin contratista. No entra en la base del impuesto. Detalle en REFORMA_FASE1_COMPLETA.md.",
+        ),
+        lambda c, n, t: draw_lines(
+            c, n, t, "Lo que espera", "La fianza no deja sitio. Esto se compra el mes " + str(LATER_N) + ".",
+            LATER_ROWS, "Resto de la reforma, mes " + str(LATER_N), LATER,
+            "Faltaban " + eur(A["falta"]) + " para pagar la fianza sin bajar del fondo. Se aplaza lo que no hace falta para abrir: decoración, archivo, el logo de pared y las herramientas de taller. Se paga con la primera venta, sin tocar el fondo.",
         ),
         draw_fixed,
         draw_not,

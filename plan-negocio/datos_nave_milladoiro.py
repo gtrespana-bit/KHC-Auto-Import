@@ -177,3 +177,42 @@ YA_ESTA = [
     "Oficinas con falso techo y ventanas al almacén",
     "Portón de entrada de 5 × 5 m",
 ]
+
+# Fianza del local: dos mensualidades (Ley de Arrendamientos Urbanos, art. 36.1).
+FIANZA_MESES = 2
+
+# Si el día 1 no llega para el fondo, se aplaza parte de la reforma. Orden:
+# primero lo que menos falta hace para abrir. Se aplazan líneas enteras hasta
+# cubrir lo que falte, y se pagan el primer mes en que caben sin tocar el fondo.
+# El suelo epoxi, la luz y la pintura nunca se aplazan: se hacen con la nave vacía.
+DIFERIBLE = [
+    ("Mobiliario de oficina", "Perchero, 3 papeleras y 3 plantas"),
+    ("Mobiliario de oficina", "Mesa auxiliar"),
+    ("Mobiliario de oficina", "2 estanterías metálicas de archivo"),
+    ("Señalización y cartelería", "Logo KHC, vinilo de pared"),
+    ("Señalización y cartelería", "10 soportes de metacrilato para fichas"),
+    ("Limpieza, extintores y herramientas", "Herramientas de taller"),
+    ("Mobiliario de oficina", "Estantería archivadora"),
+    ("Mobiliario de oficina", "Cajonera de 3 cajones"),
+    ("Limpieza, extintores y herramientas", "Material de oficina"),
+    ("Seguridad", "2 focos LED con sensor"),
+]
+
+
+def lineas_aplazadas(falta):
+    """Líneas de la reforma que se aplazan para cubrir `falta` euros."""
+    if falta <= 0:
+        return []
+    importes = {}
+    for pt in REFORMA:
+        for lab, amount in pt["lineas"]:
+            importes[(pt["partida"], lab)] = amount
+    out, acc = [], 0.0
+    for key in DIFERIBLE:
+        if acc + 1e-6 >= falta:
+            break
+        out.append((key[0], key[1], importes[key]))
+        acc = _r2(acc + importes[key])
+    if acc + 1e-6 < falta:
+        raise SystemExit("no hay bastante reforma aplazable para cubrir el fondo")
+    return out
