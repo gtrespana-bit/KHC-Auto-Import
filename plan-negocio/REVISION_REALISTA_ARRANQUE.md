@@ -597,70 +597,68 @@ De ahí las dos reglas de control que acompañan a esta decisión:
 
 ---
 
-### 7.d Cuántos coches caben en O Milladoiro
+### 7.d Cuántos coches caben en O Milladoiro (ancho confirmado: 10 m)
 
-**Dato del dueño (12/10/2026):** con las plazas en espiga a 45°, **24 coches**
-(14 en la pared derecha, empezando 4 m retrasado desde la fachada para dejar
-limpio el tiro del portón; 10 en la izquierda, detrás del tabique de la oficina).
-Con distribución mixta —**90° a la izquierda, 45° a la derecha**—, **28 coches**
-(15 + 13); se usa la espiga y, cuando hace falta, se llega a 28.
+**Dato confirmado por el dueño (12/10/2026):** el almacén mide **40 × 10 m**. La
+nave se opera **en modo stock, no en modo showroom**: los coches se colocan
+apretados (a 45° y en batería) y **se mueven cuando un cliente muestra interés
+real** en ver o probar uno. No hace falta poder sacar cualquier coche sin mover
+otros: eso es una exigencia de exposición, no de almacén, y aparece **sólo cuando
+la nave está llena**, no antes.
 
-**Comprobación geométrica con la ficha de la nave (almacén 40 × 10 m):**
+**La geometría, comprobada con las medidas reales:**
 
-| Fila de coches | Fondo | Paso | Resultado |
-|---|---|---|---|
-| 45° (espiga) | 4,74 m | 2,83 m | 14 por pared de 40 m ✓ cuadra con el número del dueño |
-| 90° (en batería) | 4,70 m | 2,00 m | 20 por pared |
-| 45° en las dos paredes | 9,48 m en total | — | pasillo central de 0,52 m: **no cabe** |
-| 90° izquierda + 45° derecha | 9,44 m en total | — | pasillo de 0,56 m: **no cabe** |
-| Dos filas + pasillo de 3,5 m | 12,98 m | — | la ficha dice **10 m** de ancho |
+| Fila | Paso por coche | 40 m dan | Cuenta del dueño | Margen |
+|---|---|---|---|---|
+| Derecha a 45°, menos 4 m del tiro del portón | 2,55-2,83 m | 14 | **14** | justo, bien calibrado |
+| Izquierda a 45°, empieza a los 6 m del tabique | 2,55-2,83 m | 13-16 | **10** | prudente |
+| Izquierda a 90° (mixta) | 1,80 m | 18 | **15** | prudente |
+| Derecha a 45° (mixta) | 2,55-2,83 m | 14 | **13** | justo |
+| Dos filas a 45° en el ancho de 10 m | 9,19 m ocupados | sobran 0,81 m | sin pasillo | es el criterio de stock |
 
-**Conclusión técnica, sin adornos:** el reparto a lo largo de la pared cuadra
-(14 coches ⇔ paso de 2,83 m a 45°), pero **el ancho es el problema**. Con 10 m de
-ancho libre, dos filas de coches dejan medio metro de pasillo: el número que
-aguanta la nave tal como la describe la ficha es **11-14 coches dentro** (8-10 en
-exposición + 2-3 en detallado + 1 en taller), y otros 6-8 en el patio delantero.
-Las **24-28 plazas son reales si el ancho libre del almacén es de 13 m o más**, o
-si la nave tiene dos crujías. **Es lo primero que hay que medir en la visita**:
-es la diferencia entre 14 y 28 plazas, y entre 494.519 € y 861.167 €.
+Los números del dueño son **correctos y conservadores**: la geometría pura daría
+15-16 en la fila derecha y 18 en la izquierda a 90°. Lo que no existe es un
+pasillo de circulación, y no hace falta: con dos filas de coches a 45° el ancho
+queda ocupado en 9,19 de 10 m.
 
-Modelado con la regla de diversificación (**máximo N unidades del mismo modelo**)
-y con una **persona contratada desde el mes 13 (2.500 €/mes)** en las naves
-grandes, porque a partir de 20 coches en stock el dueño no llega solo:
+**Cuándo molesta (mediana de coches en stock, objetivo 24 plazas):**
 
-| Plazas | ventas | P10 | P50 | caja<0 | obra pagada |
-|---|---|---|---|---|---|
-| **14 (prudente, sin personal)** | 209 | 398.654 € | **494.519 €** | 4,0 % | mes 8 |
-| 16 (sin personal, tope 2) | 224 | 427.216 € | 521.708 € | 4,0 % | mes 8 |
-| **20 (+ 1 persona)** | 280 | 540.889 € | **662.001 €** | 7,2 % | mes 13 |
-| **24 (espiga del dueño, + 1 persona)** | 306 | 584.874 € | **713.093 €** | 7,2 % | mes 13 |
-| **28 (mixta del dueño, + 1 persona)** | 354 | 659.524 € | **861.167 €** | 8,0 % | mes 25 |
-| 24, si los coches tardan un 10 % más en venderse | 265 | 437.360 € | 599.537 € | 11,2 % | mes 13 |
+| | mes 6 | mes 12 | mes 15 | mes 20 | mes 23 | mes 25 | mes 36 |
+|---|---|---|---|---|---|---|---|
+| Coches en la nave | 5 | 7 | 10 | 16 | 20 | 24 | 24 |
+| % ocupada | 21 % | 29 % | 42 % | 67 % | 83 % | 100 % | 100 % |
+| ¿Hay que moverlos para enseñar? | no | no | no | a veces | sí | sí | sí |
 
-**Lo que dice el modelo, con el techo real:**
+La nave se llena de verdad en el **mes 25** y está por encima de 20 coches
+**14 de los 36 meses**. Los dos primeros años el layout apretado no molesta a
+nadie; cuando molesta, el negocio ya paga 4.000-5.000 €/mes de sueldo y puede
+pagar a quien mueva los coches.
 
-1. **La capacidad no se usa al principio.** En el mes 6 hay 4 coches en stock sea
-   cual sea la nave: manda el dinero, no el sitio. La capacidad empieza a decidir
-   a partir del **mes 10-12**, cuando la caja permite llenar más plazas.
-2. **De 14 a 28 plazas hay +366.648 € de patrimonio P50** (494.519 € → 861.167 €),
-   pagando 2.500 €/mes de personal desde el mes 13. Es la mayor palanca que ha
-   aparecido en todo el análisis, y **es gratis**: no exige reforma ni cambiar de
-   nave, sólo aprovechar el suelo que ya pagas.
-3. **El riesgo sube poco** (4,0 % → 8,0 % de meses en descubierto) porque el
-   propio motor limita la compra al capital disponible. Pero sube, y hay que
-   vigilarlo: es el 8 % de meses en los que un sueldo o una avería te dejan justo.
-4. **Necesita una persona.** Sin contratar a nadie, el stock de 24-28 coches no
-   se puede atender (fotos, portales, visitas, preparación y gestoría). El coste
-   de 2.500 €/mes ya está dentro de las cifras de la tabla.
-5. **Todo esto va con la operación comprometida** (unidades vistas, ciclo de una
-   semana, placas temporales, 32-55 días de venta). Si los coches tardan un 10 %
-   más, las 24 plazas bajan de 713.093 € a 599.537 €: sigue siendo claramente
-   mejor que 14 plazas, pero se paga caro cada punto de lentitud.
+**Lo que vale cada tamaño (250 simulaciones, con una persona contratada desde el
+mes 13 a partir de 20 plazas y tope de 3-4 unidades por modelo):**
 
-**Lo que hay que hacer antes de firmar:** medir el ancho libre real del almacén y
-comprobar la maniobra con el portón. Si son 13 m o más, la nave vale para 24-28 y
-el plan debe crecer con la caja. Si son 10 m, el plan de 14 plazas es el correcto
-y el patio hace de pulmón cuando se pueda.
+| Plazas | ventas | P10 | P50 | caja<0 |
+|---|---|---|---|---|
+| 14 (cómodo, el supuesto anterior) | 209 | 398.654 € | 494.519 € | 4,0 % |
+| **24 (espiga, el uso normal del dueño)** | **306** | **584.874 €** | **713.093 €** | **7,2 %** |
+| 24, si los coches del fondo tardan un 10 % más | 265 | 437.360 € | 599.537 € | 11,2 % |
+| **28 (mixta, recurso cuando haga falta)** | **354** | **659.524 €** | **861.167 €** | **8,0 %** |
+
+**Reglas de operación que se derivan de esto:**
+
+1. **Regla de oro del apretado:** si para sacar un coche hay que mover **más de
+   dos**, ese coche se vende **antes de comprar** el siguiente. Es la disciplina
+   que impide que el stock enterrado se convierta en stock olvidado.
+2. **Los coches del fondo son los que menos se ven**, así que ahí van los de
+   rotación previsible (116d, A3, Golf VIII, León) y los que más margen dejan
+   pero menos visitas reciben (GTI, XC40). El coche de escaparate cambia cada
+   semana.
+3. **Con la nave llena (mes 25 en adelante)**, el coste de mover coches es real:
+   si eso cuesta un 10 % de días de venta en el stock del fondo, el P50 baja de
+   713.093 € a 599.537 €. **Sigue siendo mucho mejor que 14 plazas**, pero es el
+   número que hay que vigilar con el ERP (días entre la visita y la venta).
+4. **No se toca el layout hasta que haga falta.** Empezar con la espiga de 24 y
+   pasar a la mixta de 28 solo cuando la nave esté llena y la caja lo aguante.
 
 ---
 

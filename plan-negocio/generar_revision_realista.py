@@ -630,41 +630,38 @@ def p_plazas(c, n, t):
 @page
 def p_capacidad(c, n, t):
     bg(c)
-    heading(c, "El techo físico", "Cuántos coches caben de verdad en O Milladoiro")
-    wrap(c, "Dato del dueño (12/10/2026): espiga a 45° en las dos paredes, 14 + 10 = 24 coches; distribución mixta (90° a la izquierda, 45° a la "
-            "derecha), 15 + 13 = 28. El reparto a lo largo de la pared cuadra con las medidas de un turismo. Lo que no cuadra con la ficha de la "
-            "nave es el ancho: el almacén mide 40 × 10 m.",
+    heading(c, "Cuántos coches caben", "10 metros de ancho, en modo stock (no showroom)")
+    wrap(c, "Comprobado con cinta: el almacén tiene 40 × 10 m. Dos filas de coches a 45° ocupan 9,19 m de ancho: caben. Lo que no cabe es un "
+            "pasillo de circulación, y no hace falta: la nave se opera como stock y los coches se mueven cuando un cliente muestra interés real. "
+            "Ese coste aparece sólo con la nave llena, no antes.",
          36, 442, 890, size=9.5, leading=13, max_lines=3)
     c.setFillColor(GOLD_DEEP)
     c.setFont("DejaVuBold", 9)
-    c.drawString(36, 400, "LA COMPROBACIÓN QUE HAY QUE HACER CON CINTA MÉTRICA")
-    table(c, 36, 384, ["Fila de coches", "Fondo", "Paso", "Resultado"], [
-        ["45° (espiga)", "4,74 m", "2,83 m", "14 por pared: cuadra con el número del dueño"],
-        ["90° (en batería)", "4,70 m", "2,00 m", "20 por pared"],
-        ["Filas a 45° en las DOS paredes", "9,48 m", "—", "el pasillo central queda en 0,52 m: no cabe"],
-        ["90° izquierda + 45° derecha", "9,44 m", "—", "el pasillo queda en 0,56 m: no cabe"],
-        ["Dos filas + pasillo de 3,5 m necesitan", "12,98 m", "—", "la ficha dice 10 m de ancho"],
-    ], [286, 80, 70, 434], size=8.5, hrow=15, aligns=["l", "c", "c", "l"])
-    wrap(c, "Traducción: las 24-28 plazas son reales si el ancho libre del almacén es de 13 m o más (o si hay dos crujías). Si son 10 m de "
-            "verdad, el número que aguanta es 11-14 dentro, que es lo que dice la ficha de la nave. Medirlo antes de firmar.",
-         36, 284, 890, size=8.5, leading=12, color=SLATE, max_lines=2)
+    c.drawString(36, 388, "TU REPARTO, COMPROBADO (la geometría pura da más: tus cuentas ya llevan margen)")
+    table(c, 36, 374, ["Fila", "Paso por coche", "40 m dan", "Tu cuenta", "Margen"], [
+        ["Derecha a 45°, menos 4 m del tiro del portón", "2,55-2,83 m", "14", "14", "al límite, bien calibrado"],
+        ["Izquierda a 45°, empieza a los 6 m del tabique", "2,55-2,83 m", "13-16", "10", "prudente"],
+        ["Izquierda a 90° (mixta)", "1,80 m", "18", "15", "prudente"],
+        ["Derecha a 45° (mixta)", "2,55-2,83 m", "14", "13", "al límite"],
+        ["Dos filas a 45° en los 10 m de ancho", "9,19 m ocupados", "sobran 0,81 m", "sin pasillo", "es el criterio de stock"],
+    ], [286, 96, 84, 84, 340], size=8.5, hrow=15, aligns=["l", "c", "c", "c", "l"])
     c.setFillColor(GOLD_DEEP)
     c.setFont("DejaVuBold", 9)
-    c.drawString(36, 254, "Y SI CABEN: QUÉ VALE CADA TRAMO DE CAPACIDAD")
-    filas = [[str(pl), str(M["cap"][pl]["ventas"]), eur(M["cap"][pl]["p10"]), eur(M["cap"][pl]["p50"]),
-              f"{100*M['cap'][pl]['riesgo']:.1f} %", (f"mes {M['cap'][pl]['obra_mes']}" if M['cap'][pl]['obra_mes'] else "—")]
-             for pl in (14, 20, 24, 28)]
-    table(c, 36, 236, ["Plazas", "ventas", "P10", "P50", "caja<0", "obra"], filas,
-          [70, 70, 110, 110, 76, 74], size=8.5, hrow=15, bold_rows=(0,),
-          aligns=["c", "c", "r", "r", "c", "c"])
-    wrap(c, f"De 14 a 28 plazas el patrimonio P50 va de {eur(M['cap'][14]['p50'])} € a {eur(M['cap'][28]['p50'])} € (16 plazas, sin personal, "
-            f"dan {eur(M['cap'][16]['p50'])} €), con una persona contratada desde el mes 13 en las naves grandes (2.500 €/mes): a partir de 20 "
-            f"coches no se llega solo. Si los coches vendieran un 10 % más despacio, las 24 plazas darían {eur(M['cap_lento']['p50'])} €.",
-         36, 152, 890, size=8.5, leading=12, color=SLATE, max_lines=2)
-    card(c, 36, 68, 284, 62, "Coches en stock, mes 6", "4", "da igual la capacidad: manda el dinero", acento=GOLD)
-    card(c, 336, 68, 284, 62, "Coches en stock, mes 12", "6-8", "la capacidad decide a partir del mes 10-12", acento=GOLD)
-    card(c, 636, 68, 288, 62, "Si caben 28 plazas", f"+{eur(M['cap'][28]['p50'] - M['cap'][14]['p50'])} €",
-         "frente a las 14 plazas calculadas", acento=GREEN)
+    c.drawString(36, 256, "Y CUÁNDO MOLESTA (mediana de coches en stock, objetivo 24 plazas)")
+    table(c, 36, 242, ["", "mes 6", "mes 12", "mes 15", "mes 20", "mes 23", "mes 25", "mes 36"], [
+        ["Coches en la nave", "5", "7", "10", "16", "20", "24", "24"],
+        ["% de la nave ocupada", "21 %", "29 %", "42 %", "67 %", "83 %", "100 %", "100 %"],
+        ["¿Hay que moverlos para enseñar?", "no", "no", "no", "a veces", "sí", "sí", "sí"],
+    ], [216, 60, 60, 60, 60, 60, 60, 84], size=8.5, hrow=15, aligns=["l", "c", "c", "c", "c", "c", "c", "c"])
+    wrap(c, "La nave se llena de verdad en el mes 25 y pasa de 20 coches 14 de los 36 meses: los dos primeros años el layout apretado no molesta a "
+            "nadie. Con 24 plazas el plan da 306 ventas y 713.093 €; con 28, 354 ventas y 861.167 €; con 14, 209 ventas y 494.519 €.",
+         36, 164, 890, size=8.5, leading=12, color=SLATE, max_lines=2)
+    card(c, 36, 62, 284, 58, "La regla de oro", "máx. 2 coches",
+         "si hay que mover más de dos para sacar uno, se vende antes de comprar", acento=RED)
+    card(c, 336, 62, 284, 58, "Lo que gana apretar", f"+{eur(M['cap'][24]['p50'] - M['cap'][14]['p50'])} €",
+         "de 14 a 24 plazas, con el mismo local", acento=GREEN)
+    card(c, 636, 62, 288, 58, "Si el fondo vende lento", f"−{eur(M['cap'][24]['p50'] - M['cap_lento']['p50'])} €",
+         "que un coche enterrado no se vea (10 % de días)", acento=GOLD)
 
 
 @page
@@ -911,10 +908,10 @@ def p_limites(c, n, t):
         ("No es una previsión, es un modelo", "Los días de venta llevan fuente y fecha; la rampa del negocio (65 % al principio) y la estacionalidad son supuestos declarados. Los escenarios de las secciones anteriores enseñan el rango."),
         ("No incluye financiación", "Los 50.000 € son propios. Con aval y póliza el arranque cambia por completo (dossier de Sogarpo): es otro escenario."),
         ("El viaje no siempre sale bien", "El modelo da por hecho que cada viaje acaba con un coche bueno comprado. Volver con las manos vacías cuesta un vuelo (135 € + 39 €) y, sobre todo, tiempo."),
-        ("Las naves no están negociadas", "Los precios son de anuncios de octubre de 2026: faltan visita, estado real, potencia eléctrica y contrato. Y el patio: si no se puede usar para stock, la nave son 11-14 coches, no 14-18."),
-        ("La capacidad de O Milladoiro", "La ficha de la nave da 11-14 plazas dentro (exposición 8-10, detallado 2-3, taller 1) y 6-8 en el patio: 14-18 simultáneos. "
-                                          "El modelo trabaja con 14 y el patio libre para clientes y camión. Si el stock sube a 16, el patrimonio P50 pasa de 494.519 € a 521.708 €; "
-                                          "con 17-18 haría falta permitir 3 unidades del mismo modelo (638.172-668.973 €, pero el modelo trata las unidades iguales como independientes y eso es optimista)."),
+        ("Las naves no están negociadas", "Los precios son de anuncios de octubre de 2026: faltan visita, estado real, potencia eléctrica y contrato. El ancho ya está confirmado (10 m) y con él la capacidad (24-28)."),
+        ("La capacidad de O Milladoiro", "El almacén tiene 40 × 10 m: dos filas de coches a 45° ocupan 9,19 m, así que caben 24 (espiga) y hasta 28 "
+                                          "(mixta) sin pasillo de circulación. Se opera como stock: los coches del fondo se mueven cuando hay interés real. "
+                                          "La nave no se llena de verdad hasta el mes 25 (mediana) y está por encima de 20 coches 14 de los 36 meses."),
         ("La fiscalidad de los escenarios sin sociedad", "Está aproximada con el mismo motor. La gestoría debe confirmarla."),
         ("Dos palancas que no recoge", "Vender con señal un coche antes de comprarlo, y comprar en subasta de flota (BCA, Autorola) en vez de anuncio: baja el coste de compra un 5-10 %."),
     ]
