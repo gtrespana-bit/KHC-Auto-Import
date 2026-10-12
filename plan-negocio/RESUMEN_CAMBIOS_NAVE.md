@@ -72,6 +72,10 @@ La fianza y la reforma aplazada frenan las compras del año 2: el plan crece
 más despacio. Alternativa: abrir con 2 GTI (reforma entera el día 1): caja del
 día 1 14.214,94 €, sin recortes, 21 coches y 219.383,58 € al mes 36.
 
+El desglose de esos 85.818,82 € de diferencia (cuánto es coste y cuánto es
+trayectoria de compras) está en `ANEXO_POR_QUE_BAJA_LA_CIFRA.md` y se reproduce
+con `justificar_diferencia_nave.py`.
+
 ## Archivos tocados
 - `generar_presentacion.py`: constantes (RENT, NET, STRUCT, FIXED, REFORM). El
   plan con préstamo ya no se calcula al importar el archivo.
