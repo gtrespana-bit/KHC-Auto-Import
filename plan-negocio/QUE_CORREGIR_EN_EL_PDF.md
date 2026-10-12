@@ -153,6 +153,13 @@
    catálogo. Cambia el titular entre 275.124 € y 494.303 €.
 4. **Stock de arranque**: los tres coches de rotación (116d + A3 + GTI) o el
    trío de máxima demanda (116d + León + Golf VIII).
+5. **Reforma (decidido el 12/10/2026)**: se abre **sin obra** y se paga completa
+   (5.115,47 €) cuando la caja cubra el fondo de 3 meses + la obra + 2 meses de
+   gastos. Mediana: mes 8. Nunca el día 1.
+6. **Capacidad de la nave (pendiente de cinta métrica)**: el dueño mide 24 plazas
+   en espiga y 28 en mixta; la ficha de la nave da 11-14 dentro (40 × 10 m). Si
+   el ancho libre es ≥13 m, el plan crece de 14 a 24-28 plazas (+366.648 € de P50
+   al mes 36); si son 10 m, se queda en 14 y el patio hace de pulmón.
 
 Con esas cuatro decisiones, el PDF se regenera con los números corregidos y
 deja de tener láminas que se contradicen.

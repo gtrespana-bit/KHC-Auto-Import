@@ -92,8 +92,11 @@ M["nave"] = medir(dict(mr.ESTRATEGIAS["sin_nave"]))
 M["mud10"] = medir(dict(mr.ESTRATEGIAS["pequena_luego_milladoiro"], objetivo_flota=10))
 M["mud12"] = medir(D12)
 M["mud12fam"] = medir(dict(D12, politica="familia"))
-M["stock"] = {n: medir(dict(mr.ESTRATEGIAS["pequena"], objetivo_flota=n)) for n in (3, 4, 5, 6, 7)}
-M["stock_mud"] = {n: medir(dict(mr.ESTRATEGIAS["pequena_luego_milladoiro"], objetivo_flota=n)) for n in (8, 10, 12, 14)}
+# Curva de plazas, toda con las reglas de la decisión (sin obra el día 1):
+# hasta 7 plazas no hay nave de 465 m² que firmar, así que se mide con la nave
+# pequeña; de 10 en adelante, con O Milladoiro.
+M["stock"] = {n: medir(dict(mr.ESTRATEGIAS["pequena_sin_reforma"], objetivo_flota=n))
+              for n in (3, 4, 5, 6, 7)}
 M["vel"] = {
     "Pesimista 45-70 d": medir(dict(PEQ, dias_unidad=mr.DIAS_PESIMISTA)),
     "Base 32-55 d": M["peq"],
@@ -133,6 +136,11 @@ M["dec_margen4"] = medir(dict(DEC, reforma_margen=4.0))
 M["dec_nunca"] = medir(dict(mr.ESTRATEGIAS["milladoiro_sin_reforma"], objetivo_flota=14))
 M["dec_obradia1"] = M["plan"]
 M["dec_mal"] = medir(dict(DEC, demanda=0.6))
+M["dem_dec"] = {
+    "−40 %": M["dec_mal"], "−25 %": medir(dict(DEC, demanda=0.75)), "Base": M["dec"],
+    "+25 %": medir(dict(DEC, demanda=1.25)), "+50 %": medir(dict(DEC, demanda=1.5)),
+}
+M["lead_dec"] = {l: medir(dict(DEC, lead=l)) for l in (0.5, 1.0, 1.5, 3.0)}
 M["dec_img10"] = medir(dict(DEC, dias=1.10))
 M["dec_img20"] = medir(dict(DEC, dias=1.20))
 
@@ -146,6 +154,18 @@ def _cap(plazas, objetivo, tope, personal=2500.0, desde=13, **kw):
 M["cap"] = {14: _cap(14, 14, 2, personal=0.0), 16: _cap(16, 16, 2, personal=0.0),
             20: _cap(20, 20, 3), 24: _cap(24, 24, 3), 28: _cap(28, 28, 4)}
 M["cap_lento"] = _cap(24, 24, 3, dias=1.10)
+M["stock_mud"] = {n: _cap(n, n, 2 if n <= 16 else (3 if n <= 24 else 4),
+                          personal=0.0 if n <= 16 else 2500.0, desde=13)
+                  for n in (10, 12, 14, 16, 20, 24, 28)}
+# ocupación de la decisión (14 plazas): cuántos meses está llena y por qué no lo está
+_simsdec = M["dec"]["rs"]
+_lleno = sum(1 for r in _simsdec for m in r["meses"] if m["flota"] >= 14)
+_sin_dinero = sum(1 for r in _simsdec for m in r["meses"]
+                  if m["flota"] < 14 and (m["caja"] - m["floor"]) < 9010)
+M["ocup"] = dict(lleno=_lleno / len(_simsdec), libre=36 - _lleno / len(_simsdec),
+                 sin_dinero=_sin_dinero / len(_simsdec),
+                 con_dinero=36 - _lleno / len(_simsdec) - _sin_dinero / len(_simsdec),
+                 ocioso=300012)
 
 M["local_mal"] = {
     "peq_muda": medir(dict(mr.ESTRATEGIAS["pequena_sin_reforma"], objetivo_flota=12,
@@ -156,14 +176,14 @@ M["local_mal"] = {
 }
 
 # ocupación
-rs = M["peq"]["rs"]
-lleno = sorted(sum(1 for m in r["meses"] if m["flota"] >= 7) for r in rs)
+rs = M["dec"]["rs"]        # la decisión: O Milladoiro, 14 plazas, sin obra al abrir
+lleno = sorted(sum(1 for m in r["meses"] if m["flota"] >= 14) for r in rs)
 libre = sin_dinero = 0
 for r in rs:
     for m in r["meses"]:
-        if m["flota"] < 7:
+        if m["flota"] < 14:
             libre += 1
-            if (m["caja"] - m["floor"]) < 9010:
+            if (m["caja"] - m["floor"]) < 9010:      # ni siquiera para el 116d más barato
                 sin_dinero += 1
 LLENO_MESES = lleno[len(lleno) // 2]
 PLAZAS_LIBRES = libre / len(rs)
@@ -352,7 +372,7 @@ def p_cover(c, n, t):
     y = H - 340
     for txt in (
         f"El plan de hoy abre el día 1 con {eur(DIA1_PLAN)} € de caja: {eur(FONDO_PLAN)} € por debajo de su propio fondo.",
-        f"La misma nave sin obra abre con {eur(M['local']['grande14']['dia1'])} € y sin descubiertos en el 3,2 % de las simulaciones.",
+        f"La misma nave sin obra abre con {eur(M['dec']['dia1'])} € en caja y la obra se paga en el mes {M['dec']['obra_mes']} (mediana).",
         f"Ventas, caja y sueldo mes a mes; ocho caminos de local comparados; y los disparadores que obligan a cambiar.",
     ):
         wrap(c, txt, 60, y, 620, size=10, leading=15, color=Color(0.86, 0.85, 0.82))
@@ -467,26 +487,29 @@ def p_modelo(c, n, t):
 @page
 def p_dia1(c, n, t):
     bg(c)
-    heading(c, "El arranque recomendado", "Nave de 220 m², reforma por fases y tres coches de rotación")
-    y = 424
+    heading(c, "El día 1 de la decisión", "O Milladoiro sin obra al abrir · la obra espera a la caja")
+    D = M["dec"]
     lineas = [
         ("Aportación propia", 50000.00, ""),
         ("Kit de equipo y revisión", -g.KIT, "doc 02: revisión, Launch, medidor de pintura"),
         ("Constitución de la Sociedad Limitada", -1200.0, "notaría, registro y gestoría"),
-        ("Fianza de la nave", -1200.0, "dos mensualidades (LAU art. 36)"),
+        ("Fianza de la nave", -2400.0, "dos mensualidades (LAU art. 36)"),
         ("Licencia de apertura y técnico", -800.0, "comunicación previa + técnico"),
-        ("Reforma, fase 1", -mr.REFORMA_PEQ_A, "suelo, pintura, luces, seguridad y lonas"),
-        ("BMW 116d + Audi A3 + Golf GTI", -(9010 + 12455 + 12674), "rotación rápida y mejor margen por euro"),
-        ("Gastos fijos del mes 1", -1518.69, "alquiler, RETA, portales, luz, seguro y tasas"),
+        ("Reforma", 0.0, "aplazada: se paga cuando la caja cubra el fondo + la obra + 2 meses"),
+        ("BMW 116d + Audi A3 + Golf GTI", -34139.0, "rotación rápida y mejor margen por euro"),
+        ("Gastos fijos del mes 1", -2183.69, "alquiler, RETA, portales, luz, seguro y tasas"),
     ]
     rows = [[a, eur(b), c_] for a, b, c_ in lineas]
-    rows.append(["CAJA AL CERRAR EL DÍA 1", eur(DIA1_PEQ), f"fondo exigido {eur(FONDO_PEQ)} €"])
-    table(c, 36, y, ["Concepto", "Importe", "Por qué"], rows, [300, 110, 470], size=8.5, hrow=19.5,
+    rows.append(["CAJA AL CERRAR EL DÍA 1", eur(D["dia1"]), f"fondo de 3 meses: {eur(2183.69 * 3)} €"])
+    table(c, 36, 424, ["Concepto", "Importe", "Por qué"], rows, [300, 110, 470], size=8.5, hrow=19.5,
           aligns=["l", "r", "l"], bold_rows=(len(rows) - 1,),
           colors=[INK] * (len(rows) - 1) + [GREEN])
-    card(c, 36, 84, 260, 84, "Aire sobre el fondo", f"+{eur(DIA1_PEQ - FONDO_PEQ)} €", "el plan de hoy: −" + eur(FONDO_PLAN - DIA1_PLAN) + " €", acento=GREEN)
-    card(c, 316, 84, 260, 84, "Fondo de 3 meses", f"{eur(FONDO_PEQ)} €", "intocable, con la reserva del impuesto", acento=GOLD)
-    card(c, 596, 84, 328, 84, "Reforma total en 2 fases", f"3.100 €", "fase 2 (1.150 €) con el flujo de caja", acento=GOLD)
+    card(c, 36, 84, 284, 84, "Aire sobre el fondo",
+         f"+{eur(D['dia1'] - 2183.69 * 3)} €", "el plan de hoy: −" + eur(FONDO_PLAN - DIA1_PLAN) + " €", acento=GREEN)
+    card(c, 336, 84, 284, 84, "Obra aplazada", f"{eur(5115.47)} €",
+         f"mediana: mes {D['obra_mes']}, sin tocar el fondo", acento=GOLD)
+    card(c, 636, 84, 288, 84, "Patrimonio al mes 36", f"{eur(D['p50'])} €",
+         f"con la obra el día 1: {eur(M['dec_obradia1']['p50'])} €", acento=GOLD)
 
 
 @page
@@ -528,7 +551,7 @@ def p_mes2(c, n, t):
     card(c, 636, 84, 288, 74, "Patrimonio al mes 36", f"{eur(r['patrimonio'])} €", "caja + coches − impuesto del año 3", acento=GREEN)
     c.setFillColor(SLATE)
     c.setFont("DejaVu", 8.5)
-    c.drawString(36, 66, f"Al mes 36 hay {eur(OCIOSO)} € de mediana por encima del fondo, parados: no caben más coches. Es el disparador de la mudanza.")
+    c.drawString(36, 66, f"Al mes 36 hay {eur(OCIOSO)} € de mediana por encima del fondo, parados: no caben más coches. Es el disparador para crecer de plazas.")
 
 
 @page
@@ -555,7 +578,7 @@ def p_comparativa(c, n, t):
     y = 184
     for tit, txt, acento in (
         ("Las plazas son el motor", "Cada plaza vale 25.000-60.000 € en tres años. El negocio no crece vendiendo más rápido: crece teniendo más coches a la vez.", GOLD),
-        ("Empezar pequeño y mudarse corriendo", f"D2 da {eur(M['mud12']['p50'])} € con el mismo riesgo que la nave pequeña. En el modelo la mudanza ocurre en el mes {MUD_MES}.", GREEN),
+        ("Quedarse pequeño cuesta dinero", f"7 plazas dan {eur(M['peq']['p50'])} € al mes 36 y 24 plazas dan {eur(M['cap'][24]['p50'])} €: la diferencia es techo, no gestión.", GREEN),
         ("El plan de hoy paga caro el arranque", f"{100*M['plan']['riesgo']:.0f} % de caja negativa: paga 1.200 €/mes, fianza y reforma completa antes de tener coches que facturen.", RED),
         ("Ojo con esta tabla", "En las siete rutas de arriba la nave grande lleva siempre la obra del plan. Repetida la comparación sin obra (lámina 10), el ganador cambia.", SLATE),
     ):
@@ -575,32 +598,33 @@ def p_plazas(c, n, t):
         datos.append((f"{pl} plazas", m["p50"], eur(m["p50"]) + " €"))
     # de mayor a menor para que las barras se lean mejor
     datos.sort(key=lambda d: d[1])
-    barras(c, 24, 372, 350, datos, size=8, alto=17, hueco=8, ancho_valor=96)
+    barras(c, 24, 392, 400, datos, size=8, alto=15, hueco=6, ancho_valor=96)
     c.setFillColor(SLATE)
     c.setFont("DejaVu", 8.5)
-    wrap(c, "Patrimonio P50 al mes 36 según las plazas de la nave. Hasta 7 plazas es la nave pequeña; de ahí en adelante, ya con "
-            "O Milladoiro (la mudanza, en el mes " + str(MUD_MES) + "). Si la nave grande se firma a ≤2,2 €/m² desde el día 1, "
-            "esas plazas no llegan con una mudanza: llegan con el contrato (lámina 10).",
+    wrap(c, "Patrimonio P50 al mes 36 según las plazas de la nave, todo medido con las reglas de la decisión (sin obra el día 1). "
+            "Hasta 7 plazas, con la nave pequeña; de 10 en adelante, con O Milladoiro y una persona contratada desde el mes 13 "
+            "a partir de 20 plazas (lámina 10).",
          24, 118, 400, size=8.5, leading=11.5, color=SLATE, max_lines=4)
     c.setFillColor(GOLD_DEEP)
     c.setFont("DejaVuBold", 9)
-    c.drawString(470, 372, "¿QUÉ LIMITA EL CRECIMIENTO?")
-    wrap(c, "Con la nave de 220 m² llena (7 de 7 plazas) el negocio vende todo lo que puede. Medido en 250 simulaciones:", 470, 356, 450, size=9, leading=12)
-    table(c, 470, 328, ["Situación", "Meses de 36"], [
-        ["Nave llena (7 de 7 plazas)", str(LLENO_MESES)],
+    c.drawString(500, 392, "¿QUÉ LIMITA EL CRECIMIENTO?")
+    wrap(c, "Con O Milladoiro y 14 plazas el negocio vende todo lo que puede a partir del mes 16. Medido en 250 simulaciones:",
+         500, 376, 420, size=9, leading=12)
+    table(c, 500, 348, ["Situación (14 plazas)", "Meses de 36"], [
+        ["Nave llena (14 de 14 plazas)", str(LLENO_MESES)],
         ["Con plazas libres", f"{PLAZAS_LIBRES:.1f}"],
         ["…y sin dinero para comprar", f"{SIN_DINERO:.1f}"],
         ["…con plaza y dinero (solo búsqueda)", f"{PLAZAS_LIBRES - SIN_DINERO:.1f}"],
-    ], [300, 130], size=8.5, hrow=19, aligns=["l", "r"])
+    ], [300, 120], size=8.5, hrow=19, aligns=["l", "r"])
     c.setFillColor(GOLD_DEEP)
     c.setFont("DejaVuBold", 9)
-    c.drawString(470, 212, "DINERO PARADO AL MES 36")
+    c.drawString(500, 240, "DINERO PARADO AL MES 36")
     c.setFillColor(INK)
     c.setFont("DejaVuSerif", 24)
-    c.drawString(470, 180, f"{eur(OCIOSO)} €")
-    wrap(c, "por encima del fondo, porque no hay dónde meter más coches. Ese dinero es el argumento para tener más plazas: "
-            "cada mes de retraso después del mes 15 cuesta del orden de 5.000-8.000 € de patrimonio potencial.",
-         470, 162, 450, size=8.5, leading=11.5, color=SLATE, max_lines=4)
+    c.drawString(500, 206, f"{eur(OCIOSO)} €")
+    wrap(c, "por encima del fondo, porque no hay dónde meter más coches. Ese dinero es el argumento para crecer: cada plaza extra "
+            "vale 25.000-45.000 € al mes 36, y sale gratis si la nave aguanta la maniobra (lámina 10).",
+         500, 182, 420, size=8.5, leading=11.5, color=SLATE, max_lines=3)
 
 
 @page
@@ -737,10 +761,10 @@ def p_sens(c, n, t):
     heading(c, "Sensibilidad", "Qué pasa si el mercado es peor o la operación se retrasa")
     c.setFillColor(GOLD_DEEP)
     c.setFont("DejaVuBold", 9)
-    c.drawString(36, 430, "DEMANDA DEL MERCADO (nave 220 m², 7 plazas)")
+    c.drawString(36, 430, "DEMANDA DEL MERCADO (DECISIÓN: O Milladoiro, 14 plazas)")
     table(c, 36, 414, ["Escenario", "ventas", "patr. P10", "patr. P50", "caja P50", "sueldo", "caja<0"], [
         [k, str(v["ventas"]), eur(v["p10"]), eur(v["p50"]), eur(v["caja"]), eur(v["sueldo"]), f"{100*v['riesgo']:.1f} %"]
-        for k, v in M["dem"].items()],
+        for k, v in M["dem_dec"].items()],
         [120, 55, 80, 80, 80, 75, 70], size=7.5, hrow=17, 
         aligns=["l", "c", "r", "r", "r", "r", "c"], bold_rows=(2,))
     c.setFillColor(GOLD_DEEP)
@@ -748,7 +772,7 @@ def p_sens(c, n, t):
     c.drawString(36, 252, "CICLO DE COMPRA (semanas hasta tener el coche anunciado)")
     table(c, 36, 236, ["Semanas", "ventas", "ciclo", "patr. P10", "patr. P50", "caja P50", "caja<0"], [
         [f"{k:.1f}", str(v["ventas"]), f"{v['ciclo']:.0f} d", eur(v["p10"]), eur(v["p50"]), eur(v["caja"]), f"{100*v['riesgo']:.1f} %"]
-        for k, v in M["lead"].items()],
+        for k, v in M["lead_dec"].items()],
         [120, 55, 60, 80, 80, 80, 70], size=7.5, hrow=17,
         aligns=["l", "c", "c", "r", "r", "r", "c"], bold_rows=(1,))
     c.setFillColor(SLATE)
@@ -765,8 +789,10 @@ def p_sens(c, n, t):
             f"{eur(12840)} € en tres años. Ahí se ve por qué el orden importa: la nave grande no es mala idea; "
             "lo malo es pagarla antes de tener coches que facturen.",
          620, 372, 296, size=8.5, leading=11.5, color=SLATE, max_lines=6)
-    card(c, 620, 214, 296, 74, "Si el mercado cae un 40 %", f"{eur(M['dem']['−40 %']['p50'])} €", "y aun así paga el sueldo: no se rompe", acento=GOLD)
-    card(c, 620, 124, 296, 74, "Si el ciclo sube a 3 semanas", f"{eur(M['lead'][3.0]['p50'])} €", "es el supuesto que más pesa", acento=GOLD)
+    card(c, 620, 214, 296, 74, "Si el mercado cae un 40 %", f"{eur(M['dem_dec']['−40 %']['p50'])} €",
+         f"y aun así paga {eur(M['dem_dec']['−40 %']['sueldo'])} € de sueldo", acento=GOLD)
+    card(c, 620, 124, 296, 74, "Si el ciclo sube a 3 semanas", f"{eur(M['lead_dec'][3.0]['p50'])} €",
+         "es el supuesto que más pesa", acento=GOLD)
 
 
 @page
