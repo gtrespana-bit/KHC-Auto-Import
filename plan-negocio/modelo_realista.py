@@ -364,14 +364,22 @@ def simular(est, rng):
         return UNIDADES[nick]["dias"]
     penal_dem, penal_dias = (PENAL_SIN_NAVE["demanda"], PENAL_SIN_NAVE["dias"]) if nave is None else (1.0, 1.0)
 
+    def personal_mes(mes):
+        """Coste de la nómina de la socia-empleada. Soporta un 2º tramo:
+        desde `personal_sube` (mes) pasa a cobrar `personal_sube_imp`."""
+        if mes < est["personal_desde"]:
+            return 0.0
+        if est.get("personal_sube") and mes >= est["personal_sube"]:
+            return est.get("personal_sube_imp", est["personal"])
+        return est["personal"]
+
     def fijos(nv):
+        p = personal_mes(mes_actual[0])
         if nv is None:
             base = NAVES["sin_nave"]
-            return r2(est["reta"] + g.MKT + base["rent"] + base["net"]
-                      + (est["personal"] if mes_actual[0] >= est["personal_desde"] else 0.0))
+            return r2(est["reta"] + g.MKT + base["rent"] + base["net"] + p)
         return r2(est["reta"] + g.MKT + nv["rent"] + nv["util"] + nv["net"]
-                  + nv["seguro"] + nv["tasas"]
-                  + (est["personal"] if mes_actual[0] >= est["personal_desde"] else 0.0))
+                  + nv["seguro"] + nv["tasas"] + p)
 
     def plazas():
         tope = (nave or NAVES["sin_nave"])["plazas"]
@@ -413,6 +421,8 @@ def simular(est, rng):
     cobro_anio = 0.0
     impuesto = {1: 0.0, 2: 0.0, 3: 0.0}
     pagado = 0.0
+    dividendos_total = [0.0]
+    dividendos_anio = {1: 0.0, 2: 0.0, 3: 0.0}
     reducidos = 0
     usados = 0
     averia_total = [0.0]
@@ -619,6 +629,15 @@ def simular(est, rng):
         # --- cierre del mes -------------------------------------------------
         ultimo = int((w + 1) / SEM_MES) + 1 != mes
         if ultimo:
+            # Plan de caja a casa: a fin de ejercicio se reparte en dividendos
+            # todo lo que sobra por encima del fondo (se deja el fondo intacto).
+            # El dinero sale de la caja de la SL y deja de financiar compras.
+            if est.get("dividendos") and mes in (12, 24, MESES):
+                div = r2(max(0.0, caja - est["floor_meses"] * fijos(nave)))
+                if div > 0:
+                    caja = r2(caja - div)
+                    dividendos_total[0] = r2(dividendos_total[0] + div)
+                    dividendos_anio[anio] = r2(dividendos_anio[anio] + div)
             flota = [UNIDADES[v["nick"]]["coste"] for v in listos + en_camino]
             meses.append(dict(
                 mes=mes, caja=caja, ventas=ventas_mes[mes], cobro=cobro_mes[mes],
@@ -663,7 +682,8 @@ def simular(est, rng):
         meses=meses, insolvente=insolvente, caja=caja, flota=len(listos) + len(en_camino),
         coste_flota=coste_flota, ventas=ventas_total, impuesto3=impuesto[3],
         patrimonio=r2(caja + coste_flota - impuesto[3]),
-        sueldos=r2(sum(m["sueldo"] for m in meses)), reducidos=reducidos,
+        sueldos=r2(sum(m["sueldo"] for m in meses)), dividendos=dividendos_total[0],
+        dividendos_anio=dividendos_anio, reducidos=reducidos,
         comprados=coches_comprados, pagado=pagado, nave_mes=nave_mes,
         reforma_mes=reforma_pagada_mes, reforma_pend=r2(reforma_pend),
         averias_total=r2(averia_total[0]),
