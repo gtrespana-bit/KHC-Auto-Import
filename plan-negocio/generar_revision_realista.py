@@ -71,6 +71,7 @@ def medir(est, sims=SIM):
         pozo=sum(1 for r in rs if r["min_caja"] < -3000) / len(rs),
         recortes=sum(r["reducidos"] for r in rs) / len(rs),
         ciclo=sum(tot) / len(tot), rs=rs,
+        dia1=sorted(r["meses"][0]["caja"] for r in rs)[len(rs) // 2],
     )
 
 
@@ -102,6 +103,29 @@ M["dem"] = {
 M["dem_plan"] = medir(dict(PLAN, demanda=0.6))
 M["lead"] = {l: medir(dict(PEQ, lead=l)) for l in (0.5, 1.0, 1.5, 3.0)}
 M["tray"] = mr.trayectoria(PEQ, sims=300)
+
+# --- la decisión del local (12/10/2026): nave de paso contra nave definitiva ---
+MUDA = 2500.0            # transporte, rótulos, suministros y tiempo
+OBRA_MOVIBLE = 2045.0    # luces LED + alarma/cámaras + limpieza y extintores: se desmonta o se reutiliza
+OBRA_SUNK = 1384.0       # suelo epoxi 905 + pintura 479: en una nave de paso, dinero perdido
+M["local"] = {
+    "peq_fija": medir(dict(mr.ESTRATEGIAS["pequena_sin_reforma"], objetivo_flota=7)),
+    "peq_muda": medir(dict(mr.ESTRATEGIAS["pequena_sin_reforma"], objetivo_flota=12,
+                           nave_destino=mr.NAVES["milladoiro"], nave_destino_mes=15,
+                           tope_modelo=2, muda=MUDA)),
+    "grande12": medir(dict(mr.ESTRATEGIAS["milladoiro_sin_reforma"], objetivo_flota=12)),
+    "grande14": medir(dict(mr.ESTRATEGIAS["milladoiro_sin_reforma"])),
+    "obra_min": medir(dict(mr.ESTRATEGIAS["milladoiro_sin_reforma"], reforma_a=OBRA_MOVIBLE)),
+    "obra_todo": medir(dict(mr.ESTRATEGIAS["milladoiro_fases"])),
+    "plan_hoy": M["plan"],
+}
+M["local_mal"] = {
+    "peq_muda": medir(dict(mr.ESTRATEGIAS["pequena_sin_reforma"], objetivo_flota=12,
+                           nave_destino=mr.NAVES["milladoiro"], nave_destino_mes=15,
+                           tope_modelo=2, muda=MUDA, demanda=0.6)),
+    "grande14": medir(dict(mr.ESTRATEGIAS["milladoiro_sin_reforma"], demanda=0.6)),
+    "plan_hoy": M["dem_plan"],
+}
 
 # ocupación
 rs = M["peq"]["rs"]
@@ -300,8 +324,8 @@ def p_cover(c, n, t):
     y = H - 340
     for txt in (
         f"El plan de hoy abre el día 1 con {eur(DIA1_PLAN)} € de caja: {eur(FONDO_PLAN)} € por debajo de su propio fondo.",
-        f"La nave de 220 m² a 600 € abre con {eur(DIA1_PEQ)} € y {eur(DIA1_PEQ - FONDO_PEQ)} € de aire sobre el fondo.",
-        f"Ventas, caja y sueldo mes a mes; siete arranques comparados; y los disparadores que obligan a cambiar.",
+        f"La misma nave sin obra abre con {eur(M['local']['grande14']['dia1'])} € y sin descubiertos en el 3,2 % de las simulaciones.",
+        f"Ventas, caja y sueldo mes a mes; ocho caminos de local comparados; y los disparadores que obligan a cambiar.",
     ):
         wrap(c, txt, 60, y, 620, size=10, leading=15, color=Color(0.86, 0.85, 0.82))
         y -= 22
@@ -500,17 +524,18 @@ def p_comparativa(c, n, t):
           rows, [286, 58, 86, 88, 88, 84, 92, 62, 62], size=8, hrow=25,
           aligns=["l", "c", "r", "r", "r", "r", "r", "c", "c"],
           bold_rows=tuple(i for i, (_, _, b) in enumerate(filas) if b))
-    y = 168
+    y = 184
     for tit, txt, acento in (
         ("Las plazas son el motor", "Cada plaza vale 25.000-60.000 € en tres años. El negocio no crece vendiendo más rápido: crece teniendo más coches a la vez.", GOLD),
         ("Empezar pequeño y mudarse corriendo", f"D2 da {eur(M['mud12']['p50'])} € con el mismo riesgo que la nave pequeña. En el modelo la mudanza ocurre en el mes {MUD_MES}.", GREEN),
         ("El plan de hoy paga caro el arranque", f"{100*M['plan']['riesgo']:.0f} % de caja negativa: paga 1.200 €/mes, fianza y reforma completa antes de tener coches que facturen.", RED),
+        ("Ojo con esta tabla", "En las siete rutas de arriba la nave grande lleva siempre la obra del plan. Repetida la comparación sin obra (lámina 10), el ganador cambia.", SLATE),
     ):
         c.setFillColor(acento)
         c.setFont("DejaVuBold", 8.5)
         c.drawString(36 + (0 if acento is GOLD else 0), y, tit.upper())
         wrap(c, txt, 36, y - 13, 880, size=8.5, leading=11.5, color=INK, max_lines=2)
-        y -= 40
+        y -= 36
 
 
 @page
@@ -526,7 +551,9 @@ def p_plazas(c, n, t):
     c.setFillColor(SLATE)
     c.setFont("DejaVu", 8.5)
     wrap(c, "Patrimonio P50 al mes 36 según las plazas de la nave. Hasta 7 plazas es la nave pequeña; de ahí en adelante, ya con "
-            "O Milladoiro (la mudanza, en el mes " + str(MUD_MES) + ").", 24, 118, 400, size=8.5, leading=11.5, color=SLATE, max_lines=3)
+            "O Milladoiro (la mudanza, en el mes " + str(MUD_MES) + "). Si la nave grande se firma a ≤2,2 €/m² desde el día 1, "
+            "esas plazas no llegan con una mudanza: llegan con el contrato (lámina 10).",
+         24, 118, 400, size=8.5, leading=11.5, color=SLATE, max_lines=4)
     c.setFillColor(GOLD_DEEP)
     c.setFont("DejaVuBold", 9)
     c.drawString(470, 372, "¿QUÉ LIMITA EL CRECIMIENTO?")
@@ -543,9 +570,67 @@ def p_plazas(c, n, t):
     c.setFillColor(INK)
     c.setFont("DejaVuSerif", 24)
     c.drawString(470, 180, f"{eur(OCIOSO)} €")
-    wrap(c, "por encima del fondo, porque no hay dónde meter más coches. Ese dinero es el argumento de la mudanza: "
+    wrap(c, "por encima del fondo, porque no hay dónde meter más coches. Ese dinero es el argumento para tener más plazas: "
             "cada mes de retraso después del mes 15 cuesta del orden de 5.000-8.000 € de patrimonio potencial.",
          470, 162, 450, size=8.5, leading=11.5, color=SLATE, max_lines=4)
+
+
+@page
+def p_local(c, n, t):
+    bg(c)
+    heading(c, "La decisión del local", "¿Nave de paso un año o la nave definitiva desde el día 1?")
+    wrap(c, "Mismo motor, mismas 250 simulaciones. La nave de paso no es más barata por plaza: 220 m² a 600 € son 2,73 €/m² y "
+            "86 €/plaza; O Milladoiro, 2,58 €/m² y 86 €/plaza; San Marcos, 550 m² a 1.100 €, 2,00 €/m² y 65 €/plaza. La cuota es "
+            "más pequeña, el precio no. Lo que decide es cuándo empiezas a pagar plazas que aún no puedes llenar.",
+         36, 440, 890, size=9.5, leading=13, max_lines=3)
+    L, LM = M["local"], M["local_mal"]
+    filas = [
+        ["Nave 220 m² a 600 € · 7 plazas · no se muda", str(L["peq_fija"]["ventas"]),
+         eur(L["peq_fija"]["dia1"]), eur(L["peq_fija"]["p50"]), f"{100*L['peq_fija']['riesgo']:.1f} %", "—"],
+        ["Nave 220 m² a 600 € → O Milladoiro · 12 plazas", str(L["peq_muda"]["ventas"]),
+         eur(L["peq_muda"]["dia1"]), eur(L["peq_muda"]["p50"]), f"{100*L['peq_muda']['riesgo']:.1f} %",
+         eur(LM["peq_muda"]["p50"])],
+        ["O Milladoiro desde el día 1 · 12 plazas", str(L["grande12"]["ventas"]),
+         eur(L["grande12"]["dia1"]), eur(L["grande12"]["p50"]), f"{100*L['grande12']['riesgo']:.1f} %", "—"],
+        ["O Milladoiro desde el día 1 · 14 plazas", str(L["grande14"]["ventas"]),
+         eur(L["grande14"]["dia1"]), eur(L["grande14"]["p50"]), f"{100*L['grande14']['riesgo']:.1f} %",
+         eur(LM["grande14"]["p50"])],
+        ["Plan de hoy: O Milladoiro + obra completa", str(L["plan_hoy"]["ventas"]),
+         eur(L["plan_hoy"]["dia1"]), eur(L["plan_hoy"]["p50"]), f"{100*L['plan_hoy']['riesgo']:.1f} %",
+         eur(LM["plan_hoy"]["p50"])],
+    ]
+    table(c, 36, 390, ["Camino", "ventas", "caja día 1", "patrim. P50", "caja<0", "P50 si el mercado −40 %"],
+          filas, [316, 62, 92, 104, 78, 156], size=8.5, hrow=18, bold_rows=(1, 3),
+          aligns=["l", "c", "r", "r", "c", "r"])
+    wrap(c, "Ninguna ruta se rompe en el escenario central y las dos acaban en el mismo sitio: 465.000-515.000 €. "
+            "El riesgo de quedarte sin caja en un mes malo se paga con la cuota pequeña (24 % frente a 30 % si el mercado "
+            "cae un 40 %); con 50.000 € propios y sin facturar, ésa es la única ventaja real de la nave de paso.",
+         36, 272, 890, size=8.5, leading=12, color=SLATE, max_lines=3)
+    c.setFillColor(GOLD_DEEP)
+    c.setFont("DejaVuBold", 9)
+    c.drawString(36, 206, "LA CUENTA DE LA MUDANZA (15 MESES EN LA PEQUEÑA)")
+    table(c, 36, 192, ["Concepto", "€"], [
+        ["Alquiler ahorrado: 600 €/mes × 15", "+9.000"],
+        ["Licencia de apertura nueva", "−800"],
+        ["Transporte, rótulos y suministros", "−2.500"],
+        ["Más fianza inmovilizada (se recupera)", "−1.200"],
+        ["Suelo y pintura de la nave de paso (si se hace)", "−1.384 (perdido)"],
+        ["Saldo a favor de empezar pequeño", "+4.316"],
+    ], [340, 142], size=8.5, hrow=16, aligns=["l", "r"], bold_rows=(5,))
+    c.setFillColor(RED)
+    c.setFont("DejaVuBold", 9)
+    c.drawString(600, 206, "LA OBRA DEL DÍA 1, COBRADA A 36 MESES")
+    table(c, 600, 192, ["Obra el día 1 (misma nave, 14 plazas)", "patrim. P50", "caja<0"], [
+        ["0 €", eur(L["grande14"]["p50"]), f"{100*L['grande14']['riesgo']:.1f} %"],
+        [f"{eur(OBRA_MOVIBLE)} € (sólo lo movible)", eur(L["obra_min"]["p50"]), f"{100*L['obra_min']['riesgo']:.1f} %"],
+        [f"{eur(5115)} € (obra completa)", eur(L["obra_todo"]["p50"]), f"{100*L['obra_todo']['riesgo']:.1f} %"],
+    ], [186, 78, 52], size=8, hrow=17, aligns=["l", "r", "c"], bold_rows=(2,))
+    c.setFillColor(GOLD_DEEP)
+    c.setFont("DejaVuBold", 9)
+    c.drawString(600, 108, "LA REGLA")
+    wrap(c, "Si la nave sirve tal cual, no se toca suelo ni pintura de ninguna nave que no sea la definitiva, y la obra "
+            "se paga con caja sobrante: nunca con el capital de arranque.",
+         600, 92, 316, size=8.5, leading=12, color=SLATE, max_lines=3)
 
 
 @page
@@ -619,17 +704,17 @@ def p_sens(c, n, t):
 @page
 def p_reco(c, n, t):
     bg(c)
-    heading(c, "Recomendación", "Abrir en la nave pequeña y mudarse cuando la flota la llene")
+    heading(c, "Recomendación", "La nave más grande a ≤2,2 €/m², sin obra, con salida a 12 meses")
     items = [
-        ("1. Local de arranque", "Nave de 180-230 m² entre 590 € y 650 €/mes (Sionlla, Castiñeiriño, Campus Norte), con contrato de 12 meses prorrogable o salida pactada."),
-        ("2. Día 1", f"{eur(DIA1_PEQ, True)} € en caja, fondo de 3 meses cubierto y {eur(DIA1_PEQ - FONDO_PEQ)} € de aire."),
-        ("3. Actividad", "Declarada inocua (compraventa, exposición y almacén). El taller, fuera de la nave: cambia la licencia de comunicación previa a actividad clasificada."),
+        ("1. Local", "Decidir por €/plaza: 10-17 plazas a 2,00-2,11 €/m² existen (San Marcos 550 m² a 1.100 €; Marrozos 710 m² a 1.500 €). La de 220 m² a 600 € son 86 €/plaza: si se firma, es por el contrato corto."),
+        ("2. Día 1", f"O Milladoiro sin obra: {eur(M['local']['grande14']['dia1'], True)} € en caja frente a {eur(DIA1_PLAN, True)} € del plan. Sin obra, el riesgo de descubierto baja del 16,0 % al 3,2 %."),
+        ("3. Actividad y obra", "Inocua (compraventa, exposición, almacén), taller fuera. Cero suelo, pintura y mobiliario antes de facturar: sólo luces, alarma y extintores."),
         ("4. Los tres primeros coches", "BMW 116d (9.010 €), Audi A3 (12.455 €) y Golf GTI (12.674 €). Después, Golf VIII y Seat León: los de más giro (32 días)."),
-        ("5. Stock", "Llenar las plazas y mantenerlas llenas, una plaza un modelo. Cada plaza vale 25.000-60.000 € en tres años."),
+        ("5. Stock", "Llenar las plazas y mantenerlas llenas, una plaza un modelo. Medido con la nave grande: 8 plazas 326.725 € · 12 → 465.106 € · 14 → 515.093 €."),
         ("6. El 318d no se compra", "Es el peor retorno del catálogo (102 €/mes por cada 1.000 € inmovilizados). El XC40 solo cuando la nave ya esté llena."),
-        ("7. Mudanza a O Milladoiro", f"En el mes 15-18, a 10-12 plazas, en cuanto la flota de 7 esté llena tres meses seguidos y la caja esté sobre el fondo."),
+        ("7. Si se abre en la de paso", "Salida a 12 meses y mudanza en el mes 15-18, a 12-14 plazas, cuando la flota de 7 lleve tres meses llena. Es un seguro: cuesta ~4.300 € y en el escenario malo vale 24.000."),
         ("8. Fondo y nómina", "Fondo de 3 meses más la reserva del impuesto, intocables. La nómina antes de comprar el siguiente coche."),
-        ("9. Cerrar antes de firmar", "Precio y condiciones reales de la nave, tasa exacta del concello y cotización real del seguro."),
+        ("9. Cerrar antes de firmar", "€/plaza y €/m² de cada candidata, salida pactada, tasa exacta del concello y cotización real del seguro."),
     ]
     y = 430
     for tit, txt in items:
@@ -651,7 +736,9 @@ def p_disparadores(c, n, t):
     bloques = [
         ("Mes 6 con menos de 5 coches vendidos", "El problema es la captación, no la nave. Parar la reinversión y trabajar web y portales."),
         ("Mes 12 con menos de 16 coches vendidos", "Recortar el stock de trabajo a 5 plazas y bajar la nómina un escalón."),
-        ("Flota llena tres meses seguidos con caja sobre el fondo", "Mudanza. En el modelo, el mes " + str(MUD_MES) + "."),
+        ("Flota llena tres meses seguidos con caja sobre el fondo",
+         "Mudanza, si se empezó en la nave de paso: en el modelo, el mes " + str(MUD_MES) + ". Y el contrario: tres meses pagando "
+         "plazas que no puedes llenar por falta de capital significa que el contrato es demasiado grande."),
     ]
     for tit, txt in bloques:
         c.setStrokeColor(GOLD)
@@ -703,9 +790,9 @@ def p_final(c, n, t):
          36, y, 880, size=13, leading=19, color=GOLD, max_lines=3)
     y -= 74
     for txt in (
-        f"Con la nave de 220 m² y la reforma por fases, el día 1 cierra con {eur(DIA1_PEQ)} € y {eur(DIA1_PEQ - FONDO_PEQ)} € de aire sobre el fondo.",
-        f"Con la operación que ya está comprometida (unidades vistas, ciclo de una semana, placas temporales), 7 plazas dan 127 ventas y {eur(M['peq']['p50'])} € de patrimonio al mes 36.",
-        f"Y cuando la nave se llene, mudarse a O Milladoiro: 12 plazas dan {eur(M['mud12']['p50'])} € con el mismo riesgo. Cada plaza vale 25.000-60.000 € en tres años.",
+        f"Quitar la obra del día 1 es el cambio más barato y el que más pesa: el mismo local pasa de {eur(M['local']['plan_hoy']['p50'])} € de patrimonio y 16,0 % de descubiertos a {eur(M['local']['grande14']['p50'])} € y 3,2 %.",
+        f"La nave de paso no ahorra precio (86 €/plaza, igual que O Milladoiro): compra un seguro contra el escenario malo. Cuesta ~4.300 € y paga ~24.000 € si el mercado cae un 40 %.",
+        f"Con la operación comprometida (unidades vistas, ciclo de una semana, placas temporales) y 14 plazas sin obra: 216 ventas y {eur(M['local']['grande14']['p50'])} € de patrimonio al mes 36.",
     ):
         wrap(c, txt, 36, y, 880, size=10.5, leading=15, color=Color(0.86, 0.85, 0.82), max_lines=3)
         y -= 40

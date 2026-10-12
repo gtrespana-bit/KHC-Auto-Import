@@ -81,24 +81,29 @@
 - **Ojo con la comparación**: los 493.007 € no son «gratis». Se pagan con el
   riesgo del 16 % y con la caja del día 1 en negativo.
 
-### A.6 · La reforma
+### A.6 · La reforma (revisado el 12/10/2026: pesa más de lo que decía esta lista)
 
 - **Dice el PDF**: 5.115,47 € repartidos en 3.973,93 € el día 1 y 1.141,54 € el
   mes 2, **como obligación**.
-- **Qué es correcto**: la reforma es **aplazable sin consecuencias** (la nave es
-  apta tal cual) y en el modelo pesa un 2-3 % del resultado. Lo que sí importa es
-  el orden: **fase 1 (suelo, pintura, luces, seguridad, lonas) antes de meter
-  coches; fase 2 (decoración, archivo, herramientas) con el flujo de caja**.
-  Nunca obra con los coches dentro.
+- **Qué es correcto**: la nave es apta tal cual y la obra es **aplazable**, pero
+  no es neutral: medida con el mismo local ya elegido (550 m², 14 plazas, mismos
+  coches), la obra del día 1 baja el patrimonio P50 del mes 36 de **515.093 € a
+  489.441 €** y sube los meses en descubierto del **3,2 % al 10,4 %**. Cada euro
+  de obra antes de facturar es un coche que no rota. **Regla: cero suelo, pintura
+  y mobiliario en cualquier nave que no sea la definitiva; en la definitiva, sólo
+  luces, alarma y extintores al principio y el resto con caja sobrante.** Nunca
+  obra con los coches dentro.
 
 ### A.7 · El «stock de trabajo» de 12-22 coches
 
 - **Dice el PDF**: el lote crece hasta 12 coches (o 22 en la versión antigua).
 - **Qué es correcto**: cada plaza vale 25.000-60.000 € en tres años, así que
-  tener más coches es bueno **si se pueden pagar y colocar**. Con 50.000 €, el
-  stock sostenible sin riesgo es **7 plazas**; a partir de ahí hay que mudarse a
-  un local mayor (10-12 plazas) **y pagarlo con la caja del negocio**, no con el
-  capital del día 1.
+  tener más coches es bueno **si se pueden pagar y colocar**. Con 50.000 € el
+  arranque aguanta 3 coches y la flota crece con la caja (el modelo compra con el
+  dinero que entra: nunca hay plazas vacías por falta de capital sin que la caja
+  esté bajo el fondo). Medido con la nave grande sin obra: 8 plazas → 326.725 €,
+  12 → 465.106 €, 14 → 515.093 €. **El techo del local no es el problema; el
+  problema es firmar cuota grande + obra + fianza antes de facturar.**
 
 ---
 
@@ -131,8 +136,17 @@
 
 ## D. Lo que hay que decidir antes de regenerar el PDF
 
-1. **Nave de arranque**: ¿220 m² a 600 € (recomendado, con salida a 12 meses) u
-   O Milladoiro a 1.200 € desde el día 1?
+1. **Nave de arranque** (revisado el 12/10/2026): con los anuncios de octubre,
+   la decisión es **por €/plaza**, no por cuota:
+   - **10-17 plazas a 2,00-2,11 €/m² con salida a 12 meses** (San Marcos 550 m² a
+     1.100 €; Marrozos 710 m² a 1.500 €): mejor resultado con *menos* riesgo
+     (515.093 € y 3,2 % de descubiertos, sin obra).
+   - **220 m² a 600 € (86 €/plaza)**: sólo como contrato corto de paso, sin obra,
+     si no aparece la anterior. Ahorra ~4.300 € netos de aquí a la mudanza del
+     mes 15-18 y en el escenario malo (−40 %) acaba con ~24.000 € más que la nave
+     grande desde el día 1: es un seguro, no un ahorro.
+   - **O Milladoiro a 1.200 € con obra completa**: el peor de los tres. No
+     firmarlo así.
 2. **Política de nómina**: ¿«plan» (nómina objetivo, 5 recortes, más patrimonio)
    o «nómina primero» (sueldo blindado, ~14.300 € menos de patrimonio)?
 3. **Escenario de velocidad de venta**: media de mercado (base), optimista o

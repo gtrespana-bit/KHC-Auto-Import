@@ -269,21 +269,103 @@ hace con la nave vacía y lo que se ve en las fotos); **fase 2 = decoración,
 archivo, herramientas y el resto**, pagada con el flujo de caja. Nunca obra con
 los coches dentro.
 
-### 5.4 ¿Compensa una nave más pequeña y económica?
+### 5.4 ¿Compensa una nave más pequeña y económica? (revisado el 12/10/2026)
 
-**Como primer local, sí; como local definitivo, no** — y esa es la lectura nueva
-de la v3. La nave pequeña cuesta 600 €/mes en vez de 1.200 €, la fianza 1.200 €
-en vez de 2.400 €, la reforma ~3.100 € en vez de 5.115 €, y arranca con 3.813 €
-de aire en vez de en descubierto. **Pero se queda pequeña en el mes 13**, y a
-partir de ahí cada mes que pasa con 7 plazas deja 176.673 € de caja parada al
-final (sección 5.5). La estrategia buena es usarla **de trampolín, no de casa**:
+**Pregunta del dueño:** «¿nos vale la pena empezar en una nave pequeña para
+tener que cambiarnos a otra en un año? Remodelar una nave para usarla solo un
+año no me parece lógico».
 
-- **Contrato a 12 meses prorrogable, o salida pactada.** Es la condición que hace
-  posible mudarse en el mes 15-18 sin pagar el año que queda.
-- **Negociar la reforma de la nave nueva** cuando llegue el momento: en
-  O Milladoiro la fase 1 (suelo, pintura, luz, seguridad) es lo único necesario.
-- **La mudanza se paga sola**: la fianza (2.400 €) sale de la caja, la licencia
-  nueva es otro trámite (400-1.500 €) y la caja del mes 15 ya tiene 18.543 €.
+**Respuesta corta: no como ahorro, puede valer como seguro. Y en lo de la obra
+tiene toda la razón: es el único punto donde el plan de paso pierde dinero de
+verdad.** Tres comprobaciones, todas medidas con el motor de siempre.
+
+#### a) La nave pequeña no es más barata por plaza: es más pequeña, y punto
+
+| Local (anuncios, oct-2026) | m² | €/mes | €/m² | plazas | **€/plaza al mes** |
+|---|---|---|---|---|---|
+| San Marcos | 550 | 1.100 | 2,00 | 17 | **65** |
+| Campus Norte | 800 | 1.600 | 2,00 | 24 | **67** |
+| Marrozos-Eixo | 710 | 1.500 | 2,11 | 21 | **71** |
+| O Milladoiro | 465 | 1.200 | 2,58 | 14 | **86** |
+| Nave 220 m² (Sionlla/Castiñeiriño) | 220 | 600 | 2,73 | 7 | **86** |
+| Fontiñas | 334 | 1.200 | 3,59 | 11 | **109** |
+
+La nave de 600 € cuesta **2,73 €/m²** y **86 € por plaza**: más por metro que
+O Milladoiro y exactamente lo mismo por plaza. Lo que se ahorra no es precio, es
+cuota; y se paga con la mitad del techo. El criterio para elegir nave no es la
+cuota total, es **€/plaza** (y, con el capital justo, el €/m²).
+
+#### b) Lo que se paga por el camino: la cuenta de la mudanza
+
+| Concepto | € |
+|---|---|
+| Alquiler ahorrado: 600 €/mes × 15 meses | +9.000 |
+| Licencia de apertura nueva en el destino | −800 |
+| Transporte, rótulos, suministros y el mes perdido | −2.500 |
+| Fianza extra que hay que tener inmovilizada (se recupera) | −1.200 |
+| **Saldo a favor de empezar pequeño** | **+4.316** |
+
+(Los 2.500 € de transporte y rótulos son un supuesto declarado; el modelo antes
+no los cobraba y ahora sí.)
+
+Es decir: **la mudanza cuesta del orden de 4.300 € netos**, no un dineral. El
+problema no es la mudanza.
+
+#### c) Lo que sí cuesta dinero: la obra, y sólo en la nave equivocada
+
+| Misma nave (465 m², 14 plazas), mismos coches | patrim. P50 mes 36 | meses en descubierto |
+|---|---|---|
+| **Sin obra** | **515.093 €** | **3,2 %** |
+| Sólo lo movible (luces, alarma, extintores): 2.045 € | 497.619 € | 6,0 % |
+| Obra completa del proyecto: 5.115 € | 489.441 € | 10,4 % |
+
+Cada euro gastado en obra antes de facturar vale ~5 € de patrimonio al mes 36 en
+el modelo, porque ese euro es un coche que rota. **Es resultado del modelo, no
+una ley**, pero mide lo único que importa en los primeros ocho meses: la
+liquidez. Y en una nave de paso, además, el suelo y la pintura se quedan allí
+(905 € de epoxi + 479 € de pintura): **1.384 € tirados con toda la razón del
+mundo**. El dueño tiene razón en este punto.
+
+#### d) La comparación que decide (250 simulaciones, semilla 41)
+
+| Camino | ventas | caja día 1 | patrim. P50 | caja<0 | P50 con mercado −40 % |
+|---|---|---|---|---|---|
+| Nave 220 m² · 7 plazas · no se muda | 127 | 10.319 € | 276.472 € | 9,2 % | — |
+| Nave 220 m² → O Milladoiro · 12 plazas | 199 | 9.293 € | 474.747 € | 8,0 % | 229.323 € |
+| O Milladoiro día 1 · 12 plazas | 195 | 8.454 € | 465.106 € | 3,2 % | 201.799 € |
+| **O Milladoiro día 1 · 14 plazas** | **216** | **8.454 €** | **515.093 €** | **3,2 %** | 205.115 € |
+| Plan de hoy (O Milladoiro + obra completa) | 208 | 5.075 € | 493.007 € | 16,0 % | 171.701 € |
+
+**Lo que enseña esta tabla, en contra de la recomendación anterior:**
+
+1. **La obra era el problema, no la nave.** O Milladoiro desde el día 1, sin
+   obra y llenando las 14 plazas, da **515.093 € con 3,2 % de meses en
+   descubierto** y **8.454 € el día 1**: mejor que la nave pequeña (276.472 €),
+   mejor que la ruta de paso (474.747 €) y mucho mejor que el plan de hoy
+   (16,0 % de riesgo).
+2. **Con 50.000 € el cuello de botella es el capital, no el techo.** Con
+   objetivo de 8 plazas el patrimonio P50 es 326.725 €; con 14, 515.093 €. Las
+   plazas que no puedas llenar no cuestan nada: la nave grande se llena sola
+   cuando la caja lo permite (el modelo compra con el dinero que entra). Lo que
+   cuesta dinero es pagar cuota grande **con obra hecha y flota de 4**.
+3. **La nave de paso se justifica cuando las naves grandes de verdad
+   disponibles cuestan 3,3-4,6 €/m²** (1.690-2.300 €/mes): ahí ya no es una
+   elección de tamaño, es pagar casi el triple por plaza. Con las naves de
+   2,00-2,11 €/m² del cuadro (a), no hace falta trampolín.
+4. **Lo que la nave de paso compra es un seguro, y es un seguro caro**: en el
+   escenario malo (mercado −40 %) la ruta de paso acaba con 229.323 € frente a
+   los 205.115 € de la nave grande desde el día 1, y con 24,0 % de meses en
+   descubierto frente al 30,4 %. Cuesta ~40.000 € de mediana en el escenario
+   central y paga ~24.000 € en el malo. Para un negocio que arranca sin deuda y
+   con el dinero de casa, ese seguro puede tener sentido; lo que no tiene sentido
+   es pagarlo con obra y con una mudanza no prevista.
+
+**Regla que se lleva al plan:** elegir nave por **€/plaza**; firmar **10-15
+plazas a ≤2,2 €/m² con salida a 12 meses** si existe; **cero obra** en cualquier
+nave que no sea la definitiva, y en la definitiva sólo lo que hace falta para
+trabajar y asegurar; y si el único local grande disponible pasa de 1.600 €/mes,
+entonces nave de paso a 600 € **sin obra** y mudanza cuando la flota esté llena
+(meses 15-18).
 
 ### 5.5 Si la búsqueda no es el límite, ¿cuál es? (el hallazgo de la v3)
 
@@ -382,32 +464,45 @@ papeles.** No hay nada que cambiar.
 
 ## 7. Recomendación
 
-**Abrir en la nave pequeña, con la reforma por fases, y mudarse a O Milladoiro en
-cuanto la flota la llene.**
+**La nave más grande que se pueda firmar a ≤2,2 €/m² con salida a 12 meses, sin
+hacer obra. Si eso no existe en el mercado del día, nave de paso de 220 m² a
+600 € —sin obra— y mudanza cuando la flota esté llena (mes 15-18).**
 
-1. **Local de arranque:** nave de 180-230 m² entre 590 € y 650 €/mes (Sionlla,
-   Castiñeiriño, Campus Norte), **con contrato de 12 meses prorrogable o salida
-   pactada**: es lo que permite mudarse sin pagar el año que quede.
-2. **Día 1:** 8.369,41 € en caja, fondo de 3 meses cubierto y **3.813 € de aire**.
+1. **Local:** decidir por **€/plaza**, no por cuota. En octubre de 2026 hay
+   10-17 plazas a 2,00-2,11 €/m² (65-71 €/plaza) y naves de 3,3-4,6 €/m²
+   (110 €/plaza o más). La nave de 220 m² a 600 € son 86 €/plaza: si se firma,
+   es por el contrato corto, no por el precio. **Salida a 12 meses en cualquier
+   caso** (sección 5.4).
+2. **Día 1:** con O Milladoiro sin obra, 8.454 € en caja y el fondo de 3 meses
+   cubierto; con la nave de 220 m² sin obra, 10.319 €. **Ninguna obra antes de
+   facturar**: los 5.115 € del proyecto, si se gastan el día 1, cuestan 25.652 €
+   de patrimonio al mes 36 y suben el riesgo del 3,2 % al 10,4 %.
 3. **Actividad declarada inocua** (compraventa, exposición, almacén); el taller,
-   fuera de la nave.
+   fuera de la nave. La obra, cuando la pague la caja: suelo, pintura, luces y
+   seguridad **sólo en la nave definitiva**.
 4. **Los tres primeros coches:** BMW 116d (9.010 €), Audi A3 (12.455 €) y Golf GTI
    (12.674 €). Los tres mejores del catálogo en beneficio por euro y por mes.
    Después, **el Golf VIII y el Seat León son los que más giran (32 días)** y los
    que deben estar siempre en la nave.
 5. **Stock: llenar las plazas y mantenerlas llenas.** Una plaza, un modelo. Es la
-   única disciplina que mueve la aguja: cada plaza vale 30.000-50.000 €.
+   única disciplina que mueve la aguja: cada plaza vale 30.000-50.000 €. Con la
+   nave grande desde el día 1, medido: 8 plazas → 326.725 € · 10 → 395.042 € ·
+   12 → 465.106 € · 14 → 515.093 €.
 6. **El 318d no se compra** mientras haya otra opción mejor: es el peor retorno
    del catálogo (102 €/mes por cada 1.000 € inmovilizados). El modelo nunca lo
    elige.
-7. **Mudanza a O Milladoiro en el mes 15-18**, no antes y no mucho después: en
-   cuanto la flota de 7 esté llena tres meses seguidos y la caja esté por encima
-   del fondo. **Ir a 10-12 plazas** (D2: 468.449 € con 5,2 % de riesgo).
+7. **Si se empieza en la nave pequeña, mudanza en el mes 15-18**, no antes y no
+   mucho después: en cuanto la flota de 7 esté llena tres meses seguidos y la
+   caja esté por encima del fondo. **Ir a 12-14 plazas.** Si se empieza ya en la
+   nave grande, este punto desaparece: es el ahorro de una licencia, una fianza
+   y un traslado.
 8. **Fondo de 3 meses más la reserva del impuesto**, intocables. La nómina antes
    de comprar el siguiente coche: cuesta ~14.300 € de patrimonio (D3: 454.117 €
    frente a D2: 468.449 €) y el riesgo no sube.
-9. **Cerrar antes de firmar:** el precio real y las condiciones de la nave
-   pequeña, la tasa exacta del concello y una cotización real del seguro.
+9. **Cerrar antes de firmar:** €/plaza y €/m² reales de cada candidata, salida
+   pactada a 12 meses, la tasa exacta del concello y una cotización real del
+   seguro. **Con la lista de octubre de 2026 en la mano, no hay que firmar
+   220 m² a 600 €: hay 550 m² a 1.100 € y 710 m² a 1.500 €** (2,00-2,11 €/m²).
 
 **Tres disparadores que obligan a cambiar el plan:**
 
@@ -415,8 +510,11 @@ cuanto la flota la llene.**
   captación, no la nave. Parar la reinversión y trabajar web y portales.
 - **Mes 12 con menos de 16 coches vendidos** (el P10): recortar el stock de
   trabajo a 5 plazas y bajar la nómina un escalón.
-- **Flota llena tres meses seguidos con la caja por encima del fondo:** mudanza.
-  En el modelo, el mes 15.
+- **Flota llena tres meses seguidos con la caja por encima del fondo:** mudanza
+  (si se empezó en la nave de paso). En el modelo, el mes 15.
+- **Tres meses pagando plazas que no puedes llenar por falta de capital** (no de
+  demanda): entonces el problema es el tamaño del contrato, no el negocio, y
+  toca renegociar o mudarse a algo más pequeño.
 
 ---
 

@@ -172,6 +172,10 @@ NAVES = {
         nombre="Nave 220-227 m² (Sionlla/Castiñeiriño)", rent=600.0, util=100.0,
         net=50.0, seguro=45.0, tasas=25.0, plazas=7, m2=220,
     ),
+    "san_marcos": dict(
+        nombre="San Marcos, 550 m²", rent=1100.0, util=160.0, net=50.0,
+        seguro=60.0, tasas=25.0, plazas=17, m2=550,
+    ),
     "sin_nave": dict(
         nombre="Sin nave: 3 plazas de garaje", rent=195.0, util=0.0, net=5.0,
         seguro=0.0, tasas=0.0, plazas=4, m2=0,
@@ -241,6 +245,13 @@ def estrategia(nombre, nave, coches, reforma_a, reforma_b, **kw):
         papeles=kw.pop("papeles", PAPELES_SEMANAS),
         nave_destino=kw.pop("nave_destino", None),
         nave_destino_mes=kw.pop("nave_destino_mes", 0),
+        # Coste de la mudanza (transporte de lo que no se conduce, rótulos,
+        # alta de suministros, tiempo perdido). El modelo ya cobraba el cambio
+        # de fianza y la licencia nueva; esto es lo de fuera del contrato.
+        muda=kw.pop("muda", 0.0),
+        # Reforma que se hace EN LA NAVE DE DESTINO al mudarse (si la nave de
+        # paso se arregló sólo con cosas que viajan, aquí va el resto).
+        reforma_destino=kw.pop("reforma_destino", 0.0),
         **kw,
     )
 
@@ -278,6 +289,18 @@ ESTRATEGIAS = {
         NAVES["pequena"], ["116d", "A3", "GTI"], REFORMA_PEQ_A, REFORMA_PEQ_B,
         reforma_b_mes=5, nave_destino=NAVES["milladoiro"], nave_destino_mes=15,
         tope_modelo=2,          # ya con sitio: 2 unidades del mismo modelo como máximo
+    ),
+    "milladoiro_sin_reforma": estrategia(
+        "O Milladoiro, SIN reforma, 3 coches de rotación",
+        NAVES["milladoiro"], ["116d", "A3", "GTI"], 0.0, 0.0, tope_modelo=2,
+    ),
+    "san_marcos": estrategia(
+        "San Marcos 550 m² a 1.100 €, SIN reforma, 3 coches de rotación",
+        NAVES["san_marcos"], ["116d", "A3", "GTI"], 0.0, 0.0, tope_modelo=2,
+    ),
+    "pequena_sin_reforma": estrategia(
+        "Nave 220 m² a 600 €, SIN reforma, 3 coches de rotación",
+        NAVES["pequena"], ["116d", "A3", "GTI"], 0.0, 0.0,
     ),
     "milladoiro_2": estrategia(
         "O Milladoiro, reforma completa, 2 coches",
@@ -436,7 +459,8 @@ def simular(est, rng):
                     and nave is not None and nave is not est["nave_destino"]
                     and len(listos) + len(en_camino) >= plazas()):
                 destino = est["nave_destino"]
-                entra = r2(2 * destino["rent"] + est["licencia"])
+                entra = r2(2 * destino["rent"] + est["licencia"] + est["muda"]
+                           + est["reforma_destino"])
                 sale = r2(2 * nave["rent"])  # la fianza vieja se recupera
                 if caja - entra + sale + 1e-6 >= est["floor_meses"] * fijos(destino):
                     caja = r2(caja - entra + sale)
