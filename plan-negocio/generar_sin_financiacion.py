@@ -1450,7 +1450,7 @@ def draw_risk_full(c, n, total):
     rows = [
         ("El mes 2 no se vende", "La caja baja a " + eur(MISS) + ", " + eur(r2(FUND - MISS)) + " por debajo del fondo. El resto de la reforma, " + eur(LATER) + ", espera a la primera venta. Hay que vender desde el mes 2."),
         ("Dos meses seguidos sin vender", "Baja a " + eur(MISS2) + ", " + eur(r2(FUND - MISS2)) + " bajo el fondo. Se esperaría con el sueldo, la reposición y la reforma pendiente."),
-        ("Mes " + (str(cut["n"]) if cut else str(TAX_M1)) + ": el impuesto del año 1", ("Se pagan " + eur(OWN["y1_tax"]) + " y el bruto baja " + eur(r2(cut["want"] - cut["sal"])) + " ese mes.") if cut else "Se pagan " + eur(OWN["y1_tax"]) + " sin recortar el sueldo: con menos coches comprados el año 1, la caja llega con sitio."),
+        ("Mes " + (str(cut["n"]) if cut else str(TAX_M1)) + ": el impuesto del año 1", ("Se pagan " + eur(OWN["y1_tax"]) + " y el bruto baja " + eur(r2(cut["want"] - cut["sal"])) + " ese mes.") if cut else "Se pagan " + eur(OWN["y1_tax"]) + " sin recortar el sueldo: el año 2 se compran menos coches y la caja llega con sitio."),
         ("Precios un 3 % más bajos", cuts_txt(PRICE3["cuts"]) + " Al mes 36: " + str(PRICE3["stock"]) + " coches y " + eur(PRICE3["equity"]) + " dentro."),
         ("Precios un 5 % más bajos", cuts_txt(CUT5["cuts"]) + " Al mes 36: " + str(CUT5["stock"]) + " coches y " + eur(CUT5["equity"]) + " dentro. Los precios de la web tienen que cumplirse."),
         ("El impuesto, al 23 % y no al 15 %", "El año 1 pagaría " + eur(TAX23_Y1) + " en vez de " + eur(Y[1]["tax"]) + ": " + eur(r2(TAX23_Y1 - Y[1]["tax"])) + " más en el mes " + str(TAX_M1) + "."),
