@@ -136,6 +136,17 @@ M["dec_mal"] = medir(dict(DEC, demanda=0.6))
 M["dec_img10"] = medir(dict(DEC, dias=1.10))
 M["dec_img20"] = medir(dict(DEC, dias=1.20))
 
+# --- el techo físico de la nave (dato del dueño, 12/10/2026: espiga 24 / mixta 28) ---
+def _cap(plazas, objetivo, tope, personal=2500.0, desde=13, **kw):
+    return medir(dict(mr.ESTRATEGIAS["decision"], reforma_b_mes=4, reforma_margen=2.0,
+                      nave=dict(mr.NAVES["milladoiro"], plazas=plazas),
+                      objetivo_flota=objetivo, tope_modelo=tope,
+                      personal=personal, personal_desde=desde, **kw))
+
+M["cap"] = {14: _cap(14, 14, 2, personal=0.0), 16: _cap(16, 16, 2, personal=0.0),
+            20: _cap(20, 20, 3), 24: _cap(24, 24, 3), 28: _cap(28, 28, 4)}
+M["cap_lento"] = _cap(24, 24, 3, dias=1.10)
+
 M["local_mal"] = {
     "peq_muda": medir(dict(mr.ESTRATEGIAS["pequena_sin_reforma"], objetivo_flota=12,
                            nave_destino=mr.NAVES["milladoiro"], nave_destino_mes=15,
@@ -590,6 +601,46 @@ def p_plazas(c, n, t):
     wrap(c, "por encima del fondo, porque no hay dónde meter más coches. Ese dinero es el argumento para tener más plazas: "
             "cada mes de retraso después del mes 15 cuesta del orden de 5.000-8.000 € de patrimonio potencial.",
          470, 162, 450, size=8.5, leading=11.5, color=SLATE, max_lines=4)
+
+
+@page
+def p_capacidad(c, n, t):
+    bg(c)
+    heading(c, "El techo físico", "Cuántos coches caben de verdad en O Milladoiro")
+    wrap(c, "Dato del dueño (12/10/2026): espiga a 45° en las dos paredes, 14 + 10 = 24 coches; distribución mixta (90° a la izquierda, 45° a la "
+            "derecha), 15 + 13 = 28. El reparto a lo largo de la pared cuadra con las medidas de un turismo. Lo que no cuadra con la ficha de la "
+            "nave es el ancho: el almacén mide 40 × 10 m.",
+         36, 442, 890, size=9.5, leading=13, max_lines=3)
+    c.setFillColor(GOLD_DEEP)
+    c.setFont("DejaVuBold", 9)
+    c.drawString(36, 400, "LA COMPROBACIÓN QUE HAY QUE HACER CON CINTA MÉTRICA")
+    table(c, 36, 384, ["Fila de coches", "Fondo", "Paso", "Resultado"], [
+        ["45° (espiga)", "4,74 m", "2,83 m", "14 por pared: cuadra con el número del dueño"],
+        ["90° (en batería)", "4,70 m", "2,00 m", "20 por pared"],
+        ["Filas a 45° en las DOS paredes", "9,48 m", "—", "el pasillo central queda en 0,52 m: no cabe"],
+        ["90° izquierda + 45° derecha", "9,44 m", "—", "el pasillo queda en 0,56 m: no cabe"],
+        ["Dos filas + pasillo de 3,5 m necesitan", "12,98 m", "—", "la ficha dice 10 m de ancho"],
+    ], [286, 80, 70, 434], size=8.5, hrow=15, aligns=["l", "c", "c", "l"])
+    wrap(c, "Traducción: las 24-28 plazas son reales si el ancho libre del almacén es de 13 m o más (o si hay dos crujías). Si son 10 m de "
+            "verdad, el número que aguanta es 11-14 dentro, que es lo que dice la ficha de la nave. Medirlo antes de firmar.",
+         36, 284, 890, size=8.5, leading=12, color=SLATE, max_lines=2)
+    c.setFillColor(GOLD_DEEP)
+    c.setFont("DejaVuBold", 9)
+    c.drawString(36, 254, "Y SI CABEN: QUÉ VALE CADA TRAMO DE CAPACIDAD")
+    filas = [[str(pl), str(M["cap"][pl]["ventas"]), eur(M["cap"][pl]["p10"]), eur(M["cap"][pl]["p50"]),
+              f"{100*M['cap'][pl]['riesgo']:.1f} %", (f"mes {M['cap'][pl]['obra_mes']}" if M['cap'][pl]['obra_mes'] else "—")]
+             for pl in (14, 20, 24, 28)]
+    table(c, 36, 236, ["Plazas", "ventas", "P10", "P50", "caja<0", "obra"], filas,
+          [70, 70, 110, 110, 76, 74], size=8.5, hrow=15, bold_rows=(0,),
+          aligns=["c", "c", "r", "r", "c", "c"])
+    wrap(c, f"De 14 a 28 plazas el patrimonio P50 va de {eur(M['cap'][14]['p50'])} € a {eur(M['cap'][28]['p50'])} € (16 plazas, sin personal, "
+            f"dan {eur(M['cap'][16]['p50'])} €), con una persona contratada desde el mes 13 en las naves grandes (2.500 €/mes): a partir de 20 "
+            f"coches no se llega solo. Si los coches vendieran un 10 % más despacio, las 24 plazas darían {eur(M['cap_lento']['p50'])} €.",
+         36, 152, 890, size=8.5, leading=12, color=SLATE, max_lines=2)
+    card(c, 36, 68, 284, 62, "Coches en stock, mes 6", "4", "da igual la capacidad: manda el dinero", acento=GOLD)
+    card(c, 336, 68, 284, 62, "Coches en stock, mes 12", "6-8", "la capacidad decide a partir del mes 10-12", acento=GOLD)
+    card(c, 636, 68, 288, 62, "Si caben 28 plazas", f"+{eur(M['cap'][28]['p50'] - M['cap'][14]['p50'])} €",
+         "frente a las 14 plazas calculadas", acento=GREEN)
 
 
 @page

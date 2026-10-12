@@ -253,6 +253,12 @@ def estrategia(nombre, nave, coches, reforma_a, reforma_b, **kw):
         # alta de suministros, tiempo perdido). El modelo ya cobraba el cambio
         # de fianza y la licencia nueva; esto es lo de fuera del contrato.
         muda=kw.pop("muda", 0.0),
+        # Coste mensual de personal CONTRATADO (no la nómina de la familia, que
+        # va aparte). A partir de ~16 coches en stock el dueño no llega solo:
+        # hace falta alguien en la nave y alguien que venda y prepare. Se
+        # contrata cuando el volumen lo pide, no el día 1.
+        personal=kw.pop("personal", 0.0),
+        personal_desde=kw.pop("personal_desde", 1),
         # Reforma que se hace EN LA NAVE DE DESTINO al mudarse (si la nave de
         # paso se arregló sólo con cosas que viajan, aquí va el resto).
         reforma_destino=kw.pop("reforma_destino", 0.0),
@@ -361,13 +367,17 @@ def simular(est, rng):
     def fijos(nv):
         if nv is None:
             base = NAVES["sin_nave"]
-            return r2(est["reta"] + g.MKT + base["rent"] + base["net"])
+            return r2(est["reta"] + g.MKT + base["rent"] + base["net"]
+                      + (est["personal"] if mes_actual[0] >= est["personal_desde"] else 0.0))
         return r2(est["reta"] + g.MKT + nv["rent"] + nv["util"] + nv["net"]
-                  + nv["seguro"] + nv["tasas"])
+                  + nv["seguro"] + nv["tasas"]
+                  + (est["personal"] if mes_actual[0] >= est["personal_desde"] else 0.0))
 
     def plazas():
         tope = (nave or NAVES["sin_nave"])["plazas"]
         return min(tope, est["objetivo_flota"]) if est["objetivo_flota"] else tope
+
+    mes_actual = [1]
 
     # --- día 1 -------------------------------------------------------------
     caja = 50000.0
@@ -421,8 +431,6 @@ def simular(est, rng):
         m = mes_actual[0]
         anio = 1 if m <= 12 else 2 if m <= 24 else 3
         return _tipo_impuesto(max(0.0, res), anio, usados)
-
-    mes_actual = [1]
 
     def floor_sueldo():
         """Lo que no se toca para pagar la nómina: el fondo de meses de gastos."""
