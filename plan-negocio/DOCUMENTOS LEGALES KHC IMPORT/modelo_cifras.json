@@ -1,0 +1,494 @@
+{
+  "lot": [
+    {
+      "name": "Mercedes-Benz Clase C Estate 2019",
+      "cost": 17666.0,
+      "sell": 23990.0,
+      "gross": 6324.0,
+      "rebu": 1097.55,
+      "net": 5226.45,
+      "web_sell": null,
+      "web_net": null
+    },
+    {
+      "name": "Volkswagen Golf GTI Performance 2015",
+      "cost": 12674.0,
+      "sell": 18500.0,
+      "gross": 5826.0,
+      "rebu": 1011.12,
+      "net": 4814.88,
+      "web_sell": null,
+      "web_net": null
+    },
+    {
+      "name": "BMW 116d Manual 2015",
+      "cost": 9010.0,
+      "sell": 13475.0,
+      "gross": 4465.0,
+      "rebu": 774.92,
+      "net": 3690.08,
+      "web_sell": 12475.0,
+      "web_net": 2863.64
+    },
+    {
+      "name": "Volkswagen Golf VIII 1.0 TSI 2021",
+      "cost": 14617.0,
+      "sell": 18700.0,
+      "gross": 4083.0,
+      "rebu": 708.62,
+      "net": 3374.38,
+      "web_sell": null,
+      "web_net": null
+    },
+    {
+      "name": "BMW 318d Touring 2019",
+      "cost": 14220.0,
+      "sell": 18250.0,
+      "gross": 4030.0,
+      "rebu": 699.42,
+      "net": 3330.58,
+      "web_sell": 17250.0,
+      "web_net": 2504.13
+    },
+    {
+      "name": "Volvo XC40 2.0 D3 2020",
+      "cost": 14738.0,
+      "sell": 18500.0,
+      "gross": 3762.0,
+      "rebu": 652.91,
+      "net": 3109.09,
+      "web_sell": null,
+      "web_net": null
+    },
+    {
+      "name": "Audi A3 1.0 TFSI 2018",
+      "cost": 12455.0,
+      "sell": 15990.0,
+      "gross": 3535.0,
+      "rebu": 613.51,
+      "net": 2921.49,
+      "web_sell": null,
+      "web_net": null
+    }
+  ],
+  "totals": {
+    "cars": 7,
+    "cost": 95380.0,
+    "sell": 127405.0,
+    "gross": 32025.0,
+    "rebu": 5558.05,
+    "net": 26466.95,
+    "avg_net": 3780.99,
+    "avg_web_net": 3544.87,
+    "web_net": 24814.06
+  },
+  "opex_month": {
+    "rent": 1100.0,
+    "reta": 380.0,
+    "marketing": 250.0,
+    "utilities": 150.0,
+    "structure": 1880.0,
+    "debt_plan": 966.0,
+    "debt_exact": 955.06,
+    "total_plan": 2846.0
+  },
+  "loan": {
+    "principal": 50000.0,
+    "rate": 0.055,
+    "months": 60,
+    "payment_exact": 955.06,
+    "payment_plan": 966.0,
+    "y1_interest": 2527.03,
+    "y1_principal": 8933.69,
+    "y1_balance": 41066.31,
+    "y1_service": 11460.72,
+    "y1_service_plan": 11592.0
+  },
+  "funds": {
+    "capital": 50000.0,
+    "loan": 50000.0,
+    "total": 100000.0,
+    "stock": 95380.0,
+    "residual": 4620.0,
+    "capex_nave": 4550.0,
+    "sgr_2pct": 1000.0
+  },
+  "plan_ratio": 1.33,
+  "scenarios": {
+    "stress_12": {
+      "sales": 12,
+      "unit_net": 3780.99,
+      "contrib": 45371.88,
+      "structure": 22560.0,
+      "ebitda": 22811.88,
+      "interest": 2527.03,
+      "tax_rate": 0.15,
+      "tax": 3042.73,
+      "result": 17242.12,
+      "service": 11460.72,
+      "dscr": 1.72,
+      "monthly_surplus": 945.93
+    },
+    "base_30": {
+      "sales": 30,
+      "unit_net": 3780.99,
+      "contrib": 113429.7,
+      "structure": 22560.0,
+      "ebitda": 90869.7,
+      "interest": 2527.03,
+      "tax_rate": 0.15,
+      "tax": 13251.4,
+      "result": 75091.27,
+      "service": 11460.72,
+      "dscr": 6.77,
+      "monthly_surplus": 945.93
+    },
+    "stress_23": {
+      "sales": 12,
+      "unit_net": 3780.99,
+      "contrib": 45371.88,
+      "structure": 22560.0,
+      "ebitda": 22811.88,
+      "interest": 2527.03,
+      "tax_rate": 0.23,
+      "tax": 4665.52,
+      "result": 15619.33,
+      "service": 11460.72,
+      "dscr": 1.58,
+      "monthly_surplus": 945.93
+    },
+    "price_5": {
+      "sales": 12,
+      "unit_net": 3028.89,
+      "contrib": 36346.68,
+      "structure": 22560.0,
+      "ebitda": 13786.68,
+      "interest": 2527.03,
+      "tax_rate": 0.15,
+      "tax": 1688.95,
+      "result": 9570.7,
+      "service": 11460.72,
+      "dscr": 1.06,
+      "monthly_surplus": 193.83
+    },
+    "web_prices": {
+      "sales": 12,
+      "unit_net": 3544.87,
+      "contrib": 42538.44,
+      "structure": 22560.0,
+      "ebitda": 19978.44,
+      "interest": 2527.03,
+      "tax_rate": 0.15,
+      "tax": 2617.71,
+      "result": 14833.7,
+      "service": 11460.72,
+      "dscr": 1.51,
+      "monthly_surplus": 709.81
+    },
+    "no_nave": {
+      "sales": 12,
+      "unit_net": 3780.99,
+      "contrib": 45371.88,
+      "structure": 9360.0,
+      "ebitda": 36011.88,
+      "interest": 2527.03,
+      "tax_rate": 0.15,
+      "tax": 5022.73,
+      "result": 28462.12,
+      "service": 11460.72,
+      "dscr": 2.7,
+      "monthly_surplus": 2045.93
+    }
+  },
+  "break_even_sales": {
+    "dscr_130_15": 11,
+    "dscr_100_15": 10
+  },
+  "cash_base": [
+    {
+      "month": 1,
+      "unit": "Mercedes-Benz Clase C Estate 2019",
+      "margin": 5226.45,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 4620.0,
+      "end": 7011.39
+    },
+    {
+      "month": 2,
+      "unit": "Volkswagen Golf GTI Performance 2015",
+      "margin": 4814.88,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 7011.39,
+      "end": 8991.21
+    },
+    {
+      "month": 3,
+      "unit": "BMW 116d Manual 2015",
+      "margin": 3690.08,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 8991.21,
+      "end": 9846.23
+    },
+    {
+      "month": 4,
+      "unit": "Volkswagen Golf VIII 1.0 TSI 2021",
+      "margin": 3374.38,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 9846.23,
+      "end": 10385.55
+    },
+    {
+      "month": 5,
+      "unit": "BMW 318d Touring 2019",
+      "margin": 3330.58,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 10385.55,
+      "end": 10881.07
+    },
+    {
+      "month": 6,
+      "unit": "Volvo XC40 2.0 D3 2020",
+      "margin": 3109.09,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 10881.07,
+      "end": 11155.1
+    },
+    {
+      "month": 7,
+      "unit": "Audi A3 1.0 TFSI 2018",
+      "margin": 2921.49,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 11155.1,
+      "end": 11241.53
+    },
+    {
+      "month": 8,
+      "unit": "Mercedes-Benz Clase C Estate 2019",
+      "margin": 5226.45,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 11241.53,
+      "end": 13632.92
+    },
+    {
+      "month": 9,
+      "unit": "Volkswagen Golf GTI Performance 2015",
+      "margin": 4814.88,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 13632.92,
+      "end": 15612.74
+    },
+    {
+      "month": 10,
+      "unit": "BMW 116d Manual 2015",
+      "margin": 3690.08,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 15612.74,
+      "end": 16467.76
+    },
+    {
+      "month": 11,
+      "unit": "Volkswagen Golf VIII 1.0 TSI 2021",
+      "margin": 3374.38,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 16467.76,
+      "end": 17007.08
+    },
+    {
+      "month": 12,
+      "unit": "BMW 318d Touring 2019",
+      "margin": 3330.58,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 17007.08,
+      "end": 17502.6
+    }
+  ],
+  "cash_reform_m1": [
+    {
+      "month": 1,
+      "unit": "Mercedes-Benz Clase C Estate 2019",
+      "margin": 5226.45,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 4550.0,
+      "start": 4620.0,
+      "end": 2461.39
+    },
+    {
+      "month": 2,
+      "unit": "Volkswagen Golf GTI Performance 2015",
+      "margin": 4814.88,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 2461.39,
+      "end": 4441.21
+    },
+    {
+      "month": 3,
+      "unit": "BMW 116d Manual 2015",
+      "margin": 3690.08,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 4441.21,
+      "end": 5296.23
+    },
+    {
+      "month": 4,
+      "unit": "Volkswagen Golf VIII 1.0 TSI 2021",
+      "margin": 3374.38,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 5296.23,
+      "end": 5835.55
+    },
+    {
+      "month": 5,
+      "unit": "BMW 318d Touring 2019",
+      "margin": 3330.58,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 5835.55,
+      "end": 6331.07
+    },
+    {
+      "month": 6,
+      "unit": "Volvo XC40 2.0 D3 2020",
+      "margin": 3109.09,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 6331.07,
+      "end": 6605.1
+    },
+    {
+      "month": 7,
+      "unit": "Audi A3 1.0 TFSI 2018",
+      "margin": 2921.49,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 6605.1,
+      "end": 6691.53
+    },
+    {
+      "month": 8,
+      "unit": "Mercedes-Benz Clase C Estate 2019",
+      "margin": 5226.45,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 6691.53,
+      "end": 9082.92
+    },
+    {
+      "month": 9,
+      "unit": "Volkswagen Golf GTI Performance 2015",
+      "margin": 4814.88,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 9082.92,
+      "end": 11062.74
+    },
+    {
+      "month": 10,
+      "unit": "BMW 116d Manual 2015",
+      "margin": 3690.08,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 11062.74,
+      "end": 11917.76
+    },
+    {
+      "month": 11,
+      "unit": "Volkswagen Golf VIII 1.0 TSI 2021",
+      "margin": 3374.38,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 11917.76,
+      "end": 12457.08
+    },
+    {
+      "month": 12,
+      "unit": "BMW 318d Touring 2019",
+      "margin": 3330.58,
+      "structure": 1880.0,
+      "debt": 955.06,
+      "reform": 0.0,
+      "start": 12457.08,
+      "end": 12952.6
+    }
+  ],
+  "erp_check": [
+    {
+      "name": "Golf VIII 1.0 TSI 2021",
+      "precio_de": 12500.0,
+      "erp_all_in": 14611.82,
+      "plan_cost": 14617.0,
+      "venta_plan": 18700.0,
+      "venta_web": 18700.0
+    },
+    {
+      "name": "Audi A3 1.0 TFSI 2018",
+      "precio_de": 10650.0,
+      "erp_all_in": 12761.82,
+      "plan_cost": 12455.0,
+      "venta_plan": 15990.0,
+      "venta_web": 15990.0
+    },
+    {
+      "name": "Mercedes Clase C Estate 2019",
+      "precio_de": 15000.0,
+      "erp_all_in": 17120.36,
+      "plan_cost": 17666.0,
+      "venta_plan": 23990.0,
+      "venta_web": 23990.0
+    },
+    {
+      "name": "Volvo XC40 D3 2020",
+      "precio_de": 12000.0,
+      "erp_all_in": 14120.36,
+      "plan_cost": 14738.0,
+      "venta_plan": 18500.0,
+      "venta_web": 18500.0
+    },
+    {
+      "name": "BMW 318d Touring 2019",
+      "precio_de": 12990.0,
+      "erp_all_in": 15110.36,
+      "plan_cost": 14220.0,
+      "venta_plan": 18250.0,
+      "venta_web": 17250.0
+    }
+  ],
+  "note": "El coste del plan ya incluye coche, transporte, matriculación y puesta a la venta. El margen neto no se vuelve a reducir por esos conceptos."
+}
