@@ -360,12 +360,31 @@ mundo**. El dueño tiene razón en este punto.
    con el dinero de casa, ese seguro puede tener sentido; lo que no tiene sentido
    es pagarlo con obra y con una mudanza no prevista.
 
-**Regla que se lleva al plan:** elegir nave por **€/plaza**; firmar **10-15
-plazas a ≤2,2 €/m² con salida a 12 meses** si existe; **cero obra** en cualquier
-nave que no sea la definitiva, y en la definitiva sólo lo que hace falta para
-trabajar y asegurar; y si el único local grande disponible pasa de 1.600 €/mes,
-entonces nave de paso a 600 € **sin obra** y mudanza cuando la flota esté llena
-(meses 15-18).
+#### e) El umbral, con la nave del proyecto (O Milladoiro)
+
+La nave de la decisión es **O Milladoiro (465 m², 1.200 €/mes, 14 plazas, 86 €/plaza)**:
+es la que se venía analizando y la misma que la de 220 m² en €/plaza. ¿A partir de
+qué precio dejaría de ganar? Medido, subiendo sólo el alquiler:
+
+| Alquiler de O Milladoiro (14 plazas) | €/plaza | patrim. P50 | caja<0 |
+|---|---|---|---|
+| **1.200 € (precio del anuncio)** | **86** | **515.093 €** | **3,2 %** |
+| 1.400 € | 100 | 500.057 € | 6,8 % |
+| 1.600 € | 114 | 490.377 € | 9,6 % |
+| 1.800 € | 129 | 476.227 € | 14,4 % |
+| 2.000 € | 143 | 454.617 € | 20,4 % |
+
+Comparado con la ruta de paso (220 m² → mudanza en el mes 15: **474.747 € y
+8,0 %**) y con quedarse en la pequeña para siempre (**276.472 € y 9,2 %**), el
+empate con la ruta de paso llega alrededor de **1.700-1.800 €/mes (≈125 €/plaza)**;
+por debajo de eso, la nave grande gana en resultado **y** en riesgo. Quedarse
+siempre en 7 plazas no gana a ningún precio razonable.
+
+**Regla que se lleva al plan:** con O Milladoiro a 1.200 €/mes, **se empieza en
+O Milladoiro, desde el día 1 y sin obra**. La nave de paso (220 m² a 600 €) sólo
+se firma si el precio real negociado de la grande pasa de ~1.700 €/mes o si no
+hay forma de pactar salida a 12 meses. Y en cualquier caso: **cero obra** antes de
+facturar.
 
 ### 5.5 Si la búsqueda no es el límite, ¿cuál es? (el hallazgo de la v3)
 
@@ -468,11 +487,11 @@ papeles.** No hay nada que cambiar.
 hacer obra. Si eso no existe en el mercado del día, nave de paso de 220 m² a
 600 € —sin obra— y mudanza cuando la flota esté llena (mes 15-18).**
 
-1. **Local:** decidir por **€/plaza**, no por cuota. En octubre de 2026 hay
-   10-17 plazas a 2,00-2,11 €/m² (65-71 €/plaza) y naves de 3,3-4,6 €/m²
-   (110 €/plaza o más). La nave de 220 m² a 600 € son 86 €/plaza: si se firma,
-   es por el contrato corto, no por el precio. **Salida a 12 meses en cualquier
-   caso** (sección 5.4).
+1. **Local: O Milladoiro desde el día 1**, 465 m² a 1.200 €/mes, 14 plazas
+   (**86 €/plaza**, los mismos que la nave de 220 m² a 600 €: la pequeña no
+   ahorra precio, sólo techo). Con salida pactada a 12 meses y **sin obra**. La
+   nave de paso queda como plan B si el precio real supera ~1.700 €/mes o si no
+   hay cláusula de salida (sección 5.4).
 2. **Día 1:** con O Milladoiro sin obra, 8.454 € en caja y el fondo de 3 meses
    cubierto; con la nave de 220 m² sin obra, 10.319 €. **Ninguna obra antes de
    facturar**: los 5.115 € del proyecto, si se gastan el día 1, cuestan 25.652 €
@@ -491,11 +510,11 @@ hacer obra. Si eso no existe en el mercado del día, nave de paso de 220 m² a
 6. **El 318d no se compra** mientras haya otra opción mejor: es el peor retorno
    del catálogo (102 €/mes por cada 1.000 € inmovilizados). El modelo nunca lo
    elige.
-7. **Si se empieza en la nave pequeña, mudanza en el mes 15-18**, no antes y no
-   mucho después: en cuanto la flota de 7 esté llena tres meses seguidos y la
-   caja esté por encima del fondo. **Ir a 12-14 plazas.** Si se empieza ya en la
-   nave grande, este punto desaparece: es el ahorro de una licencia, una fianza
-   y un traslado.
+7. **Si por lo que sea se empieza en la nave pequeña, mudanza en el mes 15-18**
+   (plan B): en cuanto la flota de 7 esté llena tres meses seguidos y la caja
+   esté por encima del fondo. **Ir a 12-14 plazas.** Empezando en O Milladoiro
+   este punto desaparece: es el ahorro de una licencia, una fianza y un
+   traslado.
 8. **Fondo de 3 meses más la reserva del impuesto**, intocables. La nómina antes
    de comprar el siguiente coche: cuesta ~14.300 € de patrimonio (D3: 454.117 €
    frente a D2: 468.449 €) y el riesgo no sube.

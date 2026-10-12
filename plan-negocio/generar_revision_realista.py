@@ -602,10 +602,10 @@ def p_local(c, n, t):
     table(c, 36, 390, ["Camino", "ventas", "caja día 1", "patrim. P50", "caja<0", "P50 si el mercado −40 %"],
           filas, [316, 62, 92, 104, 78, 156], size=8.5, hrow=18, bold_rows=(1, 3),
           aligns=["l", "c", "r", "r", "c", "r"])
-    wrap(c, "Ninguna ruta se rompe en el escenario central y las dos acaban en el mismo sitio: 465.000-515.000 €. "
-            "El riesgo de quedarte sin caja en un mes malo se paga con la cuota pequeña (24 % frente a 30 % si el mercado "
-            "cae un 40 %); con 50.000 € propios y sin facturar, ésa es la única ventaja real de la nave de paso.",
-         36, 272, 890, size=8.5, leading=12, color=SLATE, max_lines=3)
+    wrap(c, "O Milladoiro a 1.200 €/mes son 86 €/plaza: los mismos que la nave de 220 m² a 600 €. La grande gana en "
+            "resultado y en riesgo (3,2 % frente a 9,2 %): la pequeña sólo empata cuando la grande pasa de ~1.700 €/mes "
+            "(≈125 €/plaza). Con el precio del anuncio, se empieza en O Milladoiro, desde el día 1 y sin obra.",
+         36, 268, 890, size=8.5, leading=12, color=SLATE, max_lines=3)
     c.setFillColor(GOLD_DEEP)
     c.setFont("DejaVuBold", 9)
     c.drawString(36, 206, "LA CUENTA DE LA MUDANZA (15 MESES EN LA PEQUEÑA)")
@@ -704,15 +704,15 @@ def p_sens(c, n, t):
 @page
 def p_reco(c, n, t):
     bg(c)
-    heading(c, "Recomendación", "La nave más grande a ≤2,2 €/m², sin obra, con salida a 12 meses")
+    heading(c, "Recomendación", "O Milladoiro desde el día 1, sin obra y con salida a 12 meses")
     items = [
-        ("1. Local", "Decidir por €/plaza: 10-17 plazas a 2,00-2,11 €/m² existen (San Marcos 550 m² a 1.100 €; Marrozos 710 m² a 1.500 €). La de 220 m² a 600 € son 86 €/plaza: si se firma, es por el contrato corto."),
+        ("1. Local", "O Milladoiro, 465 m² a 1.200 €/mes: 14 plazas y 86 €/plaza, los mismos que la nave de 220 m² a 600 €. Decidir por €/plaza, no por cuota: la pequeña no ahorra precio, sólo techo."),
         ("2. Día 1", f"O Milladoiro sin obra: {eur(M['local']['grande14']['dia1'], True)} € en caja frente a {eur(DIA1_PLAN, True)} € del plan. Sin obra, el riesgo de descubierto baja del 16,0 % al 3,2 %."),
         ("3. Actividad y obra", "Inocua (compraventa, exposición, almacén), taller fuera. Cero suelo, pintura y mobiliario antes de facturar: sólo luces, alarma y extintores."),
         ("4. Los tres primeros coches", "BMW 116d (9.010 €), Audi A3 (12.455 €) y Golf GTI (12.674 €). Después, Golf VIII y Seat León: los de más giro (32 días)."),
         ("5. Stock", "Llenar las plazas y mantenerlas llenas, una plaza un modelo. Medido con la nave grande: 8 plazas 326.725 € · 12 → 465.106 € · 14 → 515.093 €."),
         ("6. El 318d no se compra", "Es el peor retorno del catálogo (102 €/mes por cada 1.000 € inmovilizados). El XC40 solo cuando la nave ya esté llena."),
-        ("7. Si se abre en la de paso", "Salida a 12 meses y mudanza en el mes 15-18, a 12-14 plazas, cuando la flota de 7 lleve tres meses llena. Es un seguro: cuesta ~4.300 € y en el escenario malo vale 24.000."),
+        ("7. La nave de paso, plan B", "Sólo si el precio real de la grande pasa de ~1.700 €/mes (≈125 €/plaza) o no hay salida a 12 meses: 220 m² a 600 €, sin obra, y mudanza en el mes 15-18. Es un seguro: cuesta ~4.300 € y en el escenario malo vale 24.000."),
         ("8. Fondo y nómina", "Fondo de 3 meses más la reserva del impuesto, intocables. La nómina antes de comprar el siguiente coche."),
         ("9. Cerrar antes de firmar", "€/plaza y €/m² de cada candidata, salida pactada, tasa exacta del concello y cotización real del seguro."),
     ]
