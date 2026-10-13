@@ -31,11 +31,33 @@ def div_neto(bruto):
     return bruto - 2.0 * es.irpf_dividendos(mitad)
 
 
+# ---------------------------------------------------------------------------
+# PLAN DE CATERA (24 plazas). En vez de una sola regla de compra, el dealer
+# fija cuántas unidades de cada modelo quiere mantener en la flota completa.
+# La mezcla es la de un negocio real de reventa (variedad por segmento):
+#   - 11 pequeños de alta rotación  -> el motor de caja (giran en ~32-45 días)
+#   -  9 SUV / compactos            -> el volumen y la variedad (45-48 días)
+#   -  4 premium de margen alto     -> tardan ~1-2 semanas más, pero dan
+#                                       4.500-6.500 € de beneficio por coche
+# Dentro de esta mezcla, el motor siempre compra el coche MÁS EFICIENTE (ROI)
+# entre los que aún no han llegado a su cupo: maximiza la caja a casa.
+# ---------------------------------------------------------------------------
+CUPOS = dict(
+    # pequeños rápidos
+    Polo=2, **{"116d": 2, "Leon": 2, "Golf VIII": 2, "GTI": 2, "A3": 1},
+    # SUV / compactos
+    Corolla=2, **{"3008": 2, "Tiguan": 2, "XC40": 2, "318d": 1},
+    # premium de margen alto
+    X1=1, Mercedes=1, XC60=1, **{"330d": 1},
+)
+assert sum(CUPOS.values()) == 24, "los cupos deben sumar 24 plazas"
+
+
 def escenario():
     e = dict(mr.ESTRATEGIAS["decision"])
     e["nave"] = dict(mr.NAVES["milladoiro"], plazas=24)
     e["objetivo_flota"] = 24
-    e["tope_modelo"] = 3
+    e["cupos"] = CUPOS
     # Media jornada (750 €) desde m6; subida a completa (1.500 €) en m16
     e["personal"] = 750 * (1 + CUOTA)
     e["personal_desde"] = 6
@@ -170,10 +192,19 @@ def main():
     tray = [
         dict(mes=x["mes"], caja=x["caja"], flota=x["flota"], fijos=x["fijos"], sueldo=x["sueldo"],
              ventas_det=x.get("ventas_det", []), compras=x.get("compras", []),
+             stock_mix=x.get("stock_mix", {}),
              averias=x.get("averias", 0.0), obra=x.get("obra", 0.0),
              is_paid=x.get("is_paid", 0.0), div=x.get("div", 0.0),
              rebu=x.get("rebu", 0.0))
         for x in r_rep["meses"]
+    ]
+    # Catálogo completo (para la lámina del PDF): coste de compra, precio de
+    # venta (IVA incluido en la venta al cliente), margen neto y €/día.
+    catalogo = [
+        dict(nick=nick, nombre=u["nombre"], coste=u["coste"], venta=u["venta"],
+             dias=u["dias"], neto=u["neto"], margen_dia=round(u["margen_dia"], 1),
+             pct=round(100.0 * (u["venta"] - u["coste"]) / u["coste"], 1))
+        for nick, u in sorted(u.items(), key=lambda kv: kv[1]["margen_dia"], reverse=True)
     ]
     # "A casa" de la trayectoria representativa (para contrastar con la mediana).
     _sd = {1: 0.0, 2: 0.0, 3: 0.0}
@@ -198,6 +229,7 @@ def main():
     dv_m = {a: statistics.mean(dv[a]) for a in (1, 2, 3)}
     out = dict(
         dia1=dia1, kit=kit, fijos1=fijos1, trio_coste=trio_coste,
+        catalogo=catalogo,
         mensual=mensual, insol=100 * insol / SIM,
         v50=statistics.median(vtot), pat50=statistics.median(pat),
         obra=statistics.median(rm), obra_min=min(rm), obra_max=max(rm),

@@ -93,20 +93,30 @@ def eur(n, cents=True):
 # ---------------------------------------------------------------------------
 UNIDADES = {
     # nick          coste      venta     días  techo/mes  nombre
-    "116d":     dict(coste=9010.0, venta=12475.0, dias=35, techo=1.30, nombre="BMW 116d"),
+    # Pequeños de alta rotación
+    "Polo":     dict(coste=8900.0, venta=11900.0, dias=32, techo=1.30, nombre="VW Polo 1.0 TSI"),
+    "116d":     dict(coste=9010.0, venta=12475.0, dias=35, techo=1.20, nombre="BMW 116d"),
     "A3":       dict(coste=12455.0, venta=15990.0, dias=35, techo=0.90, nombre="Audi A3 1.0 TFSI"),
     "Golf VIII": dict(coste=14617.0, venta=18700.0, dias=32, techo=0.70, nombre="VW Golf VIII 1.0 TSI"),
     "Leon":     dict(coste=12900.0, venta=17500.0, dias=32, techo=0.80, nombre="Seat León 2.0 TDI FR"),
     "GTI":      dict(coste=12674.0, venta=18500.0, dias=45, techo=0.60, nombre="Golf GTI Performance"),
+    "3008":     dict(coste=15500.0, venta=20500.0, dias=48, techo=0.55, nombre="Peugeot 3008 BlueHDi"),
+    "Corolla":  dict(coste=14500.0, venta=18500.0, dias=36, techo=0.85, nombre="Toyota Corolla Hybrid"),
     "XC40":     dict(coste=14738.0, venta=18500.0, dias=45, techo=0.50, nombre="Volvo XC40 D3"),
     "318d":     dict(coste=14220.0, venta=17250.0, dias=45, techo=0.50, nombre="BMW 318d Touring"),
+    # SUV / premium de margen alto (tardan algo más, pero se justifica)
+    "Tiguan":   dict(coste=16500.0, venta=21500.0, dias=46, techo=0.50, nombre="VW Tiguan 1.5 TSI"),
+    "X1":       dict(coste=17500.0, venta=23000.0, dias=48, techo=0.45, nombre="BMW X1 xDrive18d"),
+    "330d":     dict(coste=21000.0, venta=28000.0, dias=58, techo=0.40, nombre="BMW 330d Touring"),
     "Mercedes": dict(coste=17666.0, venta=23990.0, dias=55, techo=0.35, nombre="Mercedes C Estate"),
+    "XC60":     dict(coste=22500.0, venta=30000.0, dias=56, techo=0.40, nombre="Volvo XC60 D5"),
 }
 for _u in UNIDADES.values():
     _bruto = r2(_u["venta"] - _u["coste"])
     _u["rebu"] = r2(_bruto * 21 / 121)          # IVA sólo de la ganancia (REBU)
     _u["neto"] = r2(_bruto - _u["rebu"])
     _u["roi_mes"] = _u["neto"] / (_u["coste"] * _u["dias"] / 30.0)
+    _u["margen_dia"] = _u["neto"] / _u["dias"]   # € netos recuperados por día ocupando plaza
 
 # ---------------------------------------------------------------------------
 # 1.b Velocidad de venta por modelo. `UNIDADES[nick]["dias"]` es el escenario
@@ -627,13 +637,35 @@ def simular(est, rng):
             ventas_det_mes[mes].append((v["nick"], u["venta"], u["neto"]))
             listos.remove(v)
 
-        # --- compras: el mejor retorno por euro y por mes de espera --------
+        # --- compras: el que produce más € netos por día ocupando plaza -----
+        # La nave tiene un número fijo de plazas (stock, no showroom): el
+        # objetivo es maximizar el beneficio que cada plaza produce al mes.
+        # La métrica es el MARGEN NETO POR DÍA (neto / días que el coche pasa
+        # de camino y en stock), que es la regla de un dealer de stock:
+        #   - Preemia la rotación rápida (Golf, León, Polo) porque su neto
+        #     se recicla más veces al año.
+        #   - Pero NO descarta el premium de margen alto (XC60, 330d, X1):
+        #     tarda 2 semanas más, pero su neto por día (95-111 €) iguala o
+        #     supera al de los pequeños, y aporta 5.000-6.500 € de beneficio
+        #     por coche y la variedad que un negocio real necesita.
+        # El ROI por € inmovilizado (métrica anterior) premiaba solo el coche
+        # barato+rápido y dejaba la flota en 3 modelos; margen/día da la
+        # variedad de un dealer real (8-10 modelos en 24 plazas).
+        # `cupos` (plan de cartera): {nick: unidades a mantener}. Si existe,
+        # es el límite por modelo (sustituye a tope_modelo) y la flota completa
+        # tiene EXACTAMENTE la mezcla planificada: 11 pequeños rápidos + 9 SUV/
+        # compactos + 4 premium de margen alto = 24. El dealer compra siempre
+        # el coche más eficiente (ROI) entre los que aún no llegan a su cupo.
+        cupos = est.get("cupos")
         while len(listos) + len(en_camino) < plazas():
             libre = r2(caja - floor())
-            mejor, mejor_roi = None, 0.0
+            mejor, mejor_mdia = None, 0.0
             for nick, u in UNIDADES.items():
                 cola = 1 + sum(1 for x in listos + en_camino if x["nick"] == nick)
-                if est.get("tope_modelo") and cola > est["tope_modelo"]:
+                if cupos is not None:
+                    if cola > cupos.get(nick, 0):
+                        continue
+                elif est.get("tope_modelo") and cola > est["tope_modelo"]:
                     continue
                 # Al arrancar sólo entra rotación rápida **o** un margen que pague
                 # la espera: el capital no puede quedarse dormido en un coche de
@@ -650,9 +682,30 @@ def simular(est, rng):
                 if not est.get("independiente"):
                     espera = max(espera,
                                  cola / max(0.30, u["techo"] * f_dem * penal_dem * est["rampa"] * rampa(mes)) * 30.0)
-                roi = u["neto"] / (u["coste"] * (est["lead"] * 7.0 + espera) / 30.0)
-                if u["coste"] <= libre + 1e-6 and roi > mejor_roi:
-                    mejor, mejor_roi = nick, roi
+                ciclo = est["lead"] * 7.0 + espera
+                # Métrica de compra (ver comentario del bloque):
+                #   "mdia"  -> margen neto por día (dealer de stock; preemia
+                #              variedad + premium de alto margen).
+                #   "roi"   -> retorno por € inmovilizado por mes (máx. caja).
+                #   "blend" -> roi (máx. caja, objetivo de la pareja) + un
+                #              bono por MARGEN ABSOLUTO (kappa·neto/CREF):
+                #              los coches de margen alto (XC60, 330d) entran
+                #              aunque giren algo más lento, sin sacrificar la
+                #              caja del núcleo rápido.
+                # Con `cupos` (plan de cartera) se ordena SIEMPRE por ROI: la
+                # mezcla ya está fijada por los cupos, y dentro de ella se
+                # compra el que mejor rinde el capital.
+                metrica = "roi" if cupos is not None else est.get("metrica", "mdia")
+                if metrica == "roi":
+                    punt = u["neto"] / (u["coste"] * ciclo / 30.0)
+                elif metrica == "blend":
+                    kappa = est.get("blend_kappa", 0.0)
+                    punt = (u["neto"] / (u["coste"] * ciclo / 30.0)
+                            + kappa * u["neto"] / 14000.0)
+                else:
+                    punt = u["neto"] / ciclo
+                if u["coste"] <= libre + 1e-6 and punt > mejor_mdia:
+                    mejor, mejor_mdia = nick, punt
             if mejor is None:
                 break
             u = UNIDADES[mejor]
@@ -676,6 +729,11 @@ def simular(est, rng):
                     dividendos_anio[anio] = r2(dividendos_anio[anio] + div)
                     div_mes[mes] = r2(div_mes[mes] + div)
             flota = [UNIDADES[v["nick"]]["coste"] for v in listos + en_camino]
+            # Stock por modelo a fin de mes (lo que hay en la nave + de camino):
+            # {nick: unidades}. El PDF lo usa para la línea "STOCK" siempre visible.
+            stock_mix = {}
+            for v in listos + en_camino:
+                stock_mix[v["nick"]] = stock_mix.get(v["nick"], 0) + 1
             meses.append(dict(
                 mes=mes, caja=caja, ventas=ventas_mes[mes], cobro=cobro_mes[mes],
                 flota=len(flota), flota_coste=r2(sum(flota)),
@@ -683,6 +741,7 @@ def simular(est, rng):
                 reforma_pend=reforma_pend, nave=bool(nave),
                 patrimonio=r2(caja + sum(flota)),
                 compras=list(compras_mes[mes]), ventas_det=list(ventas_det_mes[mes]),
+                stock_mix=dict(stock_mix),
                 averias=averias_mes[mes], obra=obra_mes[mes],
                 is_paid=is_mes[mes], div=div_mes[mes], rebu=rebu_mes[mes],
             ))

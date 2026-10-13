@@ -38,10 +38,14 @@ OBRA = D["obra"]                # mes mediano en que se paga el RESTO de la obra
 OBRA_SUELO = D["obra_suelo"]    # 1 (el suelo se paga en el día 1)
 SUELO = 905.0
 RESTO_OBRA = 4210.47
-NOMBRE_MODELO = {
-    "116d": "BMW 116d", "A3": "Audi A3", "Golf VIII": "Golf VIII", "Leon": "Seat León",
-    "GTI": "Golf GTI", "XC40": "Volvo XC40", "318d": "BMW 318d", "Mercedes": "Mercedes C",
-}
+# Catálogo completo (15 modelos), del JSON. CAT[nick] = dict(nombre, coste, venta,
+# dias, neto, margen_dia, pct). Se usa para mostrar SIEMPRE el precio unitario.
+CAT = {c["nick"]: c for c in D["catalogo"]}
+NOMBRE_MODELO = {n: c["nombre"] for n, c in CAT.items()}
+SHORT = {"116d": "116d", "A3": "A3", "Golf VIII": "Golf", "Leon": "León", "GTI": "GTI",
+         "XC40": "XC40", "318d": "318d", "Mercedes": "Mercedes C", "Polo": "Polo",
+         "Corolla": "Corolla", "3008": "3008", "Tiguan": "Tiguan", "X1": "X1",
+         "XC60": "XC60", "330d": "330d"}
 
 FONT = "/usr/share/fonts/truetype/dejavu"
 pdfmetrics.registerFont(TTFont("DejaVu", f"{FONT}/DejaVuSans.ttf"))
@@ -379,23 +383,61 @@ def p_paso4(c, n, t):
             c.drawString(x + 164 + 2, 382, "→")
         x += 164 + 17
     wrap(c, "Resultado: en menos de una semana, desde que se vende un coche, hay otro en stock. Vuelo solo "
-            "cuando hace falta rapidez; lo normal, envío (igual de rápido). Nunca se compra el BMW 318d (rota "
-            "demasiado lento para el capital que inmoviliza).",
+            "cuando hace falta rapidez; lo normal, envío (igual de rápido). Se compra siempre el que mejor rinde "
+            "dentro del plan de cartera de 15 modelos (lámina siguiente).",
          36, 318, 890, size=9.5, leading=13, color=SLATE, max_lines=2)
     c.setFillColor(GOLD_DEEP)
     c.setFont("DejaVuBold", 9)
     c.drawString(36, 272, "LA FLOTA CRECE ASÍ (mediana de 250 trayectorias)")
-    meses_sel = [1, 6, 12, 18, 24, 26, 36]
+    meses_sel = [1, 6, 12, 18, 24, 27, 36]
     table(c, 36, 254, [""] + [f"m{m}" for m in meses_sel], [
         ["Coches en stock"] + [str(int(round(M[m][1]))) for m in meses_sel],
         ["Ventas del mes"] + [str(int(round(M[m][0]))) for m in meses_sel],
     ], [170, 112, 112, 112, 112, 112, 112, 112], size=9, hrow=19, aligns=["l"] + ["c"] * 7)
-    wrap(c, "La flota no llega a 24 coches hasta el mes 26: se va comprando con la caja que entra de las "
+    wrap(c, "La flota no llega a 24 coches hasta el mes 27: se va comprando con la caja que entra de las "
             "ventas (menos si ese año se reparten dividendos). No hace falta (ni cabe) financiar: el negocio "
             "se financia a sí mismo.",
          36, 196, 890, size=9.5, leading=13, color=SLATE, max_lines=2)
     card(c, 36, 92, 888, 66, "Disciplina de compra", "Comprar por margen, no por ganas",
          "cada compra exige margen claro y rotación; si la caja no llega, se espera un coche menos, nunca se rompe el fondo", acento=GOLD)
+    footer(c, n, t)
+
+
+@page
+def p_paso4b(c, n, t):
+    bg(c)
+    heading(c, "Paso 4bis  ·  El catálogo", "15 modelos, cada uno con su precio fijo de compra y venta")
+    wrap(c, "No compráis tres coches: trabajáis con un catálogo de 15 modelos, y cada uno tiene un PRECIO DE "
+            "COMPRA y un PRECIO DE VENTA fijos (comprado «puesto en A Coruña», vendido con IVA de la ganancia). "
+            "Eso es lo que veréis mes a mes: qué se compra, a cuánto, y qué se vende, a cuánto.",
+         36, 448, 890, size=9, leading=12, max_lines=2)
+    # Segmentos: (título, [nicks])
+    seg = [
+        ("Pequeños de alta rotación (el motor de caja, ~32-35 días)",
+         ["Polo", "116d", "Leon", "Golf VIII", "GTI", "A3"]),
+        ("SUV / compactos (el volumen y la variedad, ~36-48 días)",
+         ["Corolla", "3008", "Tiguan", "XC40", "318d"]),
+        ("Premium de margen alto (tardan ~1-2 semanas más, margen mayor)",
+         ["X1", "Mercedes", "XC60", "330d"]),
+    ]
+    cupos = {"Polo": 2, "116d": 2, "Leon": 2, "Golf VIII": 2, "GTI": 2, "A3": 1,
+             "Corolla": 2, "3008": 2, "Tiguan": 2, "XC40": 2, "318d": 1,
+             "X1": 1, "Mercedes": 1, "XC60": 1, "330d": 1}
+    y = 408
+    for tit, nicks in seg:
+        c.setFillColor(GOLD_DEEP)
+        c.setFont("DejaVuBold", 8.5)
+        c.drawString(36, y, tit)
+        y -= 4
+        filas = [[CAT[n]["nombre"], eur(CAT[n]["coste"]), eur(CAT[n]["venta"]),
+                  "+" + eur(CAT[n]["neto"]), f"~{CAT[n]['dias']} d",
+                  f"{CAT[n]['margen_dia']:.0f} €", str(cupos[n])] for n in nicks]
+        y = table(c, 36, y - 2, ["Modelo", "Compra", "Venta", "+Neto", "Días", "€/día", "Cupos"],
+                  filas, [250, 120, 120, 120, 90, 90, 88], size=8, hrow=14,
+                  aligns=["l", "r", "r", "r", "c", "r", "c"])
+        y -= 10
+    card(c, 36, 44, 888, 66, "El plan de cartera (24 plazas)", "11 pequeños · 9 SUV/compactos · 4 premium",
+         "la flota completa mantiene esa mezcla: variedad de verdad, y dentro de ella se compra siempre el que mejor rinde el capital", acento=GOLD)
     footer(c, n, t)
 
 
@@ -483,7 +525,7 @@ def p_paso7(c, n, t):
     c.drawString(36, 398, "LOS DOS TRAMOS DE LA OBRA (5.115 € en total)")
     card(c, 36, 312, 430, 74, "Tramo 1 · Suelo (URGENTE)", "905 €  ·  día 1",
          "suelo epoxi de 400 m²: se pinta con la nave vacía, la única vez que está vacía", acento=RED)
-    card(c, 494, 312, 430, 74, "Tramo 2 · Resto (progresivo)", "4.210 €  ·  mes 15 (mediana)",
+    card(c, 494, 312, 430, 74, "Tramo 2 · Resto (progresivo)", "4.210 €  ·  mes 20 (mediana)",
          "luz, pintura de paredes, señalización, mobiliario, seguridad: poco a poco, con coches dentro", acento=GOLD)
     c.setFillColor(GOLD_DEEP)
     c.setFont("DejaVuBold", 9)
@@ -494,27 +536,48 @@ def p_paso7(c, n, t):
         ["m6-m11", "5-7", "Muy difícil: no hay sitio donde aparcarlos todos fuera"],
         ["m12 en adelante", "7+", "IMPOSIBLE: la nave se va llenando y no se puede vaciar"],
     ], [140, 110, 638], size=8.5, hrow=17, aligns=["c", "c", "l"], bold_rows=(0,))
-    wrap(c, f"Por eso el suelo se paga en el día 1, con la nave vacía. Es el precio de hacerlo bien: al "
-            f"adelantarlo, el insolvente sube ~1,6 puntos (de 10,4 % a {D['insol']:.0f} %) porque esa caja no "
-            f"financia coches en el arranque. Si se dejara para cuando la nave está llena, no se podría pintar.",
+    wrap(c, f"Por eso el suelo se paga en el día 1, con la nave vacía. Es el precio de hacerlo bien: son 905 € "
+            f"que, si se pagaran más tarde, habrían financiado un coche más en el arranque. A cambio, se pinta todo "
+            f"el suelo de una vez, sin tener que sacar 24 coches a la calle. Si se dejara para cuando la nave está "
+            f"llena, no se podría pintar (no hay sitio donde aparcarlos).",
          36, 176, 890, size=9, leading=12, color=SLATE, max_lines=3)
     card(c, 36, 48, 888, 66, "Regla", "El suelo con la nave vacía; el resto, cuando la caja lo pague",
          "el suelo (905 €) es del día 1; el resto (4.210 €) se paga en el primer mes en que la caja lo cubre con 2 meses de margen, sin tocar el fondo", acento=RED)
     footer(c, n, t)
 
 
-def _carros_str(dets, kind, maxn=5):
-    """Desglose compacto de coches: '4× Seat León, 2× Golf VIII, …'."""
+def _ventas_str(dets, maxn=6):
+    """'4× León @17.500 · 2× GTI @18.500 …' (precio de venta unitario)."""
     from collections import Counter
-    cnt = Counter(n for n, *rest in dets)
-    parts = []
-    for n, k in cnt.most_common():
-        name = NOMBRE_MODELO.get(n, n)
-        parts.append(f"{k}× {name}" if k > 1 else name)
-    s = ", ".join(parts[:maxn])
-    if len(parts) > maxn:
-        s += f"  (+{sum(k for _, k in cnt.most_common()[maxn:])} más)"
+    cnt = Counter(n for n, *_ in dets)
+    parts = [f"{k}× {SHORT.get(n, n)} @{eur(CAT[n]['venta'])}" for n, k in cnt.most_common(maxn)]
+    s = " · ".join(parts)
+    resto = [k for _, k in cnt.most_common()[maxn:]]
+    if resto:
+        s += f"  · +{sum(resto)} más"
     return s
+
+
+def _compras_str(dets, maxn=6):
+    """'2× Corolla @14.500 · 1× XC60 @22.500 …' (precio de compra unitario)."""
+    from collections import Counter
+    cnt = Counter(n for n, _ in dets)
+    parts = [f"{k}× {SHORT.get(n, n)} @{eur(CAT[n]['coste'])}" for n, k in cnt.most_common(maxn)]
+    s = " · ".join(parts)
+    resto = [k for _, k in cnt.most_common()[maxn:]]
+    if resto:
+        s += f"  · +{sum(resto)} más"
+    return s
+
+
+def _stock_str(mix, maxn=8):
+    """'2× León · 2× 116d · 1× XC60 …' (composición del stock por modelo)."""
+    items = sorted(mix.items(), key=lambda kv: (-kv[1], NOMBRE_MODELO.get(kv[0], kv[0])))
+    parts = [f"{k}× {SHORT.get(n, n)}" for n, k in items[:maxn]]
+    s = " · ".join(parts)
+    if len(items) > maxn:
+        s += f"  · +{sum(k for _, k in items[maxn:])} más"
+    return s or "vacío"
 
 
 def _mes_det(c, y, m, title, nota):
@@ -526,6 +589,8 @@ def _mes_det(c, y, m, title, nota):
     V = sum(e for _, e, _ in x["ventas_det"])
     C_ = sum(co for _, co in x["compras"])
     R = x["rebu"]; S = x["sueldo"]; O = x["obra"]; I = x["is_paid"]; Dv = x["div"]; A = x["averias"]
+    mix = x.get("stock_mix", {})
+    stock_valor = sum(k * CAT[n]["coste"] for n, k in mix.items())
     # cabecera
     c.setFillColor(GOLD_DEEP)
     c.setFont("DejaVuBold", 9)
@@ -536,30 +601,41 @@ def _mes_det(c, y, m, title, nota):
     c.setFillColor(GOLD_DEEP)
     c.setFont("DejaVuBold", 8.5)
     c.drawRightString(W - 36, y, f"Caja {eur(start)} € → {eur(end)} € · flota {x['flota']}")
-    y -= 13
-    # ventas
+    y -= 12
+    # ventas (con precio unitario por modelo)
     c.setFillColor(GREEN)
     c.setFont("DejaVuBold", 7.5)
     c.drawString(82, y, "VENDEN")
     c.setFillColor(INK)
     c.setFont("DejaVu", 8)
-    c.drawString(138, y, f"{nv} coches ({_carros_str(x['ventas_det'], 'v')})" if nv else "— (sin ventas este mes)")
+    c.drawString(140, y, _ventas_str(x["ventas_det"]) if nv else "— (sin ventas este mes)")
     if nv:
         c.setFillColor(GREEN)
         c.setFont("DejaVuBold", 8)
-        c.drawRightString(W - 36, y, f"+{eur(V)} €")
-    y -= 12
-    # compras
+        c.drawRightString(W - 36, y, f"{nv} coches · +{eur(V)} €")
+    y -= 11
+    # compras (con precio unitario por modelo)
     c.setFillColor(RED)
     c.setFont("DejaVuBold", 7.5)
     c.drawString(82, y, "COMPRAN")
     c.setFillColor(INK)
     c.setFont("DejaVu", 8)
-    c.drawString(138, y, f"{nc} coches ({_carros_str(x['compras'], 'c')})" if nc else "— (sin compras este mes)")
+    c.drawString(140, y, _compras_str(x["compras"]) if nc else "— (sin compras este mes)")
     if nc:
         c.setFillColor(RED)
         c.setFont("DejaVuBold", 8)
-        c.drawRightString(W - 36, y, f"−{eur(C_)} €")
+        c.drawRightString(W - 36, y, f"{nc} coches · −{eur(C_)} €")
+    y -= 11
+    # STOCK (siempre visible): composición por modelo + valor inmovilizado
+    c.setFillColor(GOLD_DEEP)
+    c.setFont("DejaVuBold", 7.5)
+    c.drawString(82, y, "STOCK")
+    c.setFillColor(INK)
+    c.setFont("DejaVu", 8)
+    c.drawString(140, y, f"{x['flota']} coches · {_stock_str(mix)}")
+    c.setFillColor(GOLD_DEEP)
+    c.setFont("DejaVu", 8)
+    c.drawRightString(W - 36, y, f"valor {eur(stock_valor)} €")
     y -= 12
     # otros gastos (fijos, sueldo, obra, IS, dividendo, averías, IVA)
     parts = ["fijos " + ("pagados el día 1" if m == 1 else f"−{eur(x['fijos'])} €")]
@@ -579,7 +655,7 @@ def _mes_det(c, y, m, title, nota):
     c.drawString(82, y, "GASTOS")
     c.setFillColor(INK)
     c.setFont("DejaVu", 8)
-    c.drawString(138, y, " · ".join(parts))
+    c.drawString(140, y, " · ".join(parts))
     y -= 12
     # explicación (1-2 líneas)
     if nota:
@@ -594,59 +670,58 @@ def _mes_det(c, y, m, title, nota):
 
 # Títulos y explicación de cada mes (trayectoria representativa; el flujo cuadra al céntimo)
 TIT = {
-    1: "El trío, en camino", 2: "La caja en su punto más justo",
-    3: "Primeras ventas y reposiciones", 4: "La caja roza el fondo", 5: "Repuesta de stock",
-    6: "Entran los sueldos (y el de ella, a medias)", 7: "Ritmo de 2-3 ventas",
-    8: "Primer sueldo tuyo", 9: "La flota toca 6", 10: "Mes de 4 ventas",
-    11: "La caja respira", 12: "Año 1: dividendo 50/50",
-    13: "La flota toca 8", 14: "Se paga el resto de la obra", 15: "La flota toca 9",
-    16: "Ella, a jornada completa", 17: "La flota toca 12", 18: "Mes de 7 ventas",
-    19: "IS del año 1 · flota 15", 20: "La caja pasa de 38.000 €", 21: "La flota toca 16",
-    22: "Mes de 12 ventas", 23: "La flota toca 19", 24: "Año 2: dividendo 50/50",
-    25: "Casi llena (22 coches)", 26: "La nave llena: 24 coches", 27: "Puro beneficio",
-    28: "Mes de 25 ventas", 29: "La caja pasa de 170.000 €", 30: "La caja pasa de 220.000 €",
-    31: "IS del año 2", 32: "La caja pasa de 270.000 €", 33: "La caja pasa de 319.000 €",
-    34: "La caja sube en línea recta", 35: "El pico de caja", 36: "El dividendo gordo",
+    1: "Apertura: SL, nave y suelo", 2: "El trío empieza a girar",
+    3: "Primeras ventas y reposición", 4: "3 ventas, 4 reposiciones", 5: "Reposición (3 compras)",
+    6: "Entran los sueldos (ella a medias)", 7: "3 ventas, 3 compras",
+    8: "Ritmo de 2 ventas", 9: "Primer sueldo tuyo", 10: "La caja respira",
+    11: "Mes tranquilo", 12: "Año 1: dividendo 50/50",
+    13: "La flota toca 6 · 5 ventas", 14: "5 ventas, 6 compras", 15: "La flota toca 8",
+    16: "Ella a completa · 7 ventas", 17: "La flota toca 10", 18: "Mes de 9 ventas",
+    19: "IS año 1 · flota 12 · 10 ventas", 20: "Mes de 6 ventas", 21: "9 ventas, 10 compras",
+    22: "Mes de 13 ventas · flota 16", 23: "La flota toca 18", 24: "Año 2: dividendo 50/50",
+    25: "Casi llena (21) · 14 ventas", 26: "Se paga el resto de la obra", 27: "La nave llena: 24 coches",
+    28: "Mes de 17 ventas", 29: "La caja pasa de 130.000 €", 30: "La caja pasa de 170.000 €",
+    31: "IS año 2 · 21 ventas", 32: "La caja pasa de 240.000 €", 33: "La caja pasa de 270.000 €",
+    34: "Mes de 17 ventas", 35: "El pico de caja", 36: "El dividendo gordo",
 }
 NOTA = {
-    1: "Se abren la SL y la nave, se pinta el suelo (nave vacía) y se pagan los fijos de m1. El trío (116d, A3, GTI) "
-       "viaja: llega esta semana, sin vender ni comprar todavía.",
-    2: "Sigue sin vender ni comprar (el trío aún no llega); los fijos de m2 bajan la caja a su punto más justo.",
-    3: "Llega el trío y se anuncia. Se venden 3 coches y se reponen 3: empieza el giro del negocio.",
-    4: "Se venden 2 y se compran 3 para mantener stock; la caja baja de nuevo, rozando el fondo.",
-    5: "Mes de reposición (4 compras): la flota crece a 5 y la caja se mantiene por encima del fondo.",
-    6: "Empiezan los sueldos: el tuyo (cuando hay hueco) y el de ella a media jornada (750 €). Suben los fijos "
-       "(3.163 €) y el fondo de 3 meses pasa a 9.490 €.",
-    7: "Ritmo de 2-3 ventas al mes: la nave ya rota con soltura.",
-    8: "La caja lo permite: por primera vez te llevas parte del hueco como sueldo (193 €).",
-    9: "La flota llega a 6. Hay una avería (600 €): normal al importar, está contemplada en el coste.",
-    10: "Mes de 4 ventas y una avería mayor (2.600 €); la caja sigue por encima del fondo.",
-    11: "La caja respira: sube hasta 18.283 €.",
-    12: "Cierra el año: lo que sobra del fondo se reparte 50/50 a casa (12.196 € brutos); la SL se queda su fondo (9.490 €).",
-    13: "La flota toca 8; mes de 6 ventas.",
-    14: "La caja lo permite: se paga el resto de la obra (4.210 €: luz, pintura, señalización, mobiliario, seguridad, limpieza).",
-    15: "La flota toca 9; mes de 5 ventas.",
-    16: "El sueldo de ella se dobla a jornada completa (1.500 €): suben los fijos (4.143 €) y el fondo pasa a 12.428 €.",
-    17: "La flota toca 12.",
-    18: "Mes de 7 ventas; la flota llega a 13.",
-    19: "Se ingresa en AEAT el IS del año 1 (8.309 €). La flota toca 15.",
-    20: "La caja pasa de 38.000 €.",
-    21: "La flota toca 16.",
-    22: "Mes de 12 ventas; ya rotan también los modelos grandes (XC40, Mercedes) con ticket y margen mayores.",
-    23: "La flota toca 19; la nave va muy llena.",
-    24: "Cierra el año 2: se reparte el dividendo 50/50 (41.699 € brutos); la SL se queda su fondo (12.428 €).",
-    25: "La nave ya tiene 22 coches; mes de 13 ventas.",
-    26: "La nave se llena (24 coches). A partir de aquí se reponen coches al mismo ritmo que se venden.",
-    27: "Nave llena: cada ciclo venta + reposición suma su margen, así la caja sube (15 ventas, 15 compras).",
-    28: "Mes de 25 ventas (y 25 reposiciones): la caja pasa de 143.000 €.",
-    29: "La caja pasa de 170.000 €.",
-    30: "La caja pasa de 220.000 €.",
-    31: "Se ingresa en AEAT el IS del año 2 (36.490 €).",
-    32: "La caja pasa de 270.000 €.",
-    33: "La caja pasa de 319.000 €.",
-    34: "La caja sube en línea recta hacia el dividendo.",
-    35: "La caja toca su pico (~386.461 €) justo antes del dividendo grande.",
-    36: "Cierra el año 3: se reparte el dividendo gordo (408.836 € brutos, ~304.000 € netos a casa) y la SL se queda su fondo (12.428 €).",
+    1: "Se abren la SL y la nave y se pinta el suelo (nave vacía). El trío (116d, A3, GTI) llega esta semana y ya "
+       "se vende un 116d (12.475 €) y se compra un León (12.900 €). Caja 4.787 €.",
+    2: "Gira el trío: se vende el Audi A3 (15.990 €) y se compra otro León (12.900 €). La caja se mantiene estable.",
+    3: "Se vende un León (17.500 €) y se reponen otros: empieza el ritmo de comprar y vender cada semana.",
+    4: "Primer mes con volumen: 3 ventas (2× León, 1× GTI) y 4 reposiciones. La caja sube a 10.907 €.",
+    5: "Mes de reposición (3 compras, 2× 116d y 1× Polo); la caja baja a 5.551 € pero no roza el fondo.",
+    6: "Empiezan los sueldos: el de ella a media jornada (750 €) entra en fijos (3.163 €) y el fondo de 3 meses pasa a 9.490 €.",
+    7: "Ritmo de 3 ventas (Polo, 116d, León): la nave ya rota con soltura.",
+    8: "Dos ventas, dos compras; la caja sube a 14.762 €.",
+    9: "La caja lo permite: por primera vez te llevas parte del hueco como sueldo (2.083 €).",
+    10: "Mes de 2 ventas (León, 116d); la caja toca 16.155 €.",
+    11: "Mes tranquilo (1 venta, 1 compra); la caja respira.",
+    12: "Cierra el año 1: se reparte el dividendo 50/50 (6.665 € brutos); la SL se queda su fondo (9.490 €).",
+    13: "La flota toca 6. Hay una avería mayor (3.701 €): normal al importar, contemplada en el coste.",
+    14: "5 ventas y 6 compras: la flota crece hacia 8.",
+    15: "La flota toca 8; mes de 5 ventas (2× GTI, 116d, 2× Polo, León).",
+    16: "El sueldo de ella se dobla a completa (1.500 €): fijos 4.143 € y fondo 12.428 €. Mes de 7 ventas.",
+    17: "La flota toca 10; 5 ventas (2× 116d, GTI, Golf, A3).",
+    18: "Mes de 9 ventas; la flota llega a 11.",
+    19: "Se ingresa en AEAT el IS del año 1 (4.193 €). La flota toca 12; 10 ventas.",
+    20: "Mes de 6 ventas (GTI, Polo, 2× Golf, 2× Corolla); la caja pasa de 26.000 €.",
+    21: "9 ventas y 10 compras; ya entra el primer Peugeot 3008 (15.500 €). La flota toca 14.",
+    22: "Mes de 13 ventas; ya rotan también los modelos grandes (3008, Tiguan). La flota toca 16.",
+    23: "La flota toca 18; mes de 13 ventas. Entra el primer Mercedes C (17.666 €).",
+    24: "Cierra el año 2: se reparte el dividendo 50/50 (35.994 € brutos). Entra el primer BMW X1 (17.500 €).",
+    25: "La nave ya tiene 21 coches; mes de 14 ventas. Entra el primer Volvo XC60 (22.500 €).",
+    26: "La caja lo permite: se paga el RESTO de la obra (4.210 €: luz, pintura, señalización, mobiliario, seguridad). 14 ventas.",
+    27: "La nave se llena (24 coches) y la flota ya tiene los 15 modelos: cada ciclo venta + reposición suma su margen.",
+    28: "Mes de 17 ventas (y 17 reposiciones): la caja pasa de 100.000 €.",
+    29: "La caja pasa de 130.000 €.",
+    30: "La caja pasa de 170.000 €.",
+    31: "Se ingresa en AEAT el IS del año 2 (36.518 €). Mes de 21 ventas.",
+    32: "La caja pasa de 240.000 €.",
+    33: "La caja pasa de 270.000 €.",
+    34: "Mes de 17 ventas; la caja sube en línea recta hacia el dividendo.",
+    35: "La caja toca su pico (357.357 €) justo antes del dividendo grande.",
+    36: "Cierra el año 3: se reparte el dividendo gordo (382.811 € brutos) y la SL se queda su fondo (12.428 €).",
 }
 
 
@@ -654,8 +729,9 @@ def _mes_page(c, n, t, pag, m0, m1, titulo, intro):
     bg(c)
     heading(c, f"Mes a mes  ·  {pag} de 9", titulo)
     wrap(c, intro, 36, 448, 890, size=9, leading=12, max_lines=2)
-    wrap(c, "Cada mes: lo que se vende y se compra (coche a coche), los gastos y la caja al final del mes. "
-            "Es la trayectoria representativa (la que mejor replica la mediana de 250); el flujo cuadra al céntimo.",
+    wrap(c, "Cada mes, lo que se VENDE y se COMPRA con el precio de cada coche (n× modelo @ precio), la línea "
+            "STOCK (qué hay en la nave y su valor), los gastos y la caja al final. Es la trayectoria representativa "
+            "(la que mejor replica la mediana de 250); el flujo cuadra al céntimo.",
          36, 430, 890, size=8, leading=10, color=SLATE, max_lines=2)
     y = 404
     for m in range(m0, m1 + 1):
@@ -666,63 +742,64 @@ def _mes_page(c, n, t, pag, m0, m1, titulo, intro):
 @page
 def p_mes_1_4(c, n, t):
     _mes_page(c, n, t, 1, 1, 4, "Meses 1 a 4: el arranque",
-              f"La caja sale del día 1 en {eur(DI[7][2])} €. El trío viaja (m1-m2, sin vender ni comprar); en m3 "
-              f"llega y empieza el giro. Lo más justo es m2-m4, cuando la caja roza el fondo.")
+              f"La caja sale del día 1 en {eur(DI[7][2])} €. El trío (116d, A3, GTI) llega en m1 y desde ya se "
+              f"venden y se compran coches (con su precio). Lo más justo es m1-m5, cuando la caja está cerca del fondo.")
 
 
 @page
 def p_mes_5_8(c, n, t):
     _mes_page(c, n, t, 2, 5, 8, "Meses 5 a 8: el ritmo empieza",
-              "La flota crece de 4 a 6 y se venden 2-5 coches al mes. En m6 entran los sueldos (el de ella a "
-              "medias) y en m8, por primera vez, te llevas parte del hueco.")
+              "La flota se mantiene en 5 y se venden 1-3 coches al mes. En m6 entra el sueldo de ella a media "
+              "jornada (750 €) y suben los fijos a 3.163 €.")
 
 
 @page
 def p_mes_9_12(c, n, t):
     _mes_page(c, n, t, 3, 9, 12, "Meses 9 a 12: cierra el año 1",
-              "La flota llega a 7. Hay averías puntuales (contempladas). Al cerrar el año se reparte el primer "
-              "dividendo 50/50: la SL se queda su fondo (9.490 €) y el resto va a casa.")
+              "En m9, por primera vez, te llevas parte del hueco como sueldo. Hay averías puntuales "
+              "(contempladas). Al cerrar el año 1 se reparte el dividendo 50/50: la SL se queda su fondo (9.490 €).")
 
 
 @page
 def p_mes_13_16(c, n, t):
     _mes_page(c, n, t, 4, 13, 16, "Meses 13 a 16: el despegue",
-              "Las ventas despegan y la flota crece de 8 a 11. En m14 se paga el resto de la obra y en m16 ella "
-              "pasa a jornada completa: el fondo sube a 12.428 €.")
+              "Las ventas suben (5-7/mes) y la flota crece de 6 a 9. En m16 ella pasa a jornada completa "
+              "(1.500 €) y el fondo sube a 12.428 €.")
 
 
 @page
 def p_mes_17_20(c, n, t):
     _mes_page(c, n, t, 5, 17, 20, "Meses 17 a 20: arranca el año 2",
-              "La flota crece de 12 a 15 y se pagan los sueldos completos. En m19 se ingresa en AEAT el IS del "
-              "año 1; la caja pasa de 38.000 €.")
+              "La flota crece de 10 a 13 y el sueldo tuyo crece con el beneficio. En m19 se ingresa en AEAT el IS "
+              "del año 1 (4.193 €).")
 
 
 @page
 def p_mes_21_24(c, n, t):
-    _mes_page(c, n, t, 6, 21, 24, "Meses 21 a 24: la nave casi llena",
-              "Meses de 8-12 ventas; ya rotan también los modelos grandes (XC40, Mercedes). La flota llega a 20 "
-              "y, al cerrar el año 2, se reparte el dividendo 50/50.")
+    _mes_page(c, n, t, 6, 21, 24, "Meses 21 a 24: entran los grandes",
+              "Meses de 9-13 ventas; ya rotan los modelos grandes (3008, Tiguan, Mercedes, XC40) con ticket y "
+              "margen mayores. Al cerrar el año 2 se reparte el dividendo 50/50.")
 
 
 @page
 def p_mes_25_28(c, n, t):
     _mes_page(c, n, t, 7, 25, 28, "Meses 25 a 28: la nave llena",
-              "En m26 la flota llega a 24 (la nave llena). A partir de aquí se reponen coches al mismo ritmo que "
-              "se venden: cada ciclo suma su margen y la caja sube en línea recta.")
+              "En m26 se paga el resto de la obra (4.210 €) y en m27 la flota llega a 24 con los 15 modelos "
+              "(la nave llena). A partir de ahí se reponen coches al mismo ritmo que se venden.")
 
 
 @page
 def p_mes_29_32(c, n, t):
     _mes_page(c, n, t, 8, 29, 32, "Meses 29 a 32: la caja acelera",
-              "Nave llena y la caja sube de 170.000 € a 270.000 €. En m31 se ingresa en AEAT el IS del año 2.")
+              "Nave llena y la caja sube de 130.000 € a 240.000 €. En m31 se ingresa en AEAT el IS del año 2 "
+              "(36.518 €).")
 
 
 @page
 def p_mes_33_36(c, n, t):
     _mes_page(c, n, t, 9, 33, 36, "Meses 33 a 36: el último año",
-              "La caja pasa de 319.000 € y toca su pico en m35 (~386.000 €). Al cerrar el año 3 se reparte el "
-              "dividendo gordo: ~304.000 € netos van a casa y la SL se queda su fondo.")
+              "La caja pasa de 270.000 € y toca su pico en m35 (357.357 €). Al cerrar el año 3 se reparte el "
+              "dividendo gordo (382.811 € brutos) y la SL se queda su fondo (12.428 €).")
 
 
 @page
