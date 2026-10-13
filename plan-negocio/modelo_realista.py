@@ -231,6 +231,11 @@ def estrategia(nombre, nave, coches, reforma_a, reforma_b, **kw):
         # antes de pagar la obra aplazada. Con 0 se paga en cuanto la caja cubre
         # el fondo; con 2, sólo si además sobran dos meses de gastos.
         reforma_margen=kw.pop("reforma_margen", 0.0),
+        # Tramo de reforma que exige la nave vacía (p. ej. el suelo epoxi): se paga
+        # en el primer mes en que la flota ≤ suelo_max_flota y la caja lo aguanta.
+        # Con 0 no hay tramo (comportamiento anterior).
+        reforma_suelo=kw.pop("reforma_suelo", 0.0),
+        suelo_max_flota=kw.pop("suelo_max_flota", 10 ** 9),
         nave_desde_mes=kw.pop("nave_desde_mes", None),
         floor_meses=kw.pop("floor_meses", 3.0), reta=kw.pop("reta", g.RETA),
         constitucion=kw.pop("constitucion", CONSTITUCION_SL),
@@ -410,6 +415,19 @@ def simular(est, rng):
         caja = r2(caja - UNIDADES[nick]["coste"])
         mov_dia1.append((UNIDADES[nick]["nombre"], -UNIDADES[nick]["coste"]))
         en_camino.append(dict(nick=nick, dia=1 + est["lead"], compra=1, averia=rng.random() > 0.90))
+    # Suelo (y lo que exija la nave vacía): se paga en el arranque, que es el único
+    # momento en que la nave está vacía y se puede pintar todo el suelo. Si la flota
+    # inicial ya supera el umbral, no se puede hacer aquí y se deja pendiente.
+    # (floor() aún no está definido aquí: en el día 1 no hay reserva de impuesto ni
+    # sueldo apartado, así que el fondo es simplemente meses de gastos fijos.)
+    _flota_d1 = len(en_camino)
+    _meses_d1 = est["floor_meses"] if _flota_d1 >= plazas() else 1.0
+    if (nave is not None and est.get("reforma_suelo", 0.0) > 0
+            and _flota_d1 <= est.get("suelo_max_flota", 10 ** 9)
+            and caja - est["reforma_suelo"] + 1e-6 >= r2(_meses_d1 * fijos(nave))):
+        caja = r2(caja - est["reforma_suelo"])
+        mov_dia1.append(("Suelo, con la nave vacía (tramo urgente de la obra)", -est["reforma_suelo"]))
+        reforma_suelo_mes = 1
     caja = r2(caja - fijos(nave))
     mov_dia1.append(("Gastos fijos del mes 1", -fijos(nave)))
     fijo_anio = fijos(nave)
@@ -428,7 +446,17 @@ def simular(est, rng):
     averia_total = [0.0]
     ciclos = []
     detalle_ventas = []
+    # Detalle por mes (para el mes a mes): qué se compró y qué se vendió.
+    compras_mes = {m: [] for m in range(1, MESES + 1)}
+    ventas_det_mes = {m: [] for m in range(1, MESES + 1)}
+    # Gastos puntuales por mes (averías, obra, IS, dividendos) para cuadrar el flujo.
+    averias_mes = {m: 0.0 for m in range(1, MESES + 1)}
+    obra_mes = {m: 0.0 for m in range(1, MESES + 1)}
+    is_mes = {m: 0.0 for m in range(1, MESES + 1)}
+    div_mes = {m: 0.0 for m in range(1, MESES + 1)}
+    rebu_mes = {m: 0.0 for m in range(1, MESES + 1)}
     reforma_pagada_mes = None
+    reforma_suelo_mes = None
     nave_mes = None if nave is None else 1
     coches_comprados = len(est["coches"])
     ventas_total = 0
@@ -507,17 +535,21 @@ def simular(est, rng):
             if nave is not None and mes >= est["reforma_b_mes"] and reforma_pend > 0:
                 margen = est["reforma_margen"] * fijos(nave)
                 if caja - reforma_pend - margen + 1e-6 >= floor():
-                    caja = r2(caja - reforma_pend)
+                    _obra = r2(reforma_pend)
+                    caja = r2(caja - _obra)
                     reforma_pend = 0.0
                     reforma_pagada_mes = mes
+                    obra_mes[mes] = r2(obra_mes[mes] + _obra)
             caja = r2(caja - fijos(nave))
             fijo_anio = r2(fijo_anio + fijos(nave))
             if mes == 19 and impuesto[1]:
                 caja = r2(caja - impuesto[1])
                 pagado = r2(pagado + impuesto[1])
+                is_mes[mes] = r2(is_mes[mes] + impuesto[1])
             elif mes == 31 and impuesto[2]:
                 caja = r2(caja - impuesto[2])
                 pagado = r2(pagado + impuesto[2])
+                is_mes[mes] = r2(is_mes[mes] + impuesto[2])
 
         # --- sueldo --------------------------------------------------------
         if mes >= 6 and arranque_mes:
@@ -543,6 +575,7 @@ def simular(est, rng):
                     caja = r2(caja - gasto)
                     averia_anio = r2(averia_anio + gasto)
                     averia_total[0] = r2(averia_total[0] + gasto)
+                    averias_mes[mes] = r2(averias_mes[mes] + gasto)
                 # Se anuncia el día que llega y la venta no espera a la
                 # matriculación: el cliente se lo lleva con placas temporales.
                 # Cada coche vende a su ritmo, pero ese ritmo lo modulan la
@@ -584,12 +617,14 @@ def simular(est, rng):
             neto_anio = r2(neto_anio + u["neto"])
             cobro_anio = r2(cobro_anio + u["venta"])
             cobro_mes[mes] = r2(cobro_mes[mes] + u["venta"])
+            rebu_mes[mes] = r2(rebu_mes[mes] + u["rebu"])
             _vendido = True
             ventas_mes[mes] += 1
             ventas_total += 1
             usados += 1
             ciclos.append((w - v["compra"]) * 7.0)
             detalle_ventas.append((v["nick"], (w - v["compra"]) * 7.0))
+            ventas_det_mes[mes].append((v["nick"], u["venta"], u["neto"]))
             listos.remove(v)
 
         # --- compras: el mejor retorno por euro y por mes de espera --------
@@ -623,6 +658,7 @@ def simular(est, rng):
             u = UNIDADES[mejor]
             caja = r2(caja - u["coste"])
             coches_comprados += 1
+            compras_mes[mes].append((mejor, u["coste"]))
             en_camino.append(dict(nick=mejor, dia=w + est["lead"], compra=w,
                                   averia=rng.random() > 0.90))
 
@@ -638,6 +674,7 @@ def simular(est, rng):
                     caja = r2(caja - div)
                     dividendos_total[0] = r2(dividendos_total[0] + div)
                     dividendos_anio[anio] = r2(dividendos_anio[anio] + div)
+                    div_mes[mes] = r2(div_mes[mes] + div)
             flota = [UNIDADES[v["nick"]]["coste"] for v in listos + en_camino]
             meses.append(dict(
                 mes=mes, caja=caja, ventas=ventas_mes[mes], cobro=cobro_mes[mes],
@@ -645,6 +682,9 @@ def simular(est, rng):
                 sueldo=sueldo_mes[mes], fijos=fijos(nave), floor=floor(),
                 reforma_pend=reforma_pend, nave=bool(nave),
                 patrimonio=r2(caja + sum(flota)),
+                compras=list(compras_mes[mes]), ventas_det=list(ventas_det_mes[mes]),
+                averias=averias_mes[mes], obra=obra_mes[mes],
+                is_paid=is_mes[mes], div=div_mes[mes], rebu=rebu_mes[mes],
             ))
             if anio == 1 and mes == 12:
                 res = r2(neto_anio - fijo_anio - sueldo_anio - averia_anio - g.KIT)
@@ -675,17 +715,22 @@ def simular(est, rng):
             flota=len(flota), flota_coste=r2(sum(flota)), sueldo=sueldo_mes[MESES],
             fijos=fijos(nave), floor=floor(), reforma_pend=reforma_pend,
             nave=bool(nave), patrimonio=r2(caja + sum(flota)),
+            compras=list(compras_mes[MESES]), ventas_det=list(ventas_det_mes[MESES]),
+            averias=averias_mes[MESES], obra=obra_mes[MESES],
+            is_paid=is_mes[MESES], div=div_mes[MESES], rebu=rebu_mes[MESES],
         ))
 
     coste_flota = r2(sum(UNIDADES[v["nick"]]["coste"] for v in listos + en_camino))
     return dict(
         meses=meses, insolvente=insolvente, caja=caja, flota=len(listos) + len(en_camino),
         coste_flota=coste_flota, ventas=ventas_total, impuesto3=impuesto[3],
+        impuesto1=impuesto[1], impuesto2=impuesto[2],
         patrimonio=r2(caja + coste_flota - impuesto[3]),
         sueldos=r2(sum(m["sueldo"] for m in meses)), dividendos=dividendos_total[0],
         dividendos_anio=dividendos_anio, reducidos=reducidos,
         comprados=coches_comprados, pagado=pagado, nave_mes=nave_mes,
-        reforma_mes=reforma_pagada_mes, reforma_pend=r2(reforma_pend),
+        reforma_mes=reforma_pagada_mes, reforma_suelo_mes=reforma_suelo_mes,
+        reforma_pend=r2(reforma_pend),
         averias_total=r2(averia_total[0]),
         ciclo_medio=r2(sum(ciclos) / len(ciclos)) if ciclos else 0.0,
         detalle_ventas=detalle_ventas,

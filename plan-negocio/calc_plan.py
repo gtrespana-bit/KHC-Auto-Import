@@ -41,6 +41,12 @@ def escenario():
     e["personal_desde"] = 6
     e["personal_sube"] = 16
     e["personal_sube_imp"] = 1500 * (1 + CUOTA)
+    # Obra en 2 tramos: el suelo exige la nave vacía (se paga en el día 1); el
+    # resto (luz, pintura, señalización, mobiliario, seguridad, limpieza) se hace
+    # poco a poco con coches dentro y se paga cuando la caja lo aguanta.
+    e["reforma_b"] = 4210.47     # resto de la obra (de 5.115,47 €)
+    e["reforma_suelo"] = 905.0   # suelo epoxi, con la nave vacía
+    e["suelo_max_flota"] = 5
     e["dividendos"] = True
     return e
 
@@ -67,6 +73,7 @@ def main():
     fijos1 = n["rent"] + n["util"] + n["net"] + n["seguro"] + n["tasas"] + 448.69 + mr.g.MKT
     trio_coste = u["116d"]["coste"] + u["A3"]["coste"] + u["GTI"]["coste"]
 
+    SUELO = 905.0
     raw = [
         ("Capital propio (lo que tenéis)", 50000.0),
         ("Constitución de la SL (notaría, registro, gestoría)", -1200.0),
@@ -74,6 +81,7 @@ def main():
         ("Licencia de actividad + técnico", -800.0),
         ("Kit de equipo y detallado", -kit),
         ("Trío de arranque (116d + A3 + GTI)", -trio_coste),
+        ("Suelo, con la nave vacía (tramo urgente de la obra)", -SUELO),
         ("Gastos fijos del mes 1", -fijos1),
     ]
     dia1, run = [], 0.0
@@ -84,11 +92,25 @@ def main():
     V = [{} for _ in range(37)]
     F = [{} for _ in range(37)]
     C = [{} for _ in range(37)]
+    FJ = [{} for _ in range(37)]   # fijos del mes (mediana)
+    SU = [{} for _ in range(37)]   # sueldo dueño bruto del mes (mediana)
+    # Detalle mensual: por mes y sim, unidades/€ comprados y vendidos, y mezcla.
+    CP_N = [dict() for _ in range(37)]    # mes -> {sim: unidades}
+    CP_E = [dict() for _ in range(37)]    # mes -> {sim: €}
+    CP_MX = [dict() for _ in range(37)]   # mes -> {nick: unidades totales}
+    VT_N = [dict() for _ in range(37)]
+    VT_E = [dict() for _ in range(37)]
+    VT_NT = [dict() for _ in range(37)]
+    VT_MX = [dict() for _ in range(37)]
     insol = 0
     pat, vtot, rm, minc, minmes = [], [], [], [], []
+    casa_list = []
+    rm_suelo = 1  # se paga en el día 1 (nave vacía) si el escenario lo pide
     sd = {1: [], 2: [], 3: []}   # dueño sueldo neto
     se = {1: [], 2: [], 3: []}   # ella sueldo neto
     dv = {1: [], 2: [], 3: []}   # dividendos netos
+    div_bruto = {1: [], 2: [], 3: []}
+    is_anio = {1: [], 2: [], 3: []}
     for i in range(SIM):
         r = mr.simular(escenario(), random.Random(41 * 7919 + i))
         if r["insolvente"] is not None:
@@ -99,11 +121,24 @@ def main():
         minmes.append(r["min_caja_mes"])
         if r["reforma_mes"]:
             rm.append(r["reforma_mes"])
+        rm_suelo = r["reforma_suelo_mes"] or rm_suelo
         meses = r["meses"]
         for x in meses:
-            V[x["mes"]][i] = x["ventas"]
-            F[x["mes"]][i] = x["flota"]
-            C[x["mes"]][i] = x["caja"]
+            m = x["mes"]
+            V[m][i] = x["ventas"]
+            F[m][i] = x["flota"]
+            C[m][i] = x["caja"]
+            FJ[m][i] = x["fijos"]
+            SU[m][i] = x["sueldo"]
+            for nick, coste in x.get("compras", []):
+                CP_N[m][i] = CP_N[m].get(i, 0) + 1
+                CP_E[m][i] = CP_E[m].get(i, 0.0) + coste
+                CP_MX[m][nick] = CP_MX[m].get(nick, 0) + 1
+            for nick, venta, neto in x.get("ventas_det", []):
+                VT_N[m][i] = VT_N[m].get(i, 0) + 1
+                VT_E[m][i] = VT_E[m].get(i, 0.0) + venta
+                VT_NT[m][i] = VT_NT[m].get(i, 0.0) + neto
+                VT_MX[m][nick] = VT_MX[m].get(nick, 0) + 1
         a_sd = {1: 0.0, 2: 0.0, 3: 0.0}
         a_se = {1: 0.0, 2: 0.0, 3: 0.0}
         for x in meses:
@@ -114,9 +149,50 @@ def main():
             sd[a].append(a_sd[a])
             se[a].append(a_se[a])
             dv[a].append(div_neto(r["dividendos_anio"][a]))
+            div_bruto[a].append(r["dividendos_anio"][a])
+            is_anio[a].append(r[f"impuesto{a}"])
+        casa_list.append(sum(a_sd.values()) + sum(a_se.values())
+                        + sum(div_neto(r["dividendos_anio"][a]) for a in (1, 2, 3)))
 
     med = lambda d: statistics.median(d.values()) if d else 0.0
     mensual = {m: [med(V[m]), med(F[m]), med(C[m])] for m in range(1, 37)}
+    fijos_m = {m: med(FJ[m]) for m in range(1, 37)}
+    sueldo_m = {m: med(SU[m]) for m in range(1, 37)}
+    # Trayectoria representativa: la sim cuya caja mes a mes más replica a la mediana
+    # (mínima desviación absoluta total). Se usa para el mes a mes: el flujo cuadra al
+    # céntimo y la caja de cada mes coincide con la que muestra el resumen.
+    med_caja_m = {m: statistics.median(C[m].values()) for m in range(1, 37)}
+    best_i = min(
+        range(SIM),
+        key=lambda i: sum(abs(C[m][i] - med_caja_m[m]) for m in range(1, 37)),
+    )
+    r_rep = mr.simular(escenario(), random.Random(41 * 7919 + best_i))
+    tray = [
+        dict(mes=x["mes"], caja=x["caja"], flota=x["flota"], fijos=x["fijos"], sueldo=x["sueldo"],
+             ventas_det=x.get("ventas_det", []), compras=x.get("compras", []),
+             averias=x.get("averias", 0.0), obra=x.get("obra", 0.0),
+             is_paid=x.get("is_paid", 0.0), div=x.get("div", 0.0),
+             rebu=x.get("rebu", 0.0))
+        for x in r_rep["meses"]
+    ]
+    # "A casa" de la trayectoria representativa (para contrastar con la mediana).
+    _sd = {1: 0.0, 2: 0.0, 3: 0.0}
+    _se = {1: 0.0, 2: 0.0, 3: 0.0}
+    for x in r_rep["meses"]:
+        a = 1 if x["mes"] <= 12 else 2 if x["mes"] <= 24 else 3
+        _sd[a] += x["sueldo"] * (1 - (0.19 if x["mes"] <= 12 else 0.35))
+        _se[a] += neto_ella(x["mes"])
+    tray_casa = {a: _sd[a] + _se[a] + div_neto(r_rep["dividendos_anio"][a]) for a in (1, 2, 3)}
+    tray_casa_total = sum(tray_casa.values())
+    # Detalle mensual agregado (mesa "típica" sobre las SIM trayectorias).
+    def _mix(d):
+        return {k: v / SIM for k, v in d.items() if v / SIM >= 0.3}
+    compra_det = {
+        m: dict(n=med(CP_N[m]), eur=med(CP_E[m]), mix=_mix(CP_MX[m]))
+        for m in range(1, 37)}
+    venta_det = {
+        m: dict(n=med(VT_N[m]), eur=med(VT_E[m]), neto=med(VT_NT[m]), mix=_mix(VT_MX[m]))
+        for m in range(1, 37)}
     sd_m = {a: statistics.mean(sd[a]) for a in (1, 2, 3)}
     se_m = {a: statistics.mean(se[a]) for a in (1, 2, 3)}
     dv_m = {a: statistics.mean(dv[a]) for a in (1, 2, 3)}
@@ -125,8 +201,16 @@ def main():
         mensual=mensual, insol=100 * insol / SIM,
         v50=statistics.median(vtot), pat50=statistics.median(pat),
         obra=statistics.median(rm), obra_min=min(rm), obra_max=max(rm),
+        obra_suelo=rm_suelo,
         minc=statistics.median(minc), minmes=statistics.median(minmes),
         sd=sd_m, se=se_m, dv=dv_m,
+        compra_det=compra_det, venta_det=venta_det,
+        fijos_m=fijos_m, sueldo_m=sueldo_m,
+        div_bruto={a: statistics.median(div_bruto[a]) for a in (1, 2, 3)},
+        is_anio={a: statistics.median(is_anio[a]) for a in (1, 2, 3)},
+        tray=tray, tray_casa=tray_casa, tray_casa_total=tray_casa_total,
+        rep_ventas=r_rep["ventas"], rep_insolvente=r_rep["insolvente"],
+        rep_patrimonio=r_rep["patrimonio"],
     )
     for a in (1, 2, 3):
         out[f"casa_{a}"] = sd_m[a] + se_m[a] + dv_m[a]

@@ -59,5 +59,11 @@
 12. **[`ANALISIS_TIEMPO_VENTA.md`](./ANALISIS_TIEMPO_VENTA.md)** *(días de venta modelo a modelo, con fuentes)*
    - Un turismo de combustión tarda **43 días** de media en venderse y el más rápido de España **33-38**; la horquilla profesional sana es 30-45. Días por modelo, eficiencia del capital (€ de margen al mes por 1.000 € invertidos: **116d 227 · León 227 · GTI 219 · … · 318d 102**) y el tamaño real del mercado del área de Santiago (**~7.200 coches/año**), que es lo que desmonta el supuesto de «techos de demanda» del modelo antiguo.
 
-13. **🗺️ Módulo Interactivo en el ERP: `Calculadora de viaje` (`erp/src/views/TripCalculatorView.jsx`)**
+13. **[`Plan_Ejecucion_Paso_a_Paso.pdf`](./Plan_Ejecucion_Paso_a_Paso.pdf)** *(19 láminas, SOLO lo decidido; se regenera con `calc_plan.py` + `generar_plan_ejecucion.py`)*
+   - Plan de ejecución paso a paso desde el día 1, detallando cada gasto y **indicando SIEMPRE cuánto queda en caja**. SL 50/50 (tú administrador + ella socia), nave O Milladoiro (24 plazas, hasta 28), trío de arranque, ella media jornada (m6) → completa (m16), dividendos 50/50 a fin de año.
+   - **La obra, en dos fases**: el **suelo (905 €)** se paga el **día 1 con la nave vacía** (es lo único que exige vaciarla; cuanto más llena, más imposible) y el **resto (4.210 €, luz y pintura incluidas)** se hace poco a poco **con coches dentro**, cuando la caja lo pague (mediana: mes 15).
+   - **Mes a mes (36 meses, 9 láminas)** con la trayectoria representativa que mejor replica la mediana de 250 simulaciones: **coche a coche** (modelo, unidades, precio) qué se vende y qué se compra, todos los gastos (fijos, sueldos, obra, IS, dividendos, averías, IVA) y la caja al final de cada mes. El flujo de cada mes **cuadra al céntimo**.
+   - Resultado (mediana): **426.568 € a casa** (a1 13.994 · a2 62.620 · a3 349.953), ~**12 %** de trayectorias rozan la caja en el arranque, 296 ventas, la flota llega a 24 en el mes 26 y la caja cierra con su fondo de 3 meses (12.428 €).
+
+14. **🗺️ Módulo Interactivo en el ERP: `Calculadora de viaje` (`erp/src/views/TripCalculatorView.jsx`)**
    - Integrada en el menú lateral del ERP con mapa interactivo **Leaflet + OSRM**, buscador de cualquier ciudad/dirección europea, 3 rutas alternativas reales con cálculo automático de peajes por país y consumo según coche (*Focus ST 280, Golf GTI, Audi Q7, Porsche Cayenne, 2.0 TDI*) y envío en 1 clic al **Simulador de Importación**.
