@@ -18,6 +18,7 @@ import TaxView from '../erp/src/views/TaxView.jsx';
 import DocumentsView from '../erp/src/views/DocumentsView.jsx';
 import ReportsView from '../erp/src/views/ReportsView.jsx';
 import GuidesView from '../erp/src/views/GuidesView.jsx';
+import RepairManualsView from '../erp/src/views/RepairManualsView.jsx';
 import SettingsView from '../erp/src/views/SettingsView.jsx';
 import InvoicesView from '../erp/src/views/InvoicesView.jsx';
 import AdModal from '../erp/src/components/AdModal.jsx';
@@ -62,6 +63,9 @@ const CASES = [
   ['Guías · fiabilidad', () => <GuidesView initialTab="fiabilidad" />],
   ['Guías · contratos', () => <GuidesView />],
   ['Guías · plan de crecimiento', () => <GuidesView initialTab="fase2" />],
+  ['Manuales · biblioteca', () => <RepairManualsView />],
+  ['Manuales · cambio de aceite Golf VII', () => <RepairManualsView initialManualId="vw-golf-7-15-tsi-aceite-filtro" />],
+  ['Manuales · plantilla', () => <RepairManualsView initialTab="plantilla" />],
   ['Ajustes · empresa', () => <SettingsView />],
   ['Ajustes · fiscal', () => <SettingsView initialTab="fiscal" />],
   ['Ajustes · tarifas', () => <SettingsView initialTab="tarifas" />],

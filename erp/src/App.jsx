@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import {
   Gauge, TrendingUp, Car, Database, Calculator, Users, Wallet, FileWarning, FileCheck2, BarChart3,
   BookOpen, Settings as SettingsIcon, Menu, X, Building2, HardDrive, MapPin, ShieldCheck,
-  ReceiptText, Cloud, CloudOff, LogOut, UserRound, Upload, Globe, Navigation, ClipboardCheck,
+  ReceiptText, Cloud, CloudOff, LogOut, UserRound, Upload, Globe, Navigation, ClipboardCheck, Wrench,
 } from 'lucide-react';
 import { StoreProvider, useStore } from './lib/store.jsx';
 import { AuthProvider, useOptionalAuth } from './lib/auth.jsx';
@@ -27,6 +27,7 @@ import ReportsView from './views/ReportsView.jsx';
 import InvoicesView from './views/InvoicesView.jsx';
 import WebLeadsView from './views/WebLeadsView.jsx';
 import GuidesView from './views/GuidesView.jsx';
+import RepairManualsView from './views/RepairManualsView.jsx';
 import SettingsView from './views/SettingsView.jsx';
 
 const NAV = [
@@ -50,6 +51,7 @@ const NAV = [
   ] },
   { group: 'Referencia', items: [
     { id: 'guides', label: 'Guías y contratos', icon: BookOpen },
+    { id: 'manuals', label: 'Manuales de reparación', icon: Wrench },
     { id: 'settings', label: 'Ajustes', icon: SettingsIcon },
   ] },
 ];
@@ -216,6 +218,7 @@ function Shell() {
           {view === 'reports' && <ReportsView />}
           {view === 'web' && <WebLeadsView />}
           {view === 'guides' && <GuidesView vehicles={state.vehicles} />}
+          {view === 'manuals' && <RepairManualsView />}
           {view === 'settings' && <SettingsView />}
         </main>
 
