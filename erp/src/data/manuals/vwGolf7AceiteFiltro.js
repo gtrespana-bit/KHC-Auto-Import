@@ -26,7 +26,7 @@ const FUENTE_PLANOS = 'Plano técnico dibujado para este manual a partir de foto
 
 export const vwGolf7AceiteFiltro = {
   id: 'vw-golf-7-15-tsi-aceite-filtro',
-  rev: 2,
+  rev: 3,
   status: 'verificado',
   category: 'mantenimiento',
   title: 'Cambio de aceite y filtro del motor',
@@ -38,8 +38,8 @@ export const vwGolf7AceiteFiltro = {
     model: 'Golf VII (5G/BE, restyling 2017-2020)',
     years: '2017-2020 (unidades 2019 incluidas)',
     engines: [
-      { code: 'DZJA / DXVA / DXKB', name: '1.5 TSI EVO 150 CV (EA211 evo)' },
-      { code: 'CZC* / DAD*', name: '1.5 TSI 130 CV — mismo procedimiento, capacidad de aceite a confirmar' },
+      { code: 'DADA / DZJA / DXVA / DXKB / DPCA', name: '1.5 TSI EVO 150 CV (EA211 evo) — DADA y DZJA según SSP 555 oficial' },
+      { code: 'DACA / DPBA', name: '1.5 TSI EVO 130 CV (EA211 evo, ciclo Miller) — mismo procedimiento' },
     ],
     notes:
       'El procedimiento es común a los gasolina EA211 evo del Golf VII restyling. Los 1.0 TSI y los 2.0 TDI cambian filtro, capacidad y pares: usar su propio manual. Antes de empezar, confirmar el motor por la etiqueta de datos bajo el capó o por VIN.',
@@ -56,19 +56,19 @@ export const vwGolf7AceiteFiltro = {
   specs: [
     {
       label: 'Especificación del aceite',
-      value: 'VW 504 00 / VW 507 00 (LongLife III-IV)',
-      note: 'Viscosidad habitual 0W-30. Con intervalo fijo y según mercado puede admitirse VW 502 00 / 505 00 en 5W-40. Decidir por el manual del propietario o la etiqueta del vehículo.',
-      confidence: 'orientativo',
+      value: '0W-20 · VW 508 00 / VW 509 00 (LongLife IV, «aceite azul»)',
+      note: 'El motor se diseñó para este aceite de baja fricción (así lo describe el SSP 555 oficial de VW). Es la especificación exigida para mantener la garantía en los EA211 evo. Alternativas de mercado para repostaje puntual o climas extremos (5W-30 VW 504 00/507 00) solo según la tabla de aceites del manual del propietario/etiqueta del vehículo.',
+      confidence: 'oficial',
     },
     {
       label: 'Capacidad de aceite (con cambio de filtro)',
-      value: '≈ 4,6 L',
-      note: 'El llenado se hace en dos pasos: 4,0 L → comprobar nivel → completar. Nunca verter la totalidad de golpe.',
-      confidence: 'verificar',
+      value: '4,3 L',
+      note: 'Dato de catálogo TECDOC para el Golf VII 1.5 TSI (DADA/DPCA/DACA, 2017-2020), coincidente en varias fuentes de recambios. Llenado en dos pasos: 4,0 L → comprobar nivel → completar. Confirmar la cifra por VIN en erWin/ELSA.',
+      confidence: 'orientativo',
     },
     {
       label: 'Capacidad de aceite (sin cambio de filtro)',
-      value: '≈ 4,3 L',
+      value: '≈ 4,0 L',
       note: 'Solo para referencia: el filtro se sustituye en cada cambio de aceite.',
       confidence: 'verificar',
     },
@@ -130,10 +130,10 @@ export const vwGolf7AceiteFiltro = {
 
   parts: [
     {
-      name: 'Aceite de motor LongLife 0W-30 homologación VW 504 00/507 00',
-      ref: 'Según marca (ej. Castrol EDGE LL, Mobil 1 ESP X3, Shell Helix Ultra AV-L)',
+      name: 'Aceite de motor 0W-20 homologación VW 508 00 / 509 00',
+      ref: 'Ej.: Castrol EDGE Professional LL IV 0W-20, Mobil 1 ESP X2 0W-20, Liqui Moly Special Tec V 0W-20, Motul Specific 508/509 0W-20',
       qty: '5 L',
-      note: 'Basta con 5 L para llenar 4,6 L; comprar el envase que cubra la capacidad con filtro.',
+      note: 'Basta con 5 L para llenar 4,3 L. Comprobar la homologación VW 508 00/509 00 en el envase: es distinta de la 504 00/507 00.',
       consumable: true,
     },
     {
@@ -418,7 +418,7 @@ export const vwGolf7AceiteFiltro = {
       text: 'El tapón de la cuba del Golf es de un solo uso. Reutilizarlo (o ponerle una junta suelta) es la causa número uno de los goteos «imposibles de arreglar» tras un cambio de aceite. El tapón nuevo cuesta céntimos.',
     },
     {
-      title: 'Llenar los 4,6 L de una vez',
+      title: 'Llenar los 4,3 L de una vez',
       text: 'Si se vierte toda la capacidad sin comprobar, el sobrellenado obliga a drenar. Llenar 4,0 L, comprobar y completar: es más rápido que rehacer el trabajo.',
     },
     {
@@ -431,7 +431,7 @@ export const vwGolf7AceiteFiltro = {
     },
     {
       title: 'Aceite sin la homologación correcta',
-      text: 'Un 5W-40 sin homologación VW 504 00/507 00 (o la que corresponda por mercado) puede ser incompatible con el sistema de tratamiento de gases. La homologación va en el envase: comprobarla antes de verter.',
+      text: 'El EA211 evo exige 0W-20 VW 508 00/509 00 (aceite azul). Un aceite de otra homologación (502 00, 504 00/507 00…) solo sirve como repostaje puntual máximo de 0,5 L según el manual del propietario; verter un llenado completo con la homologación equivocada compromete la garantía y el sistema de gases. La homologación va en el envase: comprobarla antes de verter.',
     },
     {
       title: 'Drenar el motor en frío',
@@ -450,7 +450,7 @@ export const vwGolf7AceiteFiltro = {
     },
     {
       label: 'Residuos',
-      text: 'Aceite usado (aprox. 4,5 L), filtro y paños al punto limpio o gestor autorizado. Solicitar el certificado de gestión.',
+      text: 'Aceite usado (aprox. 4,2 L), filtro y paños al punto limpio o gestor autorizado. Solicitar el certificado de gestión.',
     },
     {
       label: 'Seguimiento',
@@ -468,8 +468,16 @@ export const vwGolf7AceiteFiltro = {
 
   sources: [
     {
+      name: 'VW Self-Study Programme 555 — «Die 1,5l-96/110 kW-TSI-Motoren EA211 EVO» (documentación oficial VW Service Training)',
+      note: 'Documento oficial de VW para este motor exacto (códigos DACA y DADA): sistema de aceite (bomba de paletas con regulación continua 1,4-3,3 bar, válvula N428, diseño para aceite 0W-20, sensor de nivel y temperatura G266), distribución por correa de mantenimiento nulo y arquitectura del motor. Descarga directa del PDF: esperformance.net/ssp/vw/SSP_555_DE.pdf. El propio SSP remite los procedimientos de servicio a ELSA.',
+    },
+    {
       name: 'Documentación oficial Volkswagen (erWin / ELSA) por VIN',
-      note: 'Fuente de referencia para capacidades, pares de apriete y homologaciones. Las filas marcadas «verificar» deben confirmarse aquí antes de usar el manual en un vehículo de cliente.',
+      note: 'Fuente última para capacidades, pares de apriete, posiciones de componentes y procedimientos: https://erwin.volkswagen.de (acceso de pago por vehículo/plazo de tiempo, descarga en PDF). Las filas marcadas «verificar» deben confirmarse aquí antes de usar el manual en un vehículo de cliente.',
+    },
+    {
+      name: 'Catálogo de recambios TECDOC (datos del fabricante del recambio)',
+      note: 'Capacidad de aceite 4,3 L para Golf VII 1.5 TSI (DADA/DPCA/DACA) e intervalos de sustitución; contrastado en varios distribuidores (pkwteile, autodoc).',
     },
     {
       name: 'Manual del propietario Golf VII (2019)',

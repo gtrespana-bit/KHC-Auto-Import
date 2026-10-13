@@ -130,9 +130,10 @@ Reglas adicionales:
 **`vw-golf-7-15-tsi-aceite-filtro`** — Cambio de aceite y filtro del motor del
 VW Golf VII (5G/BE, 2017-2020) con motor 1.5 TSI EVO (EA211 evo):
 
-* Especificaciones: homologación VW 504 00/507 00 (0W-30), capacidad ≈ 4,6 L
-  con filtro, tapón de drenaje M14×1,5 a **30 Nm** (nuevo siempre), tapa del
-  filtro a **25 Nm**, intervalos LongLife (30.000 km / 2 años) o fijo
+* Especificaciones: homologación **VW 508 00/509 00 (0W-20)** —el motor se
+  diseñó para este aceite, según el SSP 555 oficial—, capacidad **4,3 L** con
+  filtro (TECDOC), tapón de drenaje M14×1,5 a **30 Nm** (nuevo siempre), tapa
+  del filtro a **25 Nm**, intervalos LongLife (30.000 km / 2 años) o fijo
   (15.000 km / 1 año).
 * 9 pasos con **3 planos técnicos dibujados a mano** (Plano 1: compartimento
   del motor en planta · Plano 2: vista inferior de la cuba y drenaje · Plano 3:
@@ -146,10 +147,24 @@ VW Golf VII (5G/BE, 2017-2020) con motor 1.5 TSI EVO (EA211 evo):
 * Checklist de verificación final, 6 errores frecuentes y cuidados posteriores
   (historial, residuos, seguimiento de consumo).
 
-> ⚠️ Las filas marcadas **«Verificar»** (capacidad exacta, referencia del
+> ⚠️ Las filas marcadas **«Verificar»** (capacidad sin filtro, referencia del
 > filtro, tornillos del escudo) deben confirmarse por VIN en la documentación
-> oficial antes de usar el manual en un vehículo de cliente. El resto procede
-> de valores estándar del grupo VAG para esta familia de motores.
+> oficial antes de usar el manual en un vehículo de cliente.
+
+## 📚 Documentación oficial de VW: cómo obtenerla
+
+| Documento | Qué aporta | Cómo conseguirlo |
+| --- | --- | --- |
+| **Workshop Manual + ELSA** (manual oficial de taller) | Procedimientos oficiales paso a paso, pares de apriete exactos por VIN, esquemas ELSA con posiciones de componentes | **erwin.volkswagen.de** — alta por vehículo (VIN) o por plazo de tiempo (desde ~24 h); descarga en PDF. Es de pago y requiere registro. **Es la única fuente que cierra todas las filas «verificar».** |
+| **SSP 555** — «Die 1,5l-96/110 kW-TSI-Motoren EA211 EVO» (VW Service Training) | Documentación oficial del motor exacto: sistema de aceite, distribución, datos técnicos (DACA/DADA) | PDF libre: `esperformance.net/ssp/vw/SSP_555_DE.pdf` (también versión EN `SSP_555_EN.pdf`) |
+| **Manual del propietario Golf VII (2019)** | Tabla de aceites por clima, capacidad declarada, intervalos, reinicio del servicio | PDF de VW o de la web del propietario; el que viene en la guantera del coche |
+
+> Nota honesta: el **SSP 555 oficial remite expresamente los procedimientos de
+> servicio a ELSA** («Beachten Sie dazu die Hinweise im ELSA»). Es decir: ni
+> siquiera la documentación técnica gratuita de VW sustituye al manual oficial
+> de taller para trabajar. Para cerrar un manual al 100 %, la vía es comprar
+> el acceso a erWin/ELSA por el VIN del vehículo y extraer de ahí las cifras y
+> posiciones exactas.
 
 ---
 
