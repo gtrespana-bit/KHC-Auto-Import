@@ -2,10 +2,10 @@
 
 Módulo de **Referencia → Manuales de reparación** en el ERP (`app.khcimport.autos`).
 Biblioteca interna de procedimientos de taller —mantenimiento y reparaciones— con
-**especificaciones del fabricante**, pasos detallados con **ilustraciones de
-ubicación** y verificación final. Sirve para preparar vehículos del stock, para
-que el taller trabaje con criterios homogéneos y como base documental de cada
-servicio.
+**especificaciones del fabricante**, pasos detallados con **fotos reales del
+motor concreto y los puntos exactos señalados** (pines) y verificación final.
+Sirve para preparar vehículos del stock, para que el taller trabaje con
+criterios homogéneos y como base documental de cada servicio.
 
 ---
 
@@ -17,7 +17,7 @@ servicio.
 | Manuales publicados | `erp/src/data/manuals/<marcaModeloProcedimiento>.js` |
 | Índice (registro `REPAIR_MANUALS`) | `erp/src/data/manuals/index.js` |
 | Vista del ERP | `erp/src/views/RepairManualsView.jsx` |
-| Ilustraciones de ejemplo | `erp/src/assets/manuals/*.jpg` (Vite las empaqueta bajo `/erp/assets/`) |
+| Fotos reales de procedimientos | `erp/src/assets/manuals/real/*.jpg` (Vite las empaqueta bajo `/erp/assets/`) |
 | Casos de prueba de humo | `scripts/smoke-render.jsx` («Manuales · …») |
 
 ---
@@ -30,8 +30,9 @@ servicio.
   (`verificado` / `borrador`).
 * **Ficha del manual** — cabecera con vehículos y motores cubiertos;
   especificaciones del fabricante; tabla de **pares de apriete**; herramientas y
-  recambios; avisos de seguridad; **procedimiento paso a paso** con ilustración
-  de ubicación, trucos, avisos y par aplicado por paso; checklist final
+  recambios; avisos de seguridad; **procedimiento paso a paso** con foto real
+  verificada y pines sobre los puntos exactos (o hueco «foto pendiente» con el
+  encuadre a fotografiar), trucos, avisos y par aplicado por paso; checklist final
   interactivo; errores frecuentes; cuidados posteriores y trazabilidad de
   fuentes. Botón **Imprimir manual** (la navegación no se imprime).
 * **Plantilla para nuevos manuales** — el esquema campo a campo, las reglas de
@@ -54,9 +55,18 @@ Reglas adicionales:
 
 1. Todo lo que se apriete lleva su par en la tabla `torque`. **Nunca inventar un
    par**: si no se conoce, dejar la entrada con `confidence: 'verificar'`.
-2. Las ilustraciones son de ejemplo (generadas) salvo que el `caption` diga lo
-   contrario. En manuales de producción, sustituirlas por fotos reales del
-   vehículo.
+2. **Imágenes — política estricta.** Solo se admiten **fotos reales** del
+   vehículo/motor concreto (`scope: 'modelo'`) o, como mucho, de su familia de
+   motor claramente identificada (`scope: 'familia'`). Cada foto declara
+   `shows` (qué se ve de verdad y de qué motor es), `source` (origen) y
+   `points` (pines `{x, y, label}` en % sobre el punto exacto). **Queda
+   prohibido** usar ilustraciones genéricas, renders de otros motores o fotos
+   de motorizaciones distintas: una imagen con el filtro «arriba» y otra con el
+   filtro «abajo» desorienta más que ayuda. Cuando no exista foto real
+   verificada de un punto, el paso usa `kind: 'pendiente'` con el `brief` del
+   encuadre exacto a fotografiar (ángulo, qué debe verse, elemento de
+   referencia). El hueco honesto se cubre con foto propia del taller; una
+   imagen genérica, nunca.
 3. Los pasos se redactan en imperativo, con **criterio de éxito comprobable**
    («el testigo se apaga», «hasta MIN/MAX», «30 Nm»…).
 4. Un manual con cifras críticas sin confirmar se publica en
@@ -70,10 +80,12 @@ Reglas adicionales:
    `erp/src/data/manuals/miManual.js`.
 2. **Rellena el esquema** (ver tabla de campos abajo). Usa el manual
    `vwGolf7AceiteFiltro.js` como ejemplo del nivel de detalle exigido.
-3. **Imágenes**: coloca las ilustraciones en `erp/src/assets/manuals/` e
-   impórtalas en el fichero del manual
-   (`import img from '../../assets/manuals/archivo.jpg'`). Referéncialas en
-   `steps[].image` con su `imageCaption`.
+3. **Imágenes**: coloca las **fotos reales** en `erp/src/assets/manuals/real/`
+   e impórtalas en el fichero del manual. Cada `steps[].image` de tipo `foto`
+   lleva `scope` (motor exacto o familia identificada), `shows`, `source` y
+   `points` con los pines sobre los puntos exactos. Si falta la foto de un
+   punto, usa `kind: 'pendiente'` con el encuadre a fotografiar — nunca una
+   imagen genérica.
 4. **Regístralo** en `erp/src/data/manuals/index.js`:
 
    ```js
@@ -99,7 +111,7 @@ Reglas adicionales:
 | `tools` | Herramientas `[{ name, note }]` |
 | `parts` | Recambios `[{ name, ref, qty, note, consumable }]` |
 | `warnings` | Avisos `[{ title, text }]` |
-| `steps` | Pasos `[{ title, text, bullets, image, imageCaption, tip, warning, torque }]` |
+| `steps` | Pasos `[{ title, text, bullets, image, tip, warning, torque }]` — `image` es `{ kind: 'foto', src, scope, shows, source, caption, points }` o `{ kind: 'pendiente', brief }` |
 | `torque` | Pares de apriete `[{ element, value, note, confidence }]` |
 | `checklist` | Verificación final (lista de comprobaciones) |
 | `mistakes` | Errores frecuentes `[{ title, text }]` |
@@ -117,8 +129,12 @@ VW Golf VII (5G/BE, 2017-2020) con motor 1.5 TSI EVO (EA211 evo):
   con filtro, tapón de drenaje M14×1,5 a **30 Nm** (nuevo siempre), tapa del
   filtro a **25 Nm**, intervalos LongLife (30.000 km / 2 años) o fijo
   (15.000 km / 1 año).
-* 9 pasos con 5 ilustraciones de ubicación (drenaje, filtro, llenado, varilla,
-  cuadro), trucos de taller y avisos.
+* 9 pasos con **fotos reales de taller verificadas** (drenaje en la cuba,
+  extracción y limpieza de la varilla, vista del motorraum) marcadas como
+  «familia EA211 (Golf VII)» con **pines sobre cada punto**, y **huecos
+  «foto real pendiente»** con el encuadre exacto para los 4 puntos que exigen
+  foto del motor 1.5 TSI EVO concreto (tapón de drenaje, alojamiento del
+  filtro, tapón de llenado y pantalla de servicio).
 * Checklist de verificación final, 6 errores frecuentes y cuidados posteriores
   (historial, residuos, seguimiento de consumo).
 
@@ -136,8 +152,9 @@ VW Golf VII (5G/BE, 2017-2020) con motor 1.5 TSI EVO (EA211 evo):
   tornillo), crear manuales separados y cruzarlos en `vehicle.notes`.
 * **Cifras con fecha**: al corregir una cifra, subir `rev` y dejar constancia en
   `sources`.
-* **Fotos reales cuando se pueda**: las ilustraciones IA sitúan las
-  ubicaciones, pero una foto del vehículo concreto siempre gana. Mantener el
-  `caption` honesto sobre el origen de la imagen.
+* **Fotos reales o nada**: las imágenes deben ser del motor concreto (o de su
+  familia, claramente identificada) con pines en los puntos exactos. Si no hay
+  foto verificada, hueco «pendiente» con el encuadre a fotografiar. Prohibido
+  rellenar con imágenes genéricas o de otros motores.
 * **El checklist es obligatorio**: es lo que permite firmar el trabajo como
   completado y protege frente a reclamaciones.

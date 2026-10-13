@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import {
   Wrench, Search, ArrowLeft, Printer, BookOpen, Clock, Gauge, RotateCcw,
-  AlertTriangle, CheckCircle2, Lightbulb, Info, Copy, FileCode2, Car, Layers,
+  AlertTriangle, CheckCircle2, Lightbulb, Info, Copy, FileCode2, Car, Layers, Camera,
 } from 'lucide-react';
 import {
   SectionTitle, Card, Badge, Button, Alert, Tabs, Table, EmptyState, cx,
@@ -13,7 +13,8 @@ import {
 // ============================================================================
 //  Manuales de reparación — biblioteca de procedimientos con especificaciones
 //  del fabricante (capacidades, pares de apriete, homologaciones), pasos con
-//  ilustraciones de ubicación y verificación final. Los datos viven en
+//  fotos reales verificadas + pines sobre los puntos exactos (o huecos
+//  «foto pendiente») y verificación final. Los datos viven en
 //  erp/src/data/manuals/ con el esquema de `plantilla.js`.
 // ============================================================================
 
@@ -95,6 +96,80 @@ function TorqueTable({ torque = [] }) {
   );
 }
 
+function StepImage({ image }) {
+  if (!image) return null;
+
+  if (image.kind === 'pendiente') {
+    return (
+      <figure className="rounded-xl border-2 border-dashed border-amber-500/40 bg-amber-500/5 px-4 py-4">
+        <p className="flex items-center gap-2 text-xs font-semibold text-amber-300">
+          <Camera className="w-4 h-4" /> FOTO REAL PENDIENTE
+        </p>
+        <p className="mt-2 text-xs text-amber-100/90 leading-relaxed">{image.brief}</p>
+        <p className="mt-2 text-[10px] text-amber-200/60 leading-relaxed">
+          Este manual no admite ilustraciones genéricas ni fotos de otros motores: hasta que no exista
+          foto real verificada de este punto en el motor concreto, la ubicación no se da por buena.
+        </p>
+      </figure>
+    );
+  }
+
+  return (
+    <figure>
+      <div className="relative">
+        <img
+          src={image.src}
+          alt={image.caption || image.shows || 'Foto del procedimiento'}
+          className="w-full rounded-xl border border-slate-800 object-cover max-h-80"
+          loading="lazy"
+        />
+        {(image.points || []).map((p, i) => (
+          <span
+            key={i}
+            className="absolute -translate-x-1/2 -translate-y-1/2 group/pin"
+            style={{ left: `${p.x}%`, top: `${p.y}%` }}
+          >
+            <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-amber-500 text-[11px] font-extrabold text-slate-950 shadow-lg">
+              {i + 1}
+            </span>
+            <span className="pointer-events-none absolute left-1/2 top-7 z-10 w-40 -translate-x-1/2 rounded-md border border-amber-400/50 bg-slate-950/95 px-2 py-1 text-[10px] leading-snug text-amber-100 opacity-0 shadow-xl transition-opacity group-hover/pin:opacity-100">
+              {p.label}
+            </span>
+          </span>
+        ))}
+        <span
+          className={cx(
+            'absolute left-2 top-2 rounded-md px-2 py-1 text-[10px] font-semibold shadow-md backdrop-blur-sm',
+            image.scope === 'modelo'
+              ? 'bg-emerald-500/90 text-slate-950'
+              : 'bg-amber-500/90 text-slate-950',
+          )}
+        >
+          {image.scope === 'modelo' ? 'Foto real · motor exacto' : 'Foto real · familia EA211 (Golf VII)'}
+        </span>
+      </div>
+      {image.caption && (
+        <figcaption className="mt-2 text-[11px] text-slate-500 leading-relaxed">{image.caption}</figcaption>
+      )}
+      {(image.points || []).length > 0 && (
+        <ul className="mt-1.5 space-y-0.5">
+          {image.points.map((p, i) => (
+            <li key={i} className="text-[10px] text-slate-500">
+              <b className="text-amber-400">{i + 1}.</b> {p.label}
+            </li>
+          ))}
+        </ul>
+      )}
+      {(image.shows || image.source) && (
+        <p className="mt-1.5 text-[10px] text-slate-600 leading-relaxed">
+          {image.shows && <><b className="text-slate-500">Qué se ve:</b> {image.shows} </>}
+          {image.source && <><b className="text-slate-500">Origen:</b> {image.source}</>}
+        </p>
+      )}
+    </figure>
+  );
+}
+
 function StepCard({ step, index }) {
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-900/60 overflow-hidden">
@@ -118,19 +193,7 @@ function StepCard({ step, index }) {
           </ul>
         )}
 
-        {step.image && (
-          <figure>
-            <img
-              src={step.image}
-              alt={step.imageCaption || step.title}
-              className="w-full rounded-xl border border-slate-800 object-cover max-h-80"
-              loading="lazy"
-            />
-            {step.imageCaption && (
-              <figcaption className="mt-2 text-[11px] text-slate-500 leading-relaxed">{step.imageCaption}</figcaption>
-            )}
-          </figure>
-        )}
+        <StepImage image={step.image} />
 
         {step.tip && (
           <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2.5">
@@ -383,7 +446,8 @@ function ManualDetail({ manual, onBack }) {
           ))}
         </ul>
         <p className="mt-3 text-[11px] text-slate-600">
-          Manual rev. {manual.rev} · las ilustraciones son imágenes de ejemplo para situar ubicaciones.
+          Manual rev. {manual.rev} · las fotos reales declaran su origen y alcance (motor exacto o familia);
+          los puntos sin foto real verificada quedan como «foto pendiente».
         </p>
       </Card>
     </div>
@@ -399,7 +463,7 @@ function PlantillaPanel() {
     { field: 'specs', desc: 'Especificaciones del fabricante: litros, homologaciones, intervalos… cada una con su fuente.' },
     { field: 'tools · parts', desc: 'Herramientas necesarias y recambios con referencia, cantidad y notas.' },
     { field: 'warnings', desc: 'Avisos de seguridad y garantía previos al trabajo.' },
-    { field: 'steps', desc: 'Pasos con texto, viñetas, ilustración de ubicación, truco, aviso y par aplicado.' },
+    { field: 'steps', desc: 'Pasos con texto, viñetas, foto real verificada con pines (o hueco pendiente), truco, aviso y par aplicado.' },
     { field: 'torque', desc: 'Tabla de pares de apriete (elemento, valor, notas, fuente).' },
     { field: 'checklist · mistakes · aftercare', desc: 'Verificación final, errores frecuentes y cuidados posteriores.' },
     { field: 'sources', desc: 'Trazabilidad: de dónde sale cada bloque de información.' },
@@ -429,7 +493,7 @@ function PlantillaPanel() {
         />
       </Card>
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid gap-5 lg:grid-cols-3">
         <Card className="p-5">
           <h3 className="text-sm font-bold text-white flex items-center gap-2 mb-3">
             <Gauge className="w-4 h-4 text-amber-400" /> Reglas de oro de las cifras
@@ -437,15 +501,15 @@ function PlantillaPanel() {
           <ul className="space-y-2.5 text-xs text-slate-400 leading-relaxed">
             <li className="flex items-start gap-2">
               <Badge tone="emerald">Oficial</Badge>
-              <span>Procede de la documentación del fabricante (erWin/ELSA, boletines, manual del propietario) y está contrastada.</span>
+              <span>Documentación del fabricante (erWin/ELSA, boletines, manual del propietario), contrastada.</span>
             </li>
             <li className="flex items-start gap-2">
               <Badge tone="amber">Orientativo</Badge>
-              <span>Valor estándar de la familia de motores o manual de taller conocido. Sirve para trabajar, pero conviene confirmarlo.</span>
+              <span>Valor estándar de la familia de motores o manual de taller. Sirve para trabajar; conviene confirmarlo.</span>
             </li>
             <li className="flex items-start gap-2">
               <Badge tone="rose">Verificar</Badge>
-              <span>Hay duda o depende del mercado/año exacto. No usar como referencia de apriete o llenado sin confirmar por VIN.</span>
+              <span>Duda o depende del mercado/año. No usar como referencia de apriete o llenado sin confirmar por VIN.</span>
             </li>
           </ul>
           <p className="mt-3 text-[11px] text-slate-500 leading-relaxed">
@@ -456,12 +520,32 @@ function PlantillaPanel() {
 
         <Card className="p-5">
           <h3 className="text-sm font-bold text-white flex items-center gap-2 mb-3">
+            <Camera className="w-4 h-4 text-amber-400" /> Política de imágenes (estricta)
+          </h3>
+          <ul className="space-y-2.5 text-xs text-slate-400 leading-relaxed">
+            <li className="flex items-start gap-2">
+              <Badge tone="emerald">Foto real</Badge>
+              <span>Solo fotos del vehículo/motor concreto (<code className="text-amber-300">scope: 'modelo'</code>) o de su familia claramente identificada (<code className="text-amber-300">scope: 'familia'</code>), con <code className="text-amber-300">shows</code>, <code className="text-amber-300">source</code> y <code className="text-amber-300">points</code> (pines sobre el punto exacto).</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Badge tone="amber">Pendiente</Badge>
+              <span>Sin foto real verificada del punto: hueco con el encuadre exacto a fotografiar (<code className="text-amber-300">kind: 'pendiente'</code> + <code className="text-amber-300">brief</code>), para cubrirlo con foto propia del taller.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Badge tone="rose">Prohibido</Badge>
+              <span>Ilustraciones genéricas, renders de otros motores o fotos de motorizaciones distintas: un filtro «arriba» en una foto y «abajo» en otra desorienta más que ayudar.</span>
+            </li>
+          </ul>
+        </Card>
+
+        <Card className="p-5">
+          <h3 className="text-sm font-bold text-white flex items-center gap-2 mb-3">
             <Copy className="w-4 h-4 text-amber-400" /> Checklist para publicar un manual nuevo
           </h3>
           <ol className="space-y-2 text-xs text-slate-400 leading-relaxed list-decimal list-inside">
             <li>Copiar <code className="text-amber-300">plantilla.js</code> y rellenar todos los campos obligatorios.</li>
             <li>Marcar la fuente (<code className="text-amber-300">confidence</code>) de cada cifra. Sin excepciones.</li>
-            <li>Incluir ilustraciones de ubicación reales o de ejemplo claramente etiquetadas en el <code className="text-amber-300">caption</code>.</li>
+            <li>Imágenes: solo fotos reales verificadas del motor concreto (o familia identificada) con pines en los puntos exactos. Si falta, dejar el hueco «pendiente» con el encuadre a fotografiar — nunca relleno genérico.</li>
             <li>Redactar los pasos en imperativo, con criterio de éxito comprobable.</li>
             <li>Completar checklist final, errores frecuentes y trazabilidad de fuentes.</li>
             <li>Registrar el manual en <code className="text-amber-300">REPAIR_MANUALS</code> y comprobar que renderiza en el ERP.</li>
@@ -488,7 +572,9 @@ function PlantillaPanel() {
   tools:   [{ name, note }],
   parts:   [{ name, ref, qty, note, consumable }],
   warnings:[{ title, text }],
-  steps:   [{ title, text, bullets, image, imageCaption, tip, warning, torque }],
+  steps:   [{ title, text, bullets, image, tip, warning, torque }],
+  // image = { kind:'foto', src, scope:'modelo'|'familia', shows, source, caption, points:[{x,y,label}] }
+  //       | { kind:'pendiente', brief:'encuadre exacto a fotografiar' }
   torque:  [{ element, value, note, confidence }],
   checklist: ['…'],
   mistakes:  [{ title, text }],
@@ -527,7 +613,7 @@ export default function RepairManualsView({ initialManualId = null, initialTab =
       <SectionTitle
         icon={Wrench}
         title="Manuales de reparación"
-        subtitle="Procedimientos de taller con especificaciones del fabricante: capacidades, homologaciones de aceite, pares de apriete, pasos con ilustraciones de ubicación y verificación final. Cada cifra declara su fuente."
+        subtitle="Procedimientos de taller con especificaciones del fabricante: capacidades, homologaciones de aceite, pares de apriete, pasos con fotos reales del motor concreto y puntos exactos señalados (o foto pendiente si falta) y verificación final. Cada cifra y cada imagen declara su fuente."
         right={
           <div className="flex items-center gap-2">
             <Badge tone="slate">{summary.total} manuales</Badge>

@@ -15,9 +15,17 @@
 //                        como referencia de apriete o llenado sin confirmar.
 //  2. Todo lo que se apriete lleva su par en la tabla `torque`. Nunca inventar
 //     un par: si no se conoce, dejar la entrada con `confidence: 'verificar'`.
-//  3. Las imágenes son ilustrativas (IA) salvo que se indique lo contrario en
-//     el `caption`. Para manuales de producción, sustituirlas por fotos reales
-//     del vehículo y marcar el paso como verificado.
+//  3. IMÁGENES — política estricta (ver `steps[].image`):
+//       · Solo fotos REALES del vehículo/motor concreto (scope: 'modelo') o, como
+//         mucho, de su familia de motor claramente identificada (scope: 'familia').
+//       · PROHIBIDO ilustraciones genéricas, renders de otros motores o fotos de
+//         motorizaciones distintas (un filtro «arriba» en una foto y «abajo» en
+//         otra desorienta más que ayudar).
+//       · Cada foto declara `shows` (qué se ve de verdad), `source` (origen) y
+//         `points` (pines {x, y, label} sobre el punto exacto, en % de la imagen).
+//       · Si NO hay foto real verificada del punto, usar `kind: 'pendiente'` con
+//         el `brief` del encuadre exacto a fotografiar. El hueco es honesto; una
+//         imagen genérica no lo es.
 //  4. Los pasos se redactan en imperativo, con el objetivo de cada acción y el
 //     criterio de éxito ("el testigo se apaga", "hasta MIN/MAX", etc.).
 // ============================================================================
@@ -112,8 +120,27 @@ export const MANUAL_TEMPLATE = {
       title: 'Preparación y seguridad',
       text: 'Qué hacer primero y por qué. Incluir estado del vehículo (nivelado, freno de mano, ruedas calzadas).',
       bullets: ['Detalle 1', 'Detalle 2'],
-      // image: imagenImportada,          // import desde erp/src/assets/manuals/…
-      // imageCaption: 'Ubicación de …',  // qué se ve en la ilustración
+      // IMAGEN — dos formas, y solo dos:
+      //
+      //  a) Foto real verificada (obligatorio declarar qué se ve, origen y pines):
+      //     image: {
+      //       kind: 'foto',
+      //       src: imagenImportada,            // import desde erp/src/assets/manuals/real/…
+      //       scope: 'modelo',                 // 'modelo' = motor exacto · 'familia' = familia de motor identificada
+      //       shows: 'Qué aparece realmente en la foto y de qué motor/vehículo es',
+      //       source: 'Origen de la foto (taller propio, guía, fabricante…)',
+      //       caption: 'Pie de foto: qué mirar exactamente',
+      //       points: [{ x: 42, y: 55, label: 'Tapón de drenaje' }],  // coordenadas en % de la imagen
+      //     },
+      //
+      //  b) Hueco honesto mientras no exista foto real del motor concreto:
+      //     image: {
+      //       kind: 'pendiente',
+      //       brief: 'Encuadre exacto a fotografiar (ángulo, qué debe verse, elemento de referencia).',
+      //     },
+      //
+      //  NUNCA: ilustraciones genéricas, renders de otros motores o fotos de
+      //  motorizaciones distintas a la cubierta por el manual.
       tip: 'Truco de taller que ahorra tiempo.',
       warning: 'Riesgo concreto de este paso.',
       torque: '30 Nm', // par que se aplica en este paso (debe estar también en `torque`)

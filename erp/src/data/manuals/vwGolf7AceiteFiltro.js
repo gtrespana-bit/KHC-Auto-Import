@@ -1,21 +1,28 @@
 // ============================================================================
 //  MANUAL — VW Golf VII · Cambio de aceite y filtro del motor (1.5 TSI EVO)
 // ----------------------------------------------------------------------------
-//  Primer manual de la biblioteca. Sigue el esquema de `plantilla.js`.
+//  Sigue el esquema de `plantilla.js`. POLÍTICA DE IMÁGENES (obligatoria):
+//    · Solo se admiten fotos reales del vehículo/motor concreto o, como mucho,
+//      de su familia de motor claramente identificada (campo `scope`).
+//    · Cada foto lleva `shows` (qué se ve de verdad), `source` (origen) y
+//      `points` (pines con el punto exacto sobre la foto).
+//    · Cuando NO hay foto real verificada, el paso usa `kind: 'pendiente'` con
+//      el encuadre exacto a fotografiar. PROHIBIDO rellenar con ilustraciones
+//      genéricas o imágenes de otros motores.
 //  Las cifras con `confidence: 'verificar'` deben confirmarse por VIN en la
-//  documentación oficial (erWin/ELSA) antes de usar el manual en un vehículo
-//  real de cliente. Ver `sources` al final.
+//  documentación oficial (erWin/ELSA) antes de usar el manual en un vehículo real.
 // ============================================================================
 
-import imgDrenaje from '../../assets/manuals/golf7-aceite-01-drenaje.jpg';
-import imgFiltro from '../../assets/manuals/golf7-aceite-02-filtro.jpg';
-import imgLlenado from '../../assets/manuals/golf7-aceite-03-llenado.jpg';
-import imgVarilla from '../../assets/manuals/golf7-aceite-04-varilla.jpg';
-import imgCuadro from '../../assets/manuals/golf7-aceite-05-cuadro.jpg';
+import imgDrenaje from '../../assets/manuals/real/golf7-drenaje-cuba.jpg';
+import imgVarilla from '../../assets/manuals/real/golf7-varilla-anilla.jpg';
+import imgVarillaLimpieza from '../../assets/manuals/real/golf7-varilla-limpieza.jpg';
+import imgMotorraum from '../../assets/manuals/real/golf7-motorraum-general.jpg';
+
+const FUENTE_AUTODOC = 'Autodoc — guía de cambio de aceite y filtro, VW Golf VII (club.autodoc.de, ref. 24083)';
 
 export const vwGolf7AceiteFiltro = {
   id: 'vw-golf-7-15-tsi-aceite-filtro',
-  rev: 1,
+  rev: 2,
   status: 'verificado',
   category: 'mantenimiento',
   title: 'Cambio de aceite y filtro del motor',
@@ -75,8 +82,8 @@ export const vwGolf7AceiteFiltro = {
     },
     {
       label: 'Elemento filtrante',
-      value: 'Cartucho de papel (tipo tornillo en la parte alta del motor)',
-      note: 'Referencia exacta a confirmar por VIN en el recambista (familia EA211 evo). Marca recomendada: calidad OEM (MANN, Mahle, Hengst o genuino VW).',
+      value: 'Cartucho de papel (tapa roscada en la parte alta del motor)',
+      note: 'Referencias genuinas VW de la familia EA211: 04E 115 561 B/H (en algunas aplicaciones 05E 115 561). Confirmar la correspondencia exacta con el 1.5 TSI EVO por VIN. Calidad recomendada: OEM (MANN, Mahle, Hengst o genuino VW).',
       confidence: 'verificar',
     },
     {
@@ -127,7 +134,7 @@ export const vwGolf7AceiteFiltro = {
     },
     {
       name: 'Filtro de aceite de cartucho (elemento)',
-      ref: 'A confirmar por VIN (familia EA211 evo)',
+      ref: 'EA211: 04E 115 561 B/H · confirmar por VIN para 1.5 TSI',
       qty: '1 ud.',
       note: 'Suele venir con la junta tórica incluida. Calidad OEM.',
       consumable: false,
@@ -177,6 +184,19 @@ export const vwGolf7AceiteFiltro = {
         'Desconectar el contacto; si el coche lleva Start/Stop, asegurarse de que está realmente apagado.',
         'Abrir el capó y localizar el tapón de llenado (parte alta de la tapa de válvulas): aflojarlo ya para que el drenaje ventile mejor.',
       ],
+      image: {
+        kind: 'foto',
+        src: imgMotorraum,
+        scope: 'familia',
+        shows:
+          'Vista general del motorraum de un VW Golf VII con el capó abierto (foto real de taller, guía Autodoc para Golf VII — familia EA211; la unidad fotografiada puede no ser exactamente el 1.5 TSI EVO).',
+        source: FUENTE_AUTODOC,
+        caption:
+          'Motorraum del Golf VII. Sobre esta familia de motor: la varilla de nivel (anilla amarilla) está en la zona frontal del bloque y el tapón de llenado, en la tapa de válvulas. ⚠ Foto de familia EA211, no del 1.5 TSI EVO confirmado: antes de operar, contrastar la disposición con el vehículo concreto.',
+        points: [
+          { x: 37, y: 84, label: 'Varilla de nivel (anilla amarilla)' },
+        ],
+      },
       tip: 'Aprovechar el calentamiento para revisar otras fugas menores antes de subir el coche: se ahorra un segundo montaje.',
     },
     {
@@ -187,19 +207,34 @@ export const vwGolf7AceiteFiltro = {
         'Colocar la bandeja de drenaje ligeramente descentrada: el chorro sale en diagonal al principio.',
         'Antes de soltar el tapón, ponerse los guantes y las gafas.',
       ],
-      image: imgDrenaje,
-      imageCaption:
-        'Vista desde debajo del vehículo: la cuba de aceite (cárter) con el tapón de drenaje en su cara inferior. Ilustración de ejemplo — la posición exacta puede variar ligeramente según motor.',
+      image: {
+        kind: 'pendiente',
+        brief:
+          'Foto desde abajo del 1.5 TSI EVO concreto (cámara hacia la cuba de aceite, iluminación de rampa/puente): debe verse la cara hexagonal del tapón M14×1,5 con su junta y la referencia del tornillo. Sustituye a cualquier imagen genérica: la posición exacta del tapón varía entre cubas.',
+      },
       warning: 'El aceite sale a 60-80 °C. No apoyar la mano en la cuba ni en el tubo de escape.',
     },
     {
       title: '3. Drenaje del aceite usado',
       text:
-        'Con la llave de 13 mm, aflojar el tapón de drenaje con un movimiento firente. Terminar de desenroscarlo a mano presionando hacia dentro para que no salga hasta el último momento; en cuanto ceda, retirar la mano y dejar que el aceite caiga a la bandeja. Dejar escurrir un mínimo de 10 minutos (mejor 15): el motor retiene aceite en los conductos y el turbocompresor.',
+        'Con la llave de 13 mm, aflojar el tapón de drenaje con un movimiento firme. Terminar de desenroscarlo a mano presionando hacia dentro para que no salga hasta el último momento; en cuanto ceda, retirar la mano y dejar que el aceite caiga a la bandeja. Dejar escurrir un mínimo de 10 minutos (mejor 15): el motor retiene aceite en los conductos y el turbocompresor.',
       bullets: [
         'No arrancar el motor con el tapón fuera ni con el filtro desmontado.',
         'Al final del goteo, limpiar la rosca y el asiento de la junta con un paño sin pelusa.',
       ],
+      image: {
+        kind: 'foto',
+        src: imgDrenaje,
+        scope: 'familia',
+        shows:
+          'Cuba de aceite (cárter) de un VW Golf VII en pleno drenaje, con la herramienta sobre el tapón y el chorro de aceite cayendo (foto real de taller, guía Autodoc para Golf VII — familia EA211).',
+        source: FUENTE_AUTODOC,
+        caption:
+          'Drenaje real en un Golf VII: el tapón está en la parte baja de la cuba y el chorro sale en diagonal al principio. ⚠ Foto de familia EA211: la cuba del 1.5 TSI EVO puede diferir en la posición exacta del tapón (pendiente de foto propia en el paso 2).',
+        points: [
+          { x: 50, y: 46, label: 'Salida de drenaje (tapón retirado)' },
+        ],
+      },
       torque: '30 Nm (tapón nuevo)',
       tip: 'Mientras drena, preparar el filtro nuevo y la bandeja limpia: se aprovecha el tiempo y el aceite queda menos manipulado.',
     },
@@ -217,15 +252,17 @@ export const vwGolf7AceiteFiltro = {
     {
       title: '5. Sustitución del filtro de cartucho',
       text:
-        'El filtro está en el compartimento del motor, en un alojamiento de plástico negro con tapa roscada y nervaduras (bandeja de filtro), normalmente en la parte alta delantera del bloque, accesible desde arriba. Colocar la bandeja bajo el alojamiento (cae algo de aceite al abrirlo), aflojar la tapa, retirarla con el elemento y sustituir el cartucho. Limpiar el interior del alojamiento, cambiar la junta tórica de la tapa (untada con aceite limpio) y montar todo apretando la tapa a 25 Nm.',
+        'El filtro está en el compartimento del motor, en un alojamiento de plástico negro con tapa roscada y nervaduras (bandeja de filtro), accesible desde arriba tras quitar la tapa decorativa del motor. Colocar la bandeja bajo el alojamiento (cae algo de aceite al abrirlo), aflojar la tapa, retirarla con el elemento y sustituir el cartucho. Limpiar el interior del alojamiento, cambiar la junta tórica de la tapa (untada con aceite limpio) y montar todo apretando la tapa a 25 Nm.',
       bullets: [
         'Anotar el sentido del elemento: el nuevo entra igual que salió el viejo.',
         'La junta tórica nueva va en su alojamiento de la tapa, nunca en la rosca.',
         'Si el kit trae varias juntas, usar la del diámetro que asiente sin forzar.',
       ],
-      image: imgFiltro,
-      imageCaption:
-        'Ubicación típica del alojamiento del filtro de aceite en los motores EA211 evo: tapa de plástico con nervaduras en la parte alta delantera del bloque, accesible desde el compartimento del motor. Ilustración de ejemplo.',
+      image: {
+        kind: 'pendiente',
+        brief:
+          'Foto del alojamiento del filtro del 1.5 TSI EVO concreto, desde arriba y con la tapa decorativa del motor retirada: debe verse la tapa de plástico con nervaduras en su posición real sobre el bloque, con un elemento de referencia (mano, herramienta o flecha física) que la señale. Sin esta foto, la ubicación NO se da por buena en este manual.',
+      },
       torque: '25 Nm (tapa del filtro)',
       tip: 'Poner un poco de aceite limpio en la junta tórica antes de montar: evita que se pellizque y facilita el siguiente cambio.',
       warning: 'Apriete progresivo: la tapa es de plástico y con 25 Nm es suficiente. Forzarla parte la rosca del alojamiento (reparación cara).',
@@ -238,9 +275,11 @@ export const vwGolf7AceiteFiltro = {
         'Comprobar a ojo que bajo el coche no cae ningún hilo de aceite (tapón y filtro).',
         'Con el motor parado, retirar la varilla, limpiarla, reintroducirla y leer el nivel.',
       ],
-      image: imgLlenado,
-      imageCaption:
-        'Llenado por el tapón de la tapa de válvulas, con embudo. Verter en dos tandas y comprobar el nivel entre medias. Ilustración de ejemplo.',
+      image: {
+        kind: 'pendiente',
+        brief:
+          'Foto en primer plano del tapón de llenado de aceite sobre la tapa de válvulas del 1.5 TSI EVO, con el tapón retirado y el embudo colocado. Debe identificarse sin duda el orificio de llenado (suele llevar el símbolo de la aceitera en la tapa).',
+      },
       tip: 'Verter despacio y con el embudo bien asentado: un derrame sobre la correa de accesorios deja el motor oliendo a quemado durante semanas.',
     },
     {
@@ -248,12 +287,23 @@ export const vwGolf7AceiteFiltro = {
       text:
         'Con el vehículo a nivel y el motor a temperatura de servicio, el nivel debe quedar entre MIN y MAX, cerca de MAX sin pasarse. Si falta aceite, completar en pequeñas dosis (100-200 ml) y volver a comprobar tras unos minutos de espera. Un sobrellenado por encima de MAX obliga a drenar: genera espuma, presión anormal y daños en el turbo.',
       bullets: [
-        'La varilla tiene el mango en color vivo (amarillo) en la parte frontal del motor.',
+        'La varilla de la familia EA211 lleva el mango en forma de anilla de color vivo (amarillo).',
         'En uso normal no hace falta tocar el nivel entre servicios; revisar cada 1.000-2.000 km si el coche hace trayectos cortos o tramos de alta carga.',
       ],
-      image: imgVarilla,
-      imageCaption:
-        'Localización de la varilla de nivel de aceite (mango en color vivo) y comprobación entre MIN y MAX. Ilustración de ejemplo.',
+      image: {
+        kind: 'foto',
+        src: imgVarilla,
+        scope: 'familia',
+        shows:
+          'Mano con guante extrayendo la varilla de nivel de aceite por su anilla amarilla, en el motorraum de un VW Golf VII (foto real de taller, guía Autodoc para Golf VII — familia EA211).',
+        source: FUENTE_AUTODOC,
+        caption:
+          'Extracción de la varilla por su anilla amarilla en un Golf VII. ⚠ Foto de familia EA211: contrastar la posición del tubo de la varilla en el 1.5 TSI EVO del vehículo antes de operar.',
+        points: [
+          { x: 40, y: 30, label: 'Anilla amarilla de la varilla' },
+          { x: 45, y: 72, label: 'Tubo de la varilla' },
+        ],
+      },
       warning: 'Nunca completar «a ojo» por el tapón de llenado: el exceso de aceite daña tanto como el defecto.',
     },
     {
@@ -264,9 +314,11 @@ export const vwGolf7AceiteFiltro = {
         'Si el coche tiene cuadro digital Active Info Display, el reset está en el mismo menú de servicio.',
         'Comprobar después que la fecha y los km del próximo servicio se han actualizado.',
       ],
-      image: imgCuadro,
-      imageCaption:
-        'Reinicio del intervalo de servicio desde el cuadro de mandos con los botones del volante. Ilustración de ejemplo.',
+      image: {
+        kind: 'pendiente',
+        brief:
+          'Foto del cuadro de mandos del Golf VII concreto mostrando la pantalla de servicio («Service and inspection» / «Mantenimiento») con la opción de reinicio visible, tomada desde el asiento del conductor con los botones del volante en encuadre. El menú varía entre cuadro analógico y Active Info Display: fotografiar el del vehículo.',
+      },
       tip: 'Hacer el reset SIEMPRE al terminar: un servicio sin reset deja el testigo encendido y el cliente cree que algo falla.',
     },
     {
@@ -278,6 +330,19 @@ export const vwGolf7AceiteFiltro = {
         'Entregar al cliente el albarán del aceite usado al punto limpio si se gestiona en su nombre.',
         'Programar el próximo servicio: 15.000 km / 1 año (fijo) o según régimen LongLife del vehículo.',
       ],
+      image: {
+        kind: 'foto',
+        src: imgVarillaLimpieza,
+        scope: 'familia',
+        shows:
+          'Mano con guante limpiando la varilla de nivel de aceite con un paño sin pelusa (foto real de taller, guía Autodoc para Golf VII — familia EA211).',
+        source: FUENTE_AUTODOC,
+        caption:
+          'Limpieza de la varilla antes de la lectura: reintroducirla, extraer y leer entre MIN y MAX. ⚠ Foto de familia EA211 (Golf VII).',
+        points: [
+          { x: 52, y: 38, label: 'Varilla — lectura entre MIN y MAX' },
+        ],
+      },
     },
   ],
 
@@ -296,6 +361,7 @@ export const vwGolf7AceiteFiltro = {
     'Escudo inferior montado y tornillos en su sitio',
     'Servicio registrado (fecha, km, litros, homologación, recambios)',
     'Aceite usado y filtro depositados en punto limpio / gestor autorizado',
+    'Fotos de ubicación del 1.5 TSI EVO capturadas y adjuntas al manual (puntos 2, 5, 6 y 8)',
   ],
 
   mistakes: [
@@ -323,6 +389,10 @@ export const vwGolf7AceiteFiltro = {
       title: 'Drenar el motor en frío',
       text: 'Funciona, pero deja más aceite sucio dentro. Cinco minutos de rodaje previo mejoran notablemente la limpieza del drenaje.',
     },
+    {
+      title: 'Guiarse por fotos de otros motores',
+      text: 'La disposición del filtro, el tapón de drenaje y la varilla cambia entre motorizaciones del mismo modelo. Este manual solo marca puntos sobre fotos verificadas; si tu unidad difiere, fotografiarla y actualizar el manual antes de dar el trabajo por bueno.',
+    },
   ],
 
   aftercare: [
@@ -342,6 +412,10 @@ export const vwGolf7AceiteFiltro = {
       label: 'Consumo de aceite',
       text: 'Si el motor precisa más de 0,5 L cada 1.000 km, abrir incidencia: revisar fugas, turbo y junta de culata antes de la próxima revisión.',
     },
+    {
+      label: 'Fotografía del motor concreto',
+      text: 'En el próximo Golf 1.5 TSI que entre en preparación, capturar los 4 encuadres pendientes (tapón de drenaje, alojamiento del filtro, tapón de llenado y pantalla de servicio) y colgarlos en este manual. Es lo que convierte la ficha en referencia definitiva.',
+    },
   ],
 
   sources: [
@@ -358,8 +432,12 @@ export const vwGolf7AceiteFiltro = {
       note: 'Pares de apriete estándar del grupo (tapón M14×1,5 30 Nm; tapa de filtro 25 Nm) y ubicación de filtros.',
     },
     {
+      name: FUENTE_AUTODOC,
+      note: 'Origen de las fotos reales de taller usadas con pines (drenaje, varilla, motorraum). Son fotos del Golf VII / familia EA211, identificadas como tales en cada imagen; no sustituyen a la fotografía del motor 1.5 TSI EVO concreto (encuadres pendientes en los pasos 2, 5, 6 y 8).',
+    },
+    {
       name: 'Práctica de taller KHC',
-      note: 'Tiempos, trucos y errores frecuentes. Las ilustraciones son imágenes de ejemplo generadas para situar las ubicaciones: sustituirlas por fotos reales cuando se documente un vehículo concreto.',
+      note: 'Tiempos, trucos y errores frecuentes. Política de imágenes: solo fotos reales verificadas o marcadores de foto pendiente; nunca ilustraciones genéricas.',
     },
   ],
 };
