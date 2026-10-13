@@ -55,18 +55,22 @@ Reglas adicionales:
 
 1. Todo lo que se apriete lleva su par en la tabla `torque`. **Nunca inventar un
    par**: si no se conoce, dejar la entrada con `confidence: 'verificar'`.
-2. **Imágenes — política estricta.** Solo se admiten **fotos reales** del
-   vehículo/motor concreto (`scope: 'modelo'`) o, como mucho, de su familia de
-   motor claramente identificada (`scope: 'familia'`). Cada foto declara
-   `shows` (qué se ve de verdad y de qué motor es), `source` (origen) y
-   `points` (pines `{x, y, label}` en % sobre el punto exacto). **Queda
-   prohibido** usar ilustraciones genéricas, renders de otros motores o fotos
-   de motorizaciones distintas: una imagen con el filtro «arriba» y otra con el
-   filtro «abajo» desorienta más que ayuda. Cuando no exista foto real
-   verificada de un punto, el paso usa `kind: 'pendiente'` con el `brief` del
-   encuadre exacto a fotografiar (ángulo, qué debe verse, elemento de
-   referencia). El hueco honesto se cubre con foto propia del taller; una
-   imagen genérica, nunca.
+2. **Imágenes — política estricta.** Puede ser **plano/diagrama**, **foto** o
+   **hueco pendiente**; da igual el estilo (foto realista, plano de línea,
+   corte esquemático…): lo que importa es que **cada indicación sea real** y
+   ayude sin confundir.
+   - `kind: 'diagrama'` — plano técnico dibujado a mano (SVG, estilo manual de
+     marca, en `erp/src/assets/manuals/diagrams/`). Solo indicaciones reales:
+     cada rótulo declara su alcance (**verificado** / **por confirmar**) y su
+     fuente. **Prohibido inventar posiciones.**
+   - `kind: 'foto'` — foto real del vehículo/motor concreto (`scope: 'modelo'`)
+     o de su familia claramente identificada (`scope: 'familia'`), con `shows`,
+     `source` y `points` (pines `{x, y, label}` en % sobre el punto exacto).
+   - `kind: 'pendiente'` — sin material verificado del punto: hueco con el
+     `brief` del encuadre exacto a fotografiar o dibujar.
+   - **Prohibido:** imágenes realistas generadas de motores que no son el
+     exacto (un filtro «arriba» en una y «abajo» en otra), renders de otros
+     motores o diagramas genéricos sin rotular. **Si confunde, no entra.**
 3. Los pasos se redactan en imperativo, con **criterio de éxito comprobable**
    («el testigo se apaga», «hasta MIN/MAX», «30 Nm»…).
 4. Un manual con cifras críticas sin confirmar se publica en
@@ -80,12 +84,13 @@ Reglas adicionales:
    `erp/src/data/manuals/miManual.js`.
 2. **Rellena el esquema** (ver tabla de campos abajo). Usa el manual
    `vwGolf7AceiteFiltro.js` como ejemplo del nivel de detalle exigido.
-3. **Imágenes**: coloca las **fotos reales** en `erp/src/assets/manuals/real/`
-   e impórtalas en el fichero del manual. Cada `steps[].image` de tipo `foto`
-   lleva `scope` (motor exacto o familia identificada), `shows`, `source` y
-   `points` con los pines sobre los puntos exactos. Si falta la foto de un
-   punto, usa `kind: 'pendiente'` con el encuadre a fotografiar — nunca una
-   imagen genérica.
+3. **Imágenes**: los planos se dibujan a mano (SVG) en
+   `erp/src/assets/manuals/diagrams/` con solo indicaciones reales rotuladas y
+   su alcance; las fotos reales van en `erp/src/assets/manuals/real/`. Cada
+   entrada de `steps[].images` declara `kind` (`diagrama` | `foto` |
+   `pendiente`), `shows` y `source`; las fotos añaden `points` con los pines.
+   Sin material verificado de un punto → `kind: 'pendiente'` con el encuadre
+   exacto. Nunca relleno genérico que confunda.
 4. **Regístralo** en `erp/src/data/manuals/index.js`:
 
    ```js
@@ -111,7 +116,7 @@ Reglas adicionales:
 | `tools` | Herramientas `[{ name, note }]` |
 | `parts` | Recambios `[{ name, ref, qty, note, consumable }]` |
 | `warnings` | Avisos `[{ title, text }]` |
-| `steps` | Pasos `[{ title, text, bullets, image, tip, warning, torque }]` — `image` es `{ kind: 'foto', src, scope, shows, source, caption, points }` o `{ kind: 'pendiente', brief }` |
+| `steps` | Pasos `[{ title, text, bullets, images, tip, warning, torque }]` — cada `images[]` es `{ kind: 'diagrama', src, scope, title, shows, source, caption }`, `{ kind: 'foto', src, scope, shows, source, caption, points }` o `{ kind: 'pendiente', brief }` |
 | `torque` | Pares de apriete `[{ element, value, note, confidence }]` |
 | `checklist` | Verificación final (lista de comprobaciones) |
 | `mistakes` | Errores frecuentes `[{ title, text }]` |
@@ -129,12 +134,15 @@ VW Golf VII (5G/BE, 2017-2020) con motor 1.5 TSI EVO (EA211 evo):
   con filtro, tapón de drenaje M14×1,5 a **30 Nm** (nuevo siempre), tapa del
   filtro a **25 Nm**, intervalos LongLife (30.000 km / 2 años) o fijo
   (15.000 km / 1 año).
-* 9 pasos con **fotos reales de taller verificadas** (drenaje en la cuba,
-  extracción y limpieza de la varilla, vista del motorraum) marcadas como
-  «familia EA211 (Golf VII)» con **pines sobre cada punto**, y **huecos
-  «foto real pendiente»** con el encuadre exacto para los 4 puntos que exigen
-  foto del motor 1.5 TSI EVO concreto (tapón de drenaje, alojamiento del
-  filtro, tapón de llenado y pantalla de servicio).
+* 9 pasos con **3 planos técnicos dibujados a mano** (Plano 1: compartimento
+  del motor en planta · Plano 2: vista inferior de la cuba y drenaje · Plano 3:
+  corte del alojamiento del filtro), con rótulos numerados y cada indicación
+  marcada como **verificada** o **por confirmar**, más **fotos reales de taller
+  verificadas** (drenaje en la cuba, extracción y limpieza de la varilla, vista
+  del motorraum) con **pines sobre cada punto**. Los puntos que aún exigen
+  material del motor 1.5 TSI EVO concreto (posición exacta del filtro, llenado
+  y pantalla de servicio) quedan como huecos «pendiente» con el encuadre
+  exacto que hay que captar.
 * Checklist de verificación final, 6 errores frecuentes y cuidados posteriores
   (historial, residuos, seguimiento de consumo).
 
@@ -152,9 +160,12 @@ VW Golf VII (5G/BE, 2017-2020) con motor 1.5 TSI EVO (EA211 evo):
   tornillo), crear manuales separados y cruzarlos en `vehicle.notes`.
 * **Cifras con fecha**: al corregir una cifra, subir `rev` y dejar constancia en
   `sources`.
-* **Fotos reales o nada**: las imágenes deben ser del motor concreto (o de su
-  familia, claramente identificada) con pines en los puntos exactos. Si no hay
-  foto verificada, hueco «pendiente» con el encuadre a fotografiar. Prohibido
-  rellenar con imágenes genéricas o de otros motores.
+* **Material gráfico que ayude y no confunda**: da igual que sea plano, corte
+  o foto — cada indicación debe ser real y llevar su sello (verificada / por
+  confirmar) y su fuente. Los planos se dibujan a mano sobre referencias
+  verificadas; las fotos llevan pines en los puntos exactos. Sin material
+  verificado, hueco «pendiente» con el encuadre. Prohibido rellenar con
+  imágenes generadas de motores distintos, renders ajenos o diagramas
+  genéricos sin rotular.
 * **El checklist es obligatorio**: es lo que permite firmar el trabajo como
   completado y protege frente a reclamaciones.

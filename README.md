@@ -75,7 +75,7 @@ Puesta en marcha en [`docs/09_SUPABASE_BASE_DE_DATOS_Y_USUARIOS.md`](docs/09_SUP
 | **Informes** | Cuenta de resultados, valoración de stock, carga fiscal y evolución mensual. Imprimible en PDF |
 | **Publicación web** | Botón **Publicar en la web** en cada ficha: contenido comercial, fotos sin EXIF y con la matrícula tapada, vista previa y re-sincronización cuando cambia el precio o los km |
 | **Contactos web** | Bandeja de los formularios de la web pública (llamada, WhatsApp, correo, ficha en el CRM y seguimiento) |
-| **Manuales de reparación** | Biblioteca de procedimientos de taller con especificaciones del fabricante (capacidades, homologaciones de aceite, pares de apriete con su fuente), pasos con fotos reales del motor concreto y puntos exactos señalados (o foto pendiente si falta), checklist de verificación y plantilla para crear más manuales. Ver [`docs/18_MANUALES_REPARACION.md`](docs/18_MANUALES_REPARACION.md) |
+| **Manuales de reparación** | Biblioteca de procedimientos de taller con especificaciones del fabricante (capacidades, homologaciones de aceite, pares de apriete con su fuente), pasos con planos técnicos y fotos reales —solo indicaciones reales, cada una con su fuente y confianza—, checklist de verificación y plantilla para crear más manuales. Ver [`docs/18_MANUALES_REPARACION.md`](docs/18_MANUALES_REPARACION.md) |
 | **Ajustes** | Empresa, régimen fiscal, tarifas editables del ejercicio, respaldo de datos y fuentes de cada cifra |
 
 ### 💶 Precios de compra y venta: de dónde sale cada cifra

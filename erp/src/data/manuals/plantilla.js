@@ -15,17 +15,20 @@
 //                        como referencia de apriete o llenado sin confirmar.
 //  2. Todo lo que se apriete lleva su par en la tabla `torque`. Nunca inventar
 //     un par: si no se conoce, dejar la entrada con `confidence: 'verificar'`.
-//  3. IMÁGENES — política estricta (ver `steps[].image`):
-//       · Solo fotos REALES del vehículo/motor concreto (scope: 'modelo') o, como
-//         mucho, de su familia de motor claramente identificada (scope: 'familia').
-//       · PROHIBIDO ilustraciones genéricas, renders de otros motores o fotos de
-//         motorizaciones distintas (un filtro «arriba» en una foto y «abajo» en
-//         otra desorienta más que ayudar).
-//       · Cada foto declara `shows` (qué se ve de verdad), `source` (origen) y
-//         `points` (pines {x, y, label} sobre el punto exacto, en % de la imagen).
-//       · Si NO hay foto real verificada del punto, usar `kind: 'pendiente'` con
-//         el `brief` del encuadre exacto a fotografiar. El hueco es honesto; una
-//         imagen genérica no lo es.
+//  3. IMÁGENES — política estricta (ver `steps[].images`). Puede ser foto,
+//     plano/diagrama o hueco pendiente; lo importante no es el estilo sino que
+//     CADA INDICACIÓN SEA REAL y ayude sin confundir:
+//       · 'diagrama' — plano técnico dibujado a mano (SVG, estilo manual de
+//         marca). Solo indicaciones reales: cada rótulo declara su alcance
+//         (verificado / por confirmar) y su fuente. PROHIBIDO inventar posiciones.
+//       · 'foto'     — foto real del vehículo/motor concreto (scope: 'modelo')
+//         o de su familia claramente identificada (scope: 'familia'), con
+//         `shows`, `source` y `points` (pines {x, y, label} en % de la imagen).
+//       · 'pendiente'— sin material verificado del punto: hueco con el `brief`
+//         del encuadre exacto a fotografiar o dibujar. El hueco es honesto.
+//       · PROHIBIDO: imágenes realistas generadas de motores que no son el
+//         exacto (un filtro «arriba» en una y «abajo» en otra), renders de
+//         otros motores o diagramas genéricos sin rotular. Si confunde, no entra.
 //  4. Los pasos se redactan en imperativo, con el objetivo de cada acción y el
 //     criterio de éxito ("el testigo se apaga", "hasta MIN/MAX", etc.).
 // ============================================================================
@@ -47,7 +50,7 @@
  * tools         [{ name, note }]                       herramientas necesarias
  * parts         [{ name, ref, qty, note, consumable }] recambios y consumibles
  * warnings      [{ title, text }]                      seguridad / avisos previos
- * steps         [{ title, text, bullets, image, imageCaption, tip, warning, torque }]
+ * steps         [{ title, text, bullets, images, tip, warning, torque }]
  * torque        [{ element, value, note, confidence }] pares de apriete
  * checklist     [string]                              verificación final
  * mistakes      [{ title, text }]                      errores frecuentes
@@ -120,27 +123,41 @@ export const MANUAL_TEMPLATE = {
       title: 'Preparación y seguridad',
       text: 'Qué hacer primero y por qué. Incluir estado del vehículo (nivelado, freno de mano, ruedas calzadas).',
       bullets: ['Detalle 1', 'Detalle 2'],
-      // IMAGEN — dos formas, y solo dos:
+      // IMÁGENES — lista `images` con tres formas posibles, y solo tres:
       //
-      //  a) Foto real verificada (obligatorio declarar qué se ve, origen y pines):
-      //     image: {
+      //  a) Plano/diagrama técnico dibujado a mano (SVG en erp/src/assets/manuals/diagrams/):
+      //     images: [{
+      //       kind: 'diagrama',
+      //       src: planoImportado,
+      //       scope: 'familia',                // 'modelo' | 'familia'
+      //       title: 'Plano N · título',
+      //       shows: 'Qué indica el plano y qué puntos rotula',
+      //       source: 'Cómo se ha hecho el plano (fotos verificadas, documentación…)',
+      //       caption: 'Qué mirar en el plano',
+      //     }],
+      //     REGLA: cada rótulo del SVG es una indicación REAL y declara su alcance
+      //     (verificado / por confirmar). Nada de posiciones inventadas.
+      //
+      //  b) Foto real verificada (declarar qué se ve, origen y pines):
+      //     images: [{
       //       kind: 'foto',
       //       src: imagenImportada,            // import desde erp/src/assets/manuals/real/…
-      //       scope: 'modelo',                 // 'modelo' = motor exacto · 'familia' = familia de motor identificada
+      //       scope: 'modelo',                 // 'modelo' = motor exacto · 'familia' = familia identificada
       //       shows: 'Qué aparece realmente en la foto y de qué motor/vehículo es',
       //       source: 'Origen de la foto (taller propio, guía, fabricante…)',
       //       caption: 'Pie de foto: qué mirar exactamente',
       //       points: [{ x: 42, y: 55, label: 'Tapón de drenaje' }],  // coordenadas en % de la imagen
-      //     },
+      //     }],
       //
-      //  b) Hueco honesto mientras no exista foto real del motor concreto:
-      //     image: {
+      //  c) Hueco honesto mientras no exista material verificado del punto:
+      //     images: [{
       //       kind: 'pendiente',
-      //       brief: 'Encuadre exacto a fotografiar (ángulo, qué debe verse, elemento de referencia).',
-      //     },
+      //       brief: 'Encuadre exacto a fotografiar o dibujar (ángulo, qué debe verse, referencia).',
+      //     }],
       //
-      //  NUNCA: ilustraciones genéricas, renders de otros motores o fotos de
-      //  motorizaciones distintas a la cubierta por el manual.
+      //  NUNCA: imágenes realistas generadas de motores que no son el exacto,
+      //  renders de otros motores o diagramas genéricos sin rotular. Si la
+      //  imagen confunde en vez de ayudar, no entra.
       tip: 'Truco de taller que ahorra tiempo.',
       warning: 'Riesgo concreto de este paso.',
       torque: '30 Nm', // par que se aplica en este paso (debe estar también en `torque`)

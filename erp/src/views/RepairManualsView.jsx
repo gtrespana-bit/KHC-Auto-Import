@@ -103,26 +103,37 @@ function StepImage({ image }) {
     return (
       <figure className="rounded-xl border-2 border-dashed border-amber-500/40 bg-amber-500/5 px-4 py-4">
         <p className="flex items-center gap-2 text-xs font-semibold text-amber-300">
-          <Camera className="w-4 h-4" /> FOTO REAL PENDIENTE
+          <Camera className="w-4 h-4" /> MATERIAL GRÁFICO PENDIENTE
         </p>
         <p className="mt-2 text-xs text-amber-100/90 leading-relaxed">{image.brief}</p>
         <p className="mt-2 text-[10px] text-amber-200/60 leading-relaxed">
-          Este manual no admite ilustraciones genéricas ni fotos de otros motores: hasta que no exista
-          foto real verificada de este punto en el motor concreto, la ubicación no se da por buena.
+          Este manual no admite imágenes genéricas ni de otros motores: hasta que no exista foto o
+          plano real verificado de este punto, la indicación no se da por buena.
         </p>
       </figure>
     );
   }
 
+  const isDiagram = image.kind === 'diagrama';
+
   return (
     <figure>
       <div className="relative">
-        <img
-          src={image.src}
-          alt={image.caption || image.shows || 'Foto del procedimiento'}
-          className="w-full rounded-xl border border-slate-800 object-cover max-h-80"
-          loading="lazy"
-        />
+        {isDiagram ? (
+          <img
+            src={image.src}
+            alt={image.title || image.caption || 'Plano técnico'}
+            className="w-full rounded-xl border border-slate-700 bg-[#f6f1e7]"
+            loading="lazy"
+          />
+        ) : (
+          <img
+            src={image.src}
+            alt={image.caption || image.shows || 'Foto del procedimiento'}
+            className="w-full rounded-xl border border-slate-800 object-cover max-h-80"
+            loading="lazy"
+          />
+        )}
         {(image.points || []).map((p, i) => (
           <span
             key={i}
@@ -140,16 +151,25 @@ function StepImage({ image }) {
         <span
           className={cx(
             'absolute left-2 top-2 rounded-md px-2 py-1 text-[10px] font-semibold shadow-md backdrop-blur-sm',
-            image.scope === 'modelo'
-              ? 'bg-emerald-500/90 text-slate-950'
-              : 'bg-amber-500/90 text-slate-950',
+            isDiagram
+              ? 'bg-sky-500/90 text-slate-950'
+              : image.scope === 'modelo'
+                ? 'bg-emerald-500/90 text-slate-950'
+                : 'bg-amber-500/90 text-slate-950',
           )}
         >
-          {image.scope === 'modelo' ? 'Foto real · motor exacto' : 'Foto real · familia EA211 (Golf VII)'}
+          {isDiagram
+            ? 'Plano técnico · solo indicaciones reales'
+            : image.scope === 'modelo'
+              ? 'Foto real · motor exacto'
+              : 'Foto real · familia EA211 (Golf VII)'}
         </span>
       </div>
+      {image.title && (
+        <p className="mt-2 text-[11px] font-semibold text-sky-300">{image.title}</p>
+      )}
       {image.caption && (
-        <figcaption className="mt-2 text-[11px] text-slate-500 leading-relaxed">{image.caption}</figcaption>
+        <figcaption className="mt-1 text-[11px] text-slate-500 leading-relaxed">{image.caption}</figcaption>
       )}
       {(image.points || []).length > 0 && (
         <ul className="mt-1.5 space-y-0.5">
@@ -162,7 +182,7 @@ function StepImage({ image }) {
       )}
       {(image.shows || image.source) && (
         <p className="mt-1.5 text-[10px] text-slate-600 leading-relaxed">
-          {image.shows && <><b className="text-slate-500">Qué se ve:</b> {image.shows} </>}
+          {image.shows && <><b className="text-slate-500">Qué muestra:</b> {image.shows} </>}
           {image.source && <><b className="text-slate-500">Origen:</b> {image.source}</>}
         </p>
       )}
@@ -193,7 +213,11 @@ function StepCard({ step, index }) {
           </ul>
         )}
 
-        <StepImage image={step.image} />
+        <div className="space-y-4">
+          {(step.images || (step.image ? [step.image] : [])).map((img, i) => (
+            <StepImage key={i} image={img} />
+          ))}
+        </div>
 
         {step.tip && (
           <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2.5">
@@ -463,7 +487,7 @@ function PlantillaPanel() {
     { field: 'specs', desc: 'Especificaciones del fabricante: litros, homologaciones, intervalos… cada una con su fuente.' },
     { field: 'tools · parts', desc: 'Herramientas necesarias y recambios con referencia, cantidad y notas.' },
     { field: 'warnings', desc: 'Avisos de seguridad y garantía previos al trabajo.' },
-    { field: 'steps', desc: 'Pasos con texto, viñetas, foto real verificada con pines (o hueco pendiente), truco, aviso y par aplicado.' },
+    { field: 'steps', desc: 'Pasos con texto, viñetas, imágenes (foto real con pines, plano técnico o hueco pendiente), truco, aviso y par aplicado.' },
     { field: 'torque', desc: 'Tabla de pares de apriete (elemento, valor, notas, fuente).' },
     { field: 'checklist · mistakes · aftercare', desc: 'Verificación final, errores frecuentes y cuidados posteriores.' },
     { field: 'sources', desc: 'Trazabilidad: de dónde sale cada bloque de información.' },
@@ -524,18 +548,27 @@ function PlantillaPanel() {
           </h3>
           <ul className="space-y-2.5 text-xs text-slate-400 leading-relaxed">
             <li className="flex items-start gap-2">
+              <Badge tone="sky">Plano</Badge>
+              <span>Diagrama técnico dibujado a mano (SVG) — estilo manual de marca. Solo indicaciones reales: cada rótulo declara su alcance (verificado / por confirmar) y su fuente. Prohibido inventar posiciones.</span>
+            </li>
+            <li className="flex items-start gap-2">
               <Badge tone="emerald">Foto real</Badge>
-              <span>Solo fotos del vehículo/motor concreto (<code className="text-amber-300">scope: 'modelo'</code>) o de su familia claramente identificada (<code className="text-amber-300">scope: 'familia'</code>), con <code className="text-amber-300">shows</code>, <code className="text-amber-300">source</code> y <code className="text-amber-300">points</code> (pines sobre el punto exacto).</span>
+              <span>Foto del vehículo/motor concreto (<code className="text-amber-300">scope: 'modelo'</code>) o de su familia identificada (<code className="text-amber-300">scope: 'familia'</code>), con <code className="text-amber-300">shows</code>, <code className="text-amber-300">source</code> y <code className="text-amber-300">points</code> (pines sobre el punto exacto).</span>
             </li>
             <li className="flex items-start gap-2">
               <Badge tone="amber">Pendiente</Badge>
-              <span>Sin foto real verificada del punto: hueco con el encuadre exacto a fotografiar (<code className="text-amber-300">kind: 'pendiente'</code> + <code className="text-amber-300">brief</code>), para cubrirlo con foto propia del taller.</span>
+              <span>Si falta material verificado del punto: hueco con el encuadre exacto a fotografiar o dibujar (<code className="text-amber-300">kind: 'pendiente'</code> + <code className="text-amber-300">brief</code>), para cubrirlo con material propio del taller.</span>
             </li>
             <li className="flex items-start gap-2">
               <Badge tone="rose">Prohibido</Badge>
-              <span>Ilustraciones genéricas, renders de otros motores o fotos de motorizaciones distintas: un filtro «arriba» en una foto y «abajo» en otra desorienta más que ayudar.</span>
+              <span>Imágenes realistas generadas de motores que no son el exacto, renders de otros motores o diagramas genéricos sin rotular: si confunde en vez de ayudar, no entra.</span>
             </li>
           </ul>
+          <p className="mt-3 text-[11px] text-slate-500 leading-relaxed">
+            Criterio único: <b className="text-slate-400">que sirva para ayudar y no confunda</b>. Da igual
+            que sea foto, plano o corte: lo importante es que cada indicación sea real y esté etiquetada
+            con su nivel de confianza.
+          </p>
         </Card>
 
         <Card className="p-5">
@@ -545,7 +578,7 @@ function PlantillaPanel() {
           <ol className="space-y-2 text-xs text-slate-400 leading-relaxed list-decimal list-inside">
             <li>Copiar <code className="text-amber-300">plantilla.js</code> y rellenar todos los campos obligatorios.</li>
             <li>Marcar la fuente (<code className="text-amber-300">confidence</code>) de cada cifra. Sin excepciones.</li>
-            <li>Imágenes: solo fotos reales verificadas del motor concreto (o familia identificada) con pines en los puntos exactos. Si falta, dejar el hueco «pendiente» con el encuadre a fotografiar — nunca relleno genérico.</li>
+            <li>Imágenes: planos técnicos dibujados con solo indicaciones reales (cada rótulo con su fuente/alcance) o fotos reales verificadas con pines. Si falta material verificado, hueco «pendiente» con el encuadre — nunca relleno genérico que confunda.</li>
             <li>Redactar los pasos en imperativo, con criterio de éxito comprobable.</li>
             <li>Completar checklist final, errores frecuentes y trazabilidad de fuentes.</li>
             <li>Registrar el manual en <code className="text-amber-300">REPAIR_MANUALS</code> y comprobar que renderiza en el ERP.</li>
@@ -572,9 +605,10 @@ function PlantillaPanel() {
   tools:   [{ name, note }],
   parts:   [{ name, ref, qty, note, consumable }],
   warnings:[{ title, text }],
-  steps:   [{ title, text, bullets, image, tip, warning, torque }],
-  // image = { kind:'foto', src, scope:'modelo'|'familia', shows, source, caption, points:[{x,y,label}] }
-  //       | { kind:'pendiente', brief:'encuadre exacto a fotografiar' }
+  steps:   [{ title, text, bullets, images, tip, warning, torque }],
+  // images = [{ kind:'diagrama', src, scope, title, shows, source, caption }]   ← plano técnico, solo indicaciones reales
+  //        | { kind:'foto', src, scope:'modelo'|'familia', shows, source, caption, points:[{x,y,label}] }
+  //        | { kind:'pendiente', brief:'encuadre exacto a fotografiar o dibujar' }
   torque:  [{ element, value, note, confidence }],
   checklist: ['…'],
   mistakes:  [{ title, text }],
@@ -613,7 +647,7 @@ export default function RepairManualsView({ initialManualId = null, initialTab =
       <SectionTitle
         icon={Wrench}
         title="Manuales de reparación"
-        subtitle="Procedimientos de taller con especificaciones del fabricante: capacidades, homologaciones de aceite, pares de apriete, pasos con fotos reales del motor concreto y puntos exactos señalados (o foto pendiente si falta) y verificación final. Cada cifra y cada imagen declara su fuente."
+        subtitle="Procedimientos de taller con especificaciones del fabricante: capacidades, homologaciones de aceite, pares de apriete, pasos con planos técnicos y fotos reales —solo indicaciones reales, cada una con su fuente y su nivel de confianza— y verificación final."
         right={
           <div className="flex items-center gap-2">
             <Badge tone="slate">{summary.total} manuales</Badge>

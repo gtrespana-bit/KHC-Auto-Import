@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 600" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <!-- KHC Auto Import · Plano técnico de taller — dibujado a mano, sin imágenes generadas.
+       Solo contiene indicaciones reales; lo no confirmado va marcado «POR CONFIRMAR». -->
+  <rect width="920" height="600" fill="#f6f1e7"/>
+
+  <!-- Título -->
+  <text x="24" y="34" font-size="17" font-weight="700" fill="#1f2937">PLANO 1 · Compartimento del motor — vista en planta</text>
+  <text x="24" y="56" font-size="12" fill="#4b5563">VW Golf VII · 1.5 TSI EVO (EA211 evo) · cambio de aceite y filtro — referencias de trabajo</text>
+  <line x1="24" y1="68" x2="896" y2="68" stroke="#9c8a6a" stroke-width="1.5"/>
+
+  <!-- Orientación -->
+  <g>
+    <rect x="756" y="80" width="140" height="70" rx="6" fill="#fffdf8" stroke="#9c8a6a"/>
+    <text x="826" y="100" text-anchor="middle" font-size="11" font-weight="700" fill="#1f2937">ORIENTACIÓN</text>
+    <text x="826" y="118" text-anchor="middle" font-size="10" fill="#4b5563">vista desde arriba</text>
+    <text x="826" y="134" text-anchor="middle" font-size="10" fill="#4b5563">parabrisas arriba · frente abajo</text>
+    <path d="M 40 120 L 40 240" stroke="#6b7280" stroke-width="2" marker-end="url(#arr)"/>
+    <text x="52" y="140" font-size="10" fill="#6b7280">PARABRISAS</text>
+    <path d="M 40 520 L 40 420" stroke="#6b7280" stroke-width="2" marker-end="url(#arr)"/>
+    <text x="52" y="515" font-size="10" fill="#6b7280">FRENTE DEL VEHÍCULO</text>
+    <defs>
+      <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 z" fill="#6b7280"/>
+      </marker>
+    </defs>
+  </g>
+
+  <!-- Bahía del motor -->
+  <rect x="120" y="90" width="560" height="440" rx="18" fill="#fffdf8" stroke="#9c8a6a" stroke-width="2"/>
+
+  <!-- Zona trasera: cajetón/aire + tapa decorativa -->
+  <rect x="160" y="110" width="480" height="70" rx="8" fill="#e8e0cf" stroke="#9c8a6a" stroke-dasharray="6 4"/>
+  <text x="400" y="140" text-anchor="middle" font-size="11" font-weight="600" fill="#6b5b3e">TAPA DECORATIVA DEL MOTOR</text>
+  <text x="400" y="158" text-anchor="middle" font-size="10" fill="#8a7a5c">retirar tirando hacia arriba (presión, sin tornillos)</text>
+
+  <!-- Bloque / tapa de válvulas -->
+  <rect x="200" y="210" width="400" height="190" rx="12" fill="#efe8d8" stroke="#374151" stroke-width="2"/>
+  <text x="400" y="238" text-anchor="middle" font-size="11" font-weight="700" fill="#374151">TAPA DE VÁLVULAS (bloque EA211 evo transversal)</text>
+
+  <!-- 1 Tapón de llenado -->
+  <g>
+    <circle cx="520" cy="300" r="16" fill="#fff" stroke="#374151" stroke-width="2"/>
+    <circle cx="520" cy="300" r="8" fill="none" stroke="#374151" stroke-width="1.5"/>
+    <line x1="520" y1="300" x2="640" y2="300" stroke="#b45309" stroke-width="1.5"/>
+    <circle cx="652" cy="300" r="12" fill="#b45309"/>
+    <text x="652" y="305" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">1</text>
+    <text x="672" y="296" font-size="11" font-weight="700" fill="#1f2937">Tapón de llenado de aceite</text>
+    <text x="672" y="312" font-size="10" fill="#4b5563">sobre la tapa de válvulas · símbolo de aceitera · a mano</text>
+    <rect x="672" y="318" width="86" height="16" rx="3" fill="#dcfce7" stroke="#16a34a"/>
+    <text x="715" y="330" text-anchor="middle" font-size="9" font-weight="700" fill="#166534">VERIFICADO · familia</text>
+  </g>
+
+  <!-- 2 Varilla -->
+  <g>
+    <rect x="262" y="386" width="18" height="10" rx="5" fill="#eab308" stroke="#374151" stroke-width="1.5"/>
+    <line x1="271" y1="386" x2="271" y2="330" stroke="#374151" stroke-width="1.5"/>
+    <line x1="271" y1="386" x2="160" y2="440" stroke="#b45309" stroke-width="1.5"/>
+    <circle cx="150" cy="444" r="12" fill="#b45309"/>
+    <text x="150" y="449" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">2</text>
+    <text x="24" y="472" font-size="11" font-weight="700" fill="#1f2937">Varilla de nivel — anilla amarilla</text>
+    <text x="24" y="488" font-size="10" fill="#4b5563">zona frontal del bloque · lectura entre MIN y MAX</text>
+    <rect x="24" y="494" width="86" height="16" rx="3" fill="#dcfce7" stroke="#16a34a"/>
+    <text x="67" y="506" text-anchor="middle" font-size="9" font-weight="700" fill="#166534">VERIFICADO · foto Golf VII</text>
+  </g>
+
+  <!-- 3 Filtro: zona por confirmar -->
+  <g>
+    <rect x="210" y="250" width="130" height="64" rx="8" fill="none" stroke="#b91c1c" stroke-width="2" stroke-dasharray="7 5"/>
+    <line x1="275" y1="282" x2="180" y2="220" stroke="#b91c1c" stroke-width="1.5"/>
+    <circle cx="170" cy="214" r="12" fill="#b91c1c"/>
+    <text x="170" y="219" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">3</text>
+    <text x="24" y="184" font-size="11" font-weight="700" fill="#1f2937">Filtro de aceite (cartucho)</text>
+    <text x="24" y="200" font-size="10" fill="#4b5563">tapa negra con nervaduras · accesible desde arriba</text>
+    <rect x="24" y="206" width="104" height="16" rx="3" fill="#fee2e2" stroke="#b91c1c"/>
+    <text x="76" y="218" text-anchor="middle" font-size="9" font-weight="700" fill="#991b1b">ZONA · POR CONFIRMAR</text>
+  </g>
+
+  <!-- 4 Referencia: depósito de refrigerante -->
+  <g>
+    <circle cx="170" cy="300" r="26" fill="#e8e0cf" stroke="#9c8a6a" stroke-width="1.5"/>
+    <text x="170" y="304" text-anchor="middle" font-size="9" fill="#6b5b3e">refrig.</text>
+    <line x1="170" y1="274" x2="170" y2="240" stroke="#6b7280" stroke-width="1.2"/>
+    <text x="118" y="236" font-size="10" fill="#6b7280">Depósito de refrigerante (referencia visual)</text>
+  </g>
+
+  <!-- 5 Cuba (indicativa) -->
+  <g>
+    <rect x="250" y="420" width="300" height="80" rx="10" fill="#e8e0cf" stroke="#9c8a6a" stroke-dasharray="5 4"/>
+    <text x="400" y="452" text-anchor="middle" font-size="10" fill="#6b5b3e">cuba de aceite (bajo el bloque)</text>
+    <text x="400" y="470" text-anchor="middle" font-size="10" fill="#6b5b3e">ver PLANO 2 · vista inferior</text>
+    <line x1="470" y1="460" x2="600" y2="500" stroke="#b45309" stroke-width="1.2"/>
+    <circle cx="610" cy="504" r="11" fill="#b45309"/>
+    <text x="610" y="508" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
+    <text x="630" y="508" font-size="10" fill="#4b5563">Cuba — drenaje (Plano 2)</text>
+  </g>
+
+  <!-- Leyenda -->
+  <rect x="40" y="530" width="856" height="52" rx="8" fill="#fffdf8" stroke="#9c8a6a"/>
+  <text x="56" y="550" font-size="10" font-weight="700" fill="#1f2937">FUENTES:</text>
+  <text x="56" y="568" font-size="10" fill="#4b5563">① tapa de válvulas y llenado: familia EA211 (foto real Golf VII) · ② varilla anilla amarilla: foto real Golf VII (guía Autodoc 24083) · ③ el filtro es cartucho de tapa roscada (corte en PLANO 3); su posición exacta en el 1.5 TSI EVO se confirma en el vehículo antes de trabajar · ④④ referencias de localización.</text>
+</svg>
