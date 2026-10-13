@@ -18,9 +18,12 @@ from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.colors import Color, white
+import datos_nave_milladoiro as nvm   # partidas de la reforma (fuente única)
 
 HERE = Path(__file__).resolve().parent
 OUT = HERE / "Plan_Ejecucion_Paso_a_Paso.pdf"
+FOTOS = HERE / "fotos_reforma"         # renders de "así va a quedar" (ejemplo)
+FOTO_H_W = 768 / 1408.0               # ratio alto/ancho de los renders (16:9)
 
 D = json.loads((HERE / "plan_ejecucion.json").read_text())
 M = {int(k): v for k, v in D["mensual"].items()}   # mes -> [ventas, flota, caja]
@@ -180,6 +183,21 @@ def table(c, x, y, cols, rows, widths, size=8, hrow=17, aligns=None, bold_rows=(
     return yy
 
 
+def _foto(c, nombre, x, y, w, pie):
+    """Dibuja un render de FOTOS/nombre.jpg a ancho w (16:9) con un pie.
+    Devuelve la y inferior (debajo del pie)."""
+    h = w * FOTO_H_W
+    c.drawImage(str(FOTOS / nombre), x, y, width=w, height=h,
+                preserveAspectRatio=True, mask='auto')
+    c.setStrokeColor(LINE)
+    c.setLineWidth(0.5)
+    c.rect(x, y, w, h, fill=0, stroke=1)
+    c.setFillColor(SLATE)
+    c.setFont("DejaVu", 7.5)
+    c.drawCentredString(x + w / 2, y - 11, pie)
+    return y - 20
+
+
 PAGES = []
 
 
@@ -220,6 +238,50 @@ def p_cover(c, n, t):
     c.setFont("DejaVu", 9)
     c.drawString(60, 58, "Todo lo decidido: la estructura, los gastos, la caja mes a mes y el plan de pago.")
     footer(c, n, t, True)
+
+
+@page
+def p_reforma_fotos(c, n, t):
+    bg(c)
+    heading(c, "La reforma planeada", "Así va a quedar la nave (renders de ejemplo)")
+    wrap(c, "Es la reforma completa de O Milladoiro (5.115 €), vista por zonas. Se abre la nave tal cual y se "
+            "reforma poco a poco: el suelo el día 1 (nave vacía) y el resto cuando la caja lo pague (Paso 7). "
+            "Estas imágenes son un ejemplo del resultado, no fotos.",
+         36, 452, 890, size=9, leading=12, max_lines=2)
+    # 3 arriba
+    _foto(c, "fachada.jpg", 36, 272, 289, "Fachada")
+    _foto(c, "showroom.jpg", 335, 272, 289, "Nave / showroom (24 coches)")
+    _foto(c, "sala_espera.jpg", 634, 272, 289, "Sala de espera")
+    # 2 abajo (centradas)
+    _foto(c, "oficina_ruben.jpg", 186, 92, 289, "Oficina de dirección (Rubén)")
+    _foto(c, "oficina_karen.jpg", 485, 92, 289, "Oficina de la socia (Karen)")
+    footer(c, n, t)
+
+
+@page
+def p_reforma_costes(c, n, t):
+    bg(c)
+    heading(c, "La reforma planeada · presupuesto", "Qué incluye cada partida y cuánto cuesta")
+    wrap(c, "La reforma completa suma 5.115 € (IVA incluido) y la mano de obra es propia (0 €). No se paga todo "
+            "de golpe: el suelo se hace el día 1 con la nave vacía y el resto, poco a poco con coches dentro, "
+            "cuando la caja lo pague.",
+         36, 452, 890, size=9, leading=12, max_lines=2)
+    filas = [[p["partida"], p["nota"], eur(p["total"])] for p in nvm.REFORMA]
+    filas.append(["TOTAL reforma", "7 partidas · mano de obra propia", eur(nvm.REFORMA_TOTAL)])
+    yb = table(c, 36, 418, ["Partida", "Qué incluye", "Coste"], filas,
+               [250, 500, 138], size=8.5, hrow=18, aligns=["l", "l", "r"], bold_rows=(7,))
+    c.setFillColor(GOLD_DEEP)
+    c.setFont("DejaVuBold", 9)
+    c.drawString(36, yb - 12, "CÓMO SE PAGA (dos tramos, sin préstamo)")
+    resto = nvm.REFORMA_TOTAL - 905.0
+    card(c, 36, 150, 430, 74, "Tramo 1 · Suelo (905 €)", "día 1 · nave vacía",
+         "suelo epoxi de 400 m²: se pinta con la nave vacía, la única vez que está vacía", acento=RED)
+    card(c, 494, 150, 430, 74, "Tramo 2 · Resto (" + eur(resto) + " €)", "progresivo · cuando la caja lo pague",
+         "luz, pintura, señalización, mobiliario, seguridad y limpieza: poco a poco, con coches dentro", acento=GOLD)
+    wrap(c, "Se financia con las ventas, sin préstamo: cada tramo se paga en el primer mes en que la caja lo "
+            "cubre con 2 meses de margen, sin tocar el fondo de 3 meses.",
+         36, 128, 890, size=9, leading=12, color=SLATE, max_lines=2)
+    footer(c, n, t)
 
 
 @page
