@@ -23,7 +23,7 @@ import datos_nave_milladoiro as nvm   # partidas de la reforma (fuente única)
 HERE = Path(__file__).resolve().parent
 OUT = HERE / "Plan_Ejecucion_Paso_a_Paso.pdf"
 FOTOS = HERE / "fotos_reforma"         # renders de "así va a quedar" (ejemplo)
-FOTO_H_W = 768 / 1408.0               # ratio alto/ancho de los renders (16:9)
+FOTO_H_W = 1200.0 / 1600.0            # ratio alto/ancho de los renders (4:3)
 
 D = json.loads((HERE / "plan_ejecucion.json").read_text())
 M = {int(k): v for k, v in D["mensual"].items()}   # mes -> [ventas, flota, caja]
@@ -184,7 +184,7 @@ def table(c, x, y, cols, rows, widths, size=8, hrow=17, aligns=None, bold_rows=(
 
 
 def _foto(c, nombre, x, y, w, pie):
-    """Dibuja un render de FOTOS/nombre.jpg a ancho w (16:9) con un pie.
+    """Dibuja un render de FOTOS/nombre.jpg a ancho w (4:3) con un pie.
     Devuelve la y inferior (debajo del pie)."""
     h = w * FOTO_H_W
     c.drawImage(str(FOTOS / nombre), x, y, width=w, height=h,
@@ -246,15 +246,15 @@ def p_reforma_fotos(c, n, t):
     heading(c, "La reforma planeada", "Así va a quedar la nave (renders de ejemplo)")
     wrap(c, "Es la reforma completa de O Milladoiro (5.115 €), vista por zonas. Se abre la nave tal cual y se "
             "reforma poco a poco: el suelo el día 1 (nave vacía) y el resto cuando la caja lo pague (Paso 7). "
-            "Estas imágenes son un ejemplo del resultado, no fotos.",
+            "Son renders del diseño de la reforma (a modo de referencia), no fotos de la nave terminada.",
          36, 452, 890, size=9, leading=12, max_lines=2)
-    # 3 arriba
-    _foto(c, "fachada.jpg", 36, 272, 289, "Fachada")
-    _foto(c, "showroom.jpg", 335, 272, 289, "Nave / showroom (24 coches)")
-    _foto(c, "sala_espera.jpg", 634, 272, 289, "Sala de espera")
-    # 2 abajo (centradas)
-    _foto(c, "oficina_ruben.jpg", 186, 92, 289, "Oficina de dirección (Rubén)")
-    _foto(c, "oficina_karen.jpg", 485, 92, 289, "Oficina de la socia (Karen)")
+    # 3 arriba (4:3)
+    _foto(c, "fachada.jpg", 36, 249, 244, "Fachada")
+    _foto(c, "showroom.jpg", 358, 249, 244, "Nave / showroom (24 coches)")
+    _foto(c, "sala_espera.jpg", 680, 249, 244, "Sala de espera")
+    # 2 abajo (centradas, 4:3)
+    _foto(c, "oficina_ruben.jpg", 216, 43, 244, "Oficina de dirección (Rubén)")
+    _foto(c, "oficina_karen.jpg", 500, 43, 244, "Oficina de la socia (Karen)")
     footer(c, n, t)
 
 
