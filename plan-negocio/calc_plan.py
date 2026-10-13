@@ -88,11 +88,47 @@ def neto_ella(mes):
     return bruto * (1 - es.CUOTA_EMPLEADA) * (1 - e)
 
 
+def detalle_nomina_ella(mes):
+    """Desglose de la nómina de la socia empleada según la hipótesis del plan."""
+    bruto = bruto_ella(mes)
+    seguridad_social_trabajadora = round(bruto * es.CUOTA_EMPLEADA, 2)
+    neto = round(neto_ella(mes), 2)
+    irpf_estimado = round(bruto - seguridad_social_trabajadora - neto, 2)
+    seguridad_social_empresa = round(bruto * es.CUOTA_PATRONAL, 2)
+    return dict(
+        bruto=bruto,
+        ss_trabajadora=seguridad_social_trabajadora,
+        irpf_estimado=irpf_estimado,
+        neto=neto,
+        ss_empresa=seguridad_social_empresa,
+        coste_empresa=round(bruto + seguridad_social_empresa, 2),
+    )
+
+
+def tipo_retencion_admin(mes):
+    """Retención orientativa usada por el plan para el sueldo del administrador."""
+    return 0.19 if mes <= 12 else 0.35
+
+
 def main():
+
     u = mr.UNIDADES
     kit = mr.g.KIT
     n = mr.NAVES["milladoiro"]
-    fijos1 = n["rent"] + n["util"] + n["net"] + n["seguro"] + n["tasas"] + 448.69 + mr.g.MKT
+    fijos_base_detalle = [
+        dict(concepto="Alquiler de nave O Milladoiro", importe=n["rent"]),
+        dict(concepto="Suministros nave: luz/agua (estimación conjunta)", importe=n["util"]),
+        dict(concepto="Internet y teléfono", importe=n["net"]),
+        dict(concepto="Seguro de la nave", importe=n["seguro"]),
+        dict(concepto="Tasas municipales (estimación mensual)", importe=n["tasas"]),
+        dict(concepto="RETA del administrador societario", importe=mr.g.RETA),
+        dict(concepto="Marketing y portales (presupuesto)", importe=mr.g.MKT),
+    ]
+    fijos1 = round(sum(x["importe"] for x in fijos_base_detalle), 2)
+    assert round(fijos1, 2) == round(
+        n["rent"] + n["util"] + n["net"] + n["seguro"] + n["tasas"] + mr.g.RETA + mr.g.MKT,
+        2,
+    )
     trio_coste = u["116d"]["coste"] + u["A3"]["coste"] + u["GTI"]["coste"]
 
     SUELO = 905.0
@@ -189,15 +225,25 @@ def main():
         key=lambda i: sum(abs(C[m][i] - med_caja_m[m]) for m in range(1, 37)),
     )
     r_rep = mr.simular(escenario(), random.Random(41 * 7919 + best_i))
-    tray = [
-        dict(mes=x["mes"], caja=x["caja"], flota=x["flota"], fijos=x["fijos"], sueldo=x["sueldo"],
-             ventas_det=x.get("ventas_det", []), compras=x.get("compras", []),
-             stock_mix=x.get("stock_mix", {}),
-             averias=x.get("averias", 0.0), obra=x.get("obra", 0.0),
-             is_paid=x.get("is_paid", 0.0), div=x.get("div", 0.0),
-             rebu=x.get("rebu", 0.0))
-        for x in r_rep["meses"]
-    ]
+    tray = []
+    for x in r_rep["meses"]:
+        m = x["mes"]
+        bruto_admin_objetivo = mr.p.FAM(m)
+        retencion_admin = tipo_retencion_admin(m)
+        bruto_admin_pagado = x["sueldo"]
+        nomina_ella = detalle_nomina_ella(m)
+        tray.append(dict(
+            mes=m, caja=x["caja"], flota=x["flota"], fijos=x["fijos"],
+            sueldo=bruto_admin_pagado,
+            sueldo_admin_objetivo=bruto_admin_objetivo,
+            sueldo_admin_retencion=round(bruto_admin_pagado * retencion_admin, 2),
+            sueldo_admin_neto=round(bruto_admin_pagado * (1 - retencion_admin), 2),
+            ventas_det=x.get("ventas_det", []), compras=x.get("compras", []),
+            stock_mix=x.get("stock_mix", {}),
+            averias=x.get("averias", 0.0), obra=x.get("obra", 0.0),
+            is_paid=x.get("is_paid", 0.0), div=x.get("div", 0.0),
+            rebu=x.get("rebu", 0.0), nomina_ella=nomina_ella,
+        ))
     # Catálogo completo (para la lámina del PDF): coste de compra, precio de
     # venta (IVA incluido en la venta al cliente), margen neto y €/día.
     catalogo = [
@@ -229,6 +275,24 @@ def main():
     dv_m = {a: statistics.mean(dv[a]) for a in (1, 2, 3)}
     out = dict(
         dia1=dia1, kit=kit, fijos1=fijos1, trio_coste=trio_coste,
+        fijos_base_detalle=fijos_base_detalle,
+        nominas=dict(
+            socia=dict(
+                desde_mes=6, jornada_completa_desde_mes=16,
+                bruto_media=750.0, bruto_completa=1500.0,
+                cuota_patronal=es.CUOTA_PATRONAL,
+                cuota_trabajadora=es.CUOTA_EMPLEADA,
+            ),
+            administrador=dict(
+                desde_mes=6,
+                objetivo_m6_m12=mr.g.LIVE,
+                objetivo_m13_m24=mr.g.GROSS_Y2,
+                objetivo_m25_m36=mr.g.GROSS_Y3,
+                retencion_m1_m12=0.19,
+                retencion_m13_m36=0.35,
+            ),
+        ),
+        impuesto3_representativo=r_rep["impuesto3"],
         catalogo=catalogo,
         mensual=mensual, insol=100 * insol / SIM,
         v50=statistics.median(vtot), pat50=statistics.median(pat),

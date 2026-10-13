@@ -5,8 +5,9 @@ SL 50/50 (tú administrador + ella socia), sin obra al abrir, trío de arranque,
 stock 24 plazas, ella socia desde el día 1 + empleada desde el mes 6, dividendos
 50/50 a fin de año (se reparte el sobrante sobre el fondo de 3 meses).
 
-Los números salen de `plan_ejecucion.json` (calc_plan.py): mediana de 250
-trayectorias del escenario decidido, CON reparto de dividendos a fin de año.
+Los resultados resumen salen de `plan_ejecucion.json` (calc_plan.py): mediana de 250
+trayectorias del escenario decidido, CON reparto de dividendos a fin de año. El detalle
+mensual sigue la trayectoria simulada cuya caja más se acerca a la mediana mes a mes.
 
 Uso:  python3 calc_plan.py && python3 generar_plan_ejecucion.py
 """
@@ -34,9 +35,11 @@ CD = {int(k): v for k, v in D["compra_det"].items()}   # mes -> {n, eur, mix}
 VD = {int(k): v for k, v in D["venta_det"].items()}    # mes -> {n, eur, neto, mix}
 FJ = {int(k): v for k, v in D["fijos_m"].items()}      # mes -> fijos (mediana)
 SU = {int(k): v for k, v in D["sueldo_m"].items()}     # mes -> sueldo dueño (mediana)
+FIJOS_BASE = D["fijos_base_detalle"]
+NOMINAS = D["nominas"]
 # Trayectoria representativa: la sim cuya caja mes a mes mejor replica la mediana.
 # Se usa en el mes a mes: el flujo cuadra al céntimo y la caja coincide con la mediana.
-TRAY = D["tray"]    # lista de 36 dicts: mes, caja, flota, fijos, sueldo, ventas_det, compras, ...
+TRAY = D["tray"]    # lista de 36 dicts con ventas, compras, gastos y nóminas detalladas
 OBRA = D["obra"]                # mes mediano en que se paga el RESTO de la obra
 OBRA_SUELO = D["obra_suelo"]    # 1 (el suelo se paga en el día 1)
 SUELO = 905.0
@@ -45,7 +48,7 @@ RESTO_OBRA = 4210.47
 # dias, neto, margen_dia, pct). Se usa para mostrar SIEMPRE el precio unitario.
 CAT = {c["nick"]: c for c in D["catalogo"]}
 NOMBRE_MODELO = {n: c["nombre"] for n, c in CAT.items()}
-SHORT = {"116d": "116d", "A3": "A3", "Golf VIII": "Golf", "Leon": "León", "GTI": "GTI",
+SHORT = {"116d": "116d", "A3": "A3", "Golf VIII": "Golf VIII", "Leon": "León", "GTI": "GTI",
          "XC40": "XC40", "318d": "318d", "Mercedes": "Mercedes C", "Polo": "Polo",
          "Corolla": "Corolla", "3008": "3008", "Tiguan": "Tiguan", "X1": "X1",
          "XC60": "XC60", "330d": "330d"}
@@ -90,7 +93,7 @@ def footer(c, n, total, dark=False):
     c.setFont("DejaVu", 7.5)
     c.drawString(36, 18, "KHC AUTO IMPORT")
     c.setFillColor(Color(0.72, 0.70, 0.64) if dark else SLATE)
-    c.drawCentredString(W / 2, 18, "Plan de ejecución  ·  O Milladoiro  ·  36 meses  ·  mediana de 250 trayectorias")
+    c.drawCentredString(W / 2, 18, "O Milladoiro · trayectoria representativa de 250 simulaciones · cifras estimadas")
     c.setFillColor(GOLD if dark else INK)
     c.drawRightString(W - 28, 18, f"{n:02d}  /  {total:02d}")
 
@@ -236,7 +239,7 @@ def p_cover(c, n, t):
         c.drawString(60, H - 245 - i * 24, "—  " + s)
     c.setFillColor(GOLD)
     c.setFont("DejaVu", 9)
-    c.drawString(60, 58, "Todo lo decidido: la estructura, los gastos, la caja mes a mes y el plan de pago.")
+    c.drawString(60, 58, "Plan estimado a 36 meses (250 simulaciones), para contrastar con ventas y gastos reales; no es garantía.")
     footer(c, n, t, True)
 
 
@@ -363,17 +366,18 @@ def p_paso2(c, n, t):
     _paso_caja(c, 366, [
         ["Fianza (2 mensualidades de 1.200 €)", "−2.400", eur(DI[2][2]) + " €"],
         ["Licencia de actividad + técnico", "−800", eur(DI[3][2]) + " €"],
-        ["(alquiler 1.200 + comunidad 150 + luz 50 + seguro 60 + tasas 25 → fijos)", "—", "—"],
+        ["(alquiler 1.200 + suministros luz/agua 150 + internet/teléfono 50 + seguro 60 + tasas 25)", "—", "—"],
     ])
     card(c, 36, 205, 430, 76, "Coste del paso (día 1)", "3.200 €", "fianza 2.400 + licencia 800", acento=GOLD)
     card(c, 494, 205, 430, 76, "Caja tras este paso", eur(DI[3][2]) + " €", "el alquiler se paga mes a mes", acento=GREEN)
     c.setFillColor(GOLD_DEEP)
     c.setFont("DejaVuBold", 9)
     c.drawString(36, 189, "Fijos mensuales (ya están en la caja de cada mes)")
-    wrap(c, "Alquiler 1.200 · Comunidad 150 · Luz 50 · Seguro 60 · Tasas 25 · Portales/mkt 250 · RETA (tú) "
-            "448,69 → 2.184 €/mes. Desde el mes 6 se suma la nómina de ella a media jornada (979 € con cuota "
-            "patronal) → 3.163 €/mes; desde el 16, completa (1.959 €) → 4.143 €/mes.",
-         36, 173, 890, size=9.5, leading=13, color=SLATE, max_lines=2)
+    wrap(c, "Alquiler 1.200 · suministros (luz/agua, provisión conjunta) 150 · internet/teléfono 50 · seguro 60 · "
+            "tasas 25 · marketing/portales 250 · RETA administrador 448,69 = 2.183,69 €/mes. Desde m6: "
+            "socia 750 bruto + 229,50 SS empresa = 979,50; desde m16: 1.500 + 459 = 1.959. Total fijo: "
+            "3.163,19 €/mes desde m6 y 4.142,69 desde m16. El sueldo de administrador se muestra por separado mes a mes.",
+         36, 173, 890, size=8.6, leading=11, color=SLATE, max_lines=4)
     card(c, 36, 72, 888, 66, "La obra, en dos tramos", "Suelo el día 1 (nave vacía) · resto cuando la caja lo pague",
          "pintar todo el suelo exige la nave vacía (solo está vacía al abrir); el resto se hace poco a poco con coches dentro, sin tocar el fondo", acento=RED)
     footer(c, n, t)
@@ -608,260 +612,300 @@ def p_paso7(c, n, t):
     footer(c, n, t)
 
 
-def _ventas_str(dets, maxn=6):
-    """'4× León @17.500 · 2× GTI @18.500 …' (precio de venta unitario)."""
-    from collections import Counter
-    cnt = Counter(n for n, *_ in dets)
-    parts = [f"{k}× {SHORT.get(n, n)} @{eur(CAT[n]['venta'])}" for n, k in cnt.most_common(maxn)]
-    s = " · ".join(parts)
-    resto = [k for _, k in cnt.most_common()[maxn:]]
-    if resto:
-        s += f"  · +{sum(resto)} más"
-    return s
+def _amount(n):
+    return eur(float(n), cents=True) + " €"
 
 
-def _compras_str(dets, maxn=6):
-    """'2× Corolla @14.500 · 1× XC60 @22.500 …' (precio de compra unitario)."""
-    from collections import Counter
-    cnt = Counter(n for n, _ in dets)
-    parts = [f"{k}× {SHORT.get(n, n)} @{eur(CAT[n]['coste'])}" for n, k in cnt.most_common(maxn)]
-    s = " · ".join(parts)
-    resto = [k for _, k in cnt.most_common()[maxn:]]
-    if resto:
-        s += f"  · +{sum(resto)} más"
-    return s
+def _outflow_amount(n):
+    return "−" + _amount(abs(float(n))) if abs(float(n)) >= 0.005 else _amount(0)
 
 
-def _stock_str(mix, maxn=8):
-    """'2× León · 2× 116d · 1× XC60 …' (composición del stock por modelo)."""
-    items = sorted(mix.items(), key=lambda kv: (-kv[1], NOMBRE_MODELO.get(kv[0], kv[0])))
-    parts = [f"{k}× {SHORT.get(n, n)}" for n, k in items[:maxn]]
-    s = " · ".join(parts)
-    if len(items) > maxn:
-        s += f"  · +{sum(k for _, k in items[maxn:])} más"
-    return s or "vacío"
+def _group_ventas(dets):
+    """Agrupa por modelo y conserva importe vendido y margen neto por unidad."""
+    from collections import OrderedDict
+    grouped = OrderedDict()
+    for nick, venta, neto in dets:
+        row = grouped.setdefault(nick, dict(unidades=0, unitario=float(venta), ventas=0.0, margen=0.0))
+        if abs(row["unitario"] - float(venta)) > 0.01:
+            raise AssertionError(f"precio de venta inconsistente para {nick}")
+        row["unidades"] += 1
+        row["ventas"] += float(venta)
+        row["margen"] += float(neto)
+    return sorted(grouped.items(), key=lambda item: (-item[1]["unidades"], item[0]))
 
 
-def _mes_det(c, y, m, title, nota):
-    """Un mes en detalle (trayectoria exacta). Devuelve la y del siguiente."""
+def _group_compras(dets):
+    """Agrupa por modelo las compras de stock del mes."""
+    from collections import OrderedDict
+    grouped = OrderedDict()
+    for nick, coste in dets:
+        row = grouped.setdefault(nick, dict(unidades=0, unitario=float(coste), total=0.0))
+        if abs(row["unitario"] - float(coste)) > 0.01:
+            raise AssertionError(f"coste de compra inconsistente para {nick}")
+        row["unidades"] += 1
+        row["total"] += float(coste)
+    return sorted(grouped.items(), key=lambda item: (-item[1]["unidades"], item[0]))
+
+
+def _sales_rows(dets):
+    grouped = _group_ventas(dets)
+    rows = [
+        [SHORT.get(nick, nick), str(v["unidades"]), _amount(v["unitario"]),
+         _amount(v["ventas"]), _amount(v["margen"])]
+        for nick, v in grouped
+    ]
+    if not rows:
+        rows = [["Sin ventas", "0", "—", _amount(0), _amount(0)]]
+    rows.append([
+        "TOTAL VENTAS", str(sum(v["unidades"] for _, v in grouped)), "",
+        _amount(sum(v["ventas"] for _, v in grouped)),
+        _amount(sum(v["margen"] for _, v in grouped)),
+    ])
+    return rows
+
+
+def _purchase_rows(dets):
+    grouped = _group_compras(dets)
+    rows = [
+        [SHORT.get(nick, nick), str(v["unidades"]), _amount(v["unitario"]), _amount(v["total"])]
+        for nick, v in grouped
+    ]
+    if not rows:
+        rows = [["Sin compras", "0", "—", _amount(0)]]
+    rows.append([
+        "TOTAL COMPRAS", str(sum(v["unidades"] for _, v in grouped)), "",
+        _amount(sum(v["total"] for _, v in grouped)),
+    ])
+    return rows
+
+
+def _net_dividendos(total_bruto):
+    """Neto conjunto orientativo del dividendo, aplicando tramos por socio al 50 %."""
+    def cuota(importe):
+        tramos = [(6000, .19), (50000, .21), (200000, .23), (300000, .27), (float("inf"), .28)]
+        restante, anterior, impuesto = importe, 0.0, 0.0
+        for limite, tipo in tramos:
+            base = max(0.0, min(restante, limite - anterior))
+            impuesto += base * tipo
+            restante -= base
+            anterior = limite
+            if restante <= 0:
+                break
+        return impuesto
+    mitad = max(0.0, float(total_bruto)) / 2.0
+    return round(float(total_bruto) - 2.0 * cuota(mitad), 2)
+
+
+def _stock_detalle(mix):
+    items = sorted(mix.items(), key=lambda item: (-item[1], SHORT.get(item[0], item[0])))
+    return " · ".join(f"{cantidad}× {SHORT.get(nick, nick)}" for nick, cantidad in items) or "vacío"
+
+
+def _validate_monthly_detail():
+    """Comprueba gastos desglosados, ventas, compras y caja antes de emitir el PDF."""
+    fixed_base = sum(float(row["importe"]) for row in FIJOS_BASE)
+    for i, x in enumerate(TRAY):
+        m = int(x["mes"])
+        wife = x["nomina_ella"]
+        wife_cfg = NOMINAS["socia"]
+        expected_wife_gross = (
+            0.0 if m < wife_cfg["desde_mes"]
+            else wife_cfg["bruto_completa"] if m >= wife_cfg["jornada_completa_desde_mes"]
+            else wife_cfg["bruto_media"]
+        )
+        if abs(expected_wife_gross - float(wife["bruto"])) > 0.01:
+            raise AssertionError(f"nómina de la socia de m{m} no cuadra")
+        if abs(wife["bruto"] + wife["ss_empresa"] - wife["coste_empresa"]) > 0.01:
+            raise AssertionError(f"coste patronal de la socia de m{m} no cuadra")
+        expected_fixed = round(fixed_base + wife["coste_empresa"], 2)
+        if abs(expected_fixed - float(x["fijos"])) > 0.02:
+            raise AssertionError(f"gastos fijos de m{m} no cuadran: {expected_fixed} != {x['fijos']}")
+        if abs(sum(v["ventas"] for _, v in _group_ventas(x["ventas_det"]))
+               - sum(float(sale) for _, sale, _ in x["ventas_det"])) > 0.02:
+            raise AssertionError(f"ventas agrupadas de m{m} no cuadran")
+        if abs(sum(v["total"] for _, v in _group_compras(x["compras"]))
+               - sum(float(cost) for _, cost in x["compras"])) > 0.02:
+            raise AssertionError(f"compras agrupadas de m{m} no cuadran")
+        expected_rebu = 0.0
+        for nick, sale, neto in x["ventas_det"]:
+            if abs(float(sale) - CAT[nick]["venta"]) > 0.01 or abs(float(neto) - CAT[nick]["neto"]) > 0.01:
+                raise AssertionError(f"precio o margen de venta inconsistente en m{m}: {nick}")
+            expected_rebu += float(sale) - CAT[nick]["coste"] - float(neto)
+        for nick, cost in x["compras"]:
+            if abs(float(cost) - CAT[nick]["coste"]) > 0.01:
+                raise AssertionError(f"coste de compra inconsistente en m{m}: {nick}")
+        if abs(expected_rebu - float(x["rebu"])) > 0.02:
+            raise AssertionError(f"reserva REBU de m{m} no cuadra")
+        start = float(DI[6][2]) if m == 1 else float(TRAY[i - 1]["caja"])
+
+        ventas = sum(float(sale) for _, sale, _ in x["ventas_det"])
+        compras = sum(float(cost) for _, cost in x["compras"])
+        end_calc = round(
+            start + ventas - float(x["rebu"]) - compras - float(x["fijos"])
+            - float(x["sueldo"]) - float(x["averias"]) - float(x["obra"])
+            - float(x["is_paid"]) - float(x["div"]),
+            2,
+        )
+        if abs(end_calc - float(x["caja"])) > 0.02:
+            raise AssertionError(f"flujo de caja de m{m} no cuadra: {end_calc} != {x['caja']}")
+        if sum(x.get("stock_mix", {}).values()) != int(x["flota"]):
+            raise AssertionError(f"stock final de m{m} no cuadra")
+
+
+def _draw_month_detail(c, n, t, m):
     x = TRAY[m - 1]
-    end = x["caja"]
-    start = DI[7][2] if m == 1 else TRAY[m - 2]["caja"]
-    nv = len(x["ventas_det"]); nc = len(x["compras"])
-    V = sum(e for _, e, _ in x["ventas_det"])
-    C_ = sum(co for _, co in x["compras"])
-    R = x["rebu"]; S = x["sueldo"]; O = x["obra"]; I = x["is_paid"]; Dv = x["div"]; A = x["averias"]
-    mix = x.get("stock_mix", {})
-    stock_valor = sum(k * CAT[n]["coste"] for n, k in mix.items())
-    # cabecera
-    c.setFillColor(GOLD_DEEP)
-    c.setFont("DejaVuBold", 9)
-    c.drawString(36, y, f"MES {m}")
-    c.setFillColor(INK)
-    c.setFont("DejaVuSerif", 10)
-    c.drawString(82, y, title)
-    c.setFillColor(GOLD_DEEP)
-    c.setFont("DejaVuBold", 8.5)
-    c.drawRightString(W - 36, y, f"Caja {eur(start)} € → {eur(end)} € · flota {x['flota']}")
-    y -= 12
-    # ventas (con precio unitario por modelo)
-    c.setFillColor(GREEN)
-    c.setFont("DejaVuBold", 7.5)
-    c.drawString(82, y, "VENDEN")
-    c.setFillColor(INK)
-    c.setFont("DejaVu", 8)
-    c.drawString(140, y, _ventas_str(x["ventas_det"]) if nv else "— (sin ventas este mes)")
-    if nv:
-        c.setFillColor(GREEN)
-        c.setFont("DejaVuBold", 8)
-        c.drawRightString(W - 36, y, f"{nv} coches · +{eur(V)} €")
-    y -= 11
-    # compras (con precio unitario por modelo)
-    c.setFillColor(RED)
-    c.setFont("DejaVuBold", 7.5)
-    c.drawString(82, y, "COMPRAN")
-    c.setFillColor(INK)
-    c.setFont("DejaVu", 8)
-    c.drawString(140, y, _compras_str(x["compras"]) if nc else "— (sin compras este mes)")
-    if nc:
-        c.setFillColor(RED)
-        c.setFont("DejaVuBold", 8)
-        c.drawRightString(W - 36, y, f"{nc} coches · −{eur(C_)} €")
-    y -= 11
-    # STOCK (siempre visible): composición por modelo + valor inmovilizado
-    c.setFillColor(GOLD_DEEP)
-    c.setFont("DejaVuBold", 7.5)
-    c.drawString(82, y, "STOCK")
-    c.setFillColor(INK)
-    c.setFont("DejaVu", 8)
-    c.drawString(140, y, f"{x['flota']} coches · {_stock_str(mix)}")
-    c.setFillColor(GOLD_DEEP)
-    c.setFont("DejaVu", 8)
-    c.drawRightString(W - 36, y, f"valor {eur(stock_valor)} €")
-    y -= 12
-    # otros gastos (fijos, sueldo, obra, IS, dividendo, averías, IVA)
-    parts = ["fijos " + ("pagados el día 1" if m == 1 else f"−{eur(x['fijos'])} €")]
-    if S > 0.5:
-        parts.append(f"tu sueldo −{eur(S)} €")
-    if O > 0.5:
-        parts.append(f"obra (resto) −{eur(O)} €")
-    if I > 0.5:
-        parts.append(f"IS a AEAT −{eur(I)} €")
-    if Dv > 0.5:
-        parts.append(f"dividendo 50/50 −{eur(Dv)} €")
-    if A > 0.5:
-        parts.append(f"averías −{eur(A)} €")
-    parts.append(f"IVA de la ganancia −{eur(R)} €")
+    ventas = x["ventas_det"]
+    compras = x["compras"]
+    total_ventas = sum(float(sale) for _, sale, _ in ventas)
+    margen_neto = sum(float(net) for _, _, net in ventas)
+    total_compras = sum(float(cost) for _, cost in compras)
+    stock_mix = x.get("stock_mix", {})
+    stock_coste = sum(int(q) * CAT[nick]["coste"] for nick, q in stock_mix.items())
+    start = float(DI[6][2]) if m == 1 else float(TRAY[m - 2]["caja"])
+    wife = x["nomina_ella"]
+    admin_gross = float(x["sueldo"])
+    admin_target = float(x["sueldo_admin_objetivo"])
+    admin_tax = float(x["sueldo_admin_retencion"])
+    admin_net = float(x["sueldo_admin_neto"])
+    dividend_gross = float(x["div"])
+    dividend_net_total = _net_dividendos(dividend_gross)
+    dividend_net_each = dividend_net_total / 2.0
+    admin_income_home = admin_net + dividend_net_each
+    wife_income_home = float(wife["neto"]) + dividend_net_each
+
+    total_sales_count = len(ventas)
+    total_purchase_count = len(compras)
+    ventas_label = "venta" if total_sales_count == 1 else "ventas"
+    compras_label = "compra" if total_purchase_count == 1 else "compras"
+    title = f"Mes {m} · {total_sales_count} {ventas_label} · {total_purchase_count} {compras_label}"
+    heading(c, f"Detalle mensual · {m:02d} de 36", title, size=18)
     c.setFillColor(SLATE)
-    c.setFont("DejaVuBold", 7.5)
-    c.drawString(82, y, "GASTOS")
+    c.setFont("DejaVu", 7.5)
+    if m == 1:
+        start_note = "Saldo tras los pagos de apertura, antes de los gastos recurrentes de m1"
+    else:
+        start_note = "Saldo al cierre del mes anterior"
+    c.drawString(36, 449, f"{start_note}: {_amount(start)}")
+    c.drawRightString(W - 36, 449, f"Saldo al cierre de m{m}: {_amount(x['caja'])}")
+
+    # Tablas paralelas: cada modelo queda en su propia fila con unidades,
+    # precio unitario y subtotal; a la izquierda también aparece su margen.
+    c.setFillColor(GREEN)
+    c.setFont("DejaVuBold", 8)
+    c.drawString(36, 429, "VENTAS A CLIENTES · importe cobrado por modelo")
+    c.setFillColor(RED)
+    c.drawString(492, 429, "COMPRAS DE STOCK · coste completo por modelo")
+    c.setFillColor(SLATE)
+    c.setFont("DejaVu", 6.6)
+    c.drawString(36, 417, "Margen neto = venta − coste del coche − REBU; antes de nave, nóminas, averías e IS.")
+    c.drawString(492, 417, "Coste unitario puesto en A Coruña y listo para anunciar; ver escandallo unitario.")
+    sales_rows = _sales_rows(ventas)
+    purchase_rows = _purchase_rows(compras)
+    table(c, 36, 407,
+          ["Modelo", "Uds", "€/ud", "Ventas total", "Margen neto"], sales_rows,
+          [118, 30, 78, 102, 104], size=6.8, hrow=10.4,
+          aligns=["l", "c", "r", "r", "r"], bold_rows=(len(sales_rows) - 1,))
+    table(c, 492, 407,
+          ["Modelo", "Uds", "€/ud", "Coste total"], purchase_rows,
+          [143, 32, 105, 154], size=7.0, hrow=10.4,
+          aligns=["l", "c", "r", "r"], bold_rows=(len(purchase_rows) - 1,))
+
+    # Parte inferior izquierda: fijos repetidos y desglosados en cada mes.
+    c.setFillColor(GOLD_DEEP)
+    c.setFont("DejaVuBold", 8)
+    c.drawString(36, 225, "GASTOS RECURRENTES DE LA SL · DESGLOSE DEL MES")
+    recurring_rows = [[row["concepto"], _amount(row["importe"])] for row in FIJOS_BASE]
+    recurring_rows.extend([
+        ["Salario socia empleada (bruto)", _amount(wife["bruto"])],
+        ["Seguridad Social empresa sobre su nómina", _amount(wife["ss_empresa"])],
+        ["TOTAL GASTO RECURRENTE (incluye coste laboral socia)", _amount(x["fijos"])],
+    ])
+    table(c, 36, 214, ["Concepto", "Importe"], recurring_rows,
+          [332, 100], size=6.65, hrow=9.6, aligns=["l", "r"],
+          bold_rows=(len(recurring_rows) - 1,))
+
+    # Parte inferior derecha: puente de caja, con cada salida en línea separada.
+    c.setFillColor(GOLD_DEEP)
+    c.setFont("DejaVuBold", 8)
+    c.drawString(492, 225, "MOVIMIENTO DE CAJA · QUÉ ENTRA Y QUÉ SALE")
+    is3_pendiente = float(D.get("impuesto3_representativo", 0.0)) if m == 36 else 0.0
+    impuesto_label = "− Impuesto Sociedades pagado"
+    if is3_pendiente > 0:
+        impuesto_label = f"− IS pagado (ejercicio 3 pendiente: {_amount(is3_pendiente)})"
+    cash_rows = [
+        ["Caja antes de movimientos del mes", _amount(start)],
+        ["+ Cobros de las ventas (brutos)", "+" + _amount(total_ventas)],
+        ["− Reserva IVA de margen REBU", _outflow_amount(x["rebu"])],
+        ["− Coches comprados, coste completo", _outflow_amount(total_compras)],
+        ["− Gastos recurrentes (detalle a la izquierda)", _outflow_amount(x["fijos"])],
+        ["− Salario del administrador (bruto pagado)", _outflow_amount(admin_gross)],
+        ["− Averías extraordinarias", _outflow_amount(x["averias"])],
+        ["− Reforma pagada este mes", _outflow_amount(x["obra"])],
+        [impuesto_label, _outflow_amount(x["is_paid"])],
+        ["− Dividendos totales repartidos 50/50", _outflow_amount(dividend_gross)],
+        ["CAJA AL CIERRE DEL MES", _amount(x["caja"])],
+    ]
+    table(c, 492, 214, ["Movimiento", "Importe"], cash_rows,
+          [324, 108], size=6.45, hrow=9.6, aligns=["l", "r"],
+          bold_rows=(len(cash_rows) - 1,))
+
+    # El sueldo del administrador es variable: aquí se muestra lo cobrado y el objetivo.
     c.setFillColor(INK)
-    c.setFont("DejaVu", 8)
-    c.drawString(140, y, " · ".join(parts))
-    y -= 12
-    # explicación (1-2 líneas)
-    if nota:
-        h = wrap(c, "·  " + nota, 82, y, W - 36 - 82, size=7.5, leading=10, color=SLATE, max_lines=2)
-        y -= h
-    # separador
-    c.setStrokeColor(LINE)
-    c.setLineWidth(0.5)
-    c.line(36, y - 2, W - 36, y - 2)
-    return y - 13
+    c.setFont("DejaVuBold", 6.5)
+    c.drawString(36, 79, "SUELDOS DEL MES · BRUTO, RETENCIONES Y NETO ESTIMADO")
+    c.setFont("DejaVu", 6.2)
+    admin_cfg = NOMINAS["administrador"]
+    admin_rate = round(
+        100 * (admin_cfg["retencion_m1_m12"] if m <= 12
+               else admin_cfg["retencion_m13_m36"])
+    )
+    admin_line = (
+        f"Admin.: bruto {_amount(admin_gross)} · IRPF mod. {admin_rate}% ({_amount(admin_tax)}) · "
+        f"neto {_amount(admin_net)} · objetivo {_amount(admin_target)}."
+    )
+    wife_line = (
+        f"Socia: bruto {_amount(wife['bruto'])} · SS trabajadora {_amount(wife['ss_trabajadora'])} · "
+        f"IRPF est. {_amount(wife['irpf_estimado'])} · neto {_amount(wife['neto'])}."
+    )
+    c.drawString(36, 66, admin_line)
+    c.drawString(36, 54, wife_line)
 
+    c.setFillColor(INK)
+    c.setFont("DejaVuBold", 6.5)
+    c.drawString(492, 79, "DINERO A CASA · NETO ORIENTATIVO DEL MODELO")
+    c.setFont("DejaVu", 6.2)
+    c.drawString(492, 66,
+                 f"Tú: sueldo {_amount(admin_net)} + dividendo {_amount(dividend_net_each)} "
+                 f"= {_amount(admin_income_home)}.")
+    c.drawString(492, 54,
+                 f"Socia: nómina {_amount(wife['neto'])} + dividendo {_amount(dividend_net_each)} "
+                 f"= {_amount(wife_income_home)}.")
+    c.setFont("DejaVuBold", 6.4)
+    c.drawRightString(W - 36, 42, f"TOTAL NETO PAREJA ESTE MES: {_amount(admin_income_home + wife_income_home)}")
 
-# Títulos y explicación de cada mes (trayectoria representativa; el flujo cuadra al céntimo)
-TIT = {
-    1: "Apertura: SL, nave y suelo", 2: "El trío empieza a girar",
-    3: "Primeras ventas y reposición", 4: "3 ventas, 4 reposiciones", 5: "Reposición (3 compras)",
-    6: "Entran los sueldos (ella a medias)", 7: "3 ventas, 3 compras",
-    8: "Ritmo de 2 ventas", 9: "Primer sueldo tuyo", 10: "La caja respira",
-    11: "Mes tranquilo", 12: "Año 1: dividendo 50/50",
-    13: "La flota toca 6 · 5 ventas", 14: "5 ventas, 6 compras", 15: "La flota toca 8",
-    16: "Ella a completa · 7 ventas", 17: "La flota toca 10", 18: "Mes de 9 ventas",
-    19: "IS año 1 · flota 12 · 10 ventas", 20: "Mes de 6 ventas", 21: "9 ventas, 10 compras",
-    22: "Mes de 13 ventas · flota 16", 23: "La flota toca 18", 24: "Año 2: dividendo 50/50",
-    25: "Casi llena (21) · 14 ventas", 26: "Se paga el resto de la obra", 27: "La nave llena: 24 coches",
-    28: "Mes de 17 ventas", 29: "La caja pasa de 130.000 €", 30: "La caja pasa de 170.000 €",
-    31: "IS año 2 · 21 ventas", 32: "La caja pasa de 240.000 €", 33: "La caja pasa de 270.000 €",
-    34: "Mes de 17 ventas", 35: "El pico de caja", 36: "El dividendo gordo",
-}
-NOTA = {
-    1: "Se abren la SL y la nave y se pinta el suelo (nave vacía). El trío (116d, A3, GTI) llega esta semana y ya "
-       "se vende un 116d (12.475 €) y se compra un León (12.900 €). Caja 4.787 €.",
-    2: "Gira el trío: se vende el Audi A3 (15.990 €) y se compra otro León (12.900 €). La caja se mantiene estable.",
-    3: "Se vende un León (17.500 €) y se reponen otros: empieza el ritmo de comprar y vender cada semana.",
-    4: "Primer mes con volumen: 3 ventas (2× León, 1× GTI) y 4 reposiciones. La caja sube a 10.907 €.",
-    5: "Mes de reposición (3 compras, 2× 116d y 1× Polo); la caja baja a 5.551 € pero no roza el fondo.",
-    6: "Empiezan los sueldos: el de ella a media jornada (750 €) entra en fijos (3.163 €) y el fondo de 3 meses pasa a 9.490 €.",
-    7: "Ritmo de 3 ventas (Polo, 116d, León): la nave ya rota con soltura.",
-    8: "Dos ventas, dos compras; la caja sube a 14.762 €.",
-    9: "La caja lo permite: por primera vez te llevas parte del hueco como sueldo (2.083 €).",
-    10: "Mes de 2 ventas (León, 116d); la caja toca 16.155 €.",
-    11: "Mes tranquilo (1 venta, 1 compra); la caja respira.",
-    12: "Cierra el año 1: se reparte el dividendo 50/50 (6.665 € brutos); la SL se queda su fondo (9.490 €).",
-    13: "La flota toca 6. Hay una avería mayor (3.701 €): normal al importar, contemplada en el coste.",
-    14: "5 ventas y 6 compras: la flota crece hacia 8.",
-    15: "La flota toca 8; mes de 5 ventas (2× GTI, 116d, 2× Polo, León).",
-    16: "El sueldo de ella se dobla a completa (1.500 €): fijos 4.143 € y fondo 12.428 €. Mes de 7 ventas.",
-    17: "La flota toca 10; 5 ventas (2× 116d, GTI, Golf, A3).",
-    18: "Mes de 9 ventas; la flota llega a 11.",
-    19: "Se ingresa en AEAT el IS del año 1 (4.193 €). La flota toca 12; 10 ventas.",
-    20: "Mes de 6 ventas (GTI, Polo, 2× Golf, 2× Corolla); la caja pasa de 26.000 €.",
-    21: "9 ventas y 10 compras; ya entra el primer Peugeot 3008 (15.500 €). La flota toca 14.",
-    22: "Mes de 13 ventas; ya rotan también los modelos grandes (3008, Tiguan). La flota toca 16.",
-    23: "La flota toca 18; mes de 13 ventas. Entra el primer Mercedes C (17.666 €).",
-    24: "Cierra el año 2: se reparte el dividendo 50/50 (35.994 € brutos). Entra el primer BMW X1 (17.500 €).",
-    25: "La nave ya tiene 21 coches; mes de 14 ventas. Entra el primer Volvo XC60 (22.500 €).",
-    26: "La caja lo permite: se paga el RESTO de la obra (4.210 €: luz, pintura, señalización, mobiliario, seguridad). 14 ventas.",
-    27: "La nave se llena (24 coches) y la flota ya tiene los 15 modelos: cada ciclo venta + reposición suma su margen.",
-    28: "Mes de 17 ventas (y 17 reposiciones): la caja pasa de 100.000 €.",
-    29: "La caja pasa de 130.000 €.",
-    30: "La caja pasa de 170.000 €.",
-    31: "Se ingresa en AEAT el IS del año 2 (36.518 €). Mes de 21 ventas.",
-    32: "La caja pasa de 240.000 €.",
-    33: "La caja pasa de 270.000 €.",
-    34: "Mes de 17 ventas; la caja sube en línea recta hacia el dividendo.",
-    35: "La caja toca su pico (357.357 €) justo antes del dividendo grande.",
-    36: "Cierra el año 3: se reparte el dividendo gordo (382.811 € brutos) y la SL se queda su fondo (12.428 €).",
-}
-
-
-def _mes_page(c, n, t, pag, m0, m1, titulo, intro):
-    bg(c)
-    heading(c, f"Mes a mes  ·  {pag} de 9", titulo)
-    wrap(c, intro, 36, 448, 890, size=9, leading=12, max_lines=2)
-    wrap(c, "Cada mes, lo que se VENDE y se COMPRA con el precio de cada coche (n× modelo @ precio), la línea "
-            "STOCK (qué hay en la nave y su valor), los gastos y la caja al final. Es la trayectoria representativa "
-            "(la que mejor replica la mediana de 250); el flujo cuadra al céntimo.",
-         36, 430, 890, size=8, leading=10, color=SLATE, max_lines=2)
-    y = 404
-    for m in range(m0, m1 + 1):
-        y = _mes_det(c, y, m, TIT[m], NOTA[m])
+    # El stock se valora al coste de entrada, no a un precio de venta hipotético.
+    stock_line = (
+        f"STOCK AL CIERRE: {x['flota']} coches · {_stock_detalle(stock_mix)} · "
+        f"coste inmovilizado {_amount(stock_coste)} (valor de compra, no tasación)."
+    )
+    c.setFillColor(GOLD_DEEP)
+    c.setFont("DejaVu", 6.25)
+    c.drawString(36, 29, stock_line)
     footer(c, n, t)
 
 
-@page
-def p_mes_1_4(c, n, t):
-    _mes_page(c, n, t, 1, 1, 4, "Meses 1 a 4: el arranque",
-              f"La caja sale del día 1 en {eur(DI[7][2])} €. El trío (116d, A3, GTI) llega en m1 y desde ya se "
-              f"venden y se compran coches (con su precio). Lo más justo es m1-m5, cuando la caja está cerca del fondo.")
+def _register_month_pages():
+    for month in range(1, 37):
+        def _make_page(month_number):
+            @page
+            def p_month(c, n, t):
+                _draw_month_detail(c, n, t, month_number)
+            p_month.__name__ = f"p_mes_{month_number:02d}"
+            return p_month
+        _make_page(month)
 
 
-@page
-def p_mes_5_8(c, n, t):
-    _mes_page(c, n, t, 2, 5, 8, "Meses 5 a 8: el ritmo empieza",
-              "La flota se mantiene en 5 y se venden 1-3 coches al mes. En m6 entra el sueldo de ella a media "
-              "jornada (750 €) y suben los fijos a 3.163 €.")
-
-
-@page
-def p_mes_9_12(c, n, t):
-    _mes_page(c, n, t, 3, 9, 12, "Meses 9 a 12: cierra el año 1",
-              "En m9, por primera vez, te llevas parte del hueco como sueldo. Hay averías puntuales "
-              "(contempladas). Al cerrar el año 1 se reparte el dividendo 50/50: la SL se queda su fondo (9.490 €).")
-
-
-@page
-def p_mes_13_16(c, n, t):
-    _mes_page(c, n, t, 4, 13, 16, "Meses 13 a 16: el despegue",
-              "Las ventas suben (5-7/mes) y la flota crece de 6 a 9. En m16 ella pasa a jornada completa "
-              "(1.500 €) y el fondo sube a 12.428 €.")
-
-
-@page
-def p_mes_17_20(c, n, t):
-    _mes_page(c, n, t, 5, 17, 20, "Meses 17 a 20: arranca el año 2",
-              "La flota crece de 10 a 13 y el sueldo tuyo crece con el beneficio. En m19 se ingresa en AEAT el IS "
-              "del año 1 (4.193 €).")
-
-
-@page
-def p_mes_21_24(c, n, t):
-    _mes_page(c, n, t, 6, 21, 24, "Meses 21 a 24: entran los grandes",
-              "Meses de 9-13 ventas; ya rotan los modelos grandes (3008, Tiguan, Mercedes, XC40) con ticket y "
-              "margen mayores. Al cerrar el año 2 se reparte el dividendo 50/50.")
-
-
-@page
-def p_mes_25_28(c, n, t):
-    _mes_page(c, n, t, 7, 25, 28, "Meses 25 a 28: la nave llena",
-              "En m26 se paga el resto de la obra (4.210 €) y en m27 la flota llega a 24 con los 15 modelos "
-              "(la nave llena). A partir de ahí se reponen coches al mismo ritmo que se venden.")
-
-
-@page
-def p_mes_29_32(c, n, t):
-    _mes_page(c, n, t, 8, 29, 32, "Meses 29 a 32: la caja acelera",
-              "Nave llena y la caja sube de 130.000 € a 240.000 €. En m31 se ingresa en AEAT el IS del año 2 "
-              "(36.518 €).")
-
-
-@page
-def p_mes_33_36(c, n, t):
-    _mes_page(c, n, t, 9, 33, 36, "Meses 33 a 36: el último año",
-              "La caja pasa de 270.000 € y toca su pico en m35 (357.357 €). Al cerrar el año 3 se reparte el "
-              "dividendo gordo (382.811 € brutos) y la SL se queda su fondo (12.428 €).")
+_register_month_pages()
 
 
 @page
@@ -896,6 +940,7 @@ def p_resumen(c, n, t):
 
 
 def main():
+    _validate_monthly_detail()
     total = len(PAGES)
     cv = canvas.Canvas(str(OUT), pagesize=(W, H))
     for i, fn in enumerate(PAGES, start=1):
