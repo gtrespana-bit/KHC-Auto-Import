@@ -24,7 +24,7 @@ npm run dev:erp     # ERP en http://localhost:5173
 npm run build       # compila el ERP y después la web
 npm start           # sirve el resultado (web en /, ERP en /erp/)
 npm run check       # 74 comprobaciones (motor fiscal, catálogo, dominio, plantillas)
-npm run smoke       # renderiza las 117 vistas
+npm run smoke       # renderiza las vistas del ERP (48 casos × 3 escenarios de datos)
 ```
 
 ---
@@ -75,6 +75,7 @@ Puesta en marcha en [`docs/09_SUPABASE_BASE_DE_DATOS_Y_USUARIOS.md`](docs/09_SUP
 | **Informes** | Cuenta de resultados, valoración de stock, carga fiscal y evolución mensual. Imprimible en PDF |
 | **Publicación web** | Botón **Publicar en la web** en cada ficha: contenido comercial, fotos sin EXIF y con la matrícula tapada, vista previa y re-sincronización cuando cambia el precio o los km |
 | **Contactos web** | Bandeja de los formularios de la web pública (llamada, WhatsApp, correo, ficha en el CRM y seguimiento) |
+| **Manuales de reparación** | Biblioteca de procedimientos de taller con especificaciones del fabricante (capacidades, homologaciones de aceite, pares de apriete con su fuente), pasos con ilustraciones de ubicación, checklist de verificación y plantilla para crear más manuales. Ver [`docs/18_MANUALES_REPARACION.md`](docs/18_MANUALES_REPARACION.md) |
 | **Ajustes** | Empresa, régimen fiscal, tarifas editables del ejercicio, respaldo de datos y fuentes de cada cifra |
 
 ### 💶 Precios de compra y venta: de dónde sale cada cifra
@@ -193,7 +194,7 @@ eléctricos) están marcadas como estimación dentro de la propia aplicación y 
 ```bash
 npm run check          # 74 aserciones sobre el motor fiscal, económico, facturación, plantillas y web
 npm run catalog:stats  # integridad de la base de vehículos (ids, campos, horquillas)
-npm run smoke          # monta las 39 vistas con 3 escenarios de datos
+npm run smoke          # monta las 48 vistas con 3 escenarios de datos
 npm run build          # compilación de producción
 ```
 
@@ -320,6 +321,7 @@ En el directorio `/docs` dispones de la biblioteca estratégica completa:
 13. [`docs/13_DESPLIEGUE_Y_CAPTACION.md`](docs/13_DESPLIEGUE_Y_CAPTACION.md): **Despliegue y captación**: proyecto único con `khcimport.autos` y `app.khcimport.autos`, comprobaciones de producción, Search Console, Google Business Profile y rutina de mantenimiento.
 14. [`docs/14_IDENTIDAD_WEB_Y_POSICIONAMIENTO.md`](docs/14_IDENTIDAD_WEB_Y_POSICIONAMIENTO.md): **Identidad y posicionamiento**: qué decimos y qué no, sistema visual y reglas de redacción para la web y los anuncios.
 15. [`docs/15_WEB_PUBLICA_MANUAL.md`](docs/15_WEB_PUBLICA_MANUAL.md): **Manual de la web pública**: puesta en marcha, variables, despliegue, publicación de un coche y solución de problemas.
+16. [`docs/18_MANUALES_REPARACION.md`](docs/18_MANUALES_REPARACION.md): **Manuales de reparación del ERP**: biblioteca de procedimientos con especificaciones del fabricante (capacidades, homologaciones, pares de apriete con sello de fuente), pasos con ilustraciones de ubicación y plantilla para crear manuales nuevos.
 
 ### En la app
 - **Oportunidades:** ranking «empresa» (compra en el 10 % barato de Alemania −5 % negociado, venta a la mediana española, todos los gastos e IVA del margen). Al pulsar un modelo: cuenta gasto a gasto y anuncios reales enlazados de ambos países.
