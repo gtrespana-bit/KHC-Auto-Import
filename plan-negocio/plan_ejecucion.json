@@ -44,6 +44,55 @@
   "kit": 822.9,
   "fijos1": 2183.69,
   "trio_coste": 34139.0,
+  "fijos_base_detalle": [
+    {
+      "concepto": "Alquiler de nave O Milladoiro",
+      "importe": 1200.0
+    },
+    {
+      "concepto": "Suministros nave: luz/agua (estimaci\u00f3n conjunta)",
+      "importe": 150.0
+    },
+    {
+      "concepto": "Internet y tel\u00e9fono",
+      "importe": 50.0
+    },
+    {
+      "concepto": "Seguro de la nave",
+      "importe": 60.0
+    },
+    {
+      "concepto": "Tasas municipales (estimaci\u00f3n mensual)",
+      "importe": 25.0
+    },
+    {
+      "concepto": "RETA del administrador societario",
+      "importe": 448.69
+    },
+    {
+      "concepto": "Marketing y portales (presupuesto)",
+      "importe": 250.0
+    }
+  ],
+  "nominas": {
+    "socia": {
+      "desde_mes": 6,
+      "jornada_completa_desde_mes": 16,
+      "bruto_media": 750.0,
+      "bruto_completa": 1500.0,
+      "cuota_patronal": 0.306,
+      "cuota_trabajadora": 0.0655
+    },
+    "administrador": {
+      "desde_mes": 6,
+      "objetivo_m6_m12": 2083.33,
+      "objetivo_m13_m24": 3846.15,
+      "objetivo_m25_m36": 4615.38,
+      "retencion_m1_m12": 0.19,
+      "retencion_m13_m36": 0.35
+    }
+  },
+  "impuesto3_representativo": 100647.09,
   "catalogo": [
     {
       "nick": "Leon",
@@ -1569,6 +1618,9 @@
       "flota": 3,
       "fijos": 2183.69,
       "sueldo": 0.0,
+      "sueldo_admin_objetivo": 0.0,
+      "sueldo_admin_retencion": 0.0,
+      "sueldo_admin_neto": 0.0,
       "ventas_det": [
         [
           "116d",
@@ -1591,7 +1643,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 601.36
+      "rebu": 601.36,
+      "nomina_ella": {
+        "bruto": 0.0,
+        "ss_trabajadora": 0.0,
+        "irpf_estimado": 0.0,
+        "neto": 0.0,
+        "ss_empresa": 0.0,
+        "coste_empresa": 0.0
+      }
     },
     {
       "mes": 2,
@@ -1599,6 +1659,9 @@
       "flota": 3,
       "fijos": 2183.69,
       "sueldo": 0.0,
+      "sueldo_admin_objetivo": 0.0,
+      "sueldo_admin_retencion": 0.0,
+      "sueldo_admin_neto": 0.0,
       "ventas_det": [
         [
           "A3",
@@ -1620,7 +1683,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 613.51
+      "rebu": 613.51,
+      "nomina_ella": {
+        "bruto": 0.0,
+        "ss_trabajadora": 0.0,
+        "irpf_estimado": 0.0,
+        "neto": 0.0,
+        "ss_empresa": 0.0,
+        "coste_empresa": 0.0
+      }
     },
     {
       "mes": 3,
@@ -1628,6 +1699,9 @@
       "flota": 3,
       "fijos": 2183.69,
       "sueldo": 0.0,
+      "sueldo_admin_objetivo": 0.0,
+      "sueldo_admin_retencion": 0.0,
+      "sueldo_admin_neto": 0.0,
       "ventas_det": [
         [
           "Leon",
@@ -1649,7 +1723,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 798.35
+      "rebu": 798.35,
+      "nomina_ella": {
+        "bruto": 0.0,
+        "ss_trabajadora": 0.0,
+        "irpf_estimado": 0.0,
+        "neto": 0.0,
+        "ss_empresa": 0.0,
+        "coste_empresa": 0.0
+      }
     },
     {
       "mes": 4,
@@ -1657,6 +1739,9 @@
       "flota": 4,
       "fijos": 2183.69,
       "sueldo": 0.0,
+      "sueldo_admin_objetivo": 0.0,
+      "sueldo_admin_retencion": 0.0,
+      "sueldo_admin_neto": 0.0,
       "ventas_det": [
         [
           "Leon",
@@ -1700,7 +1785,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 2607.82
+      "rebu": 2607.82,
+      "nomina_ella": {
+        "bruto": 0.0,
+        "ss_trabajadora": 0.0,
+        "irpf_estimado": 0.0,
+        "neto": 0.0,
+        "ss_empresa": 0.0,
+        "coste_empresa": 0.0
+      }
     },
     {
       "mes": 5,
@@ -1708,6 +1801,9 @@
       "flota": 5,
       "fijos": 2183.69,
       "sueldo": 0.0,
+      "sueldo_admin_objetivo": 0.0,
+      "sueldo_admin_retencion": 0.0,
+      "sueldo_admin_neto": 0.0,
       "ventas_det": [
         [
           "116d",
@@ -1743,7 +1839,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 1202.72
+      "rebu": 1202.72,
+      "nomina_ella": {
+        "bruto": 0.0,
+        "ss_trabajadora": 0.0,
+        "irpf_estimado": 0.0,
+        "neto": 0.0,
+        "ss_empresa": 0.0,
+        "coste_empresa": 0.0
+      }
     },
     {
       "mes": 6,
@@ -1751,6 +1855,9 @@
       "flota": 5,
       "fijos": 3163.19,
       "sueldo": 0.0,
+      "sueldo_admin_objetivo": 2083.33,
+      "sueldo_admin_retencion": 0.0,
+      "sueldo_admin_neto": 0.0,
       "ventas_det": [
         [
           "116d",
@@ -1782,7 +1889,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 1399.71
+      "rebu": 1399.71,
+      "nomina_ella": {
+        "bruto": 750.0,
+        "ss_trabajadora": 49.12,
+        "irpf_estimado": 45.3,
+        "neto": 655.58,
+        "ss_empresa": 229.5,
+        "coste_empresa": 979.5
+      }
     },
     {
       "mes": 7,
@@ -1790,6 +1905,9 @@
       "flota": 5,
       "fijos": 3163.19,
       "sueldo": 0.0,
+      "sueldo_admin_objetivo": 2083.33,
+      "sueldo_admin_retencion": 0.0,
+      "sueldo_admin_neto": 0.0,
       "ventas_det": [
         [
           "Polo",
@@ -1830,7 +1948,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 1920.37
+      "rebu": 1920.37,
+      "nomina_ella": {
+        "bruto": 750.0,
+        "ss_trabajadora": 49.12,
+        "irpf_estimado": 45.3,
+        "neto": 655.58,
+        "ss_empresa": 229.5,
+        "coste_empresa": 979.5
+      }
     },
     {
       "mes": 8,
@@ -1838,6 +1964,9 @@
       "flota": 5,
       "fijos": 3163.19,
       "sueldo": 0.0,
+      "sueldo_admin_objetivo": 2083.33,
+      "sueldo_admin_retencion": 0.0,
+      "sueldo_admin_neto": 0.0,
       "ventas_det": [
         [
           "116d",
@@ -1869,7 +1998,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 1399.71
+      "rebu": 1399.71,
+      "nomina_ella": {
+        "bruto": 750.0,
+        "ss_trabajadora": 49.12,
+        "irpf_estimado": 45.3,
+        "neto": 655.58,
+        "ss_empresa": 229.5,
+        "coste_empresa": 979.5
+      }
     },
     {
       "mes": 9,
@@ -1877,6 +2014,9 @@
       "flota": 5,
       "fijos": 3163.19,
       "sueldo": 2083.33,
+      "sueldo_admin_objetivo": 2083.33,
+      "sueldo_admin_retencion": 395.83,
+      "sueldo_admin_neto": 1687.5,
       "ventas_det": [
         [
           "GTI",
@@ -1899,7 +2039,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 1011.12
+      "rebu": 1011.12,
+      "nomina_ella": {
+        "bruto": 750.0,
+        "ss_trabajadora": 49.12,
+        "irpf_estimado": 45.3,
+        "neto": 655.58,
+        "ss_empresa": 229.5,
+        "coste_empresa": 979.5
+      }
     },
     {
       "mes": 10,
@@ -1907,6 +2055,9 @@
       "flota": 5,
       "fijos": 3163.19,
       "sueldo": 1677.9,
+      "sueldo_admin_objetivo": 2083.33,
+      "sueldo_admin_retencion": 318.8,
+      "sueldo_admin_neto": 1359.1,
       "ventas_det": [
         [
           "Leon",
@@ -1938,7 +2089,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 1399.71
+      "rebu": 1399.71,
+      "nomina_ella": {
+        "bruto": 750.0,
+        "ss_trabajadora": 49.12,
+        "irpf_estimado": 45.3,
+        "neto": 655.58,
+        "ss_empresa": 229.5,
+        "coste_empresa": 979.5
+      }
     },
     {
       "mes": 11,
@@ -1946,6 +2105,9 @@
       "flota": 5,
       "fijos": 3163.19,
       "sueldo": 2083.33,
+      "sueldo_admin_objetivo": 2083.33,
+      "sueldo_admin_retencion": 395.83,
+      "sueldo_admin_neto": 1687.5,
       "ventas_det": [
         [
           "116d",
@@ -1968,7 +2130,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 601.36
+      "rebu": 601.36,
+      "nomina_ella": {
+        "bruto": 750.0,
+        "ss_trabajadora": 49.12,
+        "irpf_estimado": 45.3,
+        "neto": 655.58,
+        "ss_empresa": 229.5,
+        "coste_empresa": 979.5
+      }
     },
     {
       "mes": 12,
@@ -1976,6 +2146,9 @@
       "flota": 5,
       "fijos": 3163.19,
       "sueldo": 1119.22,
+      "sueldo_admin_objetivo": 2083.33,
+      "sueldo_admin_retencion": 212.65,
+      "sueldo_admin_neto": 906.57,
       "ventas_det": [
         [
           "116d",
@@ -2007,7 +2180,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 6665.29,
-      "rebu": 1399.71
+      "rebu": 1399.71,
+      "nomina_ella": {
+        "bruto": 750.0,
+        "ss_trabajadora": 49.12,
+        "irpf_estimado": 45.3,
+        "neto": 655.58,
+        "ss_empresa": 229.5,
+        "coste_empresa": 979.5
+      }
     },
     {
       "mes": 13,
@@ -2015,6 +2196,9 @@
       "flota": 6,
       "fijos": 3163.19,
       "sueldo": 0.0,
+      "sueldo_admin_objetivo": 3846.15,
+      "sueldo_admin_retencion": 0.0,
+      "sueldo_admin_neto": 0.0,
       "ventas_det": [
         [
           "116d",
@@ -2077,7 +2261,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 3400.78
+      "rebu": 3400.78,
+      "nomina_ella": {
+        "bruto": 750.0,
+        "ss_trabajadora": 49.12,
+        "irpf_estimado": 45.3,
+        "neto": 655.58,
+        "ss_empresa": 229.5,
+        "coste_empresa": 979.5
+      }
     },
     {
       "mes": 14,
@@ -2085,6 +2277,9 @@
       "flota": 7,
       "fijos": 3163.19,
       "sueldo": 0.0,
+      "sueldo_admin_objetivo": 3846.15,
+      "sueldo_admin_retencion": 0.0,
+      "sueldo_admin_neto": 0.0,
       "ventas_det": [
         [
           "GTI",
@@ -2148,7 +2343,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 3810.54
+      "rebu": 3810.54,
+      "nomina_ella": {
+        "bruto": 750.0,
+        "ss_trabajadora": 49.12,
+        "irpf_estimado": 45.3,
+        "neto": 655.58,
+        "ss_empresa": 229.5,
+        "coste_empresa": 979.5
+      }
     },
     {
       "mes": 15,
@@ -2156,6 +2359,9 @@
       "flota": 8,
       "fijos": 3163.19,
       "sueldo": 0.0,
+      "sueldo_admin_objetivo": 3846.15,
+      "sueldo_admin_retencion": 0.0,
+      "sueldo_admin_neto": 0.0,
       "ventas_det": [
         [
           "GTI",
@@ -2219,7 +2425,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 3942.61
+      "rebu": 3942.61,
+      "nomina_ella": {
+        "bruto": 750.0,
+        "ss_trabajadora": 49.12,
+        "irpf_estimado": 45.3,
+        "neto": 655.58,
+        "ss_empresa": 229.5,
+        "coste_empresa": 979.5
+      }
     },
     {
       "mes": 16,
@@ -2227,6 +2441,9 @@
       "flota": 9,
       "fijos": 4142.69,
       "sueldo": 1464.41,
+      "sueldo_admin_objetivo": 3846.15,
+      "sueldo_admin_retencion": 512.54,
+      "sueldo_admin_neto": 951.87,
       "ventas_det": [
         [
           "116d",
@@ -2309,7 +2526,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 4851.86
+      "rebu": 4851.86,
+      "nomina_ella": {
+        "bruto": 1500.0,
+        "ss_trabajadora": 98.25,
+        "irpf_estimado": 178.46,
+        "neto": 1223.29,
+        "ss_empresa": 459.0,
+        "coste_empresa": 1959.0
+      }
     },
     {
       "mes": 17,
@@ -2317,6 +2542,9 @@
       "flota": 10,
       "fijos": 4142.69,
       "sueldo": 3846.15,
+      "sueldo_admin_objetivo": 3846.15,
+      "sueldo_admin_retencion": 1346.15,
+      "sueldo_admin_neto": 2500.0,
       "ventas_det": [
         [
           "116d",
@@ -2373,7 +2601,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 2922.46
+      "rebu": 2922.46,
+      "nomina_ella": {
+        "bruto": 1500.0,
+        "ss_trabajadora": 98.25,
+        "irpf_estimado": 178.46,
+        "neto": 1223.29,
+        "ss_empresa": 459.0,
+        "coste_empresa": 1959.0
+      }
     },
     {
       "mes": 18,
@@ -2381,6 +2617,9 @@
       "flota": 11,
       "fijos": 4142.69,
       "sueldo": 0.0,
+      "sueldo_admin_objetivo": 3846.15,
+      "sueldo_admin_retencion": 0.0,
+      "sueldo_admin_neto": 0.0,
       "ventas_det": [
         [
           "Polo",
@@ -2482,7 +2721,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 6386.76
+      "rebu": 6386.76,
+      "nomina_ella": {
+        "bruto": 1500.0,
+        "ss_trabajadora": 98.25,
+        "irpf_estimado": 178.46,
+        "neto": 1223.29,
+        "ss_empresa": 459.0,
+        "coste_empresa": 1959.0
+      }
     },
     {
       "mes": 19,
@@ -2490,6 +2737,9 @@
       "flota": 12,
       "fijos": 4142.69,
       "sueldo": 3307.22,
+      "sueldo_admin_objetivo": 3846.15,
+      "sueldo_admin_retencion": 1157.53,
+      "sueldo_admin_neto": 2149.69,
       "ventas_det": [
         [
           "Leon",
@@ -2601,7 +2851,15 @@
       "obra": 0.0,
       "is_paid": 4193.08,
       "div": 0.0,
-      "rebu": 7477.21
+      "rebu": 7477.21,
+      "nomina_ella": {
+        "bruto": 1500.0,
+        "ss_trabajadora": 98.25,
+        "irpf_estimado": 178.46,
+        "neto": 1223.29,
+        "ss_empresa": 459.0,
+        "coste_empresa": 1959.0
+      }
     },
     {
       "mes": 20,
@@ -2609,6 +2867,9 @@
       "flota": 13,
       "fijos": 4142.69,
       "sueldo": 3846.15,
+      "sueldo_admin_objetivo": 3846.15,
+      "sueldo_admin_retencion": 1346.15,
+      "sueldo_admin_neto": 2500.0,
       "ventas_det": [
         [
           "GTI",
@@ -2675,7 +2936,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 3643.23
+      "rebu": 3643.23,
+      "nomina_ella": {
+        "bruto": 1500.0,
+        "ss_trabajadora": 98.25,
+        "irpf_estimado": 178.46,
+        "neto": 1223.29,
+        "ss_empresa": 459.0,
+        "coste_empresa": 1959.0
+      }
     },
     {
       "mes": 21,
@@ -2683,6 +2952,9 @@
       "flota": 14,
       "fijos": 4142.69,
       "sueldo": 3846.15,
+      "sueldo_admin_objetivo": 3846.15,
+      "sueldo_admin_retencion": 1346.15,
+      "sueldo_admin_neto": 2500.0,
       "ventas_det": [
         [
           "GTI",
@@ -2786,7 +3058,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 6852.41
+      "rebu": 6852.41,
+      "nomina_ella": {
+        "bruto": 1500.0,
+        "ss_trabajadora": 98.25,
+        "irpf_estimado": 178.46,
+        "neto": 1223.29,
+        "ss_empresa": 459.0,
+        "coste_empresa": 1959.0
+      }
     },
     {
       "mes": 22,
@@ -2794,6 +3074,9 @@
       "flota": 16,
       "fijos": 4142.69,
       "sueldo": 3846.15,
+      "sueldo_admin_objetivo": 3846.15,
+      "sueldo_admin_retencion": 1346.15,
+      "sueldo_admin_neto": 2500.0,
       "ventas_det": [
         [
           "Leon",
@@ -2938,7 +3221,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 8974.28
+      "rebu": 8974.28,
+      "nomina_ella": {
+        "bruto": 1500.0,
+        "ss_trabajadora": 98.25,
+        "irpf_estimado": 178.46,
+        "neto": 1223.29,
+        "ss_empresa": 459.0,
+        "coste_empresa": 1959.0
+      }
     },
     {
       "mes": 23,
@@ -2946,6 +3237,9 @@
       "flota": 18,
       "fijos": 4142.69,
       "sueldo": 3846.15,
+      "sueldo_admin_objetivo": 3846.15,
+      "sueldo_admin_retencion": 1346.15,
+      "sueldo_admin_neto": 2500.0,
       "ventas_det": [
         [
           "Corolla",
@@ -3091,7 +3385,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 9328.15
+      "rebu": 9328.15,
+      "nomina_ella": {
+        "bruto": 1500.0,
+        "ss_trabajadora": 98.25,
+        "irpf_estimado": 178.46,
+        "neto": 1223.29,
+        "ss_empresa": 459.0,
+        "coste_empresa": 1959.0
+      }
     },
     {
       "mes": 24,
@@ -3099,6 +3401,9 @@
       "flota": 19,
       "fijos": 4142.69,
       "sueldo": 3846.15,
+      "sueldo_admin_objetivo": 3846.15,
+      "sueldo_admin_retencion": 1346.15,
+      "sueldo_admin_neto": 2500.0,
       "ventas_det": [
         [
           "Polo",
@@ -3223,7 +3528,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 35994.04,
-      "rebu": 7474.25
+      "rebu": 7474.25,
+      "nomina_ella": {
+        "bruto": 1500.0,
+        "ss_trabajadora": 98.25,
+        "irpf_estimado": 178.46,
+        "neto": 1223.29,
+        "ss_empresa": 459.0,
+        "coste_empresa": 1959.0
+      }
     },
     {
       "mes": 25,
@@ -3231,6 +3544,9 @@
       "flota": 21,
       "fijos": 4142.69,
       "sueldo": 0.0,
+      "sueldo_admin_objetivo": 4615.38,
+      "sueldo_admin_retencion": 0.0,
+      "sueldo_admin_neto": 0.0,
       "ventas_det": [
         [
           "GTI",
@@ -3406,7 +3722,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 11434.39
+      "rebu": 11434.39,
+      "nomina_ella": {
+        "bruto": 1500.0,
+        "ss_trabajadora": 98.25,
+        "irpf_estimado": 178.46,
+        "neto": 1223.29,
+        "ss_empresa": 459.0,
+        "coste_empresa": 1959.0
+      }
     },
     {
       "mes": 26,
@@ -3414,6 +3738,9 @@
       "flota": 23,
       "fijos": 4142.69,
       "sueldo": 4615.38,
+      "sueldo_admin_objetivo": 4615.38,
+      "sueldo_admin_retencion": 1615.38,
+      "sueldo_admin_neto": 3000.0,
       "ventas_det": [
         [
           "GTI",
@@ -3572,7 +3899,15 @@
       "obra": 4210.47,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 10971.71
+      "rebu": 10971.71,
+      "nomina_ella": {
+        "bruto": 1500.0,
+        "ss_trabajadora": 98.25,
+        "irpf_estimado": 178.46,
+        "neto": 1223.29,
+        "ss_empresa": 459.0,
+        "coste_empresa": 1959.0
+      }
     },
     {
       "mes": 27,
@@ -3580,6 +3915,9 @@
       "flota": 24,
       "fijos": 4142.69,
       "sueldo": 4615.38,
+      "sueldo_admin_objetivo": 4615.38,
+      "sueldo_admin_retencion": 1615.38,
+      "sueldo_admin_neto": 3000.0,
       "ventas_det": [
         [
           "Corolla",
@@ -3708,7 +4046,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 8091.76
+      "rebu": 8091.76,
+      "nomina_ella": {
+        "bruto": 1500.0,
+        "ss_trabajadora": 98.25,
+        "irpf_estimado": 178.46,
+        "neto": 1223.29,
+        "ss_empresa": 459.0,
+        "coste_empresa": 1959.0
+      }
     },
     {
       "mes": 28,
@@ -3716,6 +4062,9 @@
       "flota": 24,
       "fijos": 4142.69,
       "sueldo": 4615.38,
+      "sueldo_admin_objetivo": 4615.38,
+      "sueldo_admin_retencion": 1615.38,
+      "sueldo_admin_neto": 3000.0,
       "ventas_det": [
         [
           "116d",
@@ -3912,7 +4261,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 13942.95
+      "rebu": 13942.95,
+      "nomina_ella": {
+        "bruto": 1500.0,
+        "ss_trabajadora": 98.25,
+        "irpf_estimado": 178.46,
+        "neto": 1223.29,
+        "ss_empresa": 459.0,
+        "coste_empresa": 1959.0
+      }
     },
     {
       "mes": 29,
@@ -3920,6 +4277,9 @@
       "flota": 24,
       "fijos": 4142.69,
       "sueldo": 4615.38,
+      "sueldo_admin_objetivo": 4615.38,
+      "sueldo_admin_retencion": 1615.38,
+      "sueldo_admin_neto": 3000.0,
       "ventas_det": [
         [
           "XC40",
@@ -4062,7 +4422,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 9324.16
+      "rebu": 9324.16,
+      "nomina_ella": {
+        "bruto": 1500.0,
+        "ss_trabajadora": 98.25,
+        "irpf_estimado": 178.46,
+        "neto": 1223.29,
+        "ss_empresa": 459.0,
+        "coste_empresa": 1959.0
+      }
     },
     {
       "mes": 30,
@@ -4070,6 +4438,9 @@
       "flota": 24,
       "fijos": 4142.69,
       "sueldo": 4615.38,
+      "sueldo_admin_objetivo": 4615.38,
+      "sueldo_admin_retencion": 1615.38,
+      "sueldo_admin_neto": 3000.0,
       "ventas_det": [
         [
           "A3",
@@ -4212,7 +4583,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 10244.33
+      "rebu": 10244.33,
+      "nomina_ella": {
+        "bruto": 1500.0,
+        "ss_trabajadora": 98.25,
+        "irpf_estimado": 178.46,
+        "neto": 1223.29,
+        "ss_empresa": 459.0,
+        "coste_empresa": 1959.0
+      }
     },
     {
       "mes": 31,
@@ -4220,6 +4599,9 @@
       "flota": 24,
       "fijos": 4142.69,
       "sueldo": 4615.38,
+      "sueldo_admin_objetivo": 4615.38,
+      "sueldo_admin_retencion": 1615.38,
+      "sueldo_admin_neto": 3000.0,
       "ventas_det": [
         [
           "Leon",
@@ -4443,7 +4825,15 @@
       "obra": 0.0,
       "is_paid": 36518.19,
       "div": 0.0,
-      "rebu": 17227.63
+      "rebu": 17227.63,
+      "nomina_ella": {
+        "bruto": 1500.0,
+        "ss_trabajadora": 98.25,
+        "irpf_estimado": 178.46,
+        "neto": 1223.29,
+        "ss_empresa": 459.0,
+        "coste_empresa": 1959.0
+      }
     },
     {
       "mes": 32,
@@ -4451,6 +4841,9 @@
       "flota": 24,
       "fijos": 4142.69,
       "sueldo": 4615.38,
+      "sueldo_admin_objetivo": 4615.38,
+      "sueldo_admin_retencion": 1615.38,
+      "sueldo_admin_neto": 3000.0,
       "ventas_det": [
         [
           "XC60",
@@ -4593,7 +4986,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 10412.01
+      "rebu": 10412.01,
+      "nomina_ella": {
+        "bruto": 1500.0,
+        "ss_trabajadora": 98.25,
+        "irpf_estimado": 178.46,
+        "neto": 1223.29,
+        "ss_empresa": 459.0,
+        "coste_empresa": 1959.0
+      }
     },
     {
       "mes": 33,
@@ -4601,6 +5002,9 @@
       "flota": 24,
       "fijos": 4142.69,
       "sueldo": 4615.38,
+      "sueldo_admin_objetivo": 4615.38,
+      "sueldo_admin_retencion": 1615.38,
+      "sueldo_admin_neto": 3000.0,
       "ventas_det": [
         [
           "Tiguan",
@@ -4725,7 +5129,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 8651.48
+      "rebu": 8651.48,
+      "nomina_ella": {
+        "bruto": 1500.0,
+        "ss_trabajadora": 98.25,
+        "irpf_estimado": 178.46,
+        "neto": 1223.29,
+        "ss_empresa": 459.0,
+        "coste_empresa": 1959.0
+      }
     },
     {
       "mes": 34,
@@ -4733,6 +5145,9 @@
       "flota": 24,
       "fijos": 4142.69,
       "sueldo": 4615.38,
+      "sueldo_admin_objetivo": 4615.38,
+      "sueldo_admin_retencion": 1615.38,
+      "sueldo_admin_neto": 3000.0,
       "ventas_det": [
         [
           "GTI",
@@ -4920,7 +5335,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 12952.48
+      "rebu": 12952.48,
+      "nomina_ella": {
+        "bruto": 1500.0,
+        "ss_trabajadora": 98.25,
+        "irpf_estimado": 178.46,
+        "neto": 1223.29,
+        "ss_empresa": 459.0,
+        "coste_empresa": 1959.0
+      }
     },
     {
       "mes": 35,
@@ -4928,6 +5351,9 @@
       "flota": 24,
       "fijos": 4142.69,
       "sueldo": 4615.38,
+      "sueldo_admin_objetivo": 4615.38,
+      "sueldo_admin_retencion": 1615.38,
+      "sueldo_admin_neto": 3000.0,
       "ventas_det": [
         [
           "330d",
@@ -5052,7 +5478,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 0.0,
-      "rebu": 8569.21
+      "rebu": 8569.21,
+      "nomina_ella": {
+        "bruto": 1500.0,
+        "ss_trabajadora": 98.25,
+        "irpf_estimado": 178.46,
+        "neto": 1223.29,
+        "ss_empresa": 459.0,
+        "coste_empresa": 1959.0
+      }
     },
     {
       "mes": 36,
@@ -5060,6 +5494,9 @@
       "flota": 24,
       "fijos": 4142.69,
       "sueldo": 4615.38,
+      "sueldo_admin_objetivo": 4615.38,
+      "sueldo_admin_retencion": 1615.38,
+      "sueldo_admin_neto": 3000.0,
       "ventas_det": [
         [
           "Mercedes",
@@ -5202,7 +5639,15 @@
       "obra": 0.0,
       "is_paid": 0.0,
       "div": 382810.8,
-      "rebu": 9794.32
+      "rebu": 9794.32,
+      "nomina_ella": {
+        "bruto": 1500.0,
+        "ss_trabajadora": 98.25,
+        "irpf_estimado": 178.46,
+        "neto": 1223.29,
+        "ss_empresa": 459.0,
+        "coste_empresa": 1959.0
+      }
     }
   ],
   "tray_casa": {
