@@ -10,6 +10,7 @@
 // ============================================================================
 
 import { vwGolf7AceiteFiltro } from './vwGolf7AceiteFiltro.js';
+import { puestaAPunto } from './puestaAPunto.js';
 import { MANUAL_TEMPLATE } from './plantilla.js';
 
 export { MANUAL_TEMPLATE };
@@ -34,7 +35,7 @@ export const categoryLabel = (id) =>
   MANUAL_CATEGORIES.find((c) => c.id === id)?.label || id;
 
 /** Todos los manuales publicados, ordenados por marca y modelo. */
-export const REPAIR_MANUALS = [vwGolf7AceiteFiltro];
+export const REPAIR_MANUALS = [vwGolf7AceiteFiltro, puestaAPunto];
 
 export const manualById = (id) => REPAIR_MANUALS.find((m) => m.id === id) || null;
 

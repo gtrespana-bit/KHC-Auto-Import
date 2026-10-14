@@ -18,9 +18,13 @@ import imgVarilla from '../../assets/manuals/real/golf7-varilla-anilla.jpg';
 import imgVarillaLimpieza from '../../assets/manuals/real/golf7-varilla-limpieza.jpg';
 import imgMotorraum from '../../assets/manuals/real/golf7-motorraum-general.jpg';
 import imgOficialEvo from '../../assets/manuals/official/ea211-evo-tecnicas.jpg';
+import figFiltroUbicacion from '../../assets/manuals/official/mantenimiento/fig-A00-10965-filtro-ubicacion.jpg';
+import figTaponDrenaje from '../../assets/manuals/official/mantenimiento/fig-N01-11365-tapon-drenaje.jpg';
+import figVarillaABC from '../../assets/manuals/official/mantenimiento/fig-N01-11371-varilla-ABC.jpg';
 
 const FUENTE_AUTODOC = 'Autodoc — guía de cambio de aceite y filtro, VW Golf VII (club.autodoc.de, ref. 24083)';
 const FUENTE_FIGURA_VW = 'Figura técnica oficial Volkswagen del motor 1.5 TSI EA211 EVO (material de formación/prensa VW «Technikbausteine»), etiquetas originales en alemán; publicada por krafthand.de.';
+const FUENTE_MANUAL_MANT = 'Manual de Mantenimiento VW (T-Roc 2018, ed. 01.2019) — figura del PDF oficial';
 
 export const vwGolf7AceiteFiltro = {
   id: 'vw-golf-7-15-tsi-aceite-filtro',
@@ -29,7 +33,7 @@ export const vwGolf7AceiteFiltro = {
   category: 'mantenimiento',
   title: 'Cambio de aceite y filtro del motor',
   summary:
-    'Sustitución completa del aceite y del filtro de cartucho del 1.5 TSI EVO del Golf VII: drenaje, tapón nuevo, filtro, llenado con verificación de nivel y reinicio del intervalo de servicio.',
+    'Sustitución completa del aceite y del filtro de rosca (spin-on) del 1.5 TSI EVO del Golf VII: drenaje, tapón nuevo, filtro, llenado con verificación de nivel y reinicio del intervalo de servicio.',
 
   vehicle: {
     brand: 'Volkswagen',
@@ -61,8 +65,8 @@ export const vwGolf7AceiteFiltro = {
     {
       label: 'Capacidad de aceite (con cambio de filtro)',
       value: '4,3 L',
-      note: 'Dato de catálogo TECDOC para el Golf VII 1.5 TSI (DADA/DPCA/DACA, 2017-2020), coincidente en varias fuentes de recambios. Llenado en dos pasos: 4,0 L → comprobar nivel → completar. Confirmar la cifra por VIN en erWin/ELSA.',
-      confidence: 'orientativo',
+      note: 'Tabla oficial de capacidades del Manual de Mantenimiento VW (4.32): motor DADA 1,5 l/110 kW → 4,3 L con filtro. Llenado en dos pasos: 4,0 L → comprobar nivel → completar. Coincide con el catálogo TECDOC (DADA/DPCA/DACA).',
+      confidence: 'oficial',
     },
     {
       label: 'Capacidad de aceite (sin cambio de filtro)',
@@ -77,15 +81,15 @@ export const vwGolf7AceiteFiltro = {
       confidence: 'orientativo',
     },
     {
-      label: 'Tapa del alojamiento del filtro',
-      value: '25 Nm',
-      note: 'Tapa de plástico roscada con junta tórica. Apriete suave: al llegar al par, basta.',
-      confidence: 'orientativo',
+      label: 'Par de apriete del filtro de aceite (de rosca)',
+      value: '20 Nm',
+      note: 'Par oficial VW (manual de taller 4.31.2) para el elemento filtrante de rosca del 1.0/1.5 TSI, montado con la herramienta 3417. El par de 25 Nm de otras guías corresponde a la tapa del cartucho del 2.0 TSI: no aplica a este motor.',
+      confidence: 'oficial',
     },
     {
       label: 'Elemento filtrante',
-      value: 'Cartucho de papel (tapa roscada en la parte alta del motor)',
-      note: 'Referencias genuinas VW de la familia EA211: 04E 115 561 B/H (en algunas aplicaciones 05E 115 561). Confirmar la correspondencia exacta con el 1.5 TSI EVO por VIN. Calidad recomendada: OEM (MANN, Mahle, Hengst o genuino VW).',
+      value: 'Filtro de rosca (spin-on) en el frontal del bloque, acceso por abajo',
+      note: 'Figura oficial A00-10965 del manual de taller. Referencias genuinas VW de la familia EA211: 04E 115 561 B/H (en algunas aplicaciones 05E 115 561). Confirmar la correspondencia exacta con el 1.5 TSI EVO por VIN. Calidad recomendada: OEM (MANN, Mahle, Hengst o genuino VW).',
       confidence: 'verificar',
     },
     {
@@ -116,7 +120,7 @@ export const vwGolf7AceiteFiltro = {
 
   tools: [
     { name: 'Llave hexagonal de 13 mm (o 16 mm según tapón)', note: 'Para el tapón de drenaje; comprobar el tamaño antes de subir el coche' },
-    { name: 'Llave de carraca con vaso para la tapa del filtro (≈ 32 mm) o llave de cinta', note: 'La tapa del cartucho lleva nervaduras; existe llave específica VW' },
+    { name: 'Correa para filtro de aceite Hazet 2171-1 o herramienta para filtro de aceite 3417', note: 'Herramientas oficiales VW para aflojar y montar el filtro de rosca (manual de taller 4.31.2); la 3417 aprieta el filtro nuevo a 20 Nm' },
     { name: 'Bandeja de drenaje ≥ 6 L', note: 'El motor admite casi 5 L; dejar margen' },
     { name: 'Rampas o puente elevador + calzos', note: 'Nunca trabajar solo con el gato hidráulico' },
     { name: 'Embudo para el llenado', note: 'Evita derrames sobre el alternador y las correas' },
@@ -135,7 +139,7 @@ export const vwGolf7AceiteFiltro = {
       consumable: true,
     },
     {
-      name: 'Filtro de aceite de cartucho (elemento)',
+      name: 'Filtro de aceite de rosca (spin-on, conjunto completo)',
       ref: 'EA211: 04E 115 561 B/H · confirmar por VIN para 1.5 TSI',
       qty: '1 ud.',
       note: 'Suele venir con la junta tórica incluida. Calidad OEM.',
@@ -224,9 +228,14 @@ export const vwGolf7AceiteFiltro = {
       ],
       images: [
         {
-          kind: 'pendiente',
-          brief:
-            'Foto desde debajo del 1.5 TSI EVO concreto con el escudo inferior retirado: debe verse la cuba de aceite completa con el tapón de drenaje identificado (señalarlo con el dedo, una herramienta o una flecha física). Mientras no exista, localizar a simple vista la cara más baja de la cuba, junto al flex de escape; la foto real del paso siguiente muestra el punto en pleno drenaje.',
+          kind: 'diagrama',
+          src: figTaponDrenaje,
+          scope: 'oficial',
+          shows:
+            'Vista desde debajo de la cuba de aceite con el tapón de drenaje señalado por la flecha y el conjunto oficial: tapón usado -1- (se desecha) y tapón nuevo -3- con junta nueva -2-. Figura oficial N01-11365 del manual de taller VW.',
+          source: FUENTE_MANUAL_MANT,
+          caption:
+            'Ubicación oficial del tapón de drenaje en la cuba (fig. N01-11365). El tapón con junta cautiva se sustituye siempre por un conjunto nuevo: el dibujado a la izquierda va a la basura.',
         },
       ],
       warning: 'El aceite sale a 60-80 °C. No apoyar la mano en la cuba ni en el tubo de escape.',
@@ -269,24 +278,30 @@ export const vwGolf7AceiteFiltro = {
       warning: 'Nunca reutilizar el tapón ni ponerle una junta suelta genérica: el conjunto tapón-junta se sustituye completo.',
     },
     {
-      title: '5. Sustitución del filtro de cartucho',
+      title: '5. Sustitución del filtro de aceite (de rosca / spin-on)',
       text:
-        'El filtro está en el compartimento del motor, en un alojamiento de plástico negro con tapa roscada y nervaduras (bandeja de filtro), accesible desde arriba tras quitar la tapa decorativa del motor. Colocar la bandeja bajo el alojamiento (cae algo de aceite al abrirlo), aflojar la tapa, retirarla con el elemento y sustituir el cartucho. Limpiar el interior del alojamiento, cambiar la junta tórica de la tapa (untada con aceite limpio) y montar todo apretando la tapa a 25 Nm.',
+        'El 1.5 TSI EVO lleva un filtro de aceite de rosca (filtro «spin-on» completo), montado en el frontal del bloque motor y accesible por debajo tras quitar la tapa inferior del compartimento motor (aislamiento acústico). Se afloja con la correa para filtro de aceite Hazet 2171-1 o con la herramienta para filtro de aceite 3417, girándolo en sentido antihorario. Al montar el filtro nuevo: limpiar la superficie de sellado del motor con un paño sin pelusa, humedecer la junta de goma del filtro con aceite de motor, enroscarlo a mano y apretarlo a 20 Nm con la herramienta 3417.',
       bullets: [
-        'Anotar el sentido del elemento: el nuevo entra igual que salió el viejo.',
-        'La junta tórica nueva va en su alojamiento de la tapa, nunca en la rosca.',
-        'Si el kit trae varias juntas, usar la del diámetro que asiente sin forzar.',
+        'El elemento filtrante se sustituye SIEMPRE en cada cambio de aceite.',
+        'Antes de montar el filtro nuevo, llenarlo parcialmente de aceite limpio y untar su junta de goma: evita el arranque en seco.',
+        'Anotar la fecha y los km en el lateral del filtro nuevo.',
+        'Manual de taller 4.31.2: «No se permite la extracción al vacío. Drene siempre el aceite del motor».',
       ],
       images: [
         {
-          kind: 'pendiente',
-          brief:
-            'Foto del alojamiento del filtro del 1.5 TSI EVO concreto, desde arriba y con la tapa decorativa del motor retirada: debe verse la tapa de plástico con nervaduras en su posición real sobre el bloque, con un elemento de referencia (mano, herramienta o flecha física) que la señale. Es el hueco crítico del manual: sin esta foto la ubicación exacta del filtro queda «POR CONFIRMAR».',
+          kind: 'diagrama',
+          src: figFiltroUbicacion,
+          scope: 'oficial',
+          shows:
+            'Vista desde abajo del motor con el filtro de aceite de rosca (en azul en la figura) montado en el frontal del bloque, junto a la cuba de aceite, señalado por una flecha. Figura oficial A00-10965 del manual de taller VW.',
+          source: FUENTE_MANUAL_MANT,
+          caption:
+            'Ubicación oficial del filtro de rosca (fig. A00-10965): se llega por debajo, con el coche elevado y la tapa inferior retirada — no desde arriba.',
         },
       ],
-      torque: '25 Nm (tapa del filtro)',
-      tip: 'Poner un poco de aceite limpio en la junta tórica antes de montar: evita que se pellizque y facilita el siguiente cambio.',
-      warning: 'Apriete progresivo: la tapa es de plástico y con 25 Nm es suficiente. Forzarla parte la rosca del alojamiento (reparación cara).',
+      torque: '20 Nm (elemento filtrante)',
+      tip: 'Herramientas oficiales de este procedimiento (4.31.2): VAS 6622A (recogida de aceite), correa Hazet 2171-1, herramienta para filtro 3417, llave dinamométrica VAG 1331 y embudo de llenado VAS 6842A.',
+      warning: 'Apretar en exceso deforma la junta del filtro y provoca fugas: no pasar de 20 Nm. Los 25 Nm que circulan en muchas guías son de la tapa del cartucho de OTROS motores (2.0 TSI), no de este filtro de rosca.',
     },
     {
       title: '6. Llenado con aceite nuevo',
@@ -294,6 +309,7 @@ export const vwGolf7AceiteFiltro = {
         'Volver arriba, colocar el embudo en el orificio de llenado y verter primero 4,0 L de aceite nuevo (menos que la capacidad total: el filtro y los conductos retienen parte del llenado). Apretar el tapón de llenado a mano, arrancar el motor 30-60 segundos y comprobar que el testigo de presión de aceite se apaga. Parar el motor y esperar 5 minutos para que el aceite baje al cárter.',
       bullets: [
         'Comprobar a ojo que bajo el coche no cae ningún hilo de aceite (tapón y filtro).',
+        'Primer arranque con turbo (manual de taller 4.31.1): con la testigo de presión de aceite encendida, dejar el motor SOLO al ralentí y NO acelerar hasta que la lámpara se apague. La presión total solo se alcanza cuando la testigo se apaga; solo entonces acelerar. Los rodamientos del turbo se dañan en segundos sin lubricación.',
         'Con el motor parado, retirar la varilla, limpiarla, reintroducirla y leer el nivel.',
       ],
       images: [
@@ -303,17 +319,29 @@ export const vwGolf7AceiteFiltro = {
             'Foto en primer plano del tapón de llenado de aceite sobre la tapa de válvulas del 1.5 TSI EVO, con el tapón retirado y el embudo colocado. Debe identificarse sin duda el orificio de llenado (suele llevar el símbolo de la aceitera en la tapa).',
         },
       ],
-      tip: 'Verter despacio y con el embudo bien asentado: un derrame sobre la correa de accesorios deja el motor oliendo a quemado durante semanas.',
+      tip: 'Verter despacio y con el embudo bien asentado (el embudo oficial es el VAS 6842A): limpiar el asiento del tapón de llenado con un paño sin pelusa antes de cerrar (4.31.5). Un derrame sobre la correa de accesorios deja el motor oliendo a quemado durante semanas.',
     },
     {
       title: '7. Verificación del nivel con la varilla',
       text:
         'Con el vehículo a nivel y el motor a temperatura de servicio, el nivel debe quedar entre MIN y MAX, cerca de MAX sin pasarse. Si falta aceite, completar en pequeñas dosis (100-200 ml) y volver a comprobar tras unos minutos de espera. Un sobrellenado por encima de MAX obliga a drenar: genera espuma, presión anormal y daños en el turbo.',
       bullets: [
+        'Zonas de la varilla (fig. oficial N01-11371): A = no añadir aceite; B = zona de medida (se puede reponer hasta el máximo A); C = es necesario reponer, mínimo 0,5 L. El nivel de entrega correcto queda en el tercio superior de B.',
+        'Si el nivel queda por encima de A, drenar el exceso: el aceite por encima del máximo daña el convertidor catalítico.',
         'La varilla de la familia EA211 lleva el mango en forma de anilla de color vivo (amarillo).',
         'En uso normal no hace falta tocar el nivel entre servicios; revisar cada 1.000-2.000 km si el coche hace trayectos cortos o tramos de alta carga.',
       ],
       images: [
+        {
+          kind: 'diagrama',
+          src: figVarillaABC,
+          scope: 'oficial',
+          shows:
+            'Varilla medidora de aceite con las zonas A, B y C marcadas (figura oficial N01-11371 del manual de taller VW; dos variantes de varilla).',
+          source: FUENTE_MANUAL_MANT,
+          caption:
+            'Lectura oficial de la varilla (fig. N01-11371): A = no añadir; B = zona de medida, reponible hasta el máximo; C = reponer obligatorio. Nivel de entrega, en el tercio superior de B.',
+        },
         {
           kind: 'foto',
           src: imgVarilla,
@@ -377,13 +405,13 @@ export const vwGolf7AceiteFiltro = {
 
   torque: [
     { element: 'Tapón de drenaje de la cuba (M14×1,5)', value: '30 Nm', note: 'Tapón nuevo siempre; junta integrada', confidence: 'orientativo' },
-    { element: 'Tapa del alojamiento del filtro de aceite', value: '25 Nm', note: 'Junta tórica nueva engrasada; tapa de plástico', confidence: 'orientativo' },
+    { element: 'Elemento filtrante de rosca (filtro de aceite)', value: '20 Nm', note: 'Junta de goma humedecida con aceite; herramienta 3417 (manual de taller 4.31.2)', confidence: 'oficial' },
     { element: 'Tornillos del escudo inferior', value: 'A mano firme (≈ 3-5 Nm)', note: 'Rosca a plástico; apretar en cruz y no forzar', confidence: 'verificar' },
   ],
 
   checklist: [
     'Tapón de drenaje nuevo montado a 30 Nm, sin goteos',
-    'Filtro sustituido, junta tórica nueva y tapa a 25 Nm, sin goteos',
+    'Filtro de rosca nuevo con junta humedecida a 20 Nm y tapón de drenaje nuevo a 30 Nm, sin goteos',
     'Nivel de aceite entre MIN y MAX con motor a temperatura de servicio',
     'Motor girando: testigo de presión de aceite apagado, sin fugas ni ruidos',
     'Intervalo de servicio reiniciado y próximo servicio comprobado en el cuadro',
@@ -404,7 +432,7 @@ export const vwGolf7AceiteFiltro = {
     },
     {
       title: 'Aprietes «a ojo» de la tapa del filtro',
-      text: 'La tapa es de plástico: con más de 25 Nm o con llave larga se parte la rosca del alojamiento. Usar dinamométrica; el par es bajo y la mano engaña.',
+      text: 'El filtro de rosca se aprieta solo hasta 20 Nm con la herramienta 3417: con llave larga o a mano firme se deforma la junta y acaba goteando. Usar dinamométrica; el par es bajo y la mano engaña.',
     },
     {
       title: 'No reiniciar el intervalo',
@@ -443,7 +471,7 @@ export const vwGolf7AceiteFiltro = {
     },
     {
       label: 'Fotografía del motor concreto',
-      text: 'En el próximo Golf 1.5 TSI que entre en preparación, capturar los 4 encuadres pendientes (tapón de drenaje, alojamiento del filtro, tapón de llenado y pantalla de servicio) y colgarlos en este manual. Es lo que convierte la ficha en referencia definitiva.',
+      text: 'En el próximo Golf 1.5 TSI que entre en preparación, capturar los encuadres reales pendientes (tapón de drenaje desde abajo, filtro de rosca montado, tapón de llenado y pantalla de servicio) y colgarlos en este manual junto a las figuras oficiales ya extraídas del manual de taller. Es lo que convierte la ficha en referencia definitiva.',
     },
   ],
 
@@ -466,7 +494,7 @@ export const vwGolf7AceiteFiltro = {
     },
     {
       name: 'Manual de Mantenimiento VW (Departamento de Servicio, edición 01.2019) — T-Roc 2018 / motores compartidos con Golf VII',
-      note: 'Manual oficial de servicio VW con el procedimiento de cambio de aceite: «4.31 Aceite de motor: drenaje; cambio de filtro de aceite y llenado» (p. 76), «4.32 Aceite de motor: capacidades y especificaciones» (p. 84), «4.30 Nivel de aceite: control» (p. 75) y lista de motores con el 1.5 TSI EVO DADA 110 kW. PDF: manuals.opinautos.com/published/Volkswagen-T-Roc_2018_ES__manual_de_taller_acc435771c.pdf. De su tabla oficial de intervalos (2.2.3) proceden los códigos QI4/QI6 usados en este manual, y su «alcance del servicio de cambio de aceite» confirma: drenar aceite + renovar filtro → reponer aceite → comprobar nivel → poner a cero el intervalo. ⚠️ La edición ES es traducción automática (los códigos de motor aparecen deformados, p. ej. DADA → «PAPÁ»): contrastar códigos con el original o con ELSA.',
+      note: 'Manual oficial de servicio VW con el procedimiento de cambio de aceite: «4.31 Aceite de motor: drenaje; cambio de filtro de aceite y llenado» (p. 76), «4.32 Aceite de motor: capacidades y especificaciones» (p. 84), «4.30 Nivel de aceite: control» (p. 75) y lista de motores con el 1.5 TSI EVO DADA 110 kW. PDF: manuals.opinautos.com/published/Volkswagen-T-Roc_2018_ES__manual_de_taller_acc435771c.pdf. De su tabla oficial de intervalos (2.2.3) proceden los códigos QI4/QI6 usados en este manual, y su «alcance del servicio de cambio de aceite» confirma: drenar aceite + renovar filtro → reponer aceite → comprobar nivel → poner a cero el intervalo. De su procedimiento 4.31 se extraen las figuras oficiales usadas en este manual: A00-10965 (ubicación del filtro de rosca), N01-11365 (tapón de drenaje) y N01-11371 (varilla A/B/C). Corrección clave: el 1.0/1.5 TSI lleva filtro de ROSCA con par de 20 Nm (4.31.2); el filtro de cartucho con tapa de 25 Nm es el del 2.0 TSI (4.31.3). ⚠️ La edición ES es traducción automática (los códigos de motor aparecen deformados, p. ej. DADA → «PAPÁ»/«DADO»): contrastar códigos con el original o con ELSA.',
     },
     {
       name: 'Catálogo de recambios TECDOC (datos del fabricante del recambio)',
@@ -478,7 +506,7 @@ export const vwGolf7AceiteFiltro = {
     },
     {
       name: 'Manual de taller de la familia de motores EA211 evo',
-      note: 'Pares de apriete estándar del grupo (tapón M14×1,5 30 Nm; tapa de filtro 25 Nm) y ubicación de filtros.',
+      note: 'Pares de apriete del grupo (tapón de drenaje M14×1,5: 30 Nm; elemento filtrante de rosca: 20 Nm — 4.31.2 del manual de mantenimiento) y ubicación de componentes.',
     },
     {
       name: FUENTE_AUTODOC,
