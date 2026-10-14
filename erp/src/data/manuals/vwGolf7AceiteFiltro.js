@@ -48,7 +48,7 @@ export const vwGolf7AceiteFiltro = {
   meta: {
     difficulty: 1,
     time: '45-60 min',
-    interval: '30.000 km / 2 años (LongLife) o 15.000 km / 1 año (intervalo fijo)',
+    interval: '30.000 km / 2 años (LongLife QI6) o 15.000 km / 1 año (fijo QI4) — lo que ocurra primero',
     frequency: 'Mantenimiento periódico',
     warrantySafe: true,
   },
@@ -92,8 +92,8 @@ export const vwGolf7AceiteFiltro = {
     },
     {
       label: 'Intervalo de servicio',
-      value: 'LongLife: hasta 30.000 km / 2 años · Fijo: 15.000 km / 1 año',
-      note: 'El coche elige entre ambos regímenes según uso. Si el vehículo circula sobre todo en ciudad, interesa forzar el intervalo fijo.',
+      value: 'LongLife QI6: máx. 30.000 km / 2 años · Fijo QI4: 15.000 km / 1 año',
+      note: 'Oficial VW (Manual de Mantenimiento, tablas de servicio): el régimen lo decide el número PR de la etiqueta de datos del vehículo (QI6 = servicio flexible, requiere aceite LongLife; QI1/QI2/QI3/QI4/QI7 = servicio fijo). En uso urbano intensivo, interesa forzar el intervalo fijo. Con combustible fuera de norma EN 228 el intervalo se acorta (5.000-10.000 km).',
       confidence: 'orientativo',
     },
     {
@@ -482,6 +482,10 @@ export const vwGolf7AceiteFiltro = {
     {
       name: 'Manual de taller VW — extractos por grupo de reparación (edición 09.2020, español)',
       note: 'La biblioteca Opinautos publica PDFs del manual de taller oficial VW para Golf 2013-2020 divididos por grupos de reparación (verificado: formato y estructura ELSA). Ej.: «00 Datos técnicos» + «20 Suministro de combustible» — manuals.opinautos.com/published/Volkswagen-Golf-Volkswagen-T-Roc_2013-2014-2015-etc_ES__manual_de_taller_c9a58193f6.pdf. Índice de los 27 documentos: opinautos.com/volkswagen/golf/info/manuales/taller-reparacion.',
+    },
+    {
+      name: 'Manual de Mantenimiento VW (Departamento de Servicio, edición 01.2019) — T-Roc 2018 / motores compartidos con Golf VII',
+      note: 'Manual oficial de servicio VW con el procedimiento de cambio de aceite: «4.31 Aceite de motor: drenaje; cambio de filtro de aceite y llenado» (p. 76), «4.32 Aceite de motor: capacidades y especificaciones» (p. 84), «4.30 Nivel de aceite: control» (p. 75) y lista de motores con el 1.5 TSI EVO DADA 110 kW. PDF: manuals.opinautos.com/published/Volkswagen-T-Roc_2018_ES__manual_de_taller_acc435771c.pdf. De su tabla oficial de intervalos (2.2.3) proceden los códigos QI4/QI6 usados en este manual, y su «alcance del servicio de cambio de aceite» confirma: drenar aceite + renovar filtro → reponer aceite → comprobar nivel → poner a cero el intervalo. ⚠️ La edición ES es traducción automática (los códigos de motor aparecen deformados, p. ej. DADA → «PAPÁ»): contrastar códigos con el original o con ELSA.',
     },
     {
       name: 'Catálogo de recambios TECDOC (datos del fabricante del recambio)',
