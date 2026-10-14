@@ -55,22 +55,22 @@ Reglas adicionales:
 
 1. Todo lo que se apriete lleva su par en la tabla `torque`. **Nunca inventar un
    par**: si no se conoce, dejar la entrada con `confidence: 'verificar'`.
-2. **Imágenes — política estricta.** Puede ser **plano/diagrama**, **foto** o
-   **hueco pendiente**; da igual el estilo (foto realista, plano de línea,
-   corte esquemático…): lo que importa es que **cada indicación sea real** y
-   ayude sin confundir.
-   - `kind: 'diagrama'` — plano técnico dibujado a mano (SVG, estilo manual de
-     marca, en `erp/src/assets/manuals/diagrams/`). Solo indicaciones reales:
-     cada rótulo declara su alcance (**verificado** / **por confirmar**) y su
-     fuente. **Prohibido inventar posiciones.**
+2. **Imágenes — política estricta (v4).** Puede ser **figura oficial**,
+   **foto real** o **hueco pendiente**; lo que importa es que **cada
+   indicación sea real, ubique de verdad** y ayude sin confundir.
+   - `kind: 'diagrama'` — **SOLO figura/ilustración oficial del fabricante**
+     (manual de taller VW, SSP o manual del propietario), en
+     `erp/src/assets/manuals/official/`, con `source` que cite el documento de
+     origen. **Los planos dibujados a mano quedan PROHIBIDOS**: no ubican nada.
    - `kind: 'foto'` — foto real del vehículo/motor concreto (`scope: 'modelo'`)
      o de su familia claramente identificada (`scope: 'familia'`), con `shows`,
      `source` y `points` (pines `{x, y, label}` en % sobre el punto exacto).
    - `kind: 'pendiente'` — sin material verificado del punto: hueco con el
-     `brief` del encuadre exacto a fotografiar o dibujar.
-   - **Prohibido:** imágenes realistas generadas de motores que no son el
-     exacto (un filtro «arriba» en una y «abajo» en otra), renders de otros
-     motores o diagramas genéricos sin rotular. **Si confunde, no entra.**
+     `brief` del encuadre exacto a fotografiar.
+   - **Prohibido:** planos dibujados a mano, imágenes realistas generadas de
+     motores que no son el exacto (un filtro «arriba» en una y «abajo» en
+     otra), renders de otros motores o diagramas genéricos sin rotular.
+     **Si confunde o no ubica, no entra.**
 3. Los pasos se redactan en imperativo, con **criterio de éxito comprobable**
    («el testigo se apaga», «hasta MIN/MAX», «30 Nm»…).
 4. Un manual con cifras críticas sin confirmar se publica en
@@ -84,13 +84,13 @@ Reglas adicionales:
    `erp/src/data/manuals/miManual.js`.
 2. **Rellena el esquema** (ver tabla de campos abajo). Usa el manual
    `vwGolf7AceiteFiltro.js` como ejemplo del nivel de detalle exigido.
-3. **Imágenes**: los planos se dibujan a mano (SVG) en
-   `erp/src/assets/manuals/diagrams/` con solo indicaciones reales rotuladas y
-   su alcance; las fotos reales van en `erp/src/assets/manuals/real/`. Cada
-   entrada de `steps[].images` declara `kind` (`diagrama` | `foto` |
-   `pendiente`), `shows` y `source`; las fotos añaden `points` con los pines.
-   Sin material verificado de un punto → `kind: 'pendiente'` con el encuadre
-   exacto. Nunca relleno genérico que confunda.
+3. **Imágenes**: las figuras oficiales del fabricante van en
+   `erp/src/assets/manuals/official/` (extraídas de la documentación VW real);
+   las fotos reales en `erp/src/assets/manuals/real/`. Cada entrada de
+   `steps[].images` declara `kind` (`diagrama` | `foto` | `pendiente`),
+   `shows` y `source`; las fotos añaden `points` con los pines. Sin material
+   verificado de un punto → `kind: 'pendiente'` con el encuadre exacto.
+   Nunca relleno genérico que confunda y **nunca planos dibujados a mano**.
 4. **Regístralo** en `erp/src/data/manuals/index.js`:
 
    ```js
@@ -135,13 +135,13 @@ VW Golf VII (5G/BE, 2017-2020) con motor 1.5 TSI EVO (EA211 evo):
   filtro (TECDOC), tapón de drenaje M14×1,5 a **30 Nm** (nuevo siempre), tapa
   del filtro a **25 Nm**, intervalos LongLife (30.000 km / 2 años) o fijo
   (15.000 km / 1 año).
-* 9 pasos con **3 planos técnicos dibujados a mano** (Plano 1: compartimento
-  del motor en planta · Plano 2: vista inferior de la cuba y drenaje · Plano 3:
-  corte del alojamiento del filtro), con rótulos numerados y cada indicación
-  marcada como **verificada** o **por confirmar**, más **fotos reales de taller
-  verificadas** (drenaje en la cuba, extracción y limpieza de la varilla, vista
-  del motorraum) con **pines sobre cada punto**. Los puntos que aún exigen
-  material del motor 1.5 TSI EVO concreto (posición exacta del filtro, llenado
+* 9 pasos con **figura oficial VW** del motor 1.5 TSI EA211 EVO
+  («Technikbausteine», con aviso de diferencias entre versiones) y **fotos
+  reales de taller verificadas** (drenaje en la cuba, extracción y limpieza de
+  la varilla, vista del motorraum) con **pines sobre cada punto**. Los planos
+  dibujados a mano fueron retirados tras la revisión del cliente (no ubican).
+  Los puntos que aún exigen material del motor 1.5 TSI EVO concreto (posición
+  exacta del tapón de drenaje bajo el coche, alojamiento del filtro, llenado
   y pantalla de servicio) quedan como huecos «pendiente» con el encuadre
   exacto que hay que captar.
 * Checklist de verificación final, 6 errores frecuentes y cuidados posteriores
@@ -184,12 +184,11 @@ VW Golf VII (5G/BE, 2017-2020) con motor 1.5 TSI EVO (EA211 evo):
   tornillo), crear manuales separados y cruzarlos en `vehicle.notes`.
 * **Cifras con fecha**: al corregir una cifra, subir `rev` y dejar constancia en
   `sources`.
-* **Material gráfico que ayude y no confunda**: da igual que sea plano, corte
-  o foto — cada indicación debe ser real y llevar su sello (verificada / por
-  confirmar) y su fuente. Los planos se dibujan a mano sobre referencias
-  verificadas; las fotos llevan pines en los puntos exactos. Sin material
-  verificado, hueco «pendiente» con el encuadre. Prohibido rellenar con
-  imágenes generadas de motores distintos, renders ajenos o diagramas
-  genéricos sin rotular.
+* **Material gráfico que ayude y no confunda**: cada indicación debe ser
+  real, **ubicar de verdad** y llevar su fuente. Solo valen figuras oficiales
+  del fabricante y fotos reales (con pines en los puntos exactos); los planos
+  dibujados a mano están prohibidos. Sin material verificado, hueco
+  «pendiente» con el encuadre. Prohibido rellenar con imágenes generadas de
+  motores distintos, renders ajenos o diagramas genéricos sin rotular.
 * **El checklist es obligatorio**: es lo que permite firmar el trabajo como
   completado y protege frente a reclamaciones.

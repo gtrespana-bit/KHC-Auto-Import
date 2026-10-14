@@ -17,12 +17,10 @@ import imgDrenaje from '../../assets/manuals/real/golf7-drenaje-cuba.jpg';
 import imgVarilla from '../../assets/manuals/real/golf7-varilla-anilla.jpg';
 import imgVarillaLimpieza from '../../assets/manuals/real/golf7-varilla-limpieza.jpg';
 import imgMotorraum from '../../assets/manuals/real/golf7-motorraum-general.jpg';
-import planoMotorraum from '../../assets/manuals/diagrams/plano-motorraum.svg';
-import planoCuba from '../../assets/manuals/diagrams/plano-cuba.svg';
-import planoFiltroCorte from '../../assets/manuals/diagrams/plano-filtro-corte.svg';
+import imgOficialEvo from '../../assets/manuals/official/ea211-evo-tecnicas.jpg';
 
 const FUENTE_AUTODOC = 'Autodoc — guía de cambio de aceite y filtro, VW Golf VII (club.autodoc.de, ref. 24083)';
-const FUENTE_PLANOS = 'Plano técnico dibujado para este manual a partir de fotos reales verificadas del Golf VII y de la geometría de la familia EA211 — cada rótulo declara su alcance.';
+const FUENTE_FIGURA_VW = 'Figura técnica oficial Volkswagen del motor 1.5 TSI EA211 EVO (material de formación/prensa VW «Technikbausteine»), etiquetas originales en alemán; publicada por krafthand.de.';
 
 export const vwGolf7AceiteFiltro = {
   id: 'vw-golf-7-15-tsi-aceite-filtro',
@@ -191,14 +189,14 @@ export const vwGolf7AceiteFiltro = {
       images: [
         {
           kind: 'diagrama',
-          src: planoMotorraum,
+          src: imgOficialEvo,
           scope: 'familia',
-          title: 'Plano 1 · Compartimento del motor (vista en planta)',
+          title: 'Figura oficial VW · Motor 1.5 TSI EA211 EVO y sus módulos técnicos',
           shows:
-            'Plano de trabajo dibujado a mano: tapón de llenado (1), varilla de nivel (2), zona del filtro (3, marcada POR CONFIRMAR), referencias de localización y la cuba (4, ver Plano 2).',
-          source: FUENTE_PLANOS,
+            'Ilustración técnica oficial de Volkswagen del motor 1.5 TSI EA211 EVO con los módulos destacados: turbo de geometría variable VTG, recubrimiento APS de los cilindros, proceso de combustión FES (ε = 12,5), inyección directa de 350 bar y desconexión de cilindros ACT.',
+          source: FUENTE_FIGURA_VW,
           caption:
-            'Referencias de trabajo del motorraum. Solo los puntos con sello «verificado» se dan por buenos; el recuadro rojo del filtro marca la zona a confirmar a simple vista en el vehículo (tapa negra con nervaduras, accesible desde arriba).',
+            'Reconocimiento del motor: familia EA211 EVO. ⚠ La figura muestra los módulos de la familia (VTG y ACT pertenecen a la versión de 96 kW): el 1.5 TSI de 150 CV del Golf VII (DADA/DZJA) lleva turbo de wastegate. Sirve para identificar la familia del motor, no para localizar el tapón de drenaje ni el filtro.',
         },
         {
           kind: 'foto',
@@ -226,15 +224,9 @@ export const vwGolf7AceiteFiltro = {
       ],
       images: [
         {
-          kind: 'diagrama',
-          src: planoCuba,
-          scope: 'familia',
-          title: 'Plano 2 · Vista inferior — cuba y drenaje',
-          shows:
-            'Plano de trabajo dibujado a mano, visto desde debajo: escudo inferior con tornillos Torx, cuba con el tapón de drenaje M14×1,5 (1), junta integrada (2) y bandeja de drenaje. Incluye el aviso de posición del tapón (POR CONFIRMAR en el vehículo).',
-          source: FUENTE_PLANOS,
-          caption:
-            'El drenaje se hace por el tapón de la cara más baja de la cuba. La foto real del paso siguiente muestra el mismo punto en un Golf VII.',
+          kind: 'pendiente',
+          brief:
+            'Foto desde debajo del 1.5 TSI EVO concreto con el escudo inferior retirado: debe verse la cuba de aceite completa con el tapón de drenaje identificado (señalarlo con el dedo, una herramienta o una flecha física). Mientras no exista, localizar a simple vista la cara más baja de la cuba, junto al flex de escape; la foto real del paso siguiente muestra el punto en pleno drenaje.',
         },
       ],
       warning: 'El aceite sale a 60-80 °C. No apoyar la mano en la cuba ni en el tubo de escape.',
@@ -256,7 +248,7 @@ export const vwGolf7AceiteFiltro = {
             'Cuba de aceite (cárter) de un VW Golf VII en pleno drenaje, con la herramienta sobre el tapón y el chorro de aceite cayendo (foto real de taller, guía Autodoc para Golf VII — familia EA211).',
           source: FUENTE_AUTODOC,
           caption:
-            'Drenaje real en un Golf VII: el chorro sale en diagonal al principio. ⚠ Foto de familia EA211: la cuba del 1.5 TSI EVO puede diferir en la posición exacta del tapón (ver Plano 2).',
+            'Drenaje real en un Golf VII: el chorro sale en diagonal al principio. ⚠ Foto de familia EA211: la cuba del 1.5 TSI EVO puede diferir en la posición exacta del tapón (ver hueco pendiente del paso 2).',
           points: [
             { x: 50, y: 46, label: 'Salida de drenaje (tapón retirado)' },
           ],
@@ -287,20 +279,9 @@ export const vwGolf7AceiteFiltro = {
       ],
       images: [
         {
-          kind: 'diagrama',
-          src: planoFiltroCorte,
-          scope: 'familia',
-          title: 'Plano 3 · Corte esquemático del alojamiento del filtro',
-          shows:
-            'Corte dibujado a mano del conjunto tipo EA211: tapa con nervaduras (1, ≈32 mm, 25 Nm), junta tórica nueva (2), elemento de cartucho (3) y cuerpo del alojamiento, con el sentido del flujo de aceite.',
-          source: FUENTE_PLANOS,
-          caption:
-            'Así es por dentro lo que vas a abrir: la tapa sale con el cartucho, la junta tórica se cambia siempre y el nuevo elemento entra en el mismo sentido que salió el viejo.',
-        },
-        {
           kind: 'pendiente',
           brief:
-            'Foto del alojamiento del filtro del 1.5 TSI EVO concreto, desde arriba y con la tapa decorativa del motor retirada: debe verse la tapa de plástico con nervaduras en su posición real sobre el bloque, con un elemento de referencia (mano, herramienta o flecha física) que la señale. Sin esta foto, la ubicación exacta sigue como «POR CONFIRMAR» en el Plano 1.',
+            'Foto del alojamiento del filtro del 1.5 TSI EVO concreto, desde arriba y con la tapa decorativa del motor retirada: debe verse la tapa de plástico con nervaduras en su posición real sobre el bloque, con un elemento de referencia (mano, herramienta o flecha física) que la señale. Es el hueco crítico del manual: sin esta foto la ubicación exacta del filtro queda «POR CONFIRMAR».',
         },
       ],
       torque: '25 Nm (tapa del filtro)',
@@ -319,7 +300,7 @@ export const vwGolf7AceiteFiltro = {
         {
           kind: 'pendiente',
           brief:
-            'Foto en primer plano del tapón de llenado de aceite sobre la tapa de válvulas del 1.5 TSI EVO (el punto 1 del Plano 1), con el tapón retirado y el embudo colocado. Debe identificarse sin duda el orificio de llenado (suele llevar el símbolo de la aceitera en la tapa).',
+            'Foto en primer plano del tapón de llenado de aceite sobre la tapa de válvulas del 1.5 TSI EVO, con el tapón retirado y el embudo colocado. Debe identificarse sin duda el orificio de llenado (suele llevar el símbolo de la aceitera en la tapa).',
         },
       ],
       tip: 'Verter despacio y con el embudo bien asentado: un derrame sobre la correa de accesorios deja el motor oliendo a quemado durante semanas.',
@@ -341,7 +322,7 @@ export const vwGolf7AceiteFiltro = {
             'Mano con guante extrayendo la varilla de nivel de aceite por su anilla amarilla, en el motorraum de un VW Golf VII (foto real de taller, guía Autodoc para Golf VII — familia EA211).',
           source: FUENTE_AUTODOC,
           caption:
-            'Extracción de la varilla por su anilla amarilla en un Golf VII (punto 2 del Plano 1). ⚠ Foto de familia EA211: contrastar la posición del tubo de la varilla en el 1.5 TSI EVO del vehículo antes de operar.',
+            'Extracción de la varilla por su anilla amarilla en un Golf VII (varilla en la zona frontal del bloque). ⚠ Foto de familia EA211: contrastar la posición del tubo de la varilla en el 1.5 TSI EVO del vehículo antes de operar.',
           points: [
             { x: 40, y: 30, label: 'Anilla amarilla de la varilla' },
             { x: 45, y: 72, label: 'Tubo de la varilla' },

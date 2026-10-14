@@ -18,7 +18,9 @@
 //  3. IMÁGENES — política estricta (ver `steps[].images`). Puede ser foto,
 //     plano/diagrama o hueco pendiente; lo importante no es el estilo sino que
 //     CADA INDICACIÓN SEA REAL y ayude sin confundir:
-//       · 'diagrama' — plano técnico dibujado a mano (SVG, estilo manual de
+//       · 'diagrama' — SOLO figura/ilustración oficial del fabricante
+//         (documentación VW: SSP, manual de taller o manual del propietario).
+//         Los planos dibujados a mano quedan PROHIBIDOS: no ubican nada.
 //         marca). Solo indicaciones reales: cada rótulo declara su alcance
 //         (verificado / por confirmar) y su fuente. PROHIBIDO inventar posiciones.
 //       · 'foto'     — foto real del vehículo/motor concreto (scope: 'modelo')
@@ -125,18 +127,19 @@ export const MANUAL_TEMPLATE = {
       bullets: ['Detalle 1', 'Detalle 2'],
       // IMÁGENES — lista `images` con tres formas posibles, y solo tres:
       //
-      //  a) Plano/diagrama técnico dibujado a mano (SVG en erp/src/assets/manuals/diagrams/):
+      //  a) Figura oficial del fabricante (imagen extraída de documentación VW):
       //     images: [{
       //       kind: 'diagrama',
-      //       src: planoImportado,
+      //       src: figuraImportada,           // import desde erp/src/assets/manuals/official/…
       //       scope: 'familia',                // 'modelo' | 'familia'
-      //       title: 'Plano N · título',
-      //       shows: 'Qué indica el plano y qué puntos rotula',
-      //       source: 'Cómo se ha hecho el plano (fotos verificadas, documentación…)',
-      //       caption: 'Qué mirar en el plano',
+      //       title: 'Figura oficial · título',
+      //       shows: 'Qué muestra la figura oficial y qué elementos rotula',
+      //       source: 'Documento VW del que procede (SSP, manual de taller, manual del propietario)',
+      //       caption: 'Qué mirar en la figura y qué NO extrapolar de ella',
       //     }],
-      //     REGLA: cada rótulo del SVG es una indicación REAL y declara su alcance
-      //     (verificado / por confirmar). Nada de posiciones inventadas.
+      //     REGLA: SOLO figuras oficiales del fabricante. Los planos dibujados a
+      //     mano quedan PROHIBIDOS (no ubican nada). Si la figura es de la
+      //     familia y no del motor exacto, declararlo en el caption.
       //
       //  b) Foto real verificada (declarar qué se ve, origen y pines):
       //     images: [{
@@ -152,12 +155,12 @@ export const MANUAL_TEMPLATE = {
       //  c) Hueco honesto mientras no exista material verificado del punto:
       //     images: [{
       //       kind: 'pendiente',
-      //       brief: 'Encuadre exacto a fotografiar o dibujar (ángulo, qué debe verse, referencia).',
+      //       brief: 'Encuadre exacto a fotografiar (ángulo, qué debe verse, referencia).',
       //     }],
       //
       //  NUNCA: imágenes realistas generadas de motores que no son el exacto,
-      //  renders de otros motores o diagramas genéricos sin rotular. Si la
-      //  imagen confunde en vez de ayudar, no entra.
+      //  renders de otros motores, diagramas genéricos sin rotular ni planos
+      //  dibujados a mano. Si la imagen confunde o no ubica, no entra.
       tip: 'Truco de taller que ahorra tiempo.',
       warning: 'Riesgo concreto de este paso.',
       torque: '30 Nm', // par que se aplica en este paso (debe estar también en `torque`)

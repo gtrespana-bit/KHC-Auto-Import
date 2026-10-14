@@ -548,8 +548,8 @@ function PlantillaPanel() {
           </h3>
           <ul className="space-y-2.5 text-xs text-slate-400 leading-relaxed">
             <li className="flex items-start gap-2">
-              <Badge tone="sky">Plano</Badge>
-              <span>Diagrama técnico dibujado a mano (SVG) — estilo manual de marca. Solo indicaciones reales: cada rótulo declara su alcance (verificado / por confirmar) y su fuente. Prohibido inventar posiciones.</span>
+              <Badge tone="sky">Figura oficial</Badge>
+              <span>Figura/ilustración oficial del fabricante (manual de taller, SSP o manual del propietario de VW). Los planos dibujados a mano están <b className="text-rose-300">prohibidos</b>: no ubican nada. Solo indicaciones reales, cada una con su fuente.</span>
             </li>
             <li className="flex items-start gap-2">
               <Badge tone="emerald">Foto real</Badge>
@@ -557,16 +557,16 @@ function PlantillaPanel() {
             </li>
             <li className="flex items-start gap-2">
               <Badge tone="amber">Pendiente</Badge>
-              <span>Si falta material verificado del punto: hueco con el encuadre exacto a fotografiar o dibujar (<code className="text-amber-300">kind: 'pendiente'</code> + <code className="text-amber-300">brief</code>), para cubrirlo con material propio del taller.</span>
+              <span>Si falta material verificado del punto: hueco con el encuadre exacto a fotografiar (<code className="text-amber-300">kind: 'pendiente'</code> + <code className="text-amber-300">brief</code>), para cubrirlo con material propio del taller.</span>
             </li>
             <li className="flex items-start gap-2">
               <Badge tone="rose">Prohibido</Badge>
-              <span>Imágenes realistas generadas de motores que no son el exacto, renders de otros motores o diagramas genéricos sin rotular: si confunde en vez de ayudar, no entra.</span>
+              <span>Imágenes realistas generadas de motores que no son el exacto, renders de otros motores, diagramas genéricos sin rotular <b className="text-rose-300">y planos dibujados a mano</b>: si confunde o no ubica, no entra.</span>
             </li>
           </ul>
           <p className="mt-3 text-[11px] text-slate-500 leading-relaxed">
             Criterio único: <b className="text-slate-400">que sirva para ayudar y no confunda</b>. Da igual
-            que sea foto, plano o corte: lo importante es que cada indicación sea real y esté etiquetada
+            que sea foto o figura oficial: lo importante es que cada indicación sea real y esté etiquetada
             con su nivel de confianza.
           </p>
         </Card>
@@ -606,7 +606,7 @@ function PlantillaPanel() {
   parts:   [{ name, ref, qty, note, consumable }],
   warnings:[{ title, text }],
   steps:   [{ title, text, bullets, images, tip, warning, torque }],
-  // images = [{ kind:'diagrama', src, scope, title, shows, source, caption }]   ← plano técnico, solo indicaciones reales
+  // images = [{ kind:'diagrama', src, scope, title, shows, source, caption }]   ← SOLO figura oficial del fabricante (nunca planos dibujados)
   //        | { kind:'foto', src, scope:'modelo'|'familia', shows, source, caption, points:[{x,y,label}] }
   //        | { kind:'pendiente', brief:'encuadre exacto a fotografiar o dibujar' }
   torque:  [{ element, value, note, confidence }],
