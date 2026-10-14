@@ -157,8 +157,16 @@ VW Golf VII (5G/BE, 2017-2020) con motor 1.5 TSI EVO (EA211 evo):
 | --- | --- | --- |
 | **Workshop Manual + ELSA** (manual oficial de taller) | Procedimientos oficiales paso a paso, pares de apriete exactos por VIN, esquemas ELSA con posiciones de componentes | **erwin.volkswagen.de** — alta por vehículo (VIN) o por plazo de tiempo (desde ~24 h); descarga en PDF. Es de pago y requiere registro. **Es la única fuente que cierra todas las filas «verificar».** |
 | **SSP 555** — «Die 1,5l-96/110 kW-TSI-Motoren EA211 EVO» (VW Service Training) | Documentación oficial del motor exacto: sistema de aceite, distribución, datos técnicos (DACA/DADA) | PDF libre: `esperformance.net/ssp/vw/SSP_555_DE.pdf` (también versión EN `SSP_555_EN.pdf`) |
-| **Manual del propietario Golf VII (2019)** | Tabla de aceites por clima, capacidad declarada, intervalos, reinicio del servicio | PDF de VW o de la web del propietario; el que viene en la guantera del coche |
+| **Manual del propietario Golf VII (2019)** | Tabla de aceites por clima, capacidad declarada, intervalos, reinicio del servicio | **PDF oficial VW descargable gratis**: «Manual de instrucciones Golf, Golf Variant — Edición 2019» (VW de México, 348 pág., español) — `manuals.opinautos.com/published/Volkswagen-Golf_2019_ES_MX_66bde33387.pdf` (vía `opinautos.com/volkswagen/golf/info/manuales/2019`). Capítulos clave: Aceite del motor (p. 261), Servicio (p. 301), Motores/datos técnicos (p. 326). ⚠️ Edición México: comprobar en la tabla de motores si cubre el 1.5 TSI EVO (DADA/DZJA) |
+| **Biblioteca pública de manuales Opinautos/StartMycar** | Manuales del propietario Golf 1994-2020 y **27 manuales de taller/reparación** (extractos de grupos de reparación del manual de taller VW edición 09.2020, en ES y EN: transmisión, A/C, sistema eléctrico, inyección, motor…), diagramas de fusibles interactivo y guías | `opinautos.com/volkswagen/golf/info/manuales` y `.../manuales/taller-reparacion` — descarga directa de PDF sin registro. Verificado: el PDF ES del grupo «00 Datos técnicos + 20 Suministro de combustible» es material real del manual de taller VW (formato ELSA) |
 
+> Nota de uso de Opinautos: es un espejo comunitario de documentación VW.
+> Sirve para **descargar los PDF oficiales gratis** (el manual del propietario
+> 2019 y los grupos de reparación del manual de taller son material VW real);
+> las guías de la comunidad se usan solo como contraste, nunca como fuente
+> única. Los PDF son © Volkswagen: enlazar y citar datos puntuales, sin
+> reproducir capítulos enteros en el ERP.
+>
 > Nota honesta: el **SSP 555 oficial remite expresamente los procedimientos de
 > servicio a ELSA** («Beachten Sie dazu die Hinweise im ELSA»). Es decir: ni
 > siquiera la documentación técnica gratuita de VW sustituye al manual oficial

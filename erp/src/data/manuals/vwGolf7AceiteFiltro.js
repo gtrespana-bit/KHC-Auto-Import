@@ -476,6 +476,14 @@ export const vwGolf7AceiteFiltro = {
       note: 'Fuente última para capacidades, pares de apriete, posiciones de componentes y procedimientos: https://erwin.volkswagen.de (acceso de pago por vehículo/plazo de tiempo, descarga en PDF). Las filas marcadas «verificar» deben confirmarse aquí antes de usar el manual en un vehículo de cliente.',
     },
     {
+      name: 'Manual de instrucciones Golf, Golf Variant — Edición 2019 (Volkswagen de México)',
+      note: 'Manual del propietario oficial de VW para el Golf 2019 (348 pág., español), PDF gratuito en la biblioteca pública Opinautos: manuals.opinautos.com/published/Volkswagen-Golf_2019_ES_MX_66bde33387.pdf. Capítulos clave: «Aceite del motor» (p. 261), «Mantenimiento → Servicio» (p. 301), «Datos técnicos → Motores» (p. 326). Edición de México: comprobar en la tabla de motores si cubre el 1.5 TSI EVO (DADA/DZJA).',
+    },
+    {
+      name: 'Manual de taller VW — extractos por grupo de reparación (edición 09.2020, español)',
+      note: 'La biblioteca Opinautos publica PDFs del manual de taller oficial VW para Golf 2013-2020 divididos por grupos de reparación (verificado: formato y estructura ELSA). Ej.: «00 Datos técnicos» + «20 Suministro de combustible» — manuals.opinautos.com/published/Volkswagen-Golf-Volkswagen-T-Roc_2013-2014-2015-etc_ES__manual_de_taller_c9a58193f6.pdf. Índice de los 27 documentos: opinautos.com/volkswagen/golf/info/manuales/taller-reparacion.',
+    },
+    {
       name: 'Catálogo de recambios TECDOC (datos del fabricante del recambio)',
       note: 'Capacidad de aceite 4,3 L para Golf VII 1.5 TSI (DADA/DPCA/DACA) e intervalos de sustitución; contrastado en varios distribuidores (pkwteile, autodoc).',
     },
