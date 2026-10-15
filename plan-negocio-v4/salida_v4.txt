@@ -1,0 +1,235 @@
+CATÁLOGO V4 (medido sobre 337 pares generación×km, P25 DE vs mediana ES):
+
+  Golf VII.5 160-200     peso  14%  DE  10,688 → ES  14,545 spr  36%  landed  13,113  margen  1,432 giro  35 d  nDE= 98 nES= 66
+  A3 8V 120-160          peso  10%  DE  13,675 → ES  17,736 spr  30%  landed  16,470  margen  1,267 giro  32 d  nDE=193 nES= 92
+  A3 8V 160-200          peso  10%  DE  11,999 → ES  16,005 spr  33%  landed  14,729  margen  1,276 giro  36 d  nDE=131 nES= 59
+  Serie1 F20 80-120      peso   8%  DE  12,918 → ES  16,868 spr  31%  landed  15,683  margen  1,185 giro  30 d  nDE= 92 nES=104
+  Serie1 F20 160-200     peso  12%  DE   8,992 → ES  12,803 spr  42%  landed  11,606  margen  1,197 giro  29 d  nDE= 88 nES=111
+  ClaseC W205 200-240    peso  12%  DE  11,680 → ES  16,320 spr  40%  landed  14,398  margen  1,923 giro  31 d  nDE= 77 nES=100
+  ClaseA W177 160-200    peso   6%  DE  14,800 → ES  20,370 spr  38%  landed  17,638  margen  2,732 giro  36 d  nDE= 39 nES= 53
+  CLA C118 120-160       peso  10%  DE  18,980 → ES  25,681 spr  35%  landed  21,980  margen  3,700 giro  38 d  nDE= 75 nES= 44
+  ClaseE W213 160-200    peso  14%  DE  18,998 → ES  25,705 spr  35%  landed  21,999  margen  3,706 giro  33 d  nDE= 80 nES= 79
+  Q5 FY 0-40             peso   7%  DE  34,523 → ES  46,366 spr  34%  landed  38,126  margen  8,240 giro  77 d  nDE= 64 nES= 21
+  Macan 95B 80-120       peso   7%  DE  32,622 → ES  43,640 spr  34%  landed  36,152  margen  7,489 giro  71 d  nDE= 36 nES= 29
+================================================================================================================
+ESCENARIO BASE — SOLO CAPITAL 50k   |   forma: Autónomo único (tarifa plana) + esposa empleada
+================================================================================================================
+mes  C  V stk |  compras€   cobros€ fijos+SS familia  IVA303 |     CAJA IVA apto margenAc
+-----------------------------------------------------------------------------------------
+  1  2  0   2 |    23,211         0    2,325   1,200       0 |   18,964        0        0
+  2  2  2   2 |    24,719    25,103    2,325   1,200       0 |   15,523      503    2,395
+  3  1  2   1 |    21,999    26,796    2,325   1,200   1,055 |   15,590        0    5,024
+  4  1  1   1 |    16,470    24,927    2,325   1,200       0 |   20,372      778    8,730
+  5  1  1   1 |    13,113    17,470    2,325   1,200       0 |   21,054    1,044    9,996
+  6  1  1   1 |    14,729    14,244    2,325   1,200   1,345 |   15,550        0   11,429
+  7  1  1   1 |    13,113    15,737    2,325   1,200       0 |   14,499      268   12,705
+  8  1  1   1 |    16,470    14,244    2,325   1,200       0 |    8,598      569   14,137
+  9  1  1   1 |    14,398    17,470    2,325   1,200     835 |    7,162        0   15,404
+ 10  1  1   1 |    14,398    15,916    2,325   1,200       0 |    5,005      404   17,326
+ 11  1  1   1 |    13,113    15,916    2,325   1,200       0 |    4,134      808   19,249
+ 12  0  1   0 |         0    14,244    2,325   1,200   1,108 |   13,745        0   20,681
+
+MOVIMIENTOS:
+  M 1 COMPRA  Serie1 F20 160-200     DE   8,992 → landed  11,606 · vende  12,803 en 29 d
+  M 1 COMPRA  Serie1 F20 160-200     DE   8,992 → landed  11,606 · vende  12,803 en 29 d
+       STOCK fin mes: Serie1 F20 160-200×2
+  M 2 COMPRA  Golf VII.5 160-200     DE  10,688 → landed  13,113 · vende  14,545 en 35 d
+  M 2 COMPRA  Serie1 F20 160-200     DE   8,992 → landed  11,606 · vende  12,803 en 29 d
+  M 2 VENTA   Serie1 F20 160-200      12,803 € · aparta IVA   251 · margen  1,197 €
+  M 2 VENTA   Serie1 F20 160-200      12,803 € · aparta IVA   251 · margen  1,197 €
+       STOCK fin mes: Golf VII.5 160-200×1, Serie1 F20 160-200×1
+  M 3 COMPRA  ClaseE W213 160-200    DE  18,998 → landed  21,999 · vende  25,705 en 33 d
+  M 3 VENTA   Golf VII.5 160-200      14,545 € · aparta IVA   301 · margen  1,432 €
+  M 3 VENTA   Serie1 F20 160-200      12,803 € · aparta IVA   251 · margen  1,197 €
+       STOCK fin mes: ClaseE W213 160-200×1
+  M 4 COMPRA  A3 8V 120-160          DE  13,675 → landed  16,470 · vende  17,736 en 32 d
+  M 4 VENTA   ClaseE W213 160-200     25,705 € · aparta IVA   778 · margen  3,706 €
+       STOCK fin mes: A3 8V 120-160×1
+  M 5 COMPRA  Golf VII.5 160-200     DE  10,688 → landed  13,113 · vende  14,545 en 35 d
+  M 5 VENTA   A3 8V 120-160           17,736 € · aparta IVA   266 · margen  1,267 €
+       STOCK fin mes: Golf VII.5 160-200×1
+  M 6 COMPRA  A3 8V 160-200          DE  11,999 → landed  14,729 · vende  16,005 en 36 d
+  M 6 VENTA   Golf VII.5 160-200      14,545 € · aparta IVA   301 · margen  1,432 €
+       STOCK fin mes: A3 8V 160-200×1
+  M 7 COMPRA  Golf VII.5 160-200     DE  10,688 → landed  13,113 · vende  14,545 en 35 d
+  M 7 VENTA   A3 8V 160-200           16,005 € · aparta IVA   268 · margen  1,276 €
+       STOCK fin mes: Golf VII.5 160-200×1
+  M 8 COMPRA  A3 8V 120-160          DE  13,675 → landed  16,470 · vende  17,736 en 32 d
+  M 8 VENTA   Golf VII.5 160-200      14,545 € · aparta IVA   301 · margen  1,432 €
+       STOCK fin mes: A3 8V 120-160×1
+  M 9 COMPRA  ClaseC W205 200-240    DE  11,680 → landed  14,398 · vende  16,320 en 31 d
+  M 9 VENTA   A3 8V 120-160           17,736 € · aparta IVA   266 · margen  1,267 €
+       STOCK fin mes: ClaseC W205 200-240×1
+  M10 COMPRA  ClaseC W205 200-240    DE  11,680 → landed  14,398 · vende  16,320 en 31 d
+  M10 VENTA   ClaseC W205 200-240     16,320 € · aparta IVA   404 · margen  1,923 €
+       STOCK fin mes: ClaseC W205 200-240×1
+  M11 COMPRA  Golf VII.5 160-200     DE  10,688 → landed  13,113 · vende  14,545 en 35 d
+  M11 VENTA   ClaseC W205 200-240     16,320 € · aparta IVA   404 · margen  1,923 €
+       STOCK fin mes: Golf VII.5 160-200×1
+  M12 VENTA   Golf VII.5 160-200      14,545 € · aparta IVA   301 · margen  1,432 €
+
+RESUMEN ANUAL: 13 ventas (13 compras, 0 con rebaja -15 %) · margen bruto 20,681 € · fijos 24,480 € · SS 3,420 € · seguro stock 0 € · viajes 1,950 €
+Resultado contable -23,569 € · IVA pagado en caja 4,343 € · IRPF_deuda 0, rn_fiscal 0, retiros_cobrados 0, neto_esposa 11,981
+NETO FAMILIA: 11,981 €/año = 998 €/mes  (objetivo 2,500) → NO CUMPLE
+Caja final: 13,745 €
+
+================================================================================================================
+COMPARATIVA FORMA JURÍDICA (sin crédito)   |   forma: SL familiar 2 socios trabajadores
+================================================================================================================
+mes  C  V stk |  compras€   cobros€ fijos+SS familia  IVA303 |     CAJA IVA apto margenAc
+-----------------------------------------------------------------------------------------
+  1  1  0   1 |    11,606         0    3,900   3,600       0 |   25,844        0        0
+  2  1  1   1 |    11,606    12,552    3,900   3,600       0 |   19,140      251    1,197
+  3  1  1   1 |    14,729    12,552    3,900   3,600     503 |    8,810        0    2,395
+  4  1  1   1 |    11,606    15,737    3,900   3,600       0 |    5,291      268    3,671
+  5  0  1   0 |         0    12,552    3,900   3,600       0 |   10,343      519    4,868
+  6  0  0   0 |         0         0    3,900       0     519 |    5,923        0    4,868
+  7  0  0   0 |         0         0    3,900       0       0 |    2,023        0    4,868
+  8  0  0   0 |         0         0    3,900       0       0 |   -1,877        0    4,868
+  9  0  0   0 |         0         0    3,900       0       0 |   -5,777        0    4,868
+ 10  0  0   0 |         0         0    3,900       0       0 |   -9,677        0    4,868
+ 11  0  0   0 |         0         0    3,900       0       0 |  -13,577        0    4,868
+ 12  0  0   0 |         0         0    3,900       0       0 |  -17,477        0    4,868
+
+MOVIMIENTOS:
+  M 1 COMPRA  Serie1 F20 160-200     DE   8,992 → landed  11,606 · vende  12,803 en 29 d
+       STOCK fin mes: Serie1 F20 160-200×1
+  M 2 COMPRA  Serie1 F20 160-200     DE   8,992 → landed  11,606 · vende  12,803 en 29 d
+  M 2 VENTA   Serie1 F20 160-200      12,803 € · aparta IVA   251 · margen  1,197 €
+       STOCK fin mes: Serie1 F20 160-200×1
+  M 3 COMPRA  A3 8V 160-200          DE  11,999 → landed  14,729 · vende  16,005 en 36 d
+  M 3 VENTA   Serie1 F20 160-200      12,803 € · aparta IVA   251 · margen  1,197 €
+       STOCK fin mes: A3 8V 160-200×1
+  M 4 COMPRA  Serie1 F20 160-200     DE   8,992 → landed  11,606 · vende  12,803 en 29 d
+  M 4 VENTA   A3 8V 160-200           16,005 € · aparta IVA   268 · margen  1,276 €
+       STOCK fin mes: Serie1 F20 160-200×1
+  M 5 VENTA   Serie1 F20 160-200      12,803 € · aparta IVA   251 · margen  1,197 €
+
+RESUMEN ANUAL: 4 ventas (4 compras, 0 con rebaja -15 %) · margen bruto 4,868 € · fijos 24,480 € · SS 22,320 € · seguro stock 0 € · viajes 600 €
+Resultado contable -60,532 € · IVA pagado en caja 1,022 € · IS 0, nomina_bruta_socio 1,800, dividendo_neto 0, SS 22,320, nomimas_pagadas 18,000
+NETO FAMILIA: 40,478 €/año = 3,373 €/mes  (objetivo 2,500) → CUMPLE
+Caja final: -17,477 €
+
+================================================================================================================
+HIPÓTESIS DEL DUEÑO: SOLO ECONÓMICOS (Golf/A3/Serie1/ClaseA)   |   forma: Autónomo único
+================================================================================================================
+mes  C  V stk |  compras€   cobros€ fijos+SS familia  IVA303 |     CAJA IVA apto margenAc
+-----------------------------------------------------------------------------------------
+  1  1  0   1 |    14,729         0    2,325   1,200       0 |   27,596        0        0
+  2  1  1   1 |    14,729    15,737    2,325   1,200       0 |   24,929      268    1,276
+  3  1  1   1 |    16,470    15,737    2,325   1,200     536 |   19,985        0    2,552
+  4  1  1   1 |    14,729    17,470    2,325   1,200       0 |   19,052      266    3,819
+  5  1  1   1 |    13,113    15,737    2,325   1,200       0 |   18,001      534    5,095
+  6  1  1   1 |    15,683    14,244    2,325   1,200     835 |   12,053        0    6,527
+  7  1  1   1 |    14,729    16,619    2,325   1,200       0 |   10,268      249    7,712
+  8  1  1   1 |    14,729    15,737    2,325   1,200       0 |    7,601      517    8,988
+  9  1  1   1 |    11,606    15,737    2,325   1,200     785 |    7,273        0   10,264
+ 10  1  1   1 |    11,606    12,552    2,325   1,200       0 |    4,543      251   11,462
+ 11  0  1   0 |         0    12,552    2,325   1,200       0 |   13,570      503   12,659
+ 12  0  0   0 |         0         0    2,325   1,200     503 |    9,542        0   12,659
+
+MOVIMIENTOS:
+  M 1 COMPRA  A3 8V 160-200          DE  11,999 → landed  14,729 · vende  16,005 en 36 d
+       STOCK fin mes: A3 8V 160-200×1
+  M 2 COMPRA  A3 8V 160-200          DE  11,999 → landed  14,729 · vende  16,005 en 36 d
+  M 2 VENTA   A3 8V 160-200           16,005 € · aparta IVA   268 · margen  1,276 €
+       STOCK fin mes: A3 8V 160-200×1
+  M 3 COMPRA  A3 8V 120-160          DE  13,675 → landed  16,470 · vende  17,736 en 32 d
+  M 3 VENTA   A3 8V 160-200           16,005 € · aparta IVA   268 · margen  1,276 €
+       STOCK fin mes: A3 8V 120-160×1
+  M 4 COMPRA  A3 8V 160-200          DE  11,999 → landed  14,729 · vende  16,005 en 36 d
+  M 4 VENTA   A3 8V 120-160           17,736 € · aparta IVA   266 · margen  1,267 €
+       STOCK fin mes: A3 8V 160-200×1
+  M 5 COMPRA  Golf VII.5 160-200     DE  10,688 → landed  13,113 · vende  14,545 en 35 d
+  M 5 VENTA   A3 8V 160-200           16,005 € · aparta IVA   268 · margen  1,276 €
+       STOCK fin mes: Golf VII.5 160-200×1
+  M 6 COMPRA  Serie1 F20 80-120      DE  12,918 → landed  15,683 · vende  16,868 en 30 d
+  M 6 VENTA   Golf VII.5 160-200      14,545 € · aparta IVA   301 · margen  1,432 €
+       STOCK fin mes: Serie1 F20 80-120×1
+  M 7 COMPRA  A3 8V 160-200          DE  11,999 → landed  14,729 · vende  16,005 en 36 d
+  M 7 VENTA   Serie1 F20 80-120       16,868 € · aparta IVA   249 · margen  1,185 €
+       STOCK fin mes: A3 8V 160-200×1
+  M 8 COMPRA  A3 8V 160-200          DE  11,999 → landed  14,729 · vende  16,005 en 36 d
+  M 8 VENTA   A3 8V 160-200           16,005 € · aparta IVA   268 · margen  1,276 €
+       STOCK fin mes: A3 8V 160-200×1
+  M 9 COMPRA  Serie1 F20 160-200     DE   8,992 → landed  11,606 · vende  12,803 en 29 d
+  M 9 VENTA   A3 8V 160-200           16,005 € · aparta IVA   268 · margen  1,276 €
+       STOCK fin mes: Serie1 F20 160-200×1
+  M10 COMPRA  Serie1 F20 160-200     DE   8,992 → landed  11,606 · vende  12,803 en 29 d
+  M10 VENTA   Serie1 F20 160-200      12,803 € · aparta IVA   251 · margen  1,197 €
+       STOCK fin mes: Serie1 F20 160-200×1
+  M11 VENTA   Serie1 F20 160-200      12,803 € · aparta IVA   251 · margen  1,197 €
+
+RESUMEN ANUAL: 10 ventas (10 compras, 0 con rebaja -15 %) · margen bruto 12,659 € · fijos 24,480 € · SS 3,420 € · seguro stock 0 € · viajes 1,500 €
+Resultado contable -31,141 € · IVA pagado en caja 2,658 € · IRPF_deuda 0, rn_fiscal 0, retiros_cobrados 0, neto_esposa 11,981
+NETO FAMILIA: 11,981 €/año = 998 €/mes  (objetivo 2,500) → NO CUMPLE
+Caja final: 9,542 €
+
+================================================================================================================
+PALANCA: + LÍNEA ICO/AVAL SOGARPO 15.000 € para stock   |   forma: Autónomo único
+================================================================================================================
+mes  C  V stk |  compras€   cobros€ fijos+SS familia  IVA303 |     CAJA IVA apto margenAc
+-----------------------------------------------------------------------------------------
+  1  2  0   2 |    23,211         0    2,325   1,200       0 |   33,964        0        0
+  2  2  2   2 |    26,003    25,103    2,325   1,200       0 |   29,238      503    2,395
+  3  2  2   2 |    24,719    28,468    2,325   1,200   1,158 |   28,005        0    5,515
+  4  1  2   1 |    21,999    26,796    2,325   1,200       0 |   29,126      552    8,144
+  5  1  1   1 |    21,999    24,927    2,325   1,200       0 |   28,379    1,330   11,850
+  6  1  1   1 |    17,638    24,927    2,325   1,200   2,109 |   29,884        0   15,555
+  7  1  1   1 |    17,638    19,796    2,325   1,200       0 |   28,367      574   18,287
+  8  2  1   2 |    26,335    19,796    2,325   1,200       0 |   18,003    1,147   21,018
+  9  1  2   1 |    21,980    28,289    2,325   1,200   1,667 |   18,970        0   23,492
+ 10  1  1   1 |    15,683    21,829    2,325   1,200       0 |   21,440        0   23,340
+ 11  1  1   1 |    21,980    16,619    2,325   1,200       0 |   12,404      249   24,525
+ 12  1  1   1 |    14,398    24,904    2,325   1,200   1,026 |   18,209        0   28,225
+
+MOVIMIENTOS:
+  M 1 COMPRA  Serie1 F20 160-200     DE   8,992 → landed  11,606 · vende  12,803 en 29 d
+  M 1 COMPRA  Serie1 F20 160-200     DE   8,992 → landed  11,606 · vende  12,803 en 29 d
+       STOCK fin mes: Serie1 F20 160-200×2
+  M 2 COMPRA  Serie1 F20 160-200     DE   8,992 → landed  11,606 · vende  12,803 en 29 d
+  M 2 COMPRA  ClaseC W205 200-240    DE  11,680 → landed  14,398 · vende  16,320 en 31 d
+  M 2 VENTA   Serie1 F20 160-200      12,803 € · aparta IVA   251 · margen  1,197 €
+  M 2 VENTA   Serie1 F20 160-200      12,803 € · aparta IVA   251 · margen  1,197 €
+       STOCK fin mes: Serie1 F20 160-200×1, ClaseC W205 200-240×1
+  M 3 COMPRA  Serie1 F20 160-200     DE   8,992 → landed  11,606 · vende  12,803 en 29 d
+  M 3 COMPRA  Golf VII.5 160-200     DE  10,688 → landed  13,113 · vende  14,545 en 35 d
+  M 3 VENTA   Serie1 F20 160-200      12,803 € · aparta IVA   251 · margen  1,197 €
+  M 3 VENTA   ClaseC W205 200-240     16,320 € · aparta IVA   404 · margen  1,923 €
+       STOCK fin mes: Serie1 F20 160-200×1, Golf VII.5 160-200×1
+  M 4 COMPRA  ClaseE W213 160-200    DE  18,998 → landed  21,999 · vende  25,705 en 33 d
+  M 4 VENTA   Serie1 F20 160-200      12,803 € · aparta IVA   251 · margen  1,197 €
+  M 4 VENTA   Golf VII.5 160-200      14,545 € · aparta IVA   301 · margen  1,432 €
+       STOCK fin mes: ClaseE W213 160-200×1
+  M 5 COMPRA  ClaseE W213 160-200    DE  18,998 → landed  21,999 · vende  25,705 en 33 d
+  M 5 VENTA   ClaseE W213 160-200     25,705 € · aparta IVA   778 · margen  3,706 €
+       STOCK fin mes: ClaseE W213 160-200×1
+  M 6 COMPRA  ClaseA W177 160-200    DE  14,800 → landed  17,638 · vende  20,370 en 36 d
+  M 6 VENTA   ClaseE W213 160-200     25,705 € · aparta IVA   778 · margen  3,706 €
+       STOCK fin mes: ClaseA W177 160-200×1
+  M 7 COMPRA  ClaseA W177 160-200    DE  14,800 → landed  17,638 · vende  20,370 en 36 d
+  M 7 VENTA   ClaseA W177 160-200     20,370 € · aparta IVA   574 · margen  2,732 €
+       STOCK fin mes: ClaseA W177 160-200×1
+  M 8 COMPRA  A3 8V 160-200          DE  11,999 → landed  14,729 · vende  16,005 en 36 d
+  M 8 COMPRA  Serie1 F20 160-200     DE   8,992 → landed  11,606 · vende  12,803 en 29 d
+  M 8 VENTA   ClaseA W177 160-200     20,370 € · aparta IVA   574 · margen  2,732 €
+       STOCK fin mes: A3 8V 160-200×1, Serie1 F20 160-200×1
+  M 9 COMPRA  CLA C118 120-160       DE  18,980 → landed  21,980 · vende  25,681 en 38 d
+  M 9 VENTA   A3 8V 160-200           16,005 € · aparta IVA   268 · margen  1,276 €
+  M 9 VENTA   Serie1 F20 160-200      12,803 € · aparta IVA   251 · margen  1,197 €
+       STOCK fin mes: CLA C118 120-160×1
+  M10 COMPRA  Serie1 F20 80-120      DE  12,918 → landed  15,683 · vende  16,868 en 30 d
+  M10 VENTA   CLA C118 120-160 (REBAJADO)  21,829 € · aparta IVA     0 · margen   -152 €
+       STOCK fin mes: Serie1 F20 80-120×1
+  M11 COMPRA  CLA C118 120-160       DE  18,980 → landed  21,980 · vende  25,681 en 38 d
+  M11 VENTA   Serie1 F20 80-120       16,868 € · aparta IVA   249 · margen  1,185 €
+       STOCK fin mes: CLA C118 120-160×1
+  M12 COMPRA  ClaseC W205 200-240    DE  11,680 → landed  14,398 · vende  16,320 en 31 d
+  M12 VENTA   CLA C118 120-160        25,681 € · aparta IVA   777 · margen  3,700 €
+       STOCK fin mes: ClaseC W205 200-240×1
+
+RESUMEN ANUAL: 15 ventas (16 compras, 1 con rebaja -15 %) · margen bruto 28,225 € · fijos 24,480 € · SS 3,420 € · seguro stock 0 € · viajes 2,400 €
+Resultado contable -16,475 € · IVA pagado en caja 5,959 € · IRPF_deuda 0, rn_fiscal 0, retiros_cobrados 0, neto_esposa 11,981
+NETO FAMILIA: 11,981 €/año = 998 €/mes  (objetivo 2,500) → NO CUMPLE
+Caja final: 18,209 €
+

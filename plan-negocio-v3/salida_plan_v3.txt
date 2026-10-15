@@ -1,0 +1,108 @@
+====================================================================================================
+PASO 1 — CATALOGO OPERATIVO (segmentos que pasaron la regla de catalogo.py)
+====================================================================================================
+nick                    BUY P25     SELL imp+ITP  landed  margen   spr%  dias
+Q5 FY 0-40               34,523   46,366   1,338  38,096   8,270  34.3%    77
+Macan 80-120             32,622   43,640   1,264  36,122   7,519  33.8%    71
+CLA C118 120-160         18,980   25,681     735  21,950   3,730  35.3%    38
+ClaseE W213 160-200      21,642   27,544     839  24,716   2,828  27.3%    37
+GLC 300e 80-120          28,828   35,289     432  31,495   3,794  22.4%    54
+Clase A W177 160-200     14,800   20,370     574  17,608   2,762  37.6%    36
+Clase C W205 80-120      22,500   28,120     872  25,607   2,513  25.0%    46
+Serie3 F30 120-160       16,548   21,330     641  19,424   1,907  28.9%    37
+Cayenne 92A 160-200      26,490   32,442   1,026  29,751   2,690  22.5%    57
+
+Margen medio por unidad: 4,001 EUR · fijos con nave: 1,510 EUR/mes
+Dinero disponible para stock dia 1: SL 40,600 · auton 41,500
+
+====================================================================================================
+PASO 2 — SIMULACION 12 MESES, CAPITAL 50.000 € CON NAVE DESDE EL MES 1
+====================================================================================================
+
+--- SL ---   (óptimo SL: nómina 3,000 brutos/mes por socio + resto retenido/dividendo)
+compras 12 · ventas 12 · margen realizado 31,656 EUR
+fijos 18,120 · sueldos 21,806 · cotizaciones 2,460 · IS/IRPF 0
+resultado negocio -10,731 · caja final 16,574 (min 1,859)
+>>> NETO MENSUAL OPTIMIZADO PARA LA FAMILIA: 4,927 EUR/mes · óptimo SL: nómina 3,000 brutos/mes por socio + resto retenido/dividendo
+  mes | acV | acC | stock | caja
+  1 | 0 | 2 | 2 | 1868
+  2 | 2 | 3 | 1 | 18303
+  3 | 3 | 4 | 1 | 14734
+  4 | 4 | 5 | 1 | 10198
+  5 | 5 | 6 | 1 | 12157
+  6 | 6 | 7 | 1 | 10379
+  7 | 7 | 8 | 1 | 9046
+  8 | 8 | 9 | 1 | 3371
+  9 | 9 | 10 | 1 | 3386
+  10 | 10 | 11 | 1 | 3192
+  11 | 11 | 12 | 1 | 1859
+  12 | 12 | 12 | 0 | 16574
+
+--- AUTONOMO ---   (autónomo: retiro neto medio 0/mes + esposa 1,104/mes)
+compras 12 · ventas 11 · margen realizado 31,687 EUR
+fijos 18,120 · sueldos 14,400 · cotizaciones 3,420 · IS/IRPF 0
+resultado negocio -4,253 · caja final 2,915 (min 2,003)
+>>> NETO MENSUAL OPTIMIZADO PARA LA FAMILIA: 1,093 EUR/mes · autónomo: retiro neto medio 0/mes + esposa 1,104/mes
+  mes | acV | acC | stock | caja
+  1 | 0 | 2 | 2 | 3288
+  2 | 2 | 3 | 1 | 18849
+  3 | 3 | 4 | 1 | 15800
+  4 | 4 | 5 | 1 | 11785
+  5 | 5 | 6 | 1 | 14264
+  6 | 6 | 7 | 1 | 13006
+  7 | 7 | 8 | 1 | 12192
+  8 | 8 | 9 | 1 | 7037
+  9 | 9 | 10 | 1 | 5046
+  10 | 9 | 10 | 1 | 2051
+  11 | 10 | 11 | 1 | 2003
+  12 | 11 | 12 | 1 | 2915
+
+====================================================================================================
+PASO 3 — CUANTOS COCHES HACEN FALTA PARA LOS OBJETIVOS DE LA FAMILIA
+====================================================================================================
+neto familia 24,000 EUR/año -> ~14 coches/año (≈1.2/mes) al margen medio de 4,001 EUR/coche
+
+====================================================================================================
+neto familia 30,000 EUR/año -> ~16 coches/año (≈1.3/mes) al margen medio de 4,001 EUR/coche
+
+====================================================================================================
+neto familia 36,000 EUR/año -> ~18 coches/año (≈1.5/mes) al margen medio de 4,001 EUR/coche
+
+====================================================================================================
+PASO 4 — LA RESTRICCION REAL ES EL CICLO DE CAPITAL, NO LA NAVE
+====================================================================================================
+Ciclo por coche (compra->cobro): media 60 d · mediana 56 d
+Landed medio: 27,197 EUR
+Unidades simultaneas que financia tu capital: 1.5
+Vueltas del capital al año: 6.5 → ventas máximas/año ≈ 10
+Beneficio bruto potencial/año: 38,934 EUR − fijos nave 18,120 EUR
+>>> NETO FAMILIA POTENCIAL (capital girando a tope, sin colchones): 1,529 EUR/mes
+
+====================================================================================================
+PASO 5 — QUÉ CATÁLOGO RINDE MÁS CON ESTE CAPITAL (rotación vs margen)
+====================================================================================================
+A) mix premium (landed medio 27,197): 10 ventas · margen 26,199 € -> aut 1,093/mes · SL 4,927/mes (nómina óptima 3,000 €/mes por socio)
+B) rotación landed<26k (5 seg., margen medio 2,748): 12 ventas · margen 31,675 € -> aut 1,093/mes · SL 4,927/mes
+
+====================================================================================================
+PASO 6 — PALANCAS: LÍNEA DE STOCK Y AÑO 2 (capital consolidado)
+====================================================================================================
+B + línea ICO 15k solo stock: 22 ventas · margen 60,486 € -> aut 2,660/mes · SL 4,927/mes (caja min 3,905)
+Año 2 (capital consolidado ~70k, sin línea): 33 ventas · margen 90,236 € -> aut 4,189/mes · SL 4,927/mes
+
+LECTURA HONESTA DEL MODELO COMPLETO:
+  · La restricción real NO es la nave: con 2-3 coches en giro sobran 400 m². La
+    nave grande es el techo del AÑO 2-3 — exactamente tu razón para quererla ya.
+  · El cuello es el CICLO DEL CAPITAL: landed medio 24-27k y ciclo de 50-60 días
+    -> el dinero da ~6 vueltas/año y financia 1,5-2,5 unidades simultáneas.
+  · Año 1 con 50k y TODO pagado (reforma+fianza incl.): familia 1.000-1.700 €/mes.
+    Con línea ICO de 15k solo para stock: ~1.900-2.300 €/mes. Año 2 reinvertido:
+    supera los 2.500 €/mes objetivo.
+  · La SL deja de ser obvia cuando se modela la SS REAL de dos socios operativos
+    (~1.860 €/mes de cuotas): con poco volumen, un solo autónomo (tarifa plana)
+    + esposa empleada es más barato. La SL vuelve a ganar a partir de ~45-50k de
+    margen anual (comprobar en PASO 5/6 con vuestros números reales mes 6).
+  · Los meses malos existen: si un coche tarda 90 d, ese mes la familia cobra
+    menos. Los 1.510 €/mes de fijos (nave+suministros+asesoría) se pagan vendas
+    o no; portales, garantía, mantenimiento y anuncios ya están dentro del
+    coste de cada coche (landed del ERP).

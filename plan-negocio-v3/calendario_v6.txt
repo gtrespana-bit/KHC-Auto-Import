@@ -1,0 +1,286 @@
+====================================================================================================
+KHC IMPORT · PLAN V6 — CALENDARIO MES A MES DETERMINISTA · SIN FINANCIACION
+Escenario C: capital 50.000 · nave mes 1 · cartera giratoria (<26k landed) · familia cobra desde mes 8
+====================================================================================================
+
+[1] RANKING DE CARTERA (margen por euro y dia inmovilizado — el criterio de eleccion)
+     # modelo                 compra P25 DE     imp   landed  venta ES   margen  dias  €/€·dia
+     1 CLA C118 120-160              18.980     735   21.950    25.681    3.730    38    4.47‰
+     2 Clase A W177 160-200          14.800     574   17.608    20.370    2.762    36    4.36‰
+     3 ClaseE W213 160-200           21.642     839   24.716    27.544    2.828    37    3.09‰
+     4 Serie3 F30 120-160            16.548     641   19.424    21.330    1.907    37    2.65‰
+     5 Clase C W205 80-120           22.500     872   25.607    28.120    2.513    46    2.13‰
+    Excluidos por capital (landed alto, 1 unidad inmoviliza todo): Q5 FY, Macan, GLC 300e, Cayenne.
+
+[2] TABLA MAESTRA MENSUAL
+mes  caja ini   +cobros  -compras  -fijos    -SS -sueldos -retiros -impuestos  caja fin stock
+---------------------------------------------------------------------------------------------
+  1   124.500         0   -79.118  -1.510   -285       -0       -0         -0    43.587     4
+  2    43.587    49.795   -68.617  -1.510   -285       -0       -0         -0    22.970     5
+  3    22.970    89.375   -79.118  -1.510   -285       -0       -0     -4.293    27.138     5
+  4    27.138    76.745   -93.333  -1.510   -285       -0       -0         -0     8.755     6
+  5     8.755    89.375   -79.118  -1.510   -285       -0       -0         -0    17.217     6
+  6    17.217    53.900   -49.432  -1.510   -285       -0       -0     -6.075    13.816     6
+  7    13.816   143.275   -79.118  -1.510   -285       -0       -0         -0    76.178     4
+  8    76.178    49.795   -93.333  -1.510   -285   -1.080   -1.600         -0    28.165     6
+  9    28.165    89.375   -79.118  -1.510   -285   -1.080   -1.600     -8.448    25.499     6
+ 10    25.499   103.695   -93.333  -1.510   -285   -1.080   -1.600         -0    31.386     6
+ 11    31.386    89.375   -98.542  -1.510   -285   -1.080   -1.600         -0    17.744     7
+ 12    17.744   103.695   -93.333  -1.510   -285   -1.080   -1.600     -8.595    15.036     7
+
+[3] FICHA DETALLADA MES A MES
+----------------------------------------------------------------------------------------------------
+MES 1  |  caja inicial 124.500 €  →  caja final 43.587 €
+  COMPRAS:
+    U01 CLA C118 120-160       dia  7: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 55 (~mes 1)
+    U02 CLA C118 120-160       dia  7: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 55 (~mes 1)
+    U03 Clase A W177 160-200   dia 21: compra DE 14.800 + impuestos 574 + costes ERP 2.235 = landed 17.608 € · previsto cobro dia 67 (~mes 2)
+    U04 Clase A W177 160-200   dia 21: compra DE 14.800 + impuestos 574 + costes ERP 2.235 = landed 17.608 € · previsto cobro dia 67 (~mes 2)
+  PAGOS DEL MES: fijos 1.510 (nave 1.200 + sumin. 250 + asesoria 60) · SS 285 (RETA 80 + esposa 205) · sueldos 0 · retiros 0 · impuestos 0
+  IMPUESTOS APARTADOS Y PENDIENTES AL CIERRE: IVA REBU acumulado 0 €
+  STOCK FIN DE MES (4 uds, coste inmovilizado 79.118 €, margen potencial 12.984 €):
+    U01 CLA C118 120-160       en vitrina desde mes 1 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U02 CLA C118 120-160       en vitrina desde mes 1 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U03 Clase A W177 160-200   en vitrina desde mes 1 (hace 0) · PVP 20.370 € · giro previsto 36 d
+    U04 Clase A W177 160-200   en vitrina desde mes 1 (hace 0) · PVP 20.370 € · giro previsto 36 d
+----------------------------------------------------------------------------------------------------
+MES 2  |  caja inicial 43.587 €  →  caja final 22.970 €
+  COMPRAS:
+    U05 CLA C118 120-160       dia 35: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 83 (~mes 2)
+    U06 CLA C118 120-160       dia 35: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 83 (~mes 2)
+    U07 ClaseE W213 160-200    dia 49: compra DE 21.642 + impuestos 839 + costes ERP 2.235 = landed 24.716 € · previsto cobro dia 96 (~mes 3)
+  VENTAS (cobro a los 7-10 dias de firmar):
+    U01 CLA C118 120-160       vendido por 25.681 € · margen 3.730 € · IVA REBU apartado 783 € (ingreso en mod. 303)
+    U02 CLA C118 120-160       vendido por 25.681 € · margen 3.730 € · IVA REBU apartado 783 € (ingreso en mod. 303)
+  PAGOS DEL MES: fijos 1.510 (nave 1.200 + sumin. 250 + asesoria 60) · SS 285 (RETA 80 + esposa 205) · sueldos 0 · retiros 0 · impuestos 0
+  IMPUESTOS APARTADOS Y PENDIENTES AL CIERRE: IVA REBU acumulado 1.567 €
+  STOCK FIN DE MES (5 uds, coste inmovilizado 103.834 €, margen potencial 15.812 €):
+    U03 Clase A W177 160-200   en vitrina desde mes 1 (hace 1) · PVP 20.370 € · giro previsto 36 d
+    U04 Clase A W177 160-200   en vitrina desde mes 1 (hace 1) · PVP 20.370 € · giro previsto 36 d
+    U05 CLA C118 120-160       en vitrina desde mes 2 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U06 CLA C118 120-160       en vitrina desde mes 2 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U07 ClaseE W213 160-200    en vitrina desde mes 2 (hace 0) · PVP 27.544 € · giro previsto 37 d
+----------------------------------------------------------------------------------------------------
+MES 3  |  caja inicial 22.970 €  →  caja final 27.138 €
+  COMPRAS:
+    U08 CLA C118 120-160       dia 63: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 111 (~mes 3)
+    U09 CLA C118 120-160       dia 63: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 111 (~mes 3)
+    U10 Clase A W177 160-200   dia 77: compra DE 14.800 + impuestos 574 + costes ERP 2.235 = landed 17.608 € · previsto cobro dia 123 (~mes 4)
+    U11 Clase A W177 160-200   dia 77: compra DE 14.800 + impuestos 574 + costes ERP 2.235 = landed 17.608 € · previsto cobro dia 123 (~mes 4)
+  VENTAS (cobro a los 7-10 dias de firmar):
+    U03 Clase A W177 160-200   vendido por 20.370 € · margen 2.762 € · IVA REBU apartado 580 € (ingreso en mod. 303)
+    U04 Clase A W177 160-200   vendido por 20.370 € · margen 2.762 € · IVA REBU apartado 580 € (ingreso en mod. 303)
+    U05 CLA C118 120-160       vendido por 25.681 € · margen 3.730 € · IVA REBU apartado 783 € (ingreso en mod. 303)
+    U06 CLA C118 120-160       vendido por 25.681 € · margen 3.730 € · IVA REBU apartado 783 € (ingreso en mod. 303)
+  PAGOS DEL MES: fijos 1.510 (nave 1.200 + sumin. 250 + asesoria 60) · SS 285 (RETA 80 + esposa 205) · sueldos 0 · retiros 0 · impuestos 4.293
+  IMPUESTOS APARTADOS Y PENDIENTES AL CIERRE: IVA REBU acumulado 0 €
+  STOCK FIN DE MES (5 uds, coste inmovilizado 103.834 €, margen potencial 15.812 €):
+    U07 ClaseE W213 160-200    en vitrina desde mes 2 (hace 1) · PVP 27.544 € · giro previsto 37 d
+    U08 CLA C118 120-160       en vitrina desde mes 3 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U09 CLA C118 120-160       en vitrina desde mes 3 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U10 Clase A W177 160-200   en vitrina desde mes 3 (hace 0) · PVP 20.370 € · giro previsto 36 d
+    U11 Clase A W177 160-200   en vitrina desde mes 3 (hace 0) · PVP 20.370 € · giro previsto 36 d
+----------------------------------------------------------------------------------------------------
+MES 4  |  caja inicial 27.138 €  →  caja final 8.755 €
+  COMPRAS:
+    U12 CLA C118 120-160       dia 91: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 139 (~mes 4)
+    U13 CLA C118 120-160       dia 91: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 139 (~mes 4)
+    U14 ClaseE W213 160-200    dia 105: compra DE 21.642 + impuestos 839 + costes ERP 2.235 = landed 24.716 € · previsto cobro dia 152 (~mes 5)
+    U15 ClaseE W213 160-200    dia 105: compra DE 21.642 + impuestos 839 + costes ERP 2.235 = landed 24.716 € · previsto cobro dia 152 (~mes 5)
+  VENTAS (cobro a los 7-10 dias de firmar):
+    U07 ClaseE W213 160-200    vendido por 27.544 € · margen 2.828 € · IVA REBU apartado 594 € (ingreso en mod. 303)
+    U08 CLA C118 120-160       vendido por 25.681 € · margen 3.730 € · IVA REBU apartado 783 € (ingreso en mod. 303)
+    U09 CLA C118 120-160       vendido por 25.681 € · margen 3.730 € · IVA REBU apartado 783 € (ingreso en mod. 303)
+  PAGOS DEL MES: fijos 1.510 (nave 1.200 + sumin. 250 + asesoria 60) · SS 285 (RETA 80 + esposa 205) · sueldos 0 · retiros 0 · impuestos 0
+  IMPUESTOS APARTADOS Y PENDIENTES AL CIERRE: IVA REBU acumulado 2.161 €
+  STOCK FIN DE MES (6 uds, coste inmovilizado 128.550 €, margen potencial 18.639 €):
+    U10 Clase A W177 160-200   en vitrina desde mes 3 (hace 1) · PVP 20.370 € · giro previsto 36 d
+    U11 Clase A W177 160-200   en vitrina desde mes 3 (hace 1) · PVP 20.370 € · giro previsto 36 d
+    U12 CLA C118 120-160       en vitrina desde mes 4 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U13 CLA C118 120-160       en vitrina desde mes 4 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U14 ClaseE W213 160-200    en vitrina desde mes 4 (hace 0) · PVP 27.544 € · giro previsto 37 d
+    U15 ClaseE W213 160-200    en vitrina desde mes 4 (hace 0) · PVP 27.544 € · giro previsto 37 d
+----------------------------------------------------------------------------------------------------
+MES 5  |  caja inicial 8.755 €  →  caja final 17.217 €
+  COMPRAS:
+    U16 CLA C118 120-160       dia 133: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 181 (~mes 6)
+    U17 CLA C118 120-160       dia 133: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 181 (~mes 6)
+    U18 Clase A W177 160-200   dia 147: compra DE 14.800 + impuestos 574 + costes ERP 2.235 = landed 17.608 € · previsto cobro dia 193 (~mes 6)
+    U19 Clase A W177 160-200   dia 147: compra DE 14.800 + impuestos 574 + costes ERP 2.235 = landed 17.608 € · previsto cobro dia 193 (~mes 6)
+  VENTAS (cobro a los 7-10 dias de firmar):
+    U10 Clase A W177 160-200   vendido por 20.370 € · margen 2.762 € · IVA REBU apartado 580 € (ingreso en mod. 303)
+    U11 Clase A W177 160-200   vendido por 20.370 € · margen 2.762 € · IVA REBU apartado 580 € (ingreso en mod. 303)
+    U12 CLA C118 120-160       vendido por 25.681 € · margen 3.730 € · IVA REBU apartado 783 € (ingreso en mod. 303)
+    U13 CLA C118 120-160       vendido por 25.681 € · margen 3.730 € · IVA REBU apartado 783 € (ingreso en mod. 303)
+  PAGOS DEL MES: fijos 1.510 (nave 1.200 + sumin. 250 + asesoria 60) · SS 285 (RETA 80 + esposa 205) · sueldos 0 · retiros 0 · impuestos 0
+  IMPUESTOS APARTADOS Y PENDIENTES AL CIERRE: IVA REBU acumulado 4.887 €
+  STOCK FIN DE MES (6 uds, coste inmovilizado 128.550 €, margen potencial 18.639 €):
+    U14 ClaseE W213 160-200    en vitrina desde mes 4 (hace 1) · PVP 27.544 € · giro previsto 37 d
+    U15 ClaseE W213 160-200    en vitrina desde mes 4 (hace 1) · PVP 27.544 € · giro previsto 37 d
+    U16 CLA C118 120-160       en vitrina desde mes 5 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U17 CLA C118 120-160       en vitrina desde mes 5 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U18 Clase A W177 160-200   en vitrina desde mes 5 (hace 0) · PVP 20.370 € · giro previsto 36 d
+    U19 Clase A W177 160-200   en vitrina desde mes 5 (hace 0) · PVP 20.370 € · giro previsto 36 d
+----------------------------------------------------------------------------------------------------
+MES 6  |  caja inicial 17.217 €  →  caja final 13.816 €
+  COMPRAS:
+    U20 ClaseE W213 160-200    dia 161: compra DE 21.642 + impuestos 839 + costes ERP 2.235 = landed 24.716 € · previsto cobro dia 208 (~mes 6)
+    U21 ClaseE W213 160-200    dia 161: compra DE 21.642 + impuestos 839 + costes ERP 2.235 = landed 24.716 € · previsto cobro dia 208 (~mes 6)
+  VENTAS (cobro a los 7-10 dias de firmar):
+    U14 ClaseE W213 160-200    vendido por 27.544 € · margen 2.828 € · IVA REBU apartado 594 € (ingreso en mod. 303)
+    U15 ClaseE W213 160-200    vendido por 27.544 € · margen 2.828 € · IVA REBU apartado 594 € (ingreso en mod. 303)
+  PAGOS DEL MES: fijos 1.510 (nave 1.200 + sumin. 250 + asesoria 60) · SS 285 (RETA 80 + esposa 205) · sueldos 0 · retiros 0 · impuestos 6.075
+  IMPUESTOS APARTADOS Y PENDIENTES AL CIERRE: IVA REBU acumulado 0 €
+  STOCK FIN DE MES (6 uds, coste inmovilizado 128.550 €, margen potencial 18.639 €):
+    U16 CLA C118 120-160       en vitrina desde mes 5 (hace 1) · PVP 25.681 € · giro previsto 38 d
+    U17 CLA C118 120-160       en vitrina desde mes 5 (hace 1) · PVP 25.681 € · giro previsto 38 d
+    U18 Clase A W177 160-200   en vitrina desde mes 5 (hace 1) · PVP 20.370 € · giro previsto 36 d
+    U19 Clase A W177 160-200   en vitrina desde mes 5 (hace 1) · PVP 20.370 € · giro previsto 36 d
+    U20 ClaseE W213 160-200    en vitrina desde mes 6 (hace 0) · PVP 27.544 € · giro previsto 37 d
+    U21 ClaseE W213 160-200    en vitrina desde mes 6 (hace 0) · PVP 27.544 € · giro previsto 37 d
+----------------------------------------------------------------------------------------------------
+MES 7  |  caja inicial 13.816 €  →  caja final 76.178 €
+  COMPRAS:
+    U22 CLA C118 120-160       dia 189: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 237 (~mes 7)
+    U23 CLA C118 120-160       dia 189: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 237 (~mes 7)
+    U24 Clase A W177 160-200   dia 203: compra DE 14.800 + impuestos 574 + costes ERP 2.235 = landed 17.608 € · previsto cobro dia 249 (~mes 8)
+    U25 Clase A W177 160-200   dia 203: compra DE 14.800 + impuestos 574 + costes ERP 2.235 = landed 17.608 € · previsto cobro dia 249 (~mes 8)
+  VENTAS (cobro a los 7-10 dias de firmar):
+    U16 CLA C118 120-160       vendido por 25.681 € · margen 3.730 € · IVA REBU apartado 783 € (ingreso en mod. 303)
+    U17 CLA C118 120-160       vendido por 25.681 € · margen 3.730 € · IVA REBU apartado 783 € (ingreso en mod. 303)
+    U18 Clase A W177 160-200   vendido por 20.370 € · margen 2.762 € · IVA REBU apartado 580 € (ingreso en mod. 303)
+    U19 Clase A W177 160-200   vendido por 20.370 € · margen 2.762 € · IVA REBU apartado 580 € (ingreso en mod. 303)
+    U20 ClaseE W213 160-200    vendido por 27.544 € · margen 2.828 € · IVA REBU apartado 594 € (ingreso en mod. 303)
+    U21 ClaseE W213 160-200    vendido por 27.544 € · margen 2.828 € · IVA REBU apartado 594 € (ingreso en mod. 303)
+  PAGOS DEL MES: fijos 1.510 (nave 1.200 + sumin. 250 + asesoria 60) · SS 285 (RETA 80 + esposa 205) · sueldos 0 · retiros 0 · impuestos 0
+  IMPUESTOS APARTADOS Y PENDIENTES AL CIERRE: IVA REBU acumulado 3.914 €
+  STOCK FIN DE MES (4 uds, coste inmovilizado 79.118 €, margen potencial 12.984 €):
+    U22 CLA C118 120-160       en vitrina desde mes 7 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U23 CLA C118 120-160       en vitrina desde mes 7 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U24 Clase A W177 160-200   en vitrina desde mes 7 (hace 0) · PVP 20.370 € · giro previsto 36 d
+    U25 Clase A W177 160-200   en vitrina desde mes 7 (hace 0) · PVP 20.370 € · giro previsto 36 d
+----------------------------------------------------------------------------------------------------
+MES 8  |  caja inicial 76.178 €  →  caja final 28.165 €
+  COMPRAS:
+    U26 CLA C118 120-160       dia 217: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 265 (~mes 8)
+    U27 CLA C118 120-160       dia 217: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 265 (~mes 8)
+    U28 ClaseE W213 160-200    dia 231: compra DE 21.642 + impuestos 839 + costes ERP 2.235 = landed 24.716 € · previsto cobro dia 278 (~mes 9)
+    U29 ClaseE W213 160-200    dia 231: compra DE 21.642 + impuestos 839 + costes ERP 2.235 = landed 24.716 € · previsto cobro dia 278 (~mes 9)
+  VENTAS (cobro a los 7-10 dias de firmar):
+    U22 CLA C118 120-160       vendido por 25.681 € · margen 3.730 € · IVA REBU apartado 783 € (ingreso en mod. 303)
+    U23 CLA C118 120-160       vendido por 25.681 € · margen 3.730 € · IVA REBU apartado 783 € (ingreso en mod. 303)
+  PAGOS DEL MES: fijos 1.510 (nave 1.200 + sumin. 250 + asesoria 60) · SS 285 (RETA 80 + esposa 205) · sueldos 1.080 · retiros 1.600 · impuestos 0
+  IMPUESTOS APARTADOS Y PENDIENTES AL CIERRE: IVA REBU acumulado 5.481 €
+  STOCK FIN DE MES (6 uds, coste inmovilizado 128.550 €, margen potencial 18.639 €):
+    U24 Clase A W177 160-200   en vitrina desde mes 7 (hace 1) · PVP 20.370 € · giro previsto 36 d
+    U25 Clase A W177 160-200   en vitrina desde mes 7 (hace 1) · PVP 20.370 € · giro previsto 36 d
+    U26 CLA C118 120-160       en vitrina desde mes 8 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U27 CLA C118 120-160       en vitrina desde mes 8 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U28 ClaseE W213 160-200    en vitrina desde mes 8 (hace 0) · PVP 27.544 € · giro previsto 37 d
+    U29 ClaseE W213 160-200    en vitrina desde mes 8 (hace 0) · PVP 27.544 € · giro previsto 37 d
+----------------------------------------------------------------------------------------------------
+MES 9  |  caja inicial 28.165 €  →  caja final 25.499 €
+  COMPRAS:
+    U30 CLA C118 120-160       dia 245: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 293 (~mes 9)
+    U31 CLA C118 120-160       dia 245: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 293 (~mes 9)
+    U32 Clase A W177 160-200   dia 259: compra DE 14.800 + impuestos 574 + costes ERP 2.235 = landed 17.608 € · previsto cobro dia 305 (~mes 10)
+    U33 Clase A W177 160-200   dia 259: compra DE 14.800 + impuestos 574 + costes ERP 2.235 = landed 17.608 € · previsto cobro dia 305 (~mes 10)
+  VENTAS (cobro a los 7-10 dias de firmar):
+    U24 Clase A W177 160-200   vendido por 20.370 € · margen 2.762 € · IVA REBU apartado 580 € (ingreso en mod. 303)
+    U25 Clase A W177 160-200   vendido por 20.370 € · margen 2.762 € · IVA REBU apartado 580 € (ingreso en mod. 303)
+    U26 CLA C118 120-160       vendido por 25.681 € · margen 3.730 € · IVA REBU apartado 783 € (ingreso en mod. 303)
+    U27 CLA C118 120-160       vendido por 25.681 € · margen 3.730 € · IVA REBU apartado 783 € (ingreso en mod. 303)
+  PAGOS DEL MES: fijos 1.510 (nave 1.200 + sumin. 250 + asesoria 60) · SS 285 (RETA 80 + esposa 205) · sueldos 1.080 · retiros 1.600 · impuestos 8.448
+  IMPUESTOS APARTADOS Y PENDIENTES AL CIERRE: IVA REBU acumulado 0 €
+  STOCK FIN DE MES (6 uds, coste inmovilizado 128.550 €, margen potencial 18.639 €):
+    U28 ClaseE W213 160-200    en vitrina desde mes 8 (hace 1) · PVP 27.544 € · giro previsto 37 d
+    U29 ClaseE W213 160-200    en vitrina desde mes 8 (hace 1) · PVP 27.544 € · giro previsto 37 d
+    U30 CLA C118 120-160       en vitrina desde mes 9 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U31 CLA C118 120-160       en vitrina desde mes 9 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U32 Clase A W177 160-200   en vitrina desde mes 9 (hace 0) · PVP 20.370 € · giro previsto 36 d
+    U33 Clase A W177 160-200   en vitrina desde mes 9 (hace 0) · PVP 20.370 € · giro previsto 36 d
+----------------------------------------------------------------------------------------------------
+MES 10  |  caja inicial 25.499 €  →  caja final 31.386 €
+  COMPRAS:
+    U34 CLA C118 120-160       dia 273: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 321 (~mes 10)
+    U35 CLA C118 120-160       dia 273: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 321 (~mes 10)
+    U36 ClaseE W213 160-200    dia 287: compra DE 21.642 + impuestos 839 + costes ERP 2.235 = landed 24.716 € · previsto cobro dia 334 (~mes 11)
+    U37 ClaseE W213 160-200    dia 287: compra DE 21.642 + impuestos 839 + costes ERP 2.235 = landed 24.716 € · previsto cobro dia 334 (~mes 11)
+  VENTAS (cobro a los 7-10 dias de firmar):
+    U28 ClaseE W213 160-200    vendido por 27.544 € · margen 2.828 € · IVA REBU apartado 594 € (ingreso en mod. 303)
+    U29 ClaseE W213 160-200    vendido por 27.544 € · margen 2.828 € · IVA REBU apartado 594 € (ingreso en mod. 303)
+    U30 CLA C118 120-160       vendido por 25.681 € · margen 3.730 € · IVA REBU apartado 783 € (ingreso en mod. 303)
+    U31 CLA C118 120-160       vendido por 25.681 € · margen 3.730 € · IVA REBU apartado 783 € (ingreso en mod. 303)
+  PAGOS DEL MES: fijos 1.510 (nave 1.200 + sumin. 250 + asesoria 60) · SS 285 (RETA 80 + esposa 205) · sueldos 1.080 · retiros 1.600 · impuestos 0
+  IMPUESTOS APARTADOS Y PENDIENTES AL CIERRE: IVA REBU acumulado 2.754 €
+  STOCK FIN DE MES (6 uds, coste inmovilizado 128.550 €, margen potencial 18.639 €):
+    U32 Clase A W177 160-200   en vitrina desde mes 9 (hace 1) · PVP 20.370 € · giro previsto 36 d
+    U33 Clase A W177 160-200   en vitrina desde mes 9 (hace 1) · PVP 20.370 € · giro previsto 36 d
+    U34 CLA C118 120-160       en vitrina desde mes 10 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U35 CLA C118 120-160       en vitrina desde mes 10 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U36 ClaseE W213 160-200    en vitrina desde mes 10 (hace 0) · PVP 27.544 € · giro previsto 37 d
+    U37 ClaseE W213 160-200    en vitrina desde mes 10 (hace 0) · PVP 27.544 € · giro previsto 37 d
+----------------------------------------------------------------------------------------------------
+MES 11  |  caja inicial 31.386 €  →  caja final 17.744 €
+  COMPRAS:
+    U38 CLA C118 120-160       dia 301: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 349 (~mes 11)
+    U39 CLA C118 120-160       dia 301: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 349 (~mes 11)
+    U40 Clase A W177 160-200   dia 315: compra DE 14.800 + impuestos 574 + costes ERP 2.235 = landed 17.608 € · previsto cobro dia 361 (~mes 12)
+    U41 Clase A W177 160-200   dia 315: compra DE 14.800 + impuestos 574 + costes ERP 2.235 = landed 17.608 € · previsto cobro dia 361 (~mes 12)
+    U42 Serie3 F30 120-160     dia 329: compra DE 16.548 + impuestos 641 + costes ERP 2.235 = landed 19.424 € · previsto cobro dia 376 (~mes 12)
+  VENTAS (cobro a los 7-10 dias de firmar):
+    U32 Clase A W177 160-200   vendido por 20.370 € · margen 2.762 € · IVA REBU apartado 580 € (ingreso en mod. 303)
+    U33 Clase A W177 160-200   vendido por 20.370 € · margen 2.762 € · IVA REBU apartado 580 € (ingreso en mod. 303)
+    U34 CLA C118 120-160       vendido por 25.681 € · margen 3.730 € · IVA REBU apartado 783 € (ingreso en mod. 303)
+    U35 CLA C118 120-160       vendido por 25.681 € · margen 3.730 € · IVA REBU apartado 783 € (ingreso en mod. 303)
+  PAGOS DEL MES: fijos 1.510 (nave 1.200 + sumin. 250 + asesoria 60) · SS 285 (RETA 80 + esposa 205) · sueldos 1.080 · retiros 1.600 · impuestos 0
+  IMPUESTOS APARTADOS Y PENDIENTES AL CIERRE: IVA REBU acumulado 5.481 €
+  STOCK FIN DE MES (7 uds, coste inmovilizado 147.974 €, margen potencial 20.546 €):
+    U36 ClaseE W213 160-200    en vitrina desde mes 10 (hace 1) · PVP 27.544 € · giro previsto 37 d
+    U37 ClaseE W213 160-200    en vitrina desde mes 10 (hace 1) · PVP 27.544 € · giro previsto 37 d
+    U38 CLA C118 120-160       en vitrina desde mes 11 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U39 CLA C118 120-160       en vitrina desde mes 11 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U40 Clase A W177 160-200   en vitrina desde mes 11 (hace 0) · PVP 20.370 € · giro previsto 36 d
+    U41 Clase A W177 160-200   en vitrina desde mes 11 (hace 0) · PVP 20.370 € · giro previsto 36 d
+    U42 Serie3 F30 120-160     en vitrina desde mes 11 (hace 0) · PVP 21.330 € · giro previsto 37 d
+----------------------------------------------------------------------------------------------------
+MES 12  |  caja inicial 17.744 €  →  caja final 15.036 €
+  COMPRAS:
+    U43 CLA C118 120-160       dia 343: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 391 (~mes 13)
+    U44 CLA C118 120-160       dia 343: compra DE 18.980 + impuestos 735 + costes ERP 2.235 = landed 21.950 € · previsto cobro dia 391 (~mes 13)
+    U45 ClaseE W213 160-200    dia 357: compra DE 21.642 + impuestos 839 + costes ERP 2.235 = landed 24.716 € · previsto cobro dia 404 (~mes 13)
+    U46 ClaseE W213 160-200    dia 357: compra DE 21.642 + impuestos 839 + costes ERP 2.235 = landed 24.716 € · previsto cobro dia 404 (~mes 13)
+  VENTAS (cobro a los 7-10 dias de firmar):
+    U36 ClaseE W213 160-200    vendido por 27.544 € · margen 2.828 € · IVA REBU apartado 594 € (ingreso en mod. 303)
+    U37 ClaseE W213 160-200    vendido por 27.544 € · margen 2.828 € · IVA REBU apartado 594 € (ingreso en mod. 303)
+    U38 CLA C118 120-160       vendido por 25.681 € · margen 3.730 € · IVA REBU apartado 783 € (ingreso en mod. 303)
+    U39 CLA C118 120-160       vendido por 25.681 € · margen 3.730 € · IVA REBU apartado 783 € (ingreso en mod. 303)
+  PAGOS DEL MES: fijos 1.510 (nave 1.200 + sumin. 250 + asesoria 60) · SS 285 (RETA 80 + esposa 205) · sueldos 1.080 · retiros 1.600 · impuestos 8.595
+  IMPUESTOS APARTADOS Y PENDIENTES AL CIERRE: IVA REBU acumulado 0 €
+  STOCK FIN DE MES (7 uds, coste inmovilizado 147.974 €, margen potencial 20.546 €):
+    U40 Clase A W177 160-200   en vitrina desde mes 11 (hace 1) · PVP 20.370 € · giro previsto 36 d
+    U41 Clase A W177 160-200   en vitrina desde mes 11 (hace 1) · PVP 20.370 € · giro previsto 36 d
+    U42 Serie3 F30 120-160     en vitrina desde mes 11 (hace 1) · PVP 21.330 € · giro previsto 37 d
+    U43 CLA C118 120-160       en vitrina desde mes 12 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U44 CLA C118 120-160       en vitrina desde mes 12 (hace 0) · PVP 25.681 € · giro previsto 38 d
+    U45 ClaseE W213 160-200    en vitrina desde mes 12 (hace 0) · PVP 27.544 € · giro previsto 37 d
+    U46 ClaseE W213 160-200    en vitrina desde mes 12 (hace 0) · PVP 27.544 € · giro previsto 37 d
+
+[4] CUENTA DE RESULTADOS ECONÓMICA (base contable, no caja)
+  Ventas: 39 unidades · margen bruto 127.672 €
+  (-) Fijos nave+asesoria: 18.120 €   (-) Cuotas SS: 3.420 €
+  (-) Sueldos+retiros familia: 14.000 €   [el sueldo esposa es gasto deducible; el retiro titular no]
+  (=) Resultado antes de IRPF: 92.132 €
+  (-) IRPF estimado (base 85.683): 28.262 €  → neto familiar ≈ 63.870 €
+  IVA REBU repercutido y pagado: 26.811 € (sale del margen, no es coste: lo paga el comprador)
+  Caja final: 15.036 € + stock 7 uds (147.974 €) + en tramitacion 7 uds
+
+[5] REGLAS DE EJECUCION Y QUÉ HACER SI EL PLAN SE DESVIA
+  · Ventanas de compra cada 14 dias, max 2 unidades/viaje, max 8 en stock.
+  · Si en una ventana no hay unidad del puesto #1 al precio objetivo, se baja al siguiente de la
+    lista; si tampoco, se VIAJA BARATO (no se fuerza la compra). La caja manda sobre el ansia.
+  · Regla anti-atasco: cualquier unidad con >55 dias en vitrina baja de precio 4%; >75 dias, 7%.
+  · El IVA del margen se aparta en cuenta separada desde el dia del cobro; nunca es dinero 'nuestro'.
+  · Mes 8+: si la caja final prevista bajaria de 3.000 € tras el retiro, el retiro se recorta. Intocables:
+    nomina esposa 1.200 + cuota SS + fijos.
+  · Revision mensual contra esta hoja: desviacion >15% en dos meses seguidos => parar compras y diagnosticar.
