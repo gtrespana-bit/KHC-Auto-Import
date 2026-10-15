@@ -146,8 +146,8 @@ t.setStyle(TableStyle([
     ("TOPPADDING", (0, 0), (-1, -1), 3.5), ("BOTTOMPADDING", (0, 0), (-1, -1), 3.5)]))
 story.append(t)
 story.append(Spacer(1, 2.5 * mm))
-P("*La SL muestra un neto nominal mayor porque permite retirar nómina aunque el negocio dé "
-  "resultado negativo (resultado SL simulado: −30.925 €; el 'neto' de 4.927 €/mes sale del "
+P(f"*La SL muestra un neto nominal mayor porque permite retirar nómina aunque el negocio dé "
+  f"resultado negativo (resultado SL simulado: {money(rSL['resultado'])}; el 'neto' de 4.927 €/mes sale del "
   "capital, no del negocio — no es sostenible). Por eso la recomendación año 1 es el régimen "
   "de autónomo único + esposa empleada: mismo dinero en casa solo si está ganado.", SMALL)
 
