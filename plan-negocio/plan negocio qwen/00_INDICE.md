@@ -35,3 +35,23 @@ al céntimo — comportamiento intencionado: mejor un script roto que un PDF fal
   `Plan_Ejecucion_Paso_a_Paso_CORREGIDO.pdf`.
 - Lámina Paso 4 reetiquetada: matrícula española definitiva como regla; temporales solo
   como excepción extrema (venta el día 1), según tu aclaración.
+
+## Verificación "de cero" (turno 5) — todo regenerado desde el código, sin usar artefactos previos
+
+Se borraron `plan_ejecucion.json`, ambos `sensibilidad_rotacion.json` y los dos PDF, y se
+volvió a ejecutar toda la cadena desde el principio:
+
+```bash
+cd /workspace/plan-negocio
+python3 calc_plan.py                 # OK → plan_ejecucion.json
+python3 sensibilidad_rotacion.py     # OK → sensibilidad_rotacion.json (copia en esta carpeta)
+python3 generar_plan_ejecucion.py    # OK → 50 láminas, validador del puente de caja pasa
+```
+
+Resultados idénticos a los entregados (el motor usa semilla fija, por lo que es reproducible
+al céntimo): insolvente 11,6 % · ventas P50 286 · patrimonio P50 230.537 € · obra mes 23 ·
+a casa 8.485 / 32.747 / 217.061 = **258.293 €** · sensibilidad +20 %: a casa cae a 123.557 €
+y insolvente sube al 24 %. El PDF regenerado tiene 50 páginas, la lámina 50 ("Sensibilidad ·
+rotación") sale del JSON recién calculado y la lámina 8 (Paso 4 · Permanente) mantiene la
+regla de matrícula definitiva con temporales solo como excepción. Copia actualizada en
+`Plan_Ejecucion_Paso_a_Paso_CORREGIDO.pdf`.
