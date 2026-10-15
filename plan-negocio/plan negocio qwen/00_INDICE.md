@@ -25,3 +25,13 @@ python3 generar_plan_ejecucion.py  # regenera Plan_Ejecucion_Paso_a_Paso.pdf (va
 
 El validador `_validate_monthly_detail()` del generador falla si algún mes no cuadra
 al céntimo — comportamiento intencionado: mejor un script roto que un PDF falso.
+
+## Entrega del turno 4 (commit c8b6de6) — cabos sueltos cerrados
+- `05_SENSIBILIDAD_ROTACION.md` + `sensibilidad_rotacion.py` + `sensibilidad_rotacion.json`:
+  sensibilidad de rotación +20 %/+40 % (mismas 250 sims, misma semilla). Resultado clave:
+  con +20 % de días el dinero a casa cae de ~264k € a ~124k € y el insolvente sube al 24 %.
+- **Lámina 50 nueva en el PDF** ("Sensibilidad · rotación") generada desde ese JSON por
+  `generar_plan_ejecucion.py`; el PDF pasa de 49 a 50 láminas. Copia actualizada en
+  `Plan_Ejecucion_Paso_a_Paso_CORREGIDO.pdf`.
+- Lámina Paso 4 reetiquetada: matrícula española definitiva como regla; temporales solo
+  como excepción extrema (venta el día 1), según tu aclaración.
