@@ -49,12 +49,13 @@ IVA_REBU       = 0.21          # [ERP] art.137 LIVA: IVA solo sobre el margen
 CUOTA_ISD      = 0.0
 RENT           = 1_200.0       # [repo] nave O Milladoiro 465 m², datos_nave_milladoiro.py
 UTILITIES      = 250.0         # luz trifasica 400 m² + agua + vado [estimacion]
-ASESORIA       = 150.0         # contable + fiscal (dos personas, modelos 303/349/111)
-PORTALES       = 250.0         # Coches.net pro + Wallapop + mobile.de basic
-SEGUROS_RC     = 90.0          # RC actividad + flotante provisional
-PLANNING       = 160.0         # viajes de compra prorrateados (vuelo+hotel, 2/mes)
-VARIOS         = 100.0
-FIJOS_NAVE     = RENT + UTILITIES + ASESORIA + PORTALES + SEGUROS_RC + PLANNING + VARIOS  # 2.200
+ASESORIA       = 60.0          # [TÚ] coste real de la asesoría
+# PORTALES / SEGUROS / VIAJES / VARIOS / MANTENIMIENTO ya NO van en fijos:
+# estan dentro del PRECIO DE COMPRA (landed) que usa el ERP -> ver catalogo.py:
+# LOGISTICA 730 + IMPREVISTOS 300 + ADMIN 425 (ITV+DGT+placas+trad+COC)
+# + PREPARACION 780 (profesional 180 + mantenimiento 150 + garantia 450 + anuncio 30).
+# Doble cuenta corregida 2026-10-16.
+FIJOS_NAVE     = RENT + UTILITIES + ASESORIA  # 1.510
 # Reforma e instalacion de la nave: se paga ANTES del mes 1 y sale del capital.
 # Cifra validada del repo: REFORMA_FASE1_COMPLETA.md = 5.115 EUR (suelo epoxi zona
 # exposicion + LED + cortina + alarma; mano de obra propia). Se anaden mesas/sillas
@@ -331,7 +332,9 @@ LECTURA HONESTA DEL MODELO COMPLETO:
     + esposa empleada es más barato. La SL vuelve a ganar a partir de ~45-50k de
     margen anual (comprobar en PASO 5/6 con vuestros números reales mes 6).
   · Los meses malos existen: si un coche tarda 90 d, ese mes la familia cobra
-    menos. Los 2.200 €/mes de nave se pagan vendas o no vendas.""")
+    menos. Los 1.510 €/mes de fijos (nave+suministros+asesoría) se pagan vendas
+    o no; portales, garantía, mantenimiento y anuncios ya están dentro del
+    coste de cada coche (landed del ERP).""")
 
 
 if __name__ == "__main__":

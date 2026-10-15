@@ -63,7 +63,7 @@ story.append(Spacer(1, 6 * mm))
 resumen = [
     ["Parámetro", "Valor fijado por el dueño"],
     ["Capital inicial", "50.000 €"],
-    ["Nave", "Sí, grande desde el día 1 — O Milladoiro, 465 m², 1.200 €/mes (+ ~285 €/mes suministros/tasas; coste total nave≈1.485 €/mes; dentro de fijos 2.200 €/mes)"],
+    ["Nave", "Sí, grande desde el día 1 — O Milladoiro, 465 m², 1.200 €/mes (+ ~285 €/mes suministros/tasas; coste total nave≈1.485 €/mes; fijos del plan = 1.510 €/mes: alquiler+suministros+asesoría 60 — portales, garantía, mantenimiento y trámites van en el coste de cada coche (landed ERP))"],
     ["Proveedores", "Cualquiera que salga rentable (concesionario o particular)"],
     ["Objetivo", "≥ 2.500 € netos/mes entre los dos cónyuges"],
 ]
@@ -117,8 +117,11 @@ t.setStyle(TableStyle([
 story.append(t)
 story.append(Spacer(1, 3 * mm))
 P(f"Margen medio por unidad: <b>{money(pm)}</b> · Fijos mensuales con nave: "
-  f"<b>{money(plan_v3.FIJOS_NAVE)}</b> (alquiler 1.200 + suministros 250 + asesoría 150 + portales 250 "
-  "+ seguros 90 + viajes 160 + varios 100). Dinero para stock día 1: autónomo "
+  f"<b>{money(plan_v3.FIJOS_NAVE)}</b> (alquiler 1.200 + suministros 250 + asesoría 60). "
+  "Portales, seguros de operación, viajes de compra, mantenimiento y garantía de cada coche "
+  "<b>ya están incluidos en el precio de compra/landed del ERP</b> (logística 730 + imprevistos 300 "
+  "+ ITV/DGT/trámites 425 + preparación+mantenimiento+garantía+anuncio 780), no se vuelven a contar como fijos. "
+  "Dinero para stock día 1: autónomo "
   f"<b>{money(plan_v3.CAPITAL - plan_v3.ARRANQUE_NAVE - plan_v3.FIANZA_NAVE - 300)}</b>.", BODY)
 
 # ---- simulación ------------------------------------------------------------
@@ -199,7 +202,7 @@ P("· <b>RETA:</b> marido de alta como autónomo con tarifa plana 80 €/mes los
   "· <b>Cambio a SL</b> cuando el margen anual supere ~45–50k € (IS microempresa 19 %) — revisar en el mes 6 con números reales.", BODY)
 
 P("5 · Riesgos y reglas del modelo", H2)
-P("· Un coche parado 90 días reduce ese mes la retirada familiar; los 2.200 €/mes de nave se pagan vendas o no.<br/>"
+P("· Un coche parado 90 días reduce ese mes la retirada familiar; los 1.510 €/mes de fijos se pagan vendas o no (el resto ya está en el landed de cada coche).<br/>"
   "· Muestras de los segmentos caros: Q5 FY 0-40 mil km nDE=64/nES=21, Macan 95B 80-120k nDE=36/nES=29 — "
   "suficientes para la mediana pero conviene verificar 2-3 ofertas reales en mobile.de antes de cerrar la primera compra grande.<br/>" \
   "· Compras a particular añaden +8 % ITP y riesgo de garantía; el modelo ya lo incluye por segmento.<br/>"
