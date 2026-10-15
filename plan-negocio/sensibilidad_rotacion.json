@@ -1,0 +1,26 @@
+{
+  "central": {
+    "factor": 1.0,
+    "ventas_p50": 285.5,
+    "patrimonio_p50": 230536.89,
+    "casa_p50": 263865.19,
+    "insolvente_pct": 11.6,
+    "min_caja_p50": 2155.67
+  },
+  "rot+20": {
+    "factor": 1.2,
+    "ventas_p50": 208.0,
+    "patrimonio_p50": 267625.43,
+    "casa_p50": 123557.21,
+    "insolvente_pct": 24.0,
+    "min_caja_p50": 982.23
+  },
+  "rot+40": {
+    "factor": 1.4,
+    "ventas_p50": 148.0,
+    "patrimonio_p50": 232680.64,
+    "casa_p50": 62377.85,
+    "insolvente_pct": 36.8,
+    "min_caja_p50": 439.3
+  }
+}
