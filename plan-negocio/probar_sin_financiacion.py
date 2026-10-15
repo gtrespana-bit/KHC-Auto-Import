@@ -5,8 +5,10 @@ from __future__ import annotations
 
 import importlib.util
 
+from pathlib import Path as _P
+
 spec = importlib.util.spec_from_file_location(
-    "g", "/home/user/KHC-Auto-Import/plan-negocio/generar_presentacion.py"
+    "g", str(_P(__file__).resolve().parent / "generar_presentacion.py")
 )
 g = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(g)

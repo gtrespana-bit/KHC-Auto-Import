@@ -828,10 +828,8 @@ def _draw_month_detail(c, n, t, m):
     c.setFillColor(GOLD_DEEP)
     c.setFont("DejaVuBold", 8)
     c.drawString(492, 225, "MOVIMIENTO DE CAJA · QUÉ ENTRA Y QUÉ SALE")
-    is3_pendiente = float(D.get("impuesto3_representativo", 0.0)) if m == 36 else 0.0
-    impuesto_label = "− Impuesto Sociedades pagado"
-    if is3_pendiente > 0:
-        impuesto_label = f"− IS pagado (ejercicio 3 pendiente: {_amount(is3_pendiente)})"
+    # Motor corregido: el IS del ejercicio se paga en caja antes de repartir dividendos.
+    impuesto_label = "− Impuesto Sociedades pagado (devengado del ejercicio)"
     cash_rows = [
         ["Caja antes de movimientos del mes", _amount(start)],
         ["+ Cobros de las ventas (brutos)", "+" + _amount(total_ventas)],

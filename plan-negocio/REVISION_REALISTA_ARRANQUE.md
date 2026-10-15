@@ -542,6 +542,17 @@ hacer obra. Si eso no existe en el mercado del día, nave de paso de 220 m² a
 **Decidido: O Milladoiro desde el día 1, sin reforma al abrir, y la obra completa
 (5.115,47 €) cuando la caja la aguante sin riesgo para el fondo.**
 
+**Actualización (16/10/2026):** el dueño refina la decisión — **sí se pinta el suelo
+epoxi el día 1 (905 €)**, porque con los coches dentro es mucho más difícil hacerlo;
+el resto de la obra (pintura de paredes, iluminación, oficinas ≈ 4.210 €) se paga
+según la caja lo permita, ya que son trabajos realizables con vehículos en nave o
+moviéndolos con facilidad. Esta variante está medida arriba: «obra completa el día 1»
+sube los meses en descubierto al 17,2 %, pero **sólo el suelo (905 €) el día 1** es
+un coste puntual que el motor del plan de ejecución absorbe con flota ≤ 5 plazas y
+caja holgada (lámina Paso 7), y el P50 resultante (230.537 € de patrimonio, IS y
+dividendos corregidos) sigue siendo viable. El Plan_Ejecucion_Paso_a_Paso.pdf (16/10)
+refleja esta decisión; este documento queda como análisis histórico del porqué.
+
 La regla que se grabó en el modelo (`ESTRATEGIAS["decision"]`) es exactamente la
 del dueño: la obra se paga en el primer mes en que la caja cubra **a la vez** el
 fondo de 3 meses, el importe de la obra y **dos meses más de gastos fijos**; si un
