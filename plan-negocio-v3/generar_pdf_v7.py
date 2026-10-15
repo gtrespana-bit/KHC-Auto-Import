@@ -391,16 +391,19 @@ inv = [["Concepto", "Importe", "Momento", "Recuperable?"],
  ["Alta de actividad, gestoría de apertura, licencias", "300 €", "Mes 0", "No"],
  ["<b>Total inversión de arranque</b>", "<b>8.500 €</b>", "", "<b>1.200 € recuperables</b>"],
  ["Capital disponible para coches y operativa", "41.500 €", "Mes 1 día 1", "Rotante"],
- ["Colchón adicional del dueño (meses 1-7 sin retirar sueldo)", "+41.500 € de ahorro personal implícito", "—", "Permite que la caja trabaje al 100% en stock"]]
+ ["Colchón del dueño (NO entra en la caja de la empresa)", "41.500 € de ahorro personal, fuera del balance", "Meses 1-7", "Cubre los gastos de la familia: no se retira sueldo hasta el mes 8 y la caja trabaja al 100% en stock"]]
 it = tbl([[P(x, st_cellwb) for x in inv[0]]] + [[P(c, st_cell) for c in r] for r in inv[1:]],
           [86*mm, 30*mm, 20*mm, CW-136*mm])
 story.append(it)
 story.append(Spacer(1, 3*mm))
 story.append(P("Con 41.500 € operativos y landed medios de ~20.000 €, la primera oleada son 3 coches (61.509 €). "
-  "¿Cómo se compra por 61.509 € si el capital disponible es menor? Porque el socio aporta 33.000 € adicionales en el "
-  "mes 0 hasta formar una caja inicial de 83.000 € (así lo registra el libro diario del Anexo A: aportación total "
-  "50.000 € + remanente de arranque), y las ventas del mes 2 devuelven al circuito lo adelantado — el capital propio "
-  "inicial queda íntegro dentro de la caja+stock en todo momento. Alternativa sin ese adelanto: arrancar con 2 unidades "
+  "¿Cómo se compra por 61.509 € si el capital disponible es menor? Porque en el mes 0, antes de pagar reforma, "
+  "fianza y constitución (8.500 €), todavía hay 50.000 € íntegros en caja: las ventanas de compra del mes 1 se "
+  "ejecutan con ese dinero mientras las ventas aún no han vuelto — así lo registra el libro diario del Anexo A "
+  "(aportación 50.000 € → caja inicial de arranque 41.500 € + inversión 8.500 €). Las ventas del mes 2 devuelven "
+  "al circuito lo adelantado: el capital propio inicial queda íntegro dentro de la caja+stock en todo momento, y "
+  "el colchón personal de otros 41.500 € permanece fuera de la empresa, cubriendo los gastos de la familia hasta "
+  "el mes 8. Alternativa más conservadora: arrancar con 2 unidades "
   "y acortar ventanas; el calendario perdería ~2 ventas anuales pero ganaría colchón.", st_note))
 story.append(Spacer(1, 4*mm))
 story.append(Image("fig_caja_stock.png", width=CW, height=CW*3.0/7.4))

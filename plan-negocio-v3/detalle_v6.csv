@@ -1,167 +1,150 @@
 mes;dia;tipo;concepto;importe_EUR;saldo_caja_EUR;nota
 0;0;APORTACION;Capital socio (50.000);50000;91500;
-0;0;APORTACION;Colchon personal del titular (meses 1-7 sin retiro);41500;133000;decision del dueño: cubre los gastos de la familia mientras la caja trabaja al 100% en stock
-0;0;INVERSION;Reforma e instalacion nave;-7000;126000;
-0;0;INVERSION;Fianza 1 mes nave;-1200;124800;
-0;0;GASTO;Alta autonomo + asesor apertura;-300;124500;
-1;2;FIJO;Alquiler nave O Milladoiro;-1200;123300;
-1;3;FIJO;Suministros (luz/agua/vado);-250;123050;
-1;4;FIJO;Asesor fiscal-laboral;-60;122990;
-1;5;SS;RETA tarifa plana titular;-80;122910;
-1;5;SS;Cotizacion esposa empleada;-205;122705;
-1;7;COMPRA;U01 CLA C118 120-160;-21950;100755;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-1;7;COMPRA;U02 CLA C118 120-160;-21950;78804;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-1;21;COMPRA;U03 Clase A W177 160-200;-17608;61196;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
-1;21;COMPRA;U04 Clase A W177 160-200;-17608;43587;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
-2;55;VENTA;U01 CLA C118 120-160;24897;68484;compra dia 7 m1, en venta 48d
-2;55;VENTA;U02 CLA C118 120-160;24897;93382;compra dia 7 m1, en venta 48d
-2;2;FIJO;Alquiler nave O Milladoiro;-1200;92182;
-2;3;FIJO;Suministros (luz/agua/vado);-250;91932;
-2;4;FIJO;Asesor fiscal-laboral;-60;91872;
-2;5;SS;RETA tarifa plana titular;-80;91792;
-2;5;SS;Cotizacion esposa empleada;-205;91587;
-2;35;COMPRA;U05 CLA C118 120-160;-21950;69636;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-2;35;COMPRA;U06 CLA C118 120-160;-21950;47686;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-2;49;COMPRA;U07 ClaseE W213 160-200;-24716;22970;P25 DE 21,642 + log 730 + imprev 300 + admin 425 + prep 780 + imp 839
-3;67;VENTA;U03 Clase A W177 160-200;19790;42760;compra dia 21 m1, en venta 46d
-3;67;VENTA;U04 Clase A W177 160-200;19790;62550;compra dia 21 m1, en venta 46d
-3;83;VENTA;U05 CLA C118 120-160;24897;87447;compra dia 35 m2, en venta 48d
-3;83;VENTA;U06 CLA C118 120-160;24897;112345;compra dia 35 m2, en venta 48d
-3;2;FIJO;Alquiler nave O Milladoiro;-1200;111145;
-3;3;FIJO;Suministros (luz/agua/vado);-250;110895;
-3;4;FIJO;Asesor fiscal-laboral;-60;110835;
-3;5;SS;RETA tarifa plana titular;-80;110755;
-3;5;SS;Cotizacion esposa empleada;-205;110550;
-3;20;IMPUESTO;Modelo 303 IVA (trimestral);-4293;106256;apartado de los margenes cobrados
-3;63;COMPRA;U08 CLA C118 120-160;-21950;84306;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-3;63;COMPRA;U09 CLA C118 120-160;-21950;62355;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-3;77;COMPRA;U10 Clase A W177 160-200;-17608;44747;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
-3;77;COMPRA;U11 Clase A W177 160-200;-17608;27138;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
-4;96;VENTA;U07 ClaseE W213 160-200;26950;54089;compra dia 49 m2, en venta 47d
-4;111;VENTA;U08 CLA C118 120-160;24897;78986;compra dia 63 m3, en venta 48d
-4;111;VENTA;U09 CLA C118 120-160;24897;103884;compra dia 63 m3, en venta 48d
-4;2;FIJO;Alquiler nave O Milladoiro;-1200;102684;
-4;3;FIJO;Suministros (luz/agua/vado);-250;102434;
-4;4;FIJO;Asesor fiscal-laboral;-60;102374;
-4;5;SS;RETA tarifa plana titular;-80;102294;
-4;5;SS;Cotizacion esposa empleada;-205;102089;
-4;91;COMPRA;U12 CLA C118 120-160;-21950;80138;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-4;91;COMPRA;U13 CLA C118 120-160;-21950;58188;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-4;105;COMPRA;U14 ClaseE W213 160-200;-24716;33471;P25 DE 21,642 + log 730 + imprev 300 + admin 425 + prep 780 + imp 839
-4;105;COMPRA;U15 ClaseE W213 160-200;-24716;8755;P25 DE 21,642 + log 730 + imprev 300 + admin 425 + prep 780 + imp 839
-5;123;VENTA;U10 Clase A W177 160-200;19790;28545;compra dia 77 m3, en venta 46d
-5;123;VENTA;U11 Clase A W177 160-200;19790;48335;compra dia 77 m3, en venta 46d
-5;139;VENTA;U12 CLA C118 120-160;24897;73233;compra dia 91 m4, en venta 48d
-5;139;VENTA;U13 CLA C118 120-160;24897;98130;compra dia 91 m4, en venta 48d
-5;2;FIJO;Alquiler nave O Milladoiro;-1200;96930;
-5;3;FIJO;Suministros (luz/agua/vado);-250;96680;
-5;4;FIJO;Asesor fiscal-laboral;-60;96620;
-5;5;SS;RETA tarifa plana titular;-80;96540;
-5;5;SS;Cotizacion esposa empleada;-205;96335;
-5;133;COMPRA;U16 CLA C118 120-160;-21950;74385;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-5;133;COMPRA;U17 CLA C118 120-160;-21950;52434;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-5;147;COMPRA;U18 Clase A W177 160-200;-17608;34826;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
-5;147;COMPRA;U19 Clase A W177 160-200;-17608;17217;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
-6;152;VENTA;U14 ClaseE W213 160-200;26950;44168;compra dia 105 m4, en venta 47d
-6;152;VENTA;U15 ClaseE W213 160-200;26950;71118;compra dia 105 m4, en venta 47d
-6;2;FIJO;Alquiler nave O Milladoiro;-1200;69918;
-6;3;FIJO;Suministros (luz/agua/vado);-250;69668;
-6;4;FIJO;Asesor fiscal-laboral;-60;69608;
-6;5;SS;RETA tarifa plana titular;-80;69528;
-6;5;SS;Cotizacion esposa empleada;-205;69323;
-6;20;IMPUESTO;Modelo 303 IVA (trimestral);-6075;63248;apartado de los margenes cobrados
-6;161;COMPRA;U20 ClaseE W213 160-200;-24716;38532;P25 DE 21,642 + log 730 + imprev 300 + admin 425 + prep 780 + imp 839
-6;161;COMPRA;U21 ClaseE W213 160-200;-24716;13816;P25 DE 21,642 + log 730 + imprev 300 + admin 425 + prep 780 + imp 839
-7;181;VENTA;U16 CLA C118 120-160;24897;38713;compra dia 133 m5, en venta 48d
-7;181;VENTA;U17 CLA C118 120-160;24897;63610;compra dia 133 m5, en venta 48d
-7;193;VENTA;U18 Clase A W177 160-200;19790;83400;compra dia 147 m5, en venta 46d
-7;193;VENTA;U19 Clase A W177 160-200;19790;103191;compra dia 147 m5, en venta 46d
-7;208;VENTA;U20 ClaseE W213 160-200;26950;130141;compra dia 161 m6, en venta 47d
-7;208;VENTA;U21 ClaseE W213 160-200;26950;157091;compra dia 161 m6, en venta 47d
-7;2;FIJO;Alquiler nave O Milladoiro;-1200;155891;
-7;3;FIJO;Suministros (luz/agua/vado);-250;155641;
-7;4;FIJO;Asesor fiscal-laboral;-60;155581;
-7;5;SS;RETA tarifa plana titular;-80;155501;
-7;5;SS;Cotizacion esposa empleada;-205;155296;
-7;189;COMPRA;U22 CLA C118 120-160;-21950;133346;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-7;189;COMPRA;U23 CLA C118 120-160;-21950;111395;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-7;203;COMPRA;U24 Clase A W177 160-200;-17608;93787;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
-7;203;COMPRA;U25 Clase A W177 160-200;-17608;76178;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
-8;237;VENTA;U22 CLA C118 120-160;24897;101075;compra dia 189 m7, en venta 48d
-8;237;VENTA;U23 CLA C118 120-160;24897;125973;compra dia 189 m7, en venta 48d
-8;2;FIJO;Alquiler nave O Milladoiro;-1200;124773;
-8;3;FIJO;Suministros (luz/agua/vado);-250;124523;
-8;4;FIJO;Asesor fiscal-laboral;-60;124463;
-8;5;SS;RETA tarifa plana titular;-80;124383;
-8;5;SS;Cotizacion esposa empleada;-205;124178;
-8;28;NOMINA;Nomina esposa (neto);-1080;123098;
-8;28;RETIRO;Retiro variable titular;-1600;121498;
-8;217;COMPRA;U26 CLA C118 120-160;-21950;99547;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-8;217;COMPRA;U27 CLA C118 120-160;-21950;77597;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-8;231;COMPRA;U28 ClaseE W213 160-200;-24716;52881;P25 DE 21,642 + log 730 + imprev 300 + admin 425 + prep 780 + imp 839
-8;231;COMPRA;U29 ClaseE W213 160-200;-24716;28165;P25 DE 21,642 + log 730 + imprev 300 + admin 425 + prep 780 + imp 839
-9;249;VENTA;U24 Clase A W177 160-200;19790;47955;compra dia 203 m7, en venta 46d
-9;249;VENTA;U25 Clase A W177 160-200;19790;67745;compra dia 203 m7, en venta 46d
-9;265;VENTA;U26 CLA C118 120-160;24897;92642;compra dia 217 m8, en venta 48d
-9;265;VENTA;U27 CLA C118 120-160;24897;117540;compra dia 217 m8, en venta 48d
-9;2;FIJO;Alquiler nave O Milladoiro;-1200;116340;
-9;3;FIJO;Suministros (luz/agua/vado);-250;116090;
-9;4;FIJO;Asesor fiscal-laboral;-60;116030;
-9;5;SS;RETA tarifa plana titular;-80;115950;
-9;5;SS;Cotizacion esposa empleada;-205;115745;
-9;28;NOMINA;Nomina esposa (neto);-1080;114665;
-9;28;RETIRO;Retiro variable titular;-1600;113065;
-9;20;IMPUESTO;Modelo 303 IVA (trimestral);-8208;104857;apartado de los margenes cobrados
-9;20;IMPUESTO;Modelo 111 IRPF retenido esposa;-240;104617;
-9;245;COMPRA;U30 CLA C118 120-160;-21950;82667;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-9;245;COMPRA;U31 CLA C118 120-160;-21950;60716;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-9;259;COMPRA;U32 Clase A W177 160-200;-17608;43108;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
-9;259;COMPRA;U33 Clase A W177 160-200;-17608;25499;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
-10;278;VENTA;U28 ClaseE W213 160-200;26950;52449;compra dia 231 m8, en venta 47d
-10;278;VENTA;U29 ClaseE W213 160-200;26950;79400;compra dia 231 m8, en venta 47d
-10;293;VENTA;U30 CLA C118 120-160;24897;104297;compra dia 245 m9, en venta 48d
-10;293;VENTA;U31 CLA C118 120-160;24897;129194;compra dia 245 m9, en venta 48d
-10;2;FIJO;Alquiler nave O Milladoiro;-1200;127994;
-10;3;FIJO;Suministros (luz/agua/vado);-250;127744;
-10;4;FIJO;Asesor fiscal-laboral;-60;127684;
-10;5;SS;RETA tarifa plana titular;-80;127604;
-10;5;SS;Cotizacion esposa empleada;-205;127399;
-10;28;NOMINA;Nomina esposa (neto);-1080;126319;
-10;28;RETIRO;Retiro variable titular;-1600;124719;
-10;273;COMPRA;U34 CLA C118 120-160;-21950;102769;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-10;273;COMPRA;U35 CLA C118 120-160;-21950;80818;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-10;287;COMPRA;U36 ClaseE W213 160-200;-24716;56102;P25 DE 21,642 + log 730 + imprev 300 + admin 425 + prep 780 + imp 839
-10;287;COMPRA;U37 ClaseE W213 160-200;-24716;31386;P25 DE 21,642 + log 730 + imprev 300 + admin 425 + prep 780 + imp 839
-11;305;VENTA;U32 Clase A W177 160-200;19790;51176;compra dia 259 m9, en venta 46d
-11;305;VENTA;U33 Clase A W177 160-200;19790;70966;compra dia 259 m9, en venta 46d
-11;321;VENTA;U34 CLA C118 120-160;24897;95864;compra dia 273 m10, en venta 48d
-11;321;VENTA;U35 CLA C118 120-160;24897;120761;compra dia 273 m10, en venta 48d
-11;2;FIJO;Alquiler nave O Milladoiro;-1200;119561;
-11;3;FIJO;Suministros (luz/agua/vado);-250;119311;
-11;4;FIJO;Asesor fiscal-laboral;-60;119251;
-11;5;SS;RETA tarifa plana titular;-80;119171;
-11;5;SS;Cotizacion esposa empleada;-205;118966;
-11;28;NOMINA;Nomina esposa (neto);-1080;117886;
-11;28;RETIRO;Retiro variable titular;-1600;116286;
-11;301;COMPRA;U38 CLA C118 120-160;-21950;94336;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-11;301;COMPRA;U39 CLA C118 120-160;-21950;72385;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-11;315;COMPRA;U40 Clase A W177 160-200;-17608;54777;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
-11;315;COMPRA;U41 Clase A W177 160-200;-17608;37168;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
-11;329;COMPRA;U42 Serie3 F30 120-160;-19424;17744;P25 DE 16,548 + log 730 + imprev 300 + admin 425 + prep 780 + imp 641
-12;334;VENTA;U36 ClaseE W213 160-200;26950;44695;compra dia 287 m10, en venta 47d
-12;334;VENTA;U37 ClaseE W213 160-200;26950;71645;compra dia 287 m10, en venta 47d
-12;349;VENTA;U38 CLA C118 120-160;24897;96542;compra dia 301 m11, en venta 48d
-12;349;VENTA;U39 CLA C118 120-160;24897;121440;compra dia 301 m11, en venta 48d
-12;2;FIJO;Alquiler nave O Milladoiro;-1200;120240;
-12;3;FIJO;Suministros (luz/agua/vado);-250;119990;
-12;4;FIJO;Asesor fiscal-laboral;-60;119930;
-12;5;SS;RETA tarifa plana titular;-80;119850;
-12;5;SS;Cotizacion esposa empleada;-205;119645;
-12;28;NOMINA;Nomina esposa (neto);-1080;118565;
-12;28;RETIRO;Retiro variable titular;-1600;116965;
-12;20;IMPUESTO;Modelo 303 IVA (trimestral);-8235;108729;apartado de los margenes cobrados
-12;20;IMPUESTO;Modelo 111 IRPF retenido esposa;-360;108369;
-12;343;COMPRA;U43 CLA C118 120-160;-21950;86419;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-12;343;COMPRA;U44 CLA C118 120-160;-21950;64468;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
-12;357;COMPRA;U45 ClaseE W213 160-200;-24716;39752;P25 DE 21,642 + log 730 + imprev 300 + admin 425 + prep 780 + imp 839
-12;357;COMPRA;U46 ClaseE W213 160-200;-24716;15036;P25 DE 21,642 + log 730 + imprev 300 + admin 425 + prep 780 + imp 839
+0;0;INVERSION;Reforma e instalacion nave;-7000;84500;
+0;0;INVERSION;Fianza 1 mes nave;-1200;83300;
+0;0;GASTO;Alta autonomo + asesor apertura;-300;83000;
+1;2;FIJO;Alquiler nave O Milladoiro;-1200;81800;
+1;3;FIJO;Suministros (luz/agua/vado);-250;81550;
+1;4;FIJO;Asesor fiscal-laboral;-60;81490;
+1;5;SS;RETA tarifa plana titular;-80;81410;
+1;5;SS;Cotizacion esposa empleada;-205;81205;
+1;7;COMPRA;U38 CLA C118 120-160;-21950;59255;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+1;7;COMPRA;U39 CLA C118 120-160;-21950;37304;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+1;21;COMPRA;U40 Clase A W177 160-200;-17608;19696;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
+2;55;VENTA;U38 CLA C118 120-160;24897;44593;compra dia 7 m1, en venta 48d
+2;55;VENTA;U39 CLA C118 120-160;24897;69490;compra dia 7 m1, en venta 48d
+2;2;FIJO;Alquiler nave O Milladoiro;-1200;68290;
+2;3;FIJO;Suministros (luz/agua/vado);-250;68040;
+2;4;FIJO;Asesor fiscal-laboral;-60;67980;
+2;5;SS;RETA tarifa plana titular;-80;67900;
+2;5;SS;Cotizacion esposa empleada;-205;67695;
+2;35;COMPRA;U41 CLA C118 120-160;-21950;45745;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+2;35;COMPRA;U42 CLA C118 120-160;-21950;23794;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+2;49;COMPRA;U43 Clase A W177 160-200;-17608;6186;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
+3;67;VENTA;U40 Clase A W177 160-200;19790;25976;compra dia 21 m1, en venta 46d
+3;83;VENTA;U41 CLA C118 120-160;24897;50873;compra dia 35 m2, en venta 48d
+3;83;VENTA;U42 CLA C118 120-160;24897;75771;compra dia 35 m2, en venta 48d
+3;2;FIJO;Alquiler nave O Milladoiro;-1200;74571;
+3;3;FIJO;Suministros (luz/agua/vado);-250;74321;
+3;4;FIJO;Asesor fiscal-laboral;-60;74261;
+3;5;SS;RETA tarifa plana titular;-80;74181;
+3;5;SS;Cotizacion esposa empleada;-205;73976;
+3;20;IMPUESTO;Modelo 303 IVA (trimestral);-3713;70262;apartado de los margenes cobrados
+3;63;COMPRA;U44 CLA C118 120-160;-21950;48312;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+3;63;COMPRA;U45 CLA C118 120-160;-21950;26361;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+3;77;COMPRA;U46 Clase A W177 160-200;-17608;8753;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
+4;95;VENTA;U43 Clase A W177 160-200;19790;28543;compra dia 49 m2, en venta 46d
+4;111;VENTA;U44 CLA C118 120-160;24897;53440;compra dia 63 m3, en venta 48d
+4;111;VENTA;U45 CLA C118 120-160;24897;78338;compra dia 63 m3, en venta 48d
+4;2;FIJO;Alquiler nave O Milladoiro;-1200;77138;
+4;3;FIJO;Suministros (luz/agua/vado);-250;76888;
+4;4;FIJO;Asesor fiscal-laboral;-60;76828;
+4;5;SS;RETA tarifa plana titular;-80;76748;
+4;5;SS;Cotizacion esposa empleada;-205;76543;
+4;91;COMPRA;U47 CLA C118 120-160;-21950;54592;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+4;91;COMPRA;U48 CLA C118 120-160;-21950;32642;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+4;105;COMPRA;U49 Clase A W177 160-200;-17608;15033;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
+5;123;VENTA;U46 Clase A W177 160-200;19790;34823;compra dia 77 m3, en venta 46d
+5;139;VENTA;U47 CLA C118 120-160;24897;59721;compra dia 91 m4, en venta 48d
+5;139;VENTA;U48 CLA C118 120-160;24897;84618;compra dia 91 m4, en venta 48d
+5;2;FIJO;Alquiler nave O Milladoiro;-1200;83418;
+5;3;FIJO;Suministros (luz/agua/vado);-250;83168;
+5;4;FIJO;Asesor fiscal-laboral;-60;83108;
+5;5;SS;RETA tarifa plana titular;-80;83028;
+5;5;SS;Cotizacion esposa empleada;-205;82823;
+5;133;COMPRA;U50 CLA C118 120-160;-21950;60873;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+5;133;COMPRA;U51 CLA C118 120-160;-21950;38922;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+5;147;COMPRA;U52 Clase A W177 160-200;-17608;21314;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
+6;151;VENTA;U49 Clase A W177 160-200;19790;41104;compra dia 105 m4, en venta 46d
+6;2;FIJO;Alquiler nave O Milladoiro;-1200;39904;
+6;3;FIJO;Suministros (luz/agua/vado);-250;39654;
+6;4;FIJO;Asesor fiscal-laboral;-60;39594;
+6;5;SS;RETA tarifa plana titular;-80;39514;
+6;5;SS;Cotizacion esposa empleada;-205;39309;
+6;20;IMPUESTO;Modelo 303 IVA (trimestral);-4873;34436;apartado de los margenes cobrados
+6;161;COMPRA;U53 Clase A W177 160-200;-17608;16827;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
+7;181;VENTA;U50 CLA C118 120-160;24897;41725;compra dia 133 m5, en venta 48d
+7;181;VENTA;U51 CLA C118 120-160;24897;66622;compra dia 133 m5, en venta 48d
+7;193;VENTA;U52 Clase A W177 160-200;19790;86412;compra dia 147 m5, en venta 46d
+7;207;VENTA;U53 Clase A W177 160-200;19790;106202;compra dia 161 m6, en venta 46d
+7;2;FIJO;Alquiler nave O Milladoiro;-1200;105002;
+7;3;FIJO;Suministros (luz/agua/vado);-250;104752;
+7;4;FIJO;Asesor fiscal-laboral;-60;104692;
+7;5;SS;RETA tarifa plana titular;-80;104612;
+7;5;SS;Cotizacion esposa empleada;-205;104407;
+7;189;COMPRA;U54 CLA C118 120-160;-21950;82457;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+7;189;COMPRA;U55 CLA C118 120-160;-21950;60506;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+7;203;COMPRA;U56 Clase A W177 160-200;-17608;42898;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
+7;203;COMPRA;U57 Clase A W177 160-200;-17608;25289;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
+8;237;VENTA;U54 CLA C118 120-160;24897;50187;compra dia 189 m7, en venta 48d
+8;237;VENTA;U55 CLA C118 120-160;24897;75084;compra dia 189 m7, en venta 48d
+8;2;FIJO;Alquiler nave O Milladoiro;-1200;73884;
+8;3;FIJO;Suministros (luz/agua/vado);-250;73634;
+8;4;FIJO;Asesor fiscal-laboral;-60;73574;
+8;5;SS;RETA tarifa plana titular;-80;73494;
+8;5;SS;Cotizacion esposa empleada;-205;73289;
+8;28;NOMINA;Nomina esposa (neto);-1080;72209;
+8;28;RETIRO;Retiro variable titular;-1600;70609;
+8;217;COMPRA;U58 CLA C118 120-160;-21950;48659;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+8;217;COMPRA;U59 CLA C118 120-160;-21950;26708;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+8;231;COMPRA;U60 Serie3 F30 120-160;-19424;7284;P25 DE 16,548 + log 730 + imprev 300 + admin 425 + prep 780 + imp 641
+9;249;VENTA;U56 Clase A W177 160-200;19790;27074;compra dia 203 m7, en venta 46d
+9;249;VENTA;U57 Clase A W177 160-200;19790;46864;compra dia 203 m7, en venta 46d
+9;265;VENTA;U58 CLA C118 120-160;24897;71762;compra dia 217 m8, en venta 48d
+9;265;VENTA;U59 CLA C118 120-160;24897;96659;compra dia 217 m8, en venta 48d
+9;2;FIJO;Alquiler nave O Milladoiro;-1200;95459;
+9;3;FIJO;Suministros (luz/agua/vado);-250;95209;
+9;4;FIJO;Asesor fiscal-laboral;-60;95149;
+9;5;SS;RETA tarifa plana titular;-80;95069;
+9;5;SS;Cotizacion esposa empleada;-205;94864;
+9;28;NOMINA;Nomina esposa (neto);-1080;93784;
+9;28;RETIRO;Retiro variable titular;-1600;92184;
+9;20;IMPUESTO;Modelo 303 IVA (trimestral);-7020;85164;apartado de los margenes cobrados
+9;20;IMPUESTO;Modelo 111 IRPF retenido esposa;-240;84924;
+9;245;COMPRA;U61 CLA C118 120-160;-21950;62974;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+9;245;COMPRA;U62 CLA C118 120-160;-21950;41024;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+9;259;COMPRA;U63 Clase A W177 160-200;-17608;23415;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
+9;259;COMPRA;U64 Clase A W177 160-200;-17608;5807;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
+10;278;VENTA;U60 Serie3 F30 120-160;20930;26736;compra dia 231 m8, en venta 47d
+10;293;VENTA;U61 CLA C118 120-160;24897;51634;compra dia 245 m9, en venta 48d
+10;293;VENTA;U62 CLA C118 120-160;24897;76531;compra dia 245 m9, en venta 48d
+10;2;FIJO;Alquiler nave O Milladoiro;-1200;75331;
+10;3;FIJO;Suministros (luz/agua/vado);-250;75081;
+10;4;FIJO;Asesor fiscal-laboral;-60;75021;
+10;5;SS;RETA tarifa plana titular;-80;74941;
+10;5;SS;Cotizacion esposa empleada;-205;74736;
+10;28;NOMINA;Nomina esposa (neto);-1080;73656;
+10;28;RETIRO;Retiro variable titular;-1600;72056;
+10;273;COMPRA;U65 CLA C118 120-160;-21950;50106;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+10;273;COMPRA;U66 CLA C118 120-160;-21950;28155;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+10;287;COMPRA;U67 Serie3 F30 120-160;-19424;8732;P25 DE 16,548 + log 730 + imprev 300 + admin 425 + prep 780 + imp 641
+11;305;VENTA;U63 Clase A W177 160-200;19790;28522;compra dia 259 m9, en venta 46d
+11;305;VENTA;U64 Clase A W177 160-200;19790;48312;compra dia 259 m9, en venta 46d
+11;321;VENTA;U65 CLA C118 120-160;24897;73209;compra dia 273 m10, en venta 48d
+11;321;VENTA;U66 CLA C118 120-160;24897;98107;compra dia 273 m10, en venta 48d
+11;2;FIJO;Alquiler nave O Milladoiro;-1200;96907;
+11;3;FIJO;Suministros (luz/agua/vado);-250;96657;
+11;4;FIJO;Asesor fiscal-laboral;-60;96597;
+11;5;SS;RETA tarifa plana titular;-80;96517;
+11;5;SS;Cotizacion esposa empleada;-205;96312;
+11;28;NOMINA;Nomina esposa (neto);-1080;95232;
+11;28;RETIRO;Retiro variable titular;-1600;93632;
+11;301;COMPRA;U68 CLA C118 120-160;-21950;71681;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+11;301;COMPRA;U69 CLA C118 120-160;-21950;49731;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+11;315;COMPRA;U70 Clase A W177 160-200;-17608;32122;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
+11;315;COMPRA;U71 Clase A W177 160-200;-17608;14514;P25 DE 14,800 + log 730 + imprev 300 + admin 425 + prep 780 + imp 574
+12;334;VENTA;U67 Serie3 F30 120-160;20930;35443;compra dia 287 m10, en venta 47d
+12;349;VENTA;U68 CLA C118 120-160;24897;60341;compra dia 301 m11, en venta 48d
+12;349;VENTA;U69 CLA C118 120-160;24897;85238;compra dia 301 m11, en venta 48d
+12;2;FIJO;Alquiler nave O Milladoiro;-1200;84038;
+12;3;FIJO;Suministros (luz/agua/vado);-250;83788;
+12;4;FIJO;Asesor fiscal-laboral;-60;83728;
+12;5;SS;RETA tarifa plana titular;-80;83648;
+12;5;SS;Cotizacion esposa empleada;-205;83443;
+12;28;NOMINA;Nomina esposa (neto);-1080;82363;
+12;28;RETIRO;Retiro variable titular;-1600;80763;
+12;20;IMPUESTO;Modelo 303 IVA (trimestral);-6661;74103;apartado de los margenes cobrados
+12;20;IMPUESTO;Modelo 111 IRPF retenido esposa;-360;73743;
+12;343;COMPRA;U72 CLA C118 120-160;-21950;51792;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+12;343;COMPRA;U73 CLA C118 120-160;-21950;29842;P25 DE 18,980 + log 730 + imprev 300 + admin 425 + prep 780 + imp 735
+12;357;COMPRA;U74 ClaseE W213 160-200;-24716;5125;P25 DE 21,642 + log 730 + imprev 300 + admin 425 + prep 780 + imp 839
