@@ -270,9 +270,21 @@ def main():
     venta_det = {
         m: dict(n=med(VT_N[m]), eur=med(VT_E[m]), neto=med(VT_NT[m]), mix=_mix(VT_MX[m]))
         for m in range(1, 37)}
-    sd_m = {a: statistics.mean(sd[a]) for a in (1, 2, 3)}
-    se_m = {a: statistics.mean(se[a]) for a in (1, 2, 3)}
-    dv_m = {a: statistics.mean(dv[a]) for a in (1, 2, 3)}
+    # CORREGIDO 16/10/2026 (verificación de realismo): las cifras resumen del plan
+    # son P50/MEDIANAS (ventas, patrimonio, insolvente). Publicar la MEDIA de
+    # "a casa" mezclaba estadísticos: la cola superior (trayectorias con ventas
+    # P90) infla la media y el total no correspondía a ningún percentil. Ahora
+    # cada año es la MEDIANA del total familiar de ese año y el total es la
+    # MEDIANA de la suma por trayectoria (no la suma de las medianas anuales,
+    # que no cuadra en una misma trayectoria). Se guarda también la media como
+    # referencia honesta de la dispersión.
+    medf = lambda v: statistics.median(v) if v else 0.0
+    sd_m = {a: medf(sd[a]) for a in (1, 2, 3)}
+    se_m = {a: medf(se[a]) for a in (1, 2, 3)}
+    dv_m = {a: medf(dv[a]) for a in (1, 2, 3)}
+    casa_tot_p50 = medf(casa_list)
+    casa_medias = {a: statistics.mean(sd[a]) + statistics.mean(se[a]) + statistics.mean(dv[a])
+                   for a in (1, 2, 3)}
     out = dict(
         dia1=dia1, kit=kit, fijos1=fijos1, trio_coste=trio_coste,
         fijos_base_detalle=fijos_base_detalle,
@@ -310,7 +322,13 @@ def main():
     )
     for a in (1, 2, 3):
         out[f"casa_{a}"] = sd_m[a] + se_m[a] + dv_m[a]
-    out["casa_tot"] = sum(out[f"casa_{a}"] for a in (1, 2, 3))
+    # Total "a casa": MEDIANA de la suma por trayectoria (P50 coherente con
+    # ventas y patrimonio P50). La suma de las medianas anuales se guarda como
+    # referencia, pero no es una cifra que ocurra en ninguna trayectoria.
+    out["casa_tot"] = casa_tot_p50
+    out["casa_suma_medianas"] = sum(out[f"casa_{a}"] for a in (1, 2, 3))
+    out["casa_media"] = {str(a): casa_medias[a] for a in (1, 2, 3)}
+    out["casa_tot_media"] = statistics.mean(casa_list)
     (HERE / "plan_ejecucion.json").write_text(json.dumps(out, indent=2))
     print("mes  vent  flota   caja")
     for m in range(1, 37):
@@ -321,7 +339,8 @@ def main():
     for a in (1, 2, 3):
         print(f"a{a}: dueño {sd_m[a]:,.0f} + ella {se_m[a]:,.0f} + div {dv_m[a]:,.0f} "
               f"= CASA {out[f'casa_{a}']:,.0f}")
-    print(f"CASA total {out['casa_tot']:,.0f}")
+    print(f"CASA total P50 {out['casa_tot']:,.0f} (media {out['casa_tot_media']:,.0f}; "
+          f"suma de medianas anuales {out['casa_suma_medianas']:,.0f})")
 
 
 if __name__ == "__main__":
