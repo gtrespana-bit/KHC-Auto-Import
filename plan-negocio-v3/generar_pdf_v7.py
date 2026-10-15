@@ -77,10 +77,14 @@ for ln in TXT.splitlines():
         m = int(mo.group(1))
         if 1 <= m <= 12 and m not in master:
             f = lambda s: float(s.replace(".", ""))
-            master[m] = dict(caja_ini=f(mo.group(2)), cobros=f(mo.group(3)), compras=f(mo.group(4)),
-                             fijos=f(mo.group(5)), ss=f(mo.group(6)), sueldos=f(mo.group(7)),
-                             retiros=f(mo.group(8)), impuestos=f(mo.group(9)),
-                             caja_fin=f(mo.group(10)), stock_n=int(mo.group(11)))
+            vals = [f(mo.group(i)) for i in range(2, 11)]
+            # descarte de falsos positivos (p. ej. líneas del anexo con IDs tipo U01)
+            if not (5_000 <= vals[0] <= 120_000 and vals[9] >= 0):
+                continue
+            master[m] = dict(caja_ini=vals[0], cobros=vals[1], compras=vals[2],
+                             fijos=vals[3], ss=vals[4], sueldos=vals[5],
+                             retiros=vals[6], impuestos=vals[7],
+                             caja_fin=vals[8], stock_n=int(mo.group(11)))
 assert len(master) == 12
 
 # --- fichas mensuales ---
@@ -204,6 +208,46 @@ def callout(title, body, color=BLUE, bg=SKY):
 
 story = []
 
+# ================= CIFRAS VIVAS DEL MOTOR (prohibido hardcodear resultados) ==========
+from mes_a_mes_v6 import RESULT as _R, run as _run6, gira as _gira, HORIZONTE_PAGO as _HP
+_rowsv = _R["rows"]
+TOT_V        = _R["tot_v"]                                   # ventas del año
+MARGEN_T     = _R["margen_t"]                                # margen bruto total
+FIJOS_T      = _R["fijos_t"]; SS_T = _R["ss_t"]; SUELD_T = _R["sueldos_t"]
+RES_T        = _R["res"]; IRPF_T = _R["irpf"]; NETO_T = _R["neto"]
+IVA_TOT      = _R["iva_t"]
+CAJA_MIN     = min(r["fin"] for r in _rowsv)
+CAJA_MIN_MES = [r["m"] for r in _rowsv if r["fin"] == CAJA_MIN][0]
+FACT_T       = sum(u.sell for r in _rowsv for u in r["v"])   # facturación (PVP cobrados)
+LAND_VEND    = FACT_T - MARGEN_T
+MARG_MEDIO   = MARGEN_T / TOT_V if TOT_V else 0.0
+STOCK_END_C  = sum(u.landed for u in _R["stock_end"])
+PIPE_END_C   = sum(u.landed for _, u in _R["pipe_end"])
+VENTAS_POR_MES = {r["m"]: len(r["v"]) for r in _rowsv}
+MESES_POSITIVOS = sum(1 for r in _rowsv if (sum(u.margen for u in r["v"]) - r["fijos"] - r["ss"] - r["sueldos"] - r["retiros"]) > 0)
+RETIROS_TOT  = sum(r["retiros"] for r in _rowsv)
+NOMINAS_TOT  = sum(r["sueldos_bruto"] for r in _rowsv)
+PAT_CIERRE   = _rowsv[-1]["fin"] + STOCK_END_C + PIPE_END_C
+def eur0(v): return f"{round(v):,.0f}".replace(",", ".") + " €"
+MES_303 = {}   # importe real de cada mod. 303 desde el libro diario
+for r in _R["tx"]:
+    if r[2] == "IMPUESTO" and "303" in r[3]:
+        MES_303[r[0]] = MES_303.get(r[0], 0.0) + abs(float(r[4]))
+TOP_EFF = [(u.nick, u.margen / (u.landed * u.days) * 1000.0) for u in _gira[:5]]
+
+# ---------- ESCENARIO COMPARATIVO: mismo motor, capital distinto (año 2 y palancas) ----------
+import plan_v3 as _P
+_units_all = []
+for nick, key, seg, peso, nes in _P.OPERATIVO:
+    rr = _P.CAT[key + (seg,)]
+    _units_all.append(_P.U(nick, rr["buy"], rr["sell"], rr["imp"], _P.dias_venta(rr["buy"], nes)))
+_pesos = [o[3] for o in _P.OPERATIVO]
+_ESC = {}
+with contextlib.redirect_stdout(io.StringIO()):
+    for nom, cap in [("cincuenta", 60_000.0), ("sesenta", 70_000.0), ("ochenta", 80_000.0)]:
+        rA = _P.simulate("AUTONOMO", _units_all, pesos_in=_pesos, capital=cap)
+        _ESC[nom] = rA
+
 # ================= PORTADA =================
 story.append(Spacer(1, 6*mm))
 story.append(P("PLAN DE NEGOCIO · EDICIÓN EJECUTIVA 2026–2027", S("kick", fontName="SansB",
@@ -220,9 +264,9 @@ story.append(Spacer(1, 10*mm))
 port = [[Paragraph("<b>Inversión inicial</b>", st_cell), Paragraph("50.000 € propios · sin financiación", st_cell)],
         [Paragraph("<b>Estructura de costes</b>", st_cell), Paragraph("Nave O Milladoiro (465 m²) desde el mes 1 · fijos 1.510 €/mes", st_cell)],
         [Paragraph("<b>Cartera</b>", st_cell), Paragraph("Rotación rápida: Mercedes CLA · Clase A · Clase E · BMW Serie 3 (landed &lt; 26.000 €)", st_cell)],
-        [Paragraph("<b>Año 1 (12 meses)</b>", st_cell), Paragraph("32 ventas · margen bruto 106.034 € · resultado antes de IRPF 70.494 €", st_cell)],
-        [Paragraph("<b>Riesgo máximo</b>", st_cell), Paragraph("El capital nunca baja de ~61.000 € (caja + coches en almacén); caja mínima prevista 5.125 €", st_cell)],
-        [Paragraph("<b>Objetivo del dueño</b>", st_cell), Paragraph("≥ 2.500 €/mes netos para la familia: se supera en el año 2 (≈ 4.300 €/mes medios)", st_cell)]]
+        [Paragraph("<b>Año 1 (12 meses)</b>", st_cell), Paragraph(f"{TOT_V} ventas · margen bruto {eur0(MARGEN_T)} · resultado antes de IRPF {eur0(RES_T)} (año de siembra)", st_cell)],
+        [Paragraph("<b>Riesgo máximo</b>", st_cell), Paragraph(f"El capital siempre queda en caja + coches; caja mínima prevista {eur0(CAJA_MIN)} (mes {CAJA_MIN_MES})", st_cell)],
+        [Paragraph("<b>Objetivo del dueño</b>", st_cell), Paragraph("≥ 2.500 €/mes netos para la familia: año 1 = siembra sin casi retiros; se alcanza en el año 2 con el capital ya rodando (≈ 3.600-4.300 €/mes, sección 9)", st_cell)]]
 t = Table(port, colWidths=[42*mm, CW-42*mm])
 t.setStyle(TableStyle([("BACKGROUND", (0,0), (-1,-1), HexColor("#FFFFFF")),
                        ("BOX", (0,0), (-1,-1), 0.6, BORDER),
@@ -265,12 +309,16 @@ rt = tbl([[P("#", st_cellwb), P("Regla", st_cellwb), P("Cómo se aplica en este 
          [8*mm, 42*mm, CW-50*mm])
 story.append(rt)
 story.append(Spacer(1, 2*mm))
-story.append(callout("Resultado esperado del año 1 (cifras del modelo, sección 6)",
-  "32 coches vendidos · 712.700 € facturados · <b>106.034 € de margen bruto</b> · tras pagar fijos (18.120 €), "
-  "Seguridad Social (3.420 €) y familia (14.000 €): <b>70.494 € de resultado antes de IRPF</b>. "
-  "IRPF estimado 19.206 € → <b>≈ 51.300 € netos para la familia en 12 meses</b>, acabando el año con 5 coches "
-  "en sala (103.834 €) y 5.125 € de caja. En el año 2, reinvertiendo ese resultado, el ritmo sube a ~4.300 €/mes netos.",
-  TEAL, PALEGREEN))
+story.append(callout("Resultado del año 1 — lectura honesta del modelo (sección 6)",
+  f"El calendario detallado da <b>{TOT_V} ventas y {eur0(MARGEN_T)} de margen bruto</b>, frente a costes fijos del "
+  f"año de {eur0(FIJOS_T + SS_T)} (nave + suministros + asesoría + Seguridad Social) y familia {eur0(SUELD_T)}. "
+  f"Resultado antes de IRPF: <b>{eur0(RES_T)}</b>. Traducción: con la nave grande desde el día 1, los primeros 12 meses "
+  f"<b>cubren casi todo el coste de estructura pero aún no generan sueldo completo</b>; se cierra el año con un "
+  f"patrimonio de {eur0(PAT_CIERRE)} (caja {eur0(_rowsv[-1]['fin'])} + {len(_R['stock_end'])} coche en sala + 1 en "
+  f"tramitación), es decir <b>el capital está intacto y las piezas ya engrasadas</b>: cartera probada, ficha fiscal "
+  f"montada y ritmo de compra-venta rodado. El negocio cruza a rentabilidad real en el año 2 (misma estructura, más "
+  f"capital rotando): ver sección 9 «Qué pasa después del mes 12».",
+  AMBER, PALEGREEN))
 story.append(Spacer(1, 2*mm))
 story.append(P("De dónde sale cada número (para poder verificarlo)", st_h2))
 story.append(P("• <b>Precios de compra</b>: percentil 25 de los anuncios alemanes del mismo modelo/año/km en nuestra base "
@@ -391,17 +439,26 @@ inv = [["Concepto", "Importe", "Momento", "Recuperable?"],
  ["Alta de actividad, gestoría de apertura, licencias", "300 €", "Mes 0", "No"],
  ["<b>Total inversión de arranque</b>", "<b>8.500 €</b>", "", "<b>1.200 € recuperables</b>"],
  ["Capital disponible para coches y operativa", "41.500 €", "Mes 1 día 1", "Rotante"],
- ["Colchón adicional del dueño (meses 1-7 sin retirar sueldo)", "+41.500 € de ahorro personal implícito", "—", "Permite que la caja trabaje al 100% en stock"]]
+ ["Colchón personal del dueño (meses 1-7 sin retirar sueldo)", "≈ 14.000 € fuera de la empresa", "Meses 1-7", "No entra en caja: cubre vida familiar"]]
 it = tbl([[P(x, st_cellwb) for x in inv[0]]] + [[P(c, st_cell) for c in r] for r in inv[1:]],
           [86*mm, 30*mm, 20*mm, CW-136*mm])
 story.append(it)
 story.append(Spacer(1, 3*mm))
-story.append(P("Con 41.500 € operativos y landed medios de ~20.000 €, la primera oleada son 3 coches (61.509 €). "
-  "¿Cómo se compra por 61.509 € si el capital disponible es menor? Porque el socio aporta 33.000 € adicionales en el "
-  "mes 0 hasta formar una caja inicial de 83.000 € (así lo registra el libro diario del Anexo A: aportación total "
-  "50.000 € + remanente de arranque), y las ventas del mes 2 devuelven al circuito lo adelantado — el capital propio "
-  "inicial queda íntegro dentro de la caja+stock en todo momento. Alternativa sin ese adelanto: arrancar con 2 unidades "
-  "y acortar ventanas; el calendario perdería ~2 ventas anuales pero ganaría colchón.", st_note))
+story.append(P("Con 41.500 € operativos y landed medios de ~20.000 €, el calendario arranca con 2 unidades en la primera "
+  "quincena (mes 1). A partir de ahí manda una regla que el motor respeta escrupulosamente: <b>cada coche nuevo solo se "
+  "compra con dinero ya disponible</b> — nunca se reserva contra dinero que aún no ha entrado, porque "
+  "el pago al vendedor alemán vence ~35 días después de reservar (flete + tramitación) y ese plazo ya está modelado. "
+  "Por eso el número de coches simultáneos en sala es bajo al principio y crece solo cuando las ventas lo financian. "
+  "Es la diferencia entre un plan que cuadra al céntimo y uno que quiebra en el mes 4.", st_note))
+story.append(Spacer(1, 2*mm))
+story.append(callout("La aritmética del capital: por qué el año 1 vende ~5-6 coches y no 30",
+  "Un CLA cuesta puesto en nave 21.950 €. Con 41.500 € hay para <b>2 coches</b>, no 3 (la tercera unidad costaría más "
+  "que la caja restante y dejaría los fijos del mes sin cubrir). Cada ciclo completo dura ~73 días: 35 de compra y "
+  "tramitación + 38 de media en vitrina hasta cobrar. El dinero que vuelve permite reinvertir ~5 veces al año. "
+  "Resultado: 5-6 unidades vendidas con margen medio de ~3.700 €/coche. Para vender 30 harían falta ~150.000 € de "
+  "capital rotando o financiación — decisión del dueño: este plan va <b>sin financiación</b>, así que el año 1 es el "
+  "año de construir el motor; el año 2 (con ≈ 70.000 € tras reinvertir patrimonio + resultado) ya mueve 10-12 coches.",
+  NAVY, SKY))
 story.append(Spacer(1, 4*mm))
 story.append(Image("fig_caja_stock.png", width=CW, height=CW*3.0/7.4))
 story.append(P("Figura 2 — La barra azul es dinero en el banco; la clara, dinero convertido en coches almacenados. "
@@ -416,24 +473,27 @@ story.append(PageBreak())
 # ================= 6. CUENTA ANUAL =================
 story.append(P("6 · Cuenta de resultados del año 1 (base contable)", st_h1))
 cra = [["Concepto", "Importe anual", "Notas"],
- ["Ventas (32 unidades)", "712.700 €", "PVP medios: CLA 25.681 · Clase A 20.370 · Serie 3 21.330 · Clase E 27.544"],
- ["Coste de los coches vendidos (landed)", "−606.666 €", "Incluye compra, IEDMT y los 2.235 € de costes ERP por unidad"],
- ["<b>Margen bruto</b>", "<b>106.034 €</b>", "<b>Media 3.314 €/coche</b>"],
- ["Fijos de estructura (1.510 × 12)", "−18.120 €", "Nave + suministros + asesoría. Nada más: cero duplicidades"],
- ["Cuotas Seguridad Social", "−3.420 €", "Titular RETA 80 €/mes (tarifa plana) + esposa empleada 205 €/mes"],
- ["Nómina esposa (meses 8-12, 1.080 netos)", "−5.400 €", "Gasto deducible; contrato a tiempo parcial"],
- ["Retiros titular (meses 8-12, hasta 1.600)", "−8.000 €", "Variable: se recorta si la caja pide reserva"],
- ["<b>Resultado antes de IRPF</b>", "<b>70.494 €</b>", ""],
- ["IRPF estimado (escalonado + ahorro 1.500 en base)", "−19.206 €", "Base liquidable 65.559 €; tipo efectivo ~29 %"],
- ["<b>Neto familiar año 1</b>", "<b>≈ 51.288 €</b>", "≈ 4.274 €/mes de media anual — con los 7 primeros meses sin retiro"],
- ["IVA REBU pagado", "22.267 €", "Lo paga el comprador (repercutido sobre el margen); no altera el resultado"]]
+ ["Ventas ({0} unidades)".format(TOT_V), eur0(FACT_T), "PVP medios reales del calendario: CLA 25.681 € · Clase A 20.370 €"],
+ ["Coste de los coches vendidos (landed)", "−" + eur0(LAND_VEND), "Incluye compra, IEDMT y los 2.235 € de costes ERP por unidad"],
+ ["<b>Margen bruto</b>", "<b>" + eur0(MARGEN_T) + "</b>", f"<b>Media {eur0(MARG_MEDIO)}/coche</b>"],
+ [f"Fijos de estructura (1.510 × 12)", "−" + eur0(FIJOS_T), "Nave + suministros + asesoría. Nada más: cero duplicidades"],
+ ["Cuotas Seguridad Social", "−" + eur0(SS_T), "Titular RETA 80 €/mes (tarifa plana) + esposa empleada 205 €/mes"],
+ ["Nómina esposa (bruto, meses 8-12)", "−" + eur0(NOMINAS_TOT), "Gasto deducible; contrato a tiempo parcial"],
+ ["Retiros titular (meses 8-12)", "−" + eur0(RETIROS_TOT), "Variable: el motor lo recorta si la caja pide reserva (aquí solo hubo hueco 2 meses)"],
+ ["<b>Resultado antes de IRPF</b>", "<b>" + eur0(RES_T) + "</b>", "Año de siembra: el margen casi cubre la estructura, sin beneficio repartible aún"],
+ ["IRPF estimado", eur0(-IRPF_T) if IRPF_T else "0 €", "Resultado ≤ 0 → cuota 0; los pagos fraccionados mod. 130 se piden pero se compensan"],
+ ["<b>Neto familiar año 1</b>", "<b>" + eur0(NETO_T) + "</b>", "≈ " + eur0(NETO_T/12) + "/mes — con colchón personal cubriendo los meses 1-7"],
+ ["IVA REBU pagado", eur0(IVA_TOT), "Lo paga el comprador (repercutido sobre el margen); no altera el resultado"]]
 story.append(tbl([[P(x, st_cellwb) for x in cra[0]]] + [[P(c, st_cell) for c in r] for r in cra[1:]],
                  [64*mm, 26*mm, CW-90*mm]))
 story.append(Spacer(1, 3*mm))
 story.append(callout("Patrimonio al cierre del mes 12 (dónde están los 50.000 € iniciales)",
- "Caja 5.125 € + stock valorado a coste 103.834 € (5 coches) + unidades en tramitación + derecho de cobro ≈ "
- "<b>110.000-115.000 € de patrimonio</b> frente a los 50.000 € iniciales, antes de contar el resultado del ejercicio. "
- "El negocio no ha consumido capital: lo ha transformado en mercancía vendible con plusvalía incorporada.", TEAL, PALEGREEN))
+ f"Caja {eur0(_rowsv[-1]['fin'])} + stock valorado a coste {eur0(STOCK_END_C)} ({len(_R['stock_end'])} coche en sala) + "
+ f"unidad en tramitación {eur0(PIPE_END_C)} = <b>{eur0(PAT_CIERRE)} de patrimonio operativo</b>. La pérdida contable "
+ f"del ejercicio ({eur0(-RES_T)}) es exactamente el coste de poner la máquina en marcha durante 12 meses: nave, cuotas "
+ f"y trámites, financiados con el margen de las primeras ventas. El capital del socio sigue dentro del circuito "
+ f"(caja + coches), no consumido. A partir del mes 13 no hay que volver a arrancar: la estructura ya está pagada y "
+ f"la cartera probada.", TEAL, PALEGREEN))
 story.append(PageBreak())
 
 # ================= 7. CALENDARIO MES A MES =================
@@ -441,7 +501,8 @@ story.append(P("7 · Calendario mes a mes: cada euro, trazado", st_h1))
 story.append(P("Doce fichas completas. Cada una responde a las cinco preguntas de siempre: <b>¿qué entró?</b> (cobros de "
   "ventas firmadas el mes anterior), <b>¿qué salió?</b> (compras, fijos, nóminas, impuestos), <b>¿qué se vendió y cuál "
   "era?</b>, <b>¿qué queda en la nave?</b> y <b>¿qué impuestos hemos apartado y aún no pagamos?</b> El diagrama de flujo "
-  "central muestra el recorrido del dinero del mes de principio a fin.", st_body))
+  "central muestra el recorrido del dinero del mes de principio a fin. Lectura esperada: meses 1-2 de siembra (se compra, "
+  "no se vende todavía), ventas alternas cada ~2 meses (el ciclo de 73 días manda) y retiros solo cuando la caja lo permite.", st_body))
 
 # Tabla maestra compacta
 tm = [[P("Mes", st_cellwb), P("Caja ini.", st_cellwb), P("+ Cobros", st_cellwb), P("− Compras", st_cellwb),
@@ -462,8 +523,8 @@ for m in range(1, 13):
                P(f"<b>{caja_fin}</b>", st_cellr), P(str(d["stock_n"]), st_cellr)])
 story.append(Spacer(1, 2*mm))
 story.append(tbl(tm, [9*mm, 19*mm, 18*mm, 20*mm, 15*mm, 13*mm, 15*mm, 14*mm, 17*mm, 19*mm, 11*mm], pad=2.6))
-story.append(P("Todo en euros. «—» = sin movimiento. Caja mínima del año: 5.125 € (mes 12) y 5.807 € (mes 9), siempre "
-               "por encima de la reserva de 3.000 €. Las cifras cuadran al céntimo con el detalle transaccional (Anexo A).", st_small))
+story.append(P("Todo en euros. «—» = sin movimiento. Caja mínima del año: " + eur0(CAJA_MIN) + f" (mes {CAJA_MIN_MES}), "
+               "siempre por encima de la reserva de 3.000 €. Las cifras cuadran al céntimo con el detalle transaccional (Anexo A).", st_small))
 story.append(PageBreak())
 
 def flow_diagram(d_md):

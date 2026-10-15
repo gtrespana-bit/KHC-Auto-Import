@@ -73,12 +73,19 @@ def resultados_mes(df):
 
 
 def apalancamiento():
-    """€ de beneficio por cada € y día de capital inmovilizado (ranking cartera)."""
-    data = [("CLA C118 120-160", 4.47), ("Clase A W177 160-200", 4.36),
-            ("Clase E W213 160-200", 3.09), ("Serie 3 F30 120-160", 2.65),
-            ("Clase C W205 80-120", 2.13), ("Macan 95B 80-120", 1.62),
-            ("Q5 FY 0-40", 1.42), ("GLC 300e 80-120", 1.05)]
-    data = data[::-1]
+    """€ de beneficio por cada € y día de capital inmovilizado (ranking cartera).
+
+    Calculado EN VIVO desde el motor (mes_a_mes_v6.gira + catalogo): ‰ = margen / (landed * dias) * 1000.
+    Se muestran los 8 mejores; los excluidos por capital (landed > 26k) van al final con su valor real."""
+    import re as _re, io as _io, contextlib as _ctx
+    with _ctx.redirect_stdout(_io.StringIO()):
+        import mes_a_mes_v6 as _M
+    ranked = []
+    for u in _M.gira:
+        eff = u.margen / (u.landed * u.days) * 1000.0
+        ranked.append((u.nick, round(eff, 2)))
+    ranked = ranked[:8]
+    data = ranked[::-1]          # barh dibuja de abajo arriba: invierto para que el mejor quede arriba
     names = [d[0] for d in data]; vals = [d[1] for d in data]
     colors = [GREEN if v >= 3 else (BLUE if v >= 2 else GREY) for v in vals]
     fig, ax = plt.subplots(figsize=(7.4, 2.9), dpi=200)
@@ -105,16 +112,17 @@ if __name__ == "__main__":
     txt = open("calendario_v6.txt", encoding="utf-8").read()
     master = {}
     for ln in txt.splitlines():
-        mo = re.match(r"\s*(\d{1,2})\s+([\d\.]+)\s+(-?[\d\.]+)\s+(-?[\d\.]+)\s+(-?[\d\.]+)\s+(-?[\d\.]+)\s+(-?[\d\.]+)\s+(-?[\d\.]+)\s+(-?[\d\.]+)\s+([\d\.]+)\s+(\d+)\s*$", ln)
+        mo = re.match(r"\s*(\d{1,2})\s+([\d\.]+)\s+(-?[\d\.]+)\s+(-?[\d\.]+)\s+(-?[\d\.]+)\s+(-?[\d\.]+)\s+(-?[\d\.]+)\s+(-?[\d\.]+)\s+(-?[\d\.]+)\s+([\d\.]+)\s+(\d+)\s+([\d\.]+)\s*$", ln)
         if mo:
             m = int(mo.group(1))
             if 1 <= m <= 12 and m not in master:
-                f = lambda s: float(s.replace(".", ""))
+                f = lambda s: float(s.replace(".", "").replace("-", "-")) if s not in ("-",) else 0.0
+                fv = lambda s: -f(s[1:]) if s.startswith("-") else f(s)
                 master[m] = dict(caja_ini=f(mo.group(2)), cobros=f(mo.group(3)),
-                                 compras=f(mo.group(4)), fijos=f(mo.group(5)), ss=f(mo.group(6)),
-                                 sueldos=f(mo.group(7)), retiros=f(mo.group(8)),
-                                 impuestos=f(mo.group(9)), caja_fin=f(mo.group(10)),
-                                 stock_n=int(mo.group(11)))
+                                 compras=-fv(mo.group(4)), fijos=-fv(mo.group(5)), ss=-fv(mo.group(6)),
+                                 sueldos=-fv(mo.group(7)), retiros=-fv(mo.group(8)),
+                                 impuestos=-fv(mo.group(9)), caja_fin=f(mo.group(10)),
+                                 stock_n=int(mo.group(11)), deuda_de=f(mo.group(12)))
     assert len(master) == 12, f"tabla maestra incompleta: {sorted(master)}"
     sc = re.findall(r"MES (\d+)  \|.*?\n(?:.*?\n)*?.*?STOCK FIN DE MES \((\d) uds, coste inmovilizado ([\d\.]+) €", txt)
     # más robusto: recorrer líneas

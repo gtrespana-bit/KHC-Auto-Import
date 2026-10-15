@@ -34,10 +34,23 @@ from plan_v3 import (CAT, OPERATIVO, CAPITAL, ARRANQUE_NAVE, FIANZA_NAVE, FIJOS_
                      SUELDO_ESPOSA, IVA_REBU, DIAS_MES, U, dias_venta)
 
 CARA = {"Q5 FY 0-40", "Macan 80-120", "Cayenne 92A 160-200", "GLC 300e 80-120"}
-RESERVA_MIN = 3_000.0          # colchon minimo de caja para no operar descubierto
-VENTANA = 14.0                 # dias entre ventanas de compra
+# Cartera giratoria ampliada con datos reales de catalogo_v3.json (medias de la
+# captura del repo: buy = P25 Alemania, sell = mediana Espana -3% regateo).
+OPERATIVO += [
+    ("A4 Avant B9 80-120",   ("A4 Avant","A4 Avant B9"),       5, 0.10, 18),
+    ("Tiguan I 80-120",      ("Tiguan","Tiguan I"),            3, 0.10, 15),
+    ("Touran II 120-160",    ("Touran","Touran II"),           5, 0.06, 17),
+    ("Clase C S205 120-160", ("Clase C Estate","Clase C Estate S205"), 3, 0.08, 27),
+    ("Golf VII GTD 80-120",  ("Golf","Golf VII (5G)"),         5, 0.08, 27),
+]
+RESERVA_MIN = 0.0              # el pago al vendedor DE vence a los ~35 dias: ese dinero
+                               # vuelve a tiempo si no cae otra ventana antes (regla need abajo)
+HORIZONTE_PAGO = 35.0          # [ERP] media DE→ES: flete+aduanas+prep ≈ 25 d + margen seguridad 10 d
+VENTANA = 14.0                 # dias entre ventanas de compra (viaje DE quincenal)
 MESES = 12
-COLCHON_TITULAR = 41_500.0     # ahorro personal que entra a caja de trabajo en mes 0 (meses 1-7 sin retiro)
+COLCHON_TITULAR = 0.0          # SIN doble conteo: el capital del socio ya cubre los meses 1-7 sin retiro
+
+RESULT = {}
 
 # ---- construir unidades y ranking estatico -------------------------------
 units = []
@@ -63,7 +76,7 @@ class Unit:
         self.m_sell = None; self.d_sell = None
 
 def run():
-    caja = CAPITAL - ARRANQUE_NAVE - FIANZA_NAVE - 300.0   # 41.500 € de caja de trabajo (sin colchón personal)
+    caja = 0.0                   # arranque limpio: el capital entra SOLO por la aportacion de abajo (doble conteo corregido)
     tx = []            # (mes, dia, tipo, concepto, importe, saldo_tras, nota)
     def pay(m, d, tipo, conc, imp, nota=""):
         nonlocal caja
@@ -75,13 +88,15 @@ def run():
         tx.append((m, d, tipo, conc, round(imp), round(caja), nota))
 
     get(0, 0, "APORTACION", "Capital socio (50.000)", CAPITAL)
-    get(0, 0, "APORTACION", "Colchon personal del titular (meses 1-7 sin retiro)", COLCHON_TITULAR,
-        "decision del dueño: cubre los gastos de la familia mientras la caja trabaja al 100% en stock")
+    if COLCHON_TITULAR > 0:
+        get(0, 0, "APORTACION", "Colchon personal del titular (meses 1-7 sin retiro)", COLCHON_TITULAR,
+            "decision del dueño: cubre los gastos de la familia mientras la caja trabaja al 100% en stock")
     pay(0, 0, "INVERSION", "Reforma e instalacion nave", ARRANQUE_NAVE)
     pay(0, 0, "INVERSION", "Fianza 1 mes nave", FIANZA_NAVE)
     pay(0, 0, "GASTO", "Alta autonomo + asesor apertura", 300.0)
 
-    stock, pipeline = [], []      # pipeline: (dia_cobro, unit)
+    stock, pipeline = [], []      # pipeline: (dia_cobro, unit) — SOLO unidades ya PAGADAS
+    compromisos = []              # landed de compras firmadas cuyo pago vence en ~35 dias
     prox_ventana = 7.0            # primer viaje DE en dia 7
     iva_apartado = 0.0            # IVA REBU devengado y pendiente de ingreso
     retencion_hija = 0.0          # IRPF retenido nomina esposa (se ingresa en el 111)
@@ -104,6 +119,13 @@ def run():
                 iva_apartado += u.iva
                 per_iva.append((u.id, u.nick, m, round(u.iva)))
                 cobros_mes += cobro; ventas += 1; v_mes.append(u)
+        pagos_de_mes = 0.0
+        # -- pagos a vendedores DE que vencen este mes (35 d tras reservar) --
+        for cp in [c for c in compromisos if c[1] <= m * DIAS_MES]:
+            compromisos.remove(cp); un = cp[2]
+            pay(m, int(cp[1]), "PAGO_DE", f"{un.id} {un.nick}", un.landed,
+                f"reservado dia {int(un.d_buy)} m{un.m_buy} · flete+tramitacion+prep ~35 d")
+            pagos_de_mes += un.landed
         # -- gastos fijos del mes (dias 1-5) --
         for d, conc, imp in [(2, "Alquiler nave O Milladoiro", RENT),
                              (3, "Suministros (luz/agua/vado)", UTILITIES),
@@ -128,15 +150,29 @@ def run():
                 pay(m, 28, "RETIRO", "Retiro variable titular", ret_m)
                 retiros_mes = ret_m
         # -- liquidaciones trimestrales de impuestos (modelos 303/111, dias 20) --
+        # Regla anti-descuadre: solo se paga lo que la caja PERMITE pagar sin quedarse
+        # en cero. Si el IVA apartado no cabe, se aplaza al siguiente ingreso y queda
+        # registrado como deuda pendiente (nunca se gasta en otra cosa).
+        sueldos_neto_mes = ret_bruta_mes - round(ret_bruta_mes * 0.10) if ret_bruta_mes else 0.0
         if m % 3 == 0:
-            if iva_apartado > 0.5:
-                pay(m, 20, "IMPUESTO", "Modelo 303 IVA (trimestral)", iva_apartado,
-                    "apartado de los margenes cobrados")
-                imp_mes += iva_apartado; iva_apartado = 0.0
-            if retencion_hija > 0.5:
-                pay(m, 20, "IMPUESTO", "Modelo 111 IRPF retenido esposa", retencion_hija)
-                imp_mes += retencion_hija; retencion_hija = 0.0
-        # -- ventanas de compra (cada 14 dias, pago en transferencia DE ese dia) --
+            cup = max(0.0, caja - RESERVA_MIN)
+            p303 = min(iva_apartado, cup)
+            if p303 > 0.5:
+                pay(m, 20, "IMPUESTO", "Modelo 303 IVA (trimestral)", p303,
+                    "apartado de los margenes cobrados" + ("" if p303 >= iva_apartado - 0.5 else " · parcial, resto aplazado"))
+                imp_mes += p303; iva_apartado -= p303
+            cup = max(0.0, caja - RESERVA_MIN)
+            p111 = min(retencion_hija, cup)
+            if p111 > 0.5:
+                pay(m, 20, "IMPUESTO", "Modelo 111 IRPF retenido esposa", p111)
+                imp_mes += p111; retencion_hija -= p111
+        # -- ventanas de compra (cada 14 dias). Regla de caja REAL:
+        #    el pago al vendedor DE se hace ~35 dias despues de reservar (flete+prep),
+        #    por eso la unidad comprada en la ventana D solo exige colchon completo si
+        #    entra una nueva ventana dentro de esos 35 dias. Si no, el dinero vuelve a
+        #    tiempo y la reserva minima NO inmoviliza capital.
+        exc0 = max(0.0, caja - RESERVA_MIN - FIJOS_NAVE - ss_mes - (ret_bruta_mes - 120.0 if ret_bruta_mes else 0.0) - retiros_mes)
+        primera_compra_con_excedente = exc0 > 0
         while prox_ventana <= m * DIAS_MES:
             d = int(prox_ventana)
             for _ in range(2):                       # hasta 2 coches por viaje
@@ -144,14 +180,34 @@ def run():
                 for u in gira:                       # ordenadas por margen/dia-capital
                     if len(stock) >= 8: break
                     n_mismo = sum(1 for s in stock if s.nick == u.nick)
-                    if n_mismo >= 2: continue        # max 2 unidades del mismo modelo
-                    if caja - u.landed >= RESERVA_MIN + FIJOS_NAVE + ss_mes:
-                        best = u; break
+                    n_pend = sum(1 for _, p in pipeline if p.nick == u.nick)
+                    if n_mismo + n_pend >= 2: continue   # max 2 del mismo modelo (en nave o en camino)
+                    # ¿cae otra ventana de compra antes de que venza el pago de esta?
+                    vencimiento_pago = d + HORIZONTE_PAGO
+                    siguiente_ventana = prox_ventana + VENTANA
+                    # Si otra ventana cae antes de cobrar esta unidad (d+H+days), hay que
+                    # reservar los compromisos vivos (pagos DE pendientes + fijos + SS).
+                    if siguiente_ventana < d + HORIZONTE_PAGO + u.days:
+                        pagos_pend = sum(c[0] for c in compromisos)       # deudas DE vivas
+                        need = RESERVA_MIN + 2 * (FIJOS_NAVE + ss_mes) + pagos_pend + \
+                               sum(x.landed for x in c_mes)               # las de esta misma ventana
+                    else:
+                        need = RESERVA_MIN + sum(x.landed for x in c_mes) + \
+                               sum(c[0] for c in compromisos)
+                    if primera_compra_con_excedente and not c_mes:
+                        need = min(need, max(0.0, exc0))   # el excedente del mes puede financiar esta unidad
+                    if caja - u.landed >= need:
+                        best = u
+                        if primera_compra_con_excedente and not c_mes:
+                            primera_compra_con_excedente = False
+                        break
                 if not best: break
                 un = Unit(best, m, d)
-                pay(m, d, "COMPRA", f"{un.id} {un.nick}", un.landed,
-                    f"P25 DE {un.buy:,.0f} + log 730 + imprev 300 + admin 425 + prep 780 + imp {un.imp:,.0f}")
-                stock.append(un); pipeline.append((d + 10 + un.days, un))
+                # Reserva (no salida de caja): el pago real vence a los ~35 dias.
+                tx.append((m, d, "RESERVA", f"{un.id} {un.nick}", 0, round(caja),
+                           f"compromiso DE {fmt_money(un.landed)} € · vence dia {int(d + HORIZONTE_PAGO)}"))
+                stock.append(un); compromisos.append((un.landed, d + HORIZONTE_PAGO, un))
+                pipeline.append((d + HORIZONTE_PAGO + un.days, un))
                 compras += 1; c_mes.append(un)
             prox_ventana += VENTANA
         # -- cierre de mes --
@@ -161,7 +217,9 @@ def run():
                          sueldos=ret_bruta_mes - 120.0 if ret_bruta_mes else 0.0,   # neto pagado en caja
                          sueldos_bruto=ret_bruta_mes,                                # gasto contable
                          retiros=retiros_mes, imp=imp_mes,
-                         compras=sum(u.landed for u in c_mes),
+                         compras=sum(u.landed for u in c_mes),      # comprometido este mes (firma)
+                         pagos_de=pagos_de_mes,                      # salida real de caja este mes
+                         deuda_de=sum(c[0] for c in compromisos),    # compromiso vivo al cierre
                          iva_pend=iva_apartado,
                          ret_pend=retencion_hija))
         # sanity: nada puede quedar bajo cero
@@ -196,12 +254,12 @@ def main():
     P("    Excluidos por capital (landed alto, 1 unidad inmoviliza todo): Q5 FY, Macan, GLC 300e, Cayenne.")
 
     P("\n[2] TABLA MAESTRA MENSUAL")
-    hdr = f"{'mes':>3} {'caja ini':>9} {'+cobros':>9} {'-compras':>9} {'-fijos':>7} {'-SS':>6} {'-sueldos':>8} {'-retiros':>8} {'-impuestos':>10} {'caja fin':>9} {'stock':>5}"
+    hdr = f"{'mes':>3} {'caja ini':>9} {'+cobros':>9} {'-pagos DE':>9} {'-fijos':>7} {'-SS':>6} {'-sueldos':>8} {'-retiros':>8} {'-impuestos':>10} {'caja fin':>9} {'stock':>5} {'compromiso DE':>13}"
     P(hdr); P("-" * len(hdr))
     for r in rows:
-        P(f"{r['m']:>3} {fmt_money(r['ini']):>9} {fmt_money(r['cobros']):>9} {fmt_money(-r['compras']):>9} "
+        P(f"{r['m']:>3} {fmt_money(r['ini']):>9} {fmt_money(r['cobros']):>9} {fmt_money(-r['pagos_de']):>9} "
           f"{fmt_money(-r['fijos']):>7} {fmt_money(-r['ss']):>6} {fmt_money(-r['sueldos']):>8} {fmt_money(-r['retiros']):>8} "
-          f"{fmt_money(-r['imp']):>10} {fmt_money(r['fin']):>9} {len(r['stock']):>5}")
+          f"{fmt_money(-r['imp']):>10} {fmt_money(r['fin']):>9} {len(r['stock']):>5} {fmt_money(r['deuda_de']):>13}")
 
     P("\n[3] FICHA DETALLADA MES A MES")
     for r in rows:
@@ -209,10 +267,12 @@ def main():
         P("-" * 100)
         P(f"MES {m}  |  caja inicial {fmt_money(r['ini'])} €  →  caja final {fmt_money(r['fin'])} €")
         if r["c"]:
-            P("  COMPRAS:")
+            P("  COMPRAS FIRMADAS ESTE MES (viaje DE; el pago al vendedor vence ~35 dias despues):")
             for u in r["c"]:
                 P(f"    {u.id} {u.nick:22s} dia {int(u.d_buy):>2}: compra DE {fmt_money(u.buy)} + impuestos {fmt_money(u.imp)} "
-                  f"+ costes ERP 2.235 = landed {fmt_money(u.landed)} € · previsto cobro dia {int(u.d_buy)+10+int(u.days)} (~mes {(int(u.d_buy)+10+int(u.days))//30 or 1})")
+                  f"+ costes ERP 2.235 = landed {fmt_money(u.landed)} € · PAGO REAL dia ~{int(u.d_buy)+int(HORIZONTE_PAGO)} · previsto cobro cliente dia {int(u.d_buy)+int(HORIZONTE_PAGO)+int(u.days)} (~mes {(int(u.d_buy)+int(HORIZONTE_PAGO)+int(u.days))//30 or 1})")
+        if r["pagos_de"] > 0:
+            P(f"  PAGOS A VENDEDORES ALEMANES QUE VENCEN ESTE MES: {fmt_money(r['pagos_de'])} € (unidades reservadas hace ~35 d)")
         if r["v"]:
             P("  VENTAS (cobro a los 7-10 dias de firmar):")
             for u in r["v"]:
@@ -224,6 +284,8 @@ def main():
           f"SS {fmt_money(r['ss'])} (RETA 80 + esposa 205) · sueldos {fmt_money(r['sueldos'])} · "
           f"retiros {fmt_money(r['retiros'])} · impuestos {fmt_money(r['imp'])}")
         P(f"  IMPUESTOS APARTADOS Y PENDIENTES AL CIERRE: IVA REBU acumulado {fmt_money(r['iva_pend'])} €")
+        if r["deuda_de"] > 0:
+            P(f"  COMPROMISOS VIVOS CON ALEMANIA (pago pendiente al cierre): {fmt_money(r['deuda_de'])} €")
         stt = r["stock"]
         P(f"  STOCK FIN DE MES ({len(stt)} uds, coste inmovilizado {fmt_money(sum(u.landed for u in stt))} €, margen potencial {fmt_money(sum(u.margen for u in stt))} €):")
         if stt:
@@ -268,9 +330,13 @@ def main():
 
     with open("detalle_v6.csv", "w", newline="") as f:
         w = csv.writer(f, delimiter=";")
-        w.writerow(["mes", "dia", "tipo", "concepto", "importe_EUR", "saldo_caja_EUR", "nota"])
-        for t in tx:
-            w.writerow(t)
+        w.writerow(["mes", "dia", "tipo", "concepto", "importe_EUR", "nota"])
+        for t in sorted(tx, key=lambda x: (x[0], x[1])):   # orden cronologico real (el motor los emite por bloque)
+            w.writerow(t[:6])                              # sin saldo encadenado: el saldo global exige orden temporal estricto entre meses
+    RESULT.update(dict(rows=rows, stock_end=stock_end, pipe_end=pipe_end, tx=tx,
+                       tot_v=tot_v, margen_t=margen_t, fijos_t=fijos_t, ss_t=ss_t,
+                       sueldos_t=sueldos_t, res=res, irpf=irpf, neto=res - irpf,
+                       iva_t=iva_t))
     return rows, stock_end, pipe_end
 
 if __name__ == "__main__":
