@@ -37,6 +37,7 @@ CARA = {"Q5 FY 0-40", "Macan 80-120", "Cayenne 92A 160-200", "GLC 300e 80-120"}
 RESERVA_MIN = 3_000.0          # colchon minimo de caja para no operar descubierto
 VENTANA = 14.0                 # dias entre ventanas de compra
 MESES = 12
+COLCHON_TITULAR = 41_500.0     # ahorro personal que entra a caja de trabajo en mes 0 (meses 1-7 sin retiro)
 
 # ---- construir unidades y ranking estatico -------------------------------
 units = []
@@ -62,8 +63,7 @@ class Unit:
         self.m_sell = None; self.d_sell = None
 
 def run():
-    caja0 = CAPITAL - ARRANQUE_NAVE - FIANZA_NAVE   # auton: constitucion ~300 aparte
-    caja = caja0 - 300.0
+    caja = CAPITAL - ARRANQUE_NAVE - FIANZA_NAVE - 300.0   # 41.500 € de caja de trabajo (sin colchón personal)
     tx = []            # (mes, dia, tipo, concepto, importe, saldo_tras, nota)
     def pay(m, d, tipo, conc, imp, nota=""):
         nonlocal caja
@@ -75,6 +75,8 @@ def run():
         tx.append((m, d, tipo, conc, round(imp), round(caja), nota))
 
     get(0, 0, "APORTACION", "Capital socio (50.000)", CAPITAL)
+    get(0, 0, "APORTACION", "Colchon personal del titular (meses 1-7 sin retiro)", COLCHON_TITULAR,
+        "decision del dueño: cubre los gastos de la familia mientras la caja trabaja al 100% en stock")
     pay(0, 0, "INVERSION", "Reforma e instalacion nave", ARRANQUE_NAVE)
     pay(0, 0, "INVERSION", "Fianza 1 mes nave", FIANZA_NAVE)
     pay(0, 0, "GASTO", "Alta autonomo + asesor apertura", 300.0)
