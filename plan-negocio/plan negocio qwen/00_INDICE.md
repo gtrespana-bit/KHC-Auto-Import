@@ -35,3 +35,54 @@ al céntimo — comportamiento intencionado: mejor un script roto que un PDF fal
   `Plan_Ejecucion_Paso_a_Paso_CORREGIDO.pdf`.
 - Lámina Paso 4 reetiquetada: matrícula española definitiva como regla; temporales solo
   como excepción extrema (venta el día 1), según tu aclaración.
+
+## Verificación "de cero" (turno 5) — todo regenerado desde el código, sin usar artefactos previos
+
+Se borraron `plan_ejecucion.json`, ambos `sensibilidad_rotacion.json` y los dos PDF, y se
+volvió a ejecutar toda la cadena desde el principio:
+
+```bash
+cd /workspace/plan-negocio
+python3 calc_plan.py                 # OK → plan_ejecucion.json
+python3 sensibilidad_rotacion.py     # OK → sensibilidad_rotacion.json (copia en esta carpeta)
+python3 generar_plan_ejecucion.py    # OK → 50 láminas, validador del puente de caja pasa
+```
+
+Resultados idénticos a los entregados (el motor usa semilla fija, por lo que es reproducible
+al céntimo): insolvente 11,6 % · ventas P50 286 · patrimonio P50 230.537 € · obra mes 23 ·
+a casa 8.485 / 32.747 / 217.061 = **258.293 €** · sensibilidad +20 %: a casa cae a 123.557 €
+y insolvente sube al 24 %. El PDF regenerado tiene 50 páginas, la lámina 50 ("Sensibilidad ·
+rotación") sale del JSON recién calculado y la lámina 8 (Paso 4 · Permanente) mantiene la
+regla de matrícula definitiva con temporales solo como excepción. Copia actualizada en
+`Plan_Ejecucion_Paso_a_Paso_CORREGIDO.pdf`.
+
+## Auditoría de realismo (turno 6) — ¿es honesto el número grande?
+
+Se volvió a leer el motor completo (`modelo_realista.py`, `calc_plan.py`) y se
+verificó cada cifra publicada contra las 250 trayectorias:
+
+**Lo que resiste la auditoría (real y bien modelado):**
+- Ciclo de caja semana a semana, días por modelo con evidencia externa (Autouncle/Faconauto/MSI,
+  oct-2026), estacionalidad, rampa de negocio nuevo, plazas físicas, REBU, IS LIS art. 9.8/101,
+  dividendos solo tras pagar el IS y topados al beneficio distribuible, puente de caja al céntimo
+  (validador del generador), nómina de ella con 30,6 % patronal, día 1 cuadra (7.549,41 €).
+- Riesco publicado: insolvente 11,6 %, caja mínima mediana 2.156 € (mes 5) — no se vende como seguro.
+
+**El error encontrado y corregido (16/10/2026):**
+- La lámina "Resumen" publicaba el TOTAL A CASA como MEDIA de las 250 trayectorias
+  (258.293 €) mientras ventas y patrimonio eran P50 (mediana). La media la suben las
+  trayectorias de la cola superior y no corresponde a ningún caso típico. Corregido en
+  `calc_plan.py` (sd/se/dv y casa_tot ahora son medianas; la media se guarda en el JSON
+  como referencia): **a casa P50 = 263.865 €** (a1 7.714 · a2 31.454 · a3 225.224;
+  suma de medianas anuales 264.392 mostrada aparte porque no cuadra en una trayectoria).
+  El PDF lo etiquetó explícitamente como P50/mediana de 250 trayectorias. Regenerado
+  (50 láminas, validador OK) y copia actualizada en esta carpeta. Sensibilidad usa la
+  mediana desde siempre: central 263.865 · +20 % 123.557 · +40 % 62.378 — coherente.
+
+**Límites honestos que quedan (no son errores, son supuestos):**
+- Los días por modelo (32-58) son hipótesis con respaldo de mercado pero sin datos del
+  propio negocio; por eso existe la lámina de sensibilidad (+20 % duplica el riesgo: 24 %).
+- Demanda sin techo por modelo: justificado (Santiago ~7.200 VO/año; el plan es el 0,6 %),
+  pero un fracaso de posicionamiento local no lo captura el modelo.
+- Trabajo de los dueños no asalariado (solo 1 empleado + familia); si externalizan, -980 €/mes.
+- Sin inflación de alquileres, sin avería concurrente múltiple, sin préstamo.

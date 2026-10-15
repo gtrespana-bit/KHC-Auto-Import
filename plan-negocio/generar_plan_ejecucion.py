@@ -920,15 +920,20 @@ def p_resumen(c, n, t):
     suel_tot = sd_tot + se_tot
     c.setFillColor(GOLD_DEEP)
     c.setFont("DejaVuBold", 9)
-    c.drawString(36, 428, "DINERO QUE ENTRA A CASA POR AÑO (sueldos netos + dividendos netos, la pareja junta)")
+    c.drawString(36, 428, "DINERO QUE ENTRA A CASA POR AÑO (mediana P50 · sueldos netos + dividendos netos, la pareja junta)")
     filas = [
         ["Sueldos (tú + ella, neto)", eur(D["sd"][1] + D["se"][1]), eur(D["sd"][2] + D["se"][2]),
          eur(D["sd"][3] + D["se"][3]), eur(suel_tot)],
         ["Dividendos netos (50/50)", eur(D["dv"][1]), eur(D["dv"][2]), eur(D["dv"][3]), eur(dv_tot)],
-        ["TOTAL A CASA", eur(D["casa_1"]), eur(D["casa_2"]), eur(D["casa_3"]), eur(D["casa_tot"])],
+        ["TOTAL A CASA (P50 por año)", eur(D["casa_1"]), eur(D["casa_2"]), eur(D["casa_3"]), "—"],
+        ["TOTAL A CASA 36 m (P50 por trayectoria)", "", "", "", eur(D["casa_tot"])],
     ]
     table(c, 36, 410, ["", "Año 1", "Año 2", "Año 3", "Total 36 m"], filas,
-          [300, 130, 130, 130, 150], size=9.5, hrow=26, aligns=["l", "r", "r", "r", "r"], bold_rows=(2,))
+          [300, 130, 130, 130, 150], size=9.5, hrow=26, aligns=["l", "r", "r", "r", "r"], bold_rows=(2, 3))
+    c.setFillColor(SLATE)
+    c.setFont("DejaVu", 8)
+    c.drawString(36, 410 - 15 - 26 * len(filas) - 6,
+                 "Mediana (P50) de 250 trayectorias: la media sería mayor (cola de trayectorias muy buenas) y no representa al caso típico.")
     c.setFillColor(GOLD_DEEP)
     c.setFont("DejaVuBold", 9)
     c.drawString(36, 300, "Y QUÉ QUEDA EN LA SL AL MES 36 (mediana, tras repartir dividendos)")
