@@ -1,0 +1,141 @@
+diff --git a/plan-negocio/modelo_realista.py b/plan-negocio/modelo_realista.py
+index bdffa41..4f819ed 100644
+--- a/plan-negocio/modelo_realista.py
++++ b/plan-negocio/modelo_realista.py
+@@ -355,13 +355,35 @@ def _poisson(rng, lam):
+     return k
+ 
+ 
+-def _tipo_impuesto(resultado, anio, usados):
+-    """15 % los dos primeros años con beneficio; después el tipo de micropyme."""
++def _tipo_impuesto(resultado, anio, usados, ventas_previas=0):
++    """Tipo del Impuesto sobre Sociedades (LIS), corregido el 16/10/2026.
++
++    Reglas que aplican a esta SL (art. 9.8 y 101 LIS):
++
++      · 15 % (entidad de nueva creación): SOLO el primer ejercicio en que la
++        base imponible es positiva. El segundo ejercicio NO sigue al 15 %:
++        solo se extiende a ejercicios siguientes si la entidad mantiene CIE
++        y facturación < 1 M€ (art. 103.4 LIS). Con la trayectoria del plan
++        (año 2 ~1,5 M€ de cobros) ese requisito no se cumple.
++
++      · Reducida dimensión (art. 101 LIS): requiere haber importado < 1 M€
++        en el ejercicio ANTERIOR. Si se supera, todo el ejercicio tributa al
++        25 % general — no hay tramo mixto.
++
++      · "Micropyme" (17 % hasta 50k / 20 % resto, art. 101.uno LIS): exige
++        importar < 1 M€ en el ejercicio ANTERIOR Y < 1 M€ en el corriente.
++        Año 3 con año 2 > 1 M€ -> NO es micropyme: 25 %.
++
++    `ventas_previas` = cobros brutos (cifra de negocios) del ejercicio
++    anterior; `usados` = unidades vendidas hasta hoy (proxy de CIE).
++    """
+     if resultado <= 0:
+         return 0.0
+-    if anio <= 2 or usados < 2:
+-        return r2(resultado * 0.15)
+-    return g.micro_tax(resultado)
++    if anio == 1 and usados > 0:
++        return r2(resultado * 0.15)          # primer ejercicio con beneficio
++    if ventas_previas < 1_000_000.0 and usados > 0:
++        return g.micro_tax(resultado)        # micropyme: cumple ambos requisitos
++    return r2(resultado * 0.25)              # régimen general
+ 
+ 
+ def simular(est, rng):
+@@ -449,6 +471,7 @@ def simular(est, rng):
+     cobro_anio = 0.0
+     impuesto = {1: 0.0, 2: 0.0, 3: 0.0}
+     pagado = 0.0
++    cobro_anio_prev = 0.0   # cifra de negocios del ejercicio anterior (regla 1 M€ LIS)
+     dividendos_total = [0.0]
+     dividendos_anio = {1: 0.0, 2: 0.0, 3: 0.0}
+     reducidos = 0
+@@ -473,12 +496,21 @@ def simular(est, rng):
+     mes_prev = 1
+ 
+     def reserva_impuesto():
+-        """Lo que hay que apartar para el impuesto del año en curso."""
++        """Lo que hay que apartar para el impuesto del año en curso.
++
++        CORREGIDO 16/10/2026: la base imponible se estima como el resultado
++        contable del año (márgenes netos − fijos − sueldos − averías − kit),
++        NO sobre el margen bruto. Apartar el 15-25 % del margen bruto sin
++        restar los gastos deducibles inflaba la reserva y asfixiaba la caja
++        de forma artificial. Se descuenta además lo ya apartado/pagado por
++        el mismo concepto, para no reservar dos veces el mismo impuesto.
++        """
+         res = r2(neto_anio - fijo_anio - sueldo_anio - averia_anio
+                  - (g.KIT if neto_anio or fijo_anio else 0.0))
+         m = mes_actual[0]
+         anio = 1 if m <= 12 else 2 if m <= 24 else 3
+-        return _tipo_impuesto(max(0.0, res), anio, usados)
++        cuota = _tipo_impuesto(max(0.0, res), anio, usados, cobro_anio_prev)
++        return r2(max(0.0, cuota - is_mes[m]))
+ 
+     def floor_sueldo():
+         """Lo que no se toca para pagar la nómina: el fondo de meses de gastos."""
+@@ -719,10 +751,29 @@ def simular(est, rng):
+         ultimo = int((w + 1) / SEM_MES) + 1 != mes
+         if ultimo:
+             # Plan de caja a casa: a fin de ejercicio se reparte en dividendos
+-            # todo lo que sobra por encima del fondo (se deja el fondo intacto).
+-            # El dinero sale de la caja de la SL y deja de financiar compras.
++            # lo que sobra por encima del fondo, PERO SOLO DESPUÉS DE PAGAR el
++            # IS devengado por ese ejercicio (235/236 LIS: sin pago del impuesto
++            # no hay beneficio distribuible; repartir sin él sería una devolución
++            # de aportaciones encubierta y la caja quedaría insuficiente).
++            # CORREGIDO 16/10/2026: antes se repartía ignorando el IS pendiente
++            # (en la trayectoria representativa, dividendo de 382.811 € con el
++            # IS del año 3 —100.647 €— sin pagar y sin caja para pagarlo).
++            # Además el reparto queda CAPADO por los resultados contables del
++            # ejercicio (neto_anio − fijos − sueldos − averías − kit), porque
++            # una SL solo puede repartir beneficios, no la caja que financió
++            # el stock (reserva por plusvalías latentes, art. 19.4 LIS).
+             if est.get("dividendos") and mes in (12, 24, MESES):
+-                div = r2(max(0.0, caja - est["floor_meses"] * fijos(nave)))
++                _res_ej = r2(neto_anio - fijo_anio - sueldo_anio - averia_anio
++                             - (g.KIT if anio == 1 else 0.0))
++                cuota = _tipo_impuesto(max(0.0, _res_ej), anio, usados, cobro_anio_prev)
++                impuesto[anio] = cuota
++                if cuota > 0:   # el IS del ejercicio se paga antes de repartir
++                    caja = r2(caja - cuota)
++                    pagado = r2(pagado + cuota)
++                    is_mes[mes] = r2(is_mes[mes] + cuota)
++                distrib_beneficio = max(0.0, _res_ej - cuota)
++                div = r2(min(distrib_beneficio,
++                             max(0.0, caja - est["floor_meses"] * fijos(nave))))
+                 if div > 0:
+                     caja = r2(caja - div)
+                     dividendos_total[0] = r2(dividendos_total[0] + div)
+@@ -747,17 +798,25 @@ def simular(est, rng):
+             ))
+             if anio == 1 and mes == 12:
+                 res = r2(neto_anio - fijo_anio - sueldo_anio - averia_anio - g.KIT)
+-                impuesto[1] = _tipo_impuesto(res, 1, usados)
++                # Si el reparto de dividendos ya liquidó y pagó el IS del año,
++                # no se vuelve a devengar (y si no hubo reparto, se devenga aquí
++                # para la reserva; el pago real sale en mayo del año siguiente).
++                if not est.get("dividendos"):
++                    impuesto[1] = _tipo_impuesto(res, 1, usados, cobro_anio_prev)
++                cobro_anio_prev = cobro_anio
+             if anio == 2 and mes == 24:
+                 res = r2(neto_anio - fijo_anio - sueldo_anio - averia_anio)
+-                impuesto[2] = _tipo_impuesto(res, 2, usados)
++                if not est.get("dividendos"):
++                    impuesto[2] = _tipo_impuesto(res, 2, usados, cobro_anio_prev)
++                cobro_anio_prev = cobro_anio
+             if anio == 3 and mes == MESES:
+                 res = r2(neto_anio - fijo_anio - sueldo_anio - averia_anio)
+-                impuesto[3] = _tipo_impuesto(res, 3, usados)
++                if not est.get("dividendos"):
++                    impuesto[3] = _tipo_impuesto(res, 3, usados, cobro_anio_prev)
+             if anio == 1 and mes == 12:
+-                neto_anio = fijo_anio = sueldo_anio = averia_anio = 0.0
++                neto_anio = fijo_anio = sueldo_anio = averia_anio = cobro_anio = 0.0
+             elif anio == 2 and mes == 24:
+-                neto_anio = fijo_anio = sueldo_anio = averia_anio = 0.0
++                neto_anio = fijo_anio = sueldo_anio = averia_anio = cobro_anio = 0.0
+ 
+         if caja < min_caja[0]:
+             min_caja[0], min_caja[1] = caja, mes
