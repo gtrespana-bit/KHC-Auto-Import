@@ -1,0 +1,50 @@
+================================================================================================
+PASO 1 — FILTRO DEL CATÁLOGO CON DATOS REALES (mediana anuncio DE vs ES)
+================================================================================================
+modelo           compraDE  ventaES  IEDMT   coste  margen  spread  veredicto
+cla_c118           20,890   25,991      0  23,155   2,836   28.3%  ENTRA
+macan              32,650   38,703  1,551  36,466   2,237   22.8%  fuera
+clase_c            17,500   19,347      0  19,765    -419   16.0%  fuera
+clase_b            19,400   21,243      0  21,665    -422   12.9%  fuera
+x4                 21,000   23,232    998  24,263  -1,031   19.8%  fuera
+audi_a6            16,999   19,036    807  20,072  -1,036   18.9%  fuera
+serie_4_gc         17,500   19,399    831  20,597  -1,198   14.3%  fuera
+golf_gti           11,999   13,095    570  14,834  -1,739   17.4%  fuera
+q5                 19,985   21,339    949  23,200  -1,861   10.5%  fuera
+glc                23,990   25,167  1,140  27,395  -2,228    8.1%  fuera
+xc90               28,990   25,210  1,377  32,632  -7,422  -10.3%  fuera
+landcruiser        41,900   38,266  6,180  50,346 -12,079   -5.8%  fuera
+
+Catálogo aprobado: cla_c118
+
+================================================================================================
+PASO 2 — SIMULACIÓN AÑO 1 · catálogo filtrado (1 modelos)
+================================================================================================
+capital  25,000 € · SL        · CON NAVE  → compras  0, ventas  0, margen comprado       0 (vendido      0), fijos 17,400, impuesto      0, beneficio -17,400 €, caja final    7,600 € (min    7,600), stock pendiente       0 €
+capital  25,000 € · AUTONOMO  · CON NAVE  → compras  0, ventas  0, margen comprado       0 (vendido      0), fijos 17,400, impuesto      0, beneficio -17,400 €, caja final    7,600 € (min    7,600), stock pendiente       0 €
+capital  40,000 € · SL        · CON NAVE  → compras  4, ventas  3, margen comprado  11,343 (vendido  8,507), fijos 17,400, impuesto      0, beneficio  -6,057 €, caja final    7,952 € (min    7,952), stock pendiente  23,155 €
+capital  40,000 € · AUTONOMO  · CON NAVE  → compras  4, ventas  3, margen comprado  11,343 (vendido  8,507), fijos 17,400, impuesto      0, beneficio  -6,057 €, caja final    7,952 € (min    7,952), stock pendiente  23,155 €
+capital  60,000 € · SL        · CON NAVE  → compras  8, ventas  6, margen comprado  22,686 (vendido 17,015), fijos 17,400, impuesto      0, beneficio   5,286 €, caja final   13,304 € (min    9,339), stock pendiente  46,311 €
+capital  60,000 € · AUTONOMO  · CON NAVE  → compras  8, ventas  6, margen comprado  22,686 (vendido 17,015), fijos 17,400, impuesto      0, beneficio   5,286 €, caja final   13,304 € (min    9,339), stock pendiente  46,311 €
+
+Sensibilidad (días de venta x2, mismo capital):
+  capital  25,000 € → ventas  0, caja final   16,600 €
+  capital  40,000 € → ventas  2, caja final   14,116 €
+  capital  60,000 € → ventas  4, caja final   16,073 €
+
+================================================================================================
+PASO 3 — BÚSQUEDA DEL PUNTO DE EQUILIBRIO
+================================================================================================
+Mejor modelo aprobado: cla_c118 · margen bruto/coche 2,836 €
+Ventas mínimas para cubrir fijos SIN nave (año): 3.0 coches
+Ventas mínimas CON nave (año):                    6.1 coches
+
+Barrido de capital inicial (SL, sin nave, 12 meses):
+  20,000 € → compras  0, ventas  0, beneficio   -8,400 €  [no]
+  30,000 € → compras  4, ventas  3, beneficio    2,923 €  [VIABLE]
+  40,000 € → compras  4, ventas  3, beneficio    2,923 €  [VIABLE]
+  50,000 € → compras  8, ventas  6, beneficio   12,650 €  [VIABLE]
+  60,000 € → compras  8, ventas  6, beneficio   12,650 €  [VIABLE]
+  70,000 € → compras 11, ventas  8, beneficio   20,079 €  [VIABLE]
+  80,000 € → compras 13, ventas  9, beneficio   25,212 €  [VIABLE]
+  90,000 € → compras 15, ventas 11, beneficio   29,806 €  [VIABLE]

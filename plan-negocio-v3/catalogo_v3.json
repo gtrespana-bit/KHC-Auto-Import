@@ -1,0 +1,5330 @@
+[
+ {
+  "gen": [
+   "Q5",
+   "Q5 FY"
+  ],
+  "seg": 0,
+  "nDE": 64,
+  "nES": 21,
+  "buy": 34523.25,
+  "sell": 46366.0,
+  "spread": 34.30369388745267,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1337.7759375,
+  "coste": 38126.3859375,
+  "margen": 8239.614062499997,
+  "ejemplo": "40 TDI 190 CV, 40 TDI 204 CV"
+ },
+ {
+  "gen": [
+   "Macan",
+   "Macan 95B"
+  ],
+  "seg": 2,
+  "nDE": 36,
+  "nES": 29,
+  "buy": 32622.5,
+  "sell": 43640.299999999996,
+  "spread": 33.7736224998084,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1264.1218749999998,
+  "coste": 36151.981875,
+  "margen": 7488.318124999998,
+  "ejemplo": "Macan 2.0 252 CV gasolina"
+ },
+ {
+  "gen": [
+   "CLA",
+   "CLA C118"
+  ],
+  "seg": 4,
+  "nDE": 27,
+  "nES": 19,
+  "buy": 15780.0,
+  "sell": 24249.03,
+  "spread": 53.66939163498099,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 611.4749999999999,
+  "coste": 18656.835,
+  "margen": 5592.195,
+  "ejemplo": "CLA 200 d 150 CV diésel"
+ },
+ {
+  "gen": [
+   "Clase E",
+   "Clase E W213"
+  ],
+  "seg": 5,
+  "nDE": 49,
+  "nES": 34,
+  "buy": 16935.0,
+  "sell": 24245.149999999998,
+  "spread": 43.165928550339515,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 656.23125,
+  "coste": 19856.59125,
+  "margen": 4388.5587499999965,
+  "ejemplo": "E 220 d 194 CV"
+ },
+ {
+  "gen": [
+   "A4 Avant",
+   "A4 Avant B9"
+  ],
+  "seg": 5,
+  "nDE": 56,
+  "nES": 18,
+  "buy": 10999.25,
+  "sell": 17935.3,
+  "spread": 63.05929949769302,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 426.2209375,
+  "coste": 13690.8309375,
+  "margen": 4244.4690624999985,
+  "ejemplo": "35 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Tiguan",
+   "Tiguan I"
+  ],
+  "seg": 3,
+  "nDE": 162,
+  "nES": 15,
+  "buy": 13750.0,
+  "sell": 20340.899999999998,
+  "spread": 47.93381818181817,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 532.8125,
+  "coste": 16548.1725,
+  "margen": 3792.7274999999972,
+  "ejemplo": "2.0 TDI 150 CV Tiguan I"
+ },
+ {
+  "gen": [
+   "GLC",
+   "GLC X253 300e"
+  ],
+  "seg": 2,
+  "nDE": 54,
+  "nES": 92,
+  "buy": 28827.5,
+  "sell": 35288.6,
+  "spread": 22.412973723007546,
+  "co2": 45.0,
+  "co2src": "PHEV (tramo 0%)",
+  "imp": 432.41249999999997,
+  "coste": 31525.2725,
+  "margen": 3763.3274999999994,
+  "ejemplo": "GLC 300 e Plug-in Hybrid 320 CV"
+ },
+ {
+  "gen": [
+   "Clase E",
+   "Clase E W213"
+  ],
+  "seg": 4,
+  "nDE": 80,
+  "nES": 79,
+  "buy": 18998.25,
+  "sell": 25705.0,
+  "spread": 35.30193570460438,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 736.1821875,
+  "coste": 21999.7921875,
+  "margen": 3705.2078125000007,
+  "ejemplo": "E 220 d 194 CV"
+ },
+ {
+  "gen": [
+   "CLA",
+   "CLA C118"
+  ],
+  "seg": 3,
+  "nDE": 75,
+  "nES": 44,
+  "buy": 18980.0,
+  "sell": 25680.75,
+  "spread": 35.30426765015806,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 735.4749999999999,
+  "coste": 21980.835,
+  "margen": 3699.915000000001,
+  "ejemplo": "CLA 200 d 150 CV diésel"
+ },
+ {
+  "gen": [
+   "Clase E",
+   "Clase E W213"
+  ],
+  "seg": 1,
+  "nDE": 41,
+  "nES": 32,
+  "buy": 26495.0,
+  "sell": 32926.65,
+  "spread": 24.274957539158336,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1026.68125,
+  "coste": 29787.041250000002,
+  "margen": 3139.6087499999994,
+  "ejemplo": "E 220 d 194 CV"
+ },
+ {
+  "gen": [
+   "Clase E",
+   "Clase E W213"
+  ],
+  "seg": 3,
+  "nDE": 86,
+  "nES": 84,
+  "buy": 21642.5,
+  "sell": 27544.12,
+  "spread": 27.268661199029687,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 838.6468749999999,
+  "coste": 24746.506875,
+  "margen": 2797.613125,
+  "ejemplo": "E 220 d 194 CV"
+ },
+ {
+  "gen": [
+   "Clase A",
+   "Clase A W177"
+  ],
+  "seg": 4,
+  "nDE": 39,
+  "nES": 53,
+  "buy": 14800.0,
+  "sell": 20370.0,
+  "spread": 37.635135135135144,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 573.5,
+  "coste": 17638.86,
+  "margen": 2731.1399999999994,
+  "ejemplo": "A 180 d 116 CV, A 200 d 150 CV, A 220 d 190 CV"
+ },
+ {
+  "gen": [
+   "Cayenne",
+   "Cayenne 92A"
+  ],
+  "seg": 4,
+  "nDE": 59,
+  "nES": 22,
+  "buy": 26490.0,
+  "sell": 32441.649999999998,
+  "spread": 22.467534918837284,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1026.4875,
+  "coste": 29781.8475,
+  "margen": 2659.802499999998,
+  "ejemplo": "Cayenne Diesel 262 CV"
+ },
+ {
+  "gen": [
+   "Clase C",
+   "Clase C W205"
+  ],
+  "seg": 2,
+  "nDE": 35,
+  "nES": 25,
+  "buy": 22500.0,
+  "sell": 28120.3,
+  "spread": 24.97911111111111,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 871.875,
+  "coste": 25637.235,
+  "margen": 2483.0649999999987,
+  "ejemplo": "C 220 d 194 CV"
+ },
+ {
+  "gen": [
+   "GLC",
+   "GLC X253"
+  ],
+  "seg": 4,
+  "nDE": 25,
+  "nES": 19,
+  "buy": 23395.0,
+  "sell": 29003.0,
+  "spread": 23.97093396024792,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 906.5562500000001,
+  "coste": 26566.916250000002,
+  "margen": 2436.083749999998,
+  "ejemplo": "GLC 220 d 194 CV"
+ },
+ {
+  "gen": [
+   "GLC",
+   "GLC X253 pre"
+  ],
+  "seg": 1,
+  "nDE": 73,
+  "nES": 26,
+  "buy": 24340.0,
+  "sell": 29769.3,
+  "spread": 22.30608052588332,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 943.175,
+  "coste": 27548.535,
+  "margen": 2220.7649999999994,
+  "ejemplo": "GLC 220 d 170 CV diésel"
+ },
+ {
+  "gen": [
+   "Touran",
+   "Touran II"
+  ],
+  "seg": 5,
+  "nDE": 62,
+  "nES": 17,
+  "buy": 11495.0,
+  "sell": 16393.0,
+  "spread": 42.609830361026525,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 445.43125,
+  "coste": 14205.79125,
+  "margen": 2187.20875,
+  "ejemplo": "2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Cayenne",
+   "Cayenne 92A"
+  ],
+  "seg": 5,
+  "nDE": 27,
+  "nES": 17,
+  "buy": 22900.0,
+  "sell": 28120.3,
+  "spread": 22.796069868995627,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 887.375,
+  "coste": 26052.735,
+  "margen": 2067.5649999999987,
+  "ejemplo": "Cayenne Diesel 262 CV"
+ },
+ {
+  "gen": [
+   "GLC",
+   "GLC X253 pre"
+  ],
+  "seg": 5,
+  "nDE": 51,
+  "nES": 29,
+  "buy": 16500.0,
+  "sell": 21339.03,
+  "spread": 29.327454545454536,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 639.375,
+  "coste": 19404.735,
+  "margen": 1934.2949999999983,
+  "ejemplo": "GLC 220 d 170 CV diésel"
+ },
+ {
+  "gen": [
+   "Clase C",
+   "Clase C W205 pre"
+  ],
+  "seg": 5,
+  "nDE": 77,
+  "nES": 100,
+  "buy": 11680.0,
+  "sell": 16320.25,
+  "spread": 39.72816780821917,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 452.59999999999997,
+  "coste": 14397.960000000001,
+  "margen": 1922.289999999999,
+  "ejemplo": "C 220 d 170 CV diésel"
+ },
+ {
+  "gen": [
+   "Serie 3",
+   "Serie 3 F30 LCI"
+  ],
+  "seg": 3,
+  "nDE": 84,
+  "nES": 47,
+  "buy": 16547.5,
+  "sell": 21330.3,
+  "spread": 28.903459737120407,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 641.215625,
+  "coste": 19454.075625,
+  "margen": 1876.224374999998,
+  "ejemplo": "320d 184 CV EfficientDynamics, 320d 190 CV diésel"
+ },
+ {
+  "gen": [
+   "Clase C Estate",
+   "Clase C Estate S205"
+  ],
+  "seg": 3,
+  "nDE": 137,
+  "nES": 27,
+  "buy": 18999.0,
+  "sell": 23800.89,
+  "spread": 25.274435496605086,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 736.2112500000001,
+  "coste": 22000.57125,
+  "margen": 1800.3187499999985,
+  "ejemplo": "C 220 d 194 CV T"
+ },
+ {
+  "gen": [
+   "GLC",
+   "GLC X253 pre"
+  ],
+  "seg": 4,
+  "nDE": 113,
+  "nES": 70,
+  "buy": 18500.0,
+  "sell": 23274.665,
+  "spread": 25.809000000000015,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 716.875,
+  "coste": 21482.235,
+  "margen": 1792.4300000000003,
+  "ejemplo": "GLC 220 d 170 CV diésel"
+ },
+ {
+  "gen": [
+   "Clase A",
+   "Clase A W177"
+  ],
+  "seg": 1,
+  "nDE": 36,
+  "nES": 99,
+  "buy": 18992.25,
+  "sell": 23755.3,
+  "spread": 25.078913767457767,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 735.9496875,
+  "coste": 21993.5596875,
+  "margen": 1761.7403124999983,
+  "ejemplo": "A 180 d 116 CV, A 200 d 150 CV, A 220 d 190 CV"
+ },
+ {
+  "gen": [
+   "California",
+   "California T6"
+  ],
+  "seg": 2,
+  "nDE": 128,
+  "nES": 43,
+  "buy": 40999.0,
+  "sell": 46550.299999999996,
+  "spread": 13.540086343569335,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1588.71125,
+  "coste": 44853.07125,
+  "margen": 1697.2287499999948,
+  "ejemplo": "California 2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Q3",
+   "Q3 F3"
+  ],
+  "seg": 0,
+  "nDE": 372,
+  "nES": 178,
+  "buy": 27860.0,
+  "sell": 32810.25,
+  "spread": 17.76830581478823,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1079.5749999999998,
+  "coste": 31204.935,
+  "margen": 1605.3149999999987,
+  "ejemplo": "2.0 TDI 150 CV S line, 2.0 TDI 190 CV S tronic quattro S Lin"
+ },
+ {
+  "gen": [
+   "Golf",
+   "Golf VII (5G)"
+  ],
+  "seg": 5,
+  "nDE": 122,
+  "nES": 27,
+  "buy": 7499.75,
+  "sell": 11640.0,
+  "spread": 55.205173505783534,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 290.6153125,
+  "coste": 10055.7253125,
+  "margen": 1584.2746874999993,
+  "ejemplo": "2.0 TDI 150 CV, 2.0 TDI 184 CV GTD"
+ },
+ {
+  "gen": [
+   "A5 Sportback",
+   "A5 Sportback F5"
+  ],
+  "seg": 3,
+  "nDE": 129,
+  "nES": 17,
+  "buy": 20499.5,
+  "sell": 25088.079999999998,
+  "spread": 22.383863021049287,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 794.355625,
+  "coste": 23559.215625,
+  "margen": 1528.8643749999974,
+  "ejemplo": "A5 Sportback 2.0 TDI 190 CV"
+ },
+ {
+  "gen": [
+   "Touran",
+   "Touran II"
+  ],
+  "seg": 2,
+  "nDE": 158,
+  "nES": 53,
+  "buy": 17987.5,
+  "sell": 22444.829999999998,
+  "spread": 24.78015288394717,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 697.015625,
+  "coste": 20949.875625,
+  "margen": 1494.9543749999975,
+  "ejemplo": "2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Golf",
+   "Golf VII (5G)"
+  ],
+  "seg": 4,
+  "nDE": 185,
+  "nES": 50,
+  "buy": 8990.0,
+  "sell": 13095.0,
+  "spread": 45.66184649610678,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 348.36249999999995,
+  "coste": 11603.7225,
+  "margen": 1491.2775000000001,
+  "ejemplo": "2.0 TDI 150 CV, 2.0 TDI 184 CV GTD"
+ },
+ {
+  "gen": [
+   "CX-5",
+   "CX-5 KF"
+  ],
+  "seg": 4,
+  "nDE": 54,
+  "nES": 27,
+  "buy": 9647.5,
+  "sell": 13774.0,
+  "spread": 42.772739051567754,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 373.84062500000005,
+  "coste": 12286.700625000001,
+  "margen": 1487.2993749999987,
+  "ejemplo": "CX-5 2.2 Skyactiv-D 150 CV diésel"
+ },
+ {
+  "gen": [
+   "A3",
+   "A3 8V"
+  ],
+  "seg": 5,
+  "nDE": 39,
+  "nES": 23,
+  "buy": 9950.0,
+  "sell": 14065.0,
+  "spread": 41.35678391959799,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 385.5625,
+  "coste": 12600.9225,
+  "margen": 1464.0774999999994,
+  "ejemplo": "1.5 TFSI 150 CV S-Tronic, 2.0 TDI 150 CV, 2.0 TFSI 190 CV qu"
+ },
+ {
+  "gen": [
+   "Clase E",
+   "Clase E W213"
+  ],
+  "seg": 2,
+  "nDE": 68,
+  "nES": 91,
+  "buy": 24912.5,
+  "sell": 29585.0,
+  "spread": 18.75564475664826,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 965.359375,
+  "coste": 28143.219375,
+  "margen": 1441.7806249999994,
+  "ejemplo": "E 220 d 194 CV"
+ },
+ {
+  "gen": [
+   "Multivan",
+   "Multivan T6"
+  ],
+  "seg": 3,
+  "nDE": 218,
+  "nES": 22,
+  "buy": 29490.0,
+  "sell": 34333.15,
+  "spread": 16.423024754153957,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1142.7375,
+  "coste": 32898.0975,
+  "margen": 1435.052499999998,
+  "ejemplo": "Multivan 2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Golf",
+   "Golf VII.5"
+  ],
+  "seg": 4,
+  "nDE": 98,
+  "nES": 66,
+  "buy": 10687.5,
+  "sell": 14545.15,
+  "spread": 36.09497076023391,
+  "co2": 110.0,
+  "co2src": "ficha",
+  "imp": 160.3125,
+  "coste": 13113.1725,
+  "margen": 1431.977499999999,
+  "ejemplo": "1.6 TDI 116 CV IQ.DRIVE Aut, 2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Cayenne",
+   "Cayenne 92A"
+  ],
+  "seg": 3,
+  "nDE": 53,
+  "nES": 22,
+  "buy": 29600.0,
+  "sell": 34429.665,
+  "spread": 16.316435810810816,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1147.0,
+  "coste": 33012.36,
+  "margen": 1417.3050000000003,
+  "ejemplo": "Cayenne Diesel 262 CV"
+ },
+ {
+  "gen": [
+   "Clase A",
+   "Clase A W177"
+  ],
+  "seg": 3,
+  "nDE": 65,
+  "nES": 187,
+  "buy": 16940.0,
+  "sell": 21243.0,
+  "spread": 25.40141676505312,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 656.425,
+  "coste": 19861.785,
+  "margen": 1381.2150000000001,
+  "ejemplo": "A 180 d 116 CV, A 200 d 150 CV, A 220 d 190 CV"
+ },
+ {
+  "gen": [
+   "Touran",
+   "Touran II"
+  ],
+  "seg": 3,
+  "nDE": 191,
+  "nES": 79,
+  "buy": 15750.0,
+  "sell": 19982.0,
+  "spread": 26.869841269841267,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 610.3125,
+  "coste": 18625.6725,
+  "margen": 1356.3274999999994,
+  "ejemplo": "2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "XC90",
+   "XC90 II"
+  ],
+  "seg": 4,
+  "nDE": 82,
+  "nES": 21,
+  "buy": 22292.25,
+  "sell": 26710.89,
+  "spread": 19.821417757292338,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 863.8246875,
+  "coste": 25421.4346875,
+  "margen": 1289.4553124999984,
+  "ejemplo": "XC90 D5 AWD 235 CV diésel"
+ },
+ {
+  "gen": [
+   "A3",
+   "A3 8V"
+  ],
+  "seg": 4,
+  "nDE": 131,
+  "nES": 59,
+  "buy": 11999.0,
+  "sell": 16005.0,
+  "spread": 33.3861155096258,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 464.96124999999995,
+  "coste": 14729.32125,
+  "margen": 1275.6787499999991,
+  "ejemplo": "1.5 TFSI 150 CV S-Tronic, 2.0 TDI 150 CV, 2.0 TFSI 190 CV qu"
+ },
+ {
+  "gen": [
+   "A3",
+   "A3 8V"
+  ],
+  "seg": 3,
+  "nDE": 193,
+  "nES": 92,
+  "buy": 13675.0,
+  "sell": 17736.45,
+  "spread": 29.699817184643518,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 529.90625,
+  "coste": 16470.26625,
+  "margen": 1266.1837500000001,
+  "ejemplo": "1.5 TFSI 150 CV S-Tronic, 2.0 TDI 150 CV, 2.0 TFSI 190 CV qu"
+ },
+ {
+  "gen": [
+   "Tiguan",
+   "Tiguan II"
+  ],
+  "seg": 4,
+  "nDE": 120,
+  "nES": 104,
+  "buy": 14490.0,
+  "sell": 18575.5,
+  "spread": 28.195307108350587,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 561.4875,
+  "coste": 17316.8475,
+  "margen": 1258.6525000000001,
+  "ejemplo": "2.0 TDI 150 CV DSG 4Motion"
+ },
+ {
+  "gen": [
+   "A4 Avant",
+   "A4 Avant B9"
+  ],
+  "seg": 2,
+  "nDE": 73,
+  "nES": 34,
+  "buy": 16999.5,
+  "sell": 21155.7,
+  "spread": 24.4489543810112,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 658.730625,
+  "coste": 19923.590625,
+  "margen": 1232.109375,
+  "ejemplo": "35 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Serie 1",
+   "Serie 1 F20 LCI"
+  ],
+  "seg": 4,
+  "nDE": 88,
+  "nES": 111,
+  "buy": 8992.25,
+  "sell": 12803.029999999999,
+  "spread": 42.3784925908421,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 348.4496875,
+  "coste": 11606.059687500001,
+  "margen": 1196.9703124999978,
+  "ejemplo": "116d 116 CV, 118d 150 CV M Sport"
+ },
+ {
+  "gen": [
+   "Serie 1",
+   "Serie 1 F20 LCI"
+  ],
+  "seg": 2,
+  "nDE": 92,
+  "nES": 104,
+  "buy": 12917.5,
+  "sell": 16868.3,
+  "spread": 30.584865492548865,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 500.55312499999997,
+  "coste": 15683.413125000001,
+  "margen": 1184.8868749999983,
+  "ejemplo": "116d 116 CV, 118d 150 CV M Sport"
+ },
+ {
+  "gen": [
+   "A3",
+   "A3 8Y"
+  ],
+  "seg": 4,
+  "nDE": 33,
+  "nES": 16,
+  "buy": 15640.0,
+  "sell": 19642.5,
+  "spread": 25.591432225063947,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 606.05,
+  "coste": 18511.41,
+  "margen": 1131.0900000000001,
+  "ejemplo": "A3 35 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Serie 4 Gran Coupe",
+   "Serie 4 Gran Coupé F36"
+  ],
+  "seg": 3,
+  "nDE": 85,
+  "nES": 23,
+  "buy": 17894.0,
+  "sell": 21957.89,
+  "spread": 22.71090868447525,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 693.3924999999999,
+  "coste": 20852.752500000002,
+  "margen": 1105.137499999997,
+  "ejemplo": "420d Gran Coupé 190 CV diésel"
+ },
+ {
+  "gen": [
+   "GLC",
+   "GLC X253"
+  ],
+  "seg": 2,
+  "nDE": 138,
+  "nES": 178,
+  "buy": 29897.5,
+  "sell": 34425.299999999996,
+  "spread": 15.144410067731396,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1158.5281249999998,
+  "coste": 33321.388125,
+  "margen": 1103.911874999998,
+  "ejemplo": "GLC 220 d 170 CV, GLC 220 d 194 CV"
+ },
+ {
+  "gen": [
+   "Touran",
+   "Touran II"
+  ],
+  "seg": 4,
+  "nDE": 138,
+  "nES": 38,
+  "buy": 12500.0,
+  "sell": 16247.5,
+  "spread": 29.980000000000008,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 484.375,
+  "coste": 15249.735,
+  "margen": 997.7649999999994,
+  "ejemplo": "2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Tiguan",
+   "Tiguan II"
+  ],
+  "seg": 1,
+  "nDE": 110,
+  "nES": 42,
+  "buy": 19990.0,
+  "sell": 24026.899999999998,
+  "spread": 20.19459729864932,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 774.6125,
+  "coste": 23029.9725,
+  "margen": 996.927499999998,
+  "ejemplo": "2.0 TDI 150 CV DSG 4Motion"
+ },
+ {
+  "gen": [
+   "Clase C Estate",
+   "Clase C Estate S205"
+  ],
+  "seg": 1,
+  "nDE": 65,
+  "nES": 18,
+  "buy": 23890.0,
+  "sell": 28076.649999999998,
+  "spread": 17.52469652574298,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 925.7375,
+  "coste": 27081.0975,
+  "margen": 995.552499999998,
+  "ejemplo": "C 220 d 194 CV T"
+ },
+ {
+  "gen": [
+   "A5",
+   "A5 F5"
+  ],
+  "seg": 4,
+  "nDE": 26,
+  "nES": 32,
+  "buy": 16937.5,
+  "sell": 20850.149999999998,
+  "spread": 23.100516605166032,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 656.328125,
+  "coste": 19859.188125,
+  "margen": 990.9618749999972,
+  "ejemplo": "40 TDI 190 CV"
+ },
+ {
+  "gen": [
+   "Serie 1",
+   "Serie 1 F20 LCI"
+  ],
+  "seg": 5,
+  "nDE": 31,
+  "nES": 29,
+  "buy": 7800.0,
+  "sell": 11349.0,
+  "spread": 45.50000000000001,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 302.25,
+  "coste": 10367.61,
+  "margen": 981.3899999999994,
+  "ejemplo": "116d 116 CV, 118d 150 CV M Sport"
+ },
+ {
+  "gen": [
+   "GLB",
+   "GLB X247"
+  ],
+  "seg": 3,
+  "nDE": 119,
+  "nES": 67,
+  "buy": 22999.0,
+  "sell": 27053.3,
+  "spread": 17.628157745988958,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 891.2112500000001,
+  "coste": 26155.57125,
+  "margen": 897.7287499999984,
+  "ejemplo": "GLB 200 d 150 CV diésel"
+ },
+ {
+  "gen": [
+   "CLA",
+   "CLA C117"
+  ],
+  "seg": 3,
+  "nDE": 29,
+  "nES": 76,
+  "buy": 14745.0,
+  "sell": 18410.6,
+  "spread": 24.859952526280082,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 571.36875,
+  "coste": 17581.728750000002,
+  "margen": 828.8712499999965,
+  "ejemplo": "CLA 200 d 136 CV diésel"
+ },
+ {
+  "gen": [
+   "CLA",
+   "CLA C118"
+  ],
+  "seg": 2,
+  "nDE": 89,
+  "nES": 97,
+  "buy": 22239.5,
+  "sell": 26189.03,
+  "spread": 17.75907731738573,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 861.780625,
+  "coste": 25366.640625,
+  "margen": 822.3893749999988,
+  "ejemplo": "CLA 200 d 150 CV diésel"
+ },
+ {
+  "gen": [
+   "GLC",
+   "GLC X253"
+  ],
+  "seg": 3,
+  "nDE": 82,
+  "nES": 119,
+  "buy": 27390.0,
+  "sell": 31515.3,
+  "spread": 15.061336254107328,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1061.3625,
+  "coste": 30716.7225,
+  "margen": 798.5774999999994,
+  "ejemplo": "GLC 220 d 194 CV"
+ },
+ {
+  "gen": [
+   "X1",
+   "X1 F48"
+  ],
+  "seg": 4,
+  "nDE": 79,
+  "nES": 75,
+  "buy": 11989.0,
+  "sell": 15510.3,
+  "spread": 29.371090165985493,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 464.57374999999996,
+  "coste": 14718.93375,
+  "margen": 791.3662499999991,
+  "ejemplo": "xDrive18d 150 CV diésel"
+ },
+ {
+  "gen": [
+   "Serie 3 Touring",
+   "Serie 3 Touring F31"
+  ],
+  "seg": 4,
+  "nDE": 209,
+  "nES": 15,
+  "buy": 12000.0,
+  "sell": 15510.3,
+  "spread": 29.25249999999999,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 465.0,
+  "coste": 14730.36,
+  "margen": 779.9399999999987,
+  "ejemplo": "320d Touring 190 CV diésel"
+ },
+ {
+  "gen": [
+   "Golf",
+   "Golf VII.5"
+  ],
+  "seg": 1,
+  "nDE": 49,
+  "nES": 26,
+  "buy": 15150.0,
+  "sell": 18420.3,
+  "spread": 21.586138613861383,
+  "co2": 110.0,
+  "co2src": "ficha",
+  "imp": 227.25,
+  "coste": 17642.61,
+  "margen": 777.6899999999987,
+  "ejemplo": "1.6 TDI 116 CV IQ.DRIVE Aut, 2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "A6",
+   "A6 C7"
+  ],
+  "seg": 5,
+  "nDE": 126,
+  "nES": 23,
+  "buy": 12500.0,
+  "sell": 16005.0,
+  "spread": 28.04,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 484.375,
+  "coste": 15249.735,
+  "margen": 755.2649999999994,
+  "ejemplo": "A6 2.0 TDI ultra 190 CV"
+ },
+ {
+  "gen": [
+   "Serie 1",
+   "Serie 1 F20 LCI"
+  ],
+  "seg": 3,
+  "nDE": 106,
+  "nES": 168,
+  "buy": 11575.0,
+  "sell": 15025.3,
+  "spread": 29.80820734341252,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 448.53125,
+  "coste": 14288.89125,
+  "margen": 736.4087499999987,
+  "ejemplo": "116d 116 CV, 118d 150 CV M Sport"
+ },
+ {
+  "gen": [
+   "X4",
+   "X4 F26"
+  ],
+  "seg": 3,
+  "nDE": 58,
+  "nES": 62,
+  "buy": 18497.5,
+  "sell": 22203.3,
+  "spread": 20.034058656575215,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 716.778125,
+  "coste": 21479.638125,
+  "margen": 723.661874999998,
+  "ejemplo": "xDrive20d X4 190 CV diésel"
+ },
+ {
+  "gen": [
+   "Clase C",
+   "Clase C W205"
+  ],
+  "seg": 3,
+  "nDE": 27,
+  "nES": 24,
+  "buy": 19990.0,
+  "sell": 23735.899999999998,
+  "spread": 18.738869434717344,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 774.6125,
+  "coste": 23029.9725,
+  "margen": 705.927499999998,
+  "ejemplo": "C 220 d 194 CV"
+ },
+ {
+  "gen": [
+   "GLA",
+   "GLA X156"
+  ],
+  "seg": 4,
+  "nDE": 44,
+  "nES": 40,
+  "buy": 11999.0,
+  "sell": 15423.0,
+  "spread": 28.53571130927577,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 464.96124999999995,
+  "coste": 14729.32125,
+  "margen": 693.6787499999991,
+  "ejemplo": "GLA 200 d 136 CV diésel"
+ },
+ {
+  "gen": [
+   "Clase C",
+   "Clase C W205 pre"
+  ],
+  "seg": 4,
+  "nDE": 104,
+  "nES": 110,
+  "buy": 13999.25,
+  "sell": 17460.0,
+  "spread": 24.72096719467114,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 542.4709375,
+  "coste": 16807.0809375,
+  "margen": 652.919062500001,
+  "ejemplo": "C 220 d 170 CV diésel"
+ },
+ {
+  "gen": [
+   "Q7",
+   "Q7 4M 50"
+  ],
+  "seg": 4,
+  "nDE": 94,
+  "nES": 21,
+  "buy": 25209.75,
+  "sell": 29090.3,
+  "spread": 15.393052291276188,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 976.8778125,
+  "coste": 28451.9878125,
+  "margen": 638.3121874999997,
+  "ejemplo": "Q7 3.0 TDI 272 CV"
+ },
+ {
+  "gen": [
+   "Duster",
+   "Duster II"
+  ],
+  "seg": 3,
+  "nDE": 26,
+  "nES": 118,
+  "buy": 9996.75,
+  "sell": 13230.8,
+  "spread": 32.351014079575855,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 387.3740625,
+  "coste": 12649.4840625,
+  "margen": 581.3159374999996,
+  "ejemplo": "1.5 Blue dCi 115 CV Prestige, 1.5 dCi 110 CV Prestige"
+ },
+ {
+  "gen": [
+   "CLA",
+   "CLA C118"
+  ],
+  "seg": 1,
+  "nDE": 131,
+  "nES": 111,
+  "buy": 24400.0,
+  "sell": 28120.3,
+  "spread": 15.247131147540971,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 945.5,
+  "coste": 27610.86,
+  "margen": 509.4399999999987,
+  "ejemplo": "CLA 200 d 150 CV diésel"
+ },
+ {
+  "gen": [
+   "Serie 2 Active Tourer",
+   "Serie 2 AT F45"
+  ],
+  "seg": 3,
+  "nDE": 161,
+  "nES": 93,
+  "buy": 10500.0,
+  "sell": 13667.3,
+  "spread": 30.164761904761896,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 406.875,
+  "coste": 13172.235,
+  "margen": 495.0649999999987,
+  "ejemplo": "218d Active Tourer 150 CV diésel"
+ },
+ {
+  "gen": [
+   "GLC",
+   "GLC X253 300e"
+  ],
+  "seg": 1,
+  "nDE": 60,
+  "nES": 79,
+  "buy": 32450.0,
+  "sell": 35686.299999999996,
+  "spread": 9.973189522342052,
+  "co2": 45.0,
+  "co2src": "PHEV (tramo 0%)",
+  "imp": 486.75,
+  "coste": 35202.11,
+  "margen": 484.18999999999505,
+  "ejemplo": "GLC 300 e Plug-in Hybrid 320 CV"
+ },
+ {
+  "gen": [
+   "Golf",
+   "Golf VII (5G)"
+  ],
+  "seg": 3,
+  "nDE": 149,
+  "nES": 24,
+  "buy": 10450.0,
+  "sell": 13579.515,
+  "spread": 29.947511961722473,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 404.9375,
+  "coste": 13120.2975,
+  "margen": 459.21749999999884,
+  "ejemplo": "2.0 TDI 150 CV, 2.0 TDI 184 CV GTD"
+ },
+ {
+  "gen": [
+   "Clase A",
+   "Clase A W177 250e"
+  ],
+  "seg": 0,
+  "nDE": 50,
+  "nES": 39,
+  "buy": 25037.5,
+  "sell": 28712.0,
+  "spread": 14.675986020968557,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 970.203125,
+  "coste": 28273.063125,
+  "margen": 438.9368749999994,
+  "ejemplo": "A 250 e Plug-in Hybrid 218 CV"
+ },
+ {
+  "gen": [
+   "X4",
+   "X4 F26"
+  ],
+  "seg": 4,
+  "nDE": 48,
+  "nES": 18,
+  "buy": 16900.0,
+  "sell": 20228.38,
+  "spread": 19.694556213017766,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 654.875,
+  "coste": 19820.235,
+  "margen": 408.14500000000044,
+  "ejemplo": "xDrive20d X4 190 CV diésel"
+ },
+ {
+  "gen": [
+   "Serie 2 Active Tourer",
+   "Serie 2 AT F45"
+  ],
+  "seg": 4,
+  "nDE": 89,
+  "nES": 35,
+  "buy": 8540.0,
+  "sell": 11543.0,
+  "spread": 35.16393442622952,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 330.92499999999995,
+  "coste": 11136.285,
+  "margen": 406.71500000000015,
+  "ejemplo": "218d Active Tourer 150 CV diésel"
+ },
+ {
+  "gen": [
+   "Clase C",
+   "Clase C W205 pre"
+  ],
+  "seg": 2,
+  "nDE": 62,
+  "nES": 78,
+  "buy": 17299.25,
+  "sell": 20600.375,
+  "spread": 19.082474673757545,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 670.3459375,
+  "coste": 20234.9559375,
+  "margen": 365.419062500001,
+  "ejemplo": "C 220 d 170 CV diésel"
+ },
+ {
+  "gen": [
+   "Clase A",
+   "Clase A W177 250e"
+  ],
+  "seg": 3,
+  "nDE": 28,
+  "nES": 38,
+  "buy": 18950.0,
+  "sell": 22256.649999999998,
+  "spread": 17.44934036939312,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 734.3125,
+  "coste": 21949.6725,
+  "margen": 306.97749999999724,
+  "ejemplo": "A 250 e Plug-in Hybrid 218 CV"
+ },
+ {
+  "gen": [
+   "A6",
+   "A6 C7"
+  ],
+  "seg": 2,
+  "nDE": 74,
+  "nES": 47,
+  "buy": 18990.0,
+  "sell": 22265.38,
+  "spread": 17.24791995787256,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 735.8625,
+  "coste": 21991.2225,
+  "margen": 274.15750000000116,
+  "ejemplo": "A6 2.0 TDI ultra 190 CV"
+ },
+ {
+  "gen": [
+   "CX-5",
+   "CX-5 KF"
+  ],
+  "seg": 3,
+  "nDE": 63,
+  "nES": 73,
+  "buy": 12490.0,
+  "sell": 15510.3,
+  "spread": 24.181745396317055,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 483.98749999999995,
+  "coste": 15239.3475,
+  "margen": 270.9524999999994,
+  "ejemplo": "CX-5 2.2 Skyactiv-D 150 CV diésel"
+ },
+ {
+  "gen": [
+   "A6",
+   "A6 C7"
+  ],
+  "seg": 4,
+  "nDE": 265,
+  "nES": 31,
+  "buy": 14390.0,
+  "sell": 17459.03,
+  "spread": 21.327519110493398,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 557.6125,
+  "coste": 17212.9725,
+  "margen": 246.05749999999898,
+  "ejemplo": "A6 2.0 TDI ultra 190 CV"
+ },
+ {
+  "gen": [
+   "A4 Avant",
+   "A4 Avant B9"
+  ],
+  "seg": 3,
+  "nDE": 139,
+  "nES": 43,
+  "buy": 15500.0,
+  "sell": 18591.989999999998,
+  "spread": 19.94832258064514,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 600.625,
+  "coste": 18365.985,
+  "margen": 226.00499999999738,
+  "ejemplo": "35 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Arteon",
+   "Arteon"
+  ],
+  "seg": 3,
+  "nDE": 32,
+  "nES": 66,
+  "buy": 17249.0,
+  "sell": 20351.57,
+  "spread": 17.986955765551627,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 668.3987500000001,
+  "coste": 20182.75875,
+  "margen": 168.81124999999884,
+  "ejemplo": "2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "GLC",
+   "GLC X253"
+  ],
+  "seg": 1,
+  "nDE": 115,
+  "nES": 96,
+  "buy": 33740.0,
+  "sell": 37478.375,
+  "spread": 11.079949614700645,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1307.425,
+  "coste": 37312.785,
+  "margen": 165.5899999999965,
+  "ejemplo": "GLC 220 d 194 CV"
+ },
+ {
+  "gen": [
+   "Q3",
+   "Q3 F3"
+  ],
+  "seg": 3,
+  "nDE": 82,
+  "nES": 217,
+  "buy": 19185.0,
+  "sell": 22300.3,
+  "spread": 16.238206932499356,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 743.41875,
+  "coste": 22193.77875,
+  "margen": 106.52124999999796,
+  "ejemplo": "2.0 TDI 150 CV S line, 2.0 TDI 190 CV S tronic quattro S Lin"
+ },
+ {
+  "gen": [
+   "Arteon",
+   "Arteon"
+  ],
+  "seg": 2,
+  "nDE": 39,
+  "nES": 68,
+  "buy": 19999.0,
+  "sell": 23134.5,
+  "spread": 15.6782839141957,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 774.9612500000001,
+  "coste": 23039.32125,
+  "margen": 95.17874999999913,
+  "ejemplo": "2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "X3",
+   "X3 F25"
+  ],
+  "seg": 4,
+  "nDE": 137,
+  "nES": 32,
+  "buy": 14000.0,
+  "sell": 16868.3,
+  "spread": 20.487857142857145,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 542.5,
+  "coste": 16807.86,
+  "margen": 60.43999999999869,
+  "ejemplo": "xDrive20d 190 CV diésel"
+ },
+ {
+  "gen": [
+   "A5 Sportback",
+   "A5 Sportback F5"
+  ],
+  "seg": 2,
+  "nDE": 93,
+  "nES": 24,
+  "buy": 22495.0,
+  "sell": 25678.809999999998,
+  "spread": 14.153411869304279,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 871.6812500000001,
+  "coste": 25632.041250000002,
+  "margen": 46.768749999995634,
+  "ejemplo": "A5 Sportback 2.0 TDI 190 CV"
+ },
+ {
+  "gen": [
+   "Golf",
+   "Golf VII.5"
+  ],
+  "seg": 3,
+  "nDE": 152,
+  "nES": 86,
+  "buy": 12277.25,
+  "sell": 14744.0,
+  "spread": 20.09204015557229,
+  "co2": 110.0,
+  "co2src": "ficha",
+  "imp": 184.15875,
+  "coste": 14726.768750000001,
+  "margen": 17.23124999999891,
+  "ejemplo": "1.6 TDI 116 CV IQ.DRIVE Aut, 2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Sandero",
+   "Sandero II"
+  ],
+  "seg": 2,
+  "nDE": 37,
+  "nES": 20,
+  "buy": 7145.0,
+  "sell": 9700.0,
+  "spread": 35.7592722183345,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 276.86875,
+  "coste": 9687.22875,
+  "margen": 12.771249999999782,
+  "ejemplo": "0.9 TCe 90 CV Stepway Essential"
+ },
+ {
+  "gen": [
+   "Serie 2 Active Tourer",
+   "Serie 2 AT F45"
+  ],
+  "seg": 2,
+  "nDE": 168,
+  "nES": 83,
+  "buy": 12490.0,
+  "sell": 15247.43,
+  "spread": 22.07710168134507,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 483.98749999999995,
+  "coste": 15239.3475,
+  "margen": 8.082500000000437,
+  "ejemplo": "218d Active Tourer 150 CV diésel"
+ },
+ {
+  "gen": [
+   "Golf Variant",
+   "Golf VII Variant"
+  ],
+  "seg": 4,
+  "nDE": 232,
+  "nES": 38,
+  "buy": 9000.0,
+  "sell": 11610.9,
+  "spread": 29.01,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 348.75,
+  "coste": 11614.11,
+  "margen": -3.210000000000946,
+  "ejemplo": "2.0 TDI 150 CV DSG"
+ },
+ {
+  "gen": [
+   "Serie 5",
+   "Serie 5 F10"
+  ],
+  "seg": 5,
+  "nDE": 26,
+  "nES": 26,
+  "buy": 10899.0,
+  "sell": 13580.0,
+  "spread": 24.598587026332687,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 422.33624999999995,
+  "coste": 13586.69625,
+  "margen": -6.696250000000873,
+  "ejemplo": "520d 190 CV diésel"
+ },
+ {
+  "gen": [
+   "Golf",
+   "Golf VII.5"
+  ],
+  "seg": 2,
+  "nDE": 140,
+  "nES": 102,
+  "buy": 13999.25,
+  "sell": 16457.989999999998,
+  "spread": 17.56336946622139,
+  "co2": 110.0,
+  "co2src": "ficha",
+  "imp": 209.98874999999998,
+  "coste": 16474.59875,
+  "margen": -16.608750000003056,
+  "ejemplo": "1.6 TDI 116 CV IQ.DRIVE Aut, 2.0 TDI 150 CV, 2.0 TDI 184 CV "
+ },
+ {
+  "gen": [
+   "California",
+   "California T6"
+  ],
+  "seg": 3,
+  "nDE": 63,
+  "nES": 19,
+  "buy": 37990.0,
+  "sell": 41710.0,
+  "spread": 9.792050539615694,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1472.1125000000002,
+  "coste": 41727.4725,
+  "margen": -17.472500000003492,
+  "ejemplo": "California 2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "X5",
+   "X5 F15"
+  ],
+  "seg": 3,
+  "nDE": 124,
+  "nES": 30,
+  "buy": 24550.0,
+  "sell": 27732.3,
+  "spread": 12.962525458248475,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 951.3125,
+  "coste": 27766.6725,
+  "margen": -34.37250000000131,
+  "ejemplo": "xDrive30d 258 CV diésel"
+ },
+ {
+  "gen": [
+   "Q3",
+   "Q3 8U"
+  ],
+  "seg": 3,
+  "nDE": 86,
+  "nES": 70,
+  "buy": 14187.25,
+  "sell": 16965.3,
+  "spread": 19.58131420817988,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 549.7559375,
+  "coste": 17002.3659375,
+  "margen": -37.06593749999956,
+  "ejemplo": "2.0 TDI 150 CV Sport"
+ },
+ {
+  "gen": [
+   "Range Rover Evoque",
+   "Evoque L538"
+  ],
+  "seg": 4,
+  "nDE": 31,
+  "nES": 17,
+  "buy": 10950.0,
+  "sell": 13570.3,
+  "spread": 23.92968036529679,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 424.3125,
+  "coste": 13639.6725,
+  "margen": -69.37250000000131,
+  "ejemplo": "Evoque 2.0 TD4 150 CV diésel"
+ },
+ {
+  "gen": [
+   "X1",
+   "X1 F48"
+  ],
+  "seg": 2,
+  "nDE": 206,
+  "nES": 270,
+  "buy": 16497.5,
+  "sell": 19303.0,
+  "spread": 17.005606910137907,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 639.278125,
+  "coste": 19402.138125,
+  "margen": -99.13812500000131,
+  "ejemplo": "xDrive18d 150 CV diésel"
+ },
+ {
+  "gen": [
+   "Octavia Combi",
+   "Octavia Combi IV"
+  ],
+  "seg": 4,
+  "nDE": 69,
+  "nES": 16,
+  "buy": 12138.0,
+  "sell": 14767.765,
+  "spread": 21.66555445707694,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 470.34749999999997,
+  "coste": 14873.7075,
+  "margen": -105.94250000000102,
+  "ejemplo": "1.6 TDI 115 CV CR Ambition, 2.0 TDI 150 CV First Edition Aut"
+ },
+ {
+  "gen": [
+   "Serie 1",
+   "Serie 1 F40"
+  ],
+  "seg": 3,
+  "nDE": 43,
+  "nES": 112,
+  "buy": 15995.0,
+  "sell": 18769.5,
+  "spread": 17.346045639262275,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 619.80625,
+  "coste": 18880.166250000002,
+  "margen": -110.66625000000204,
+  "ejemplo": "118d 150 CV M Sport"
+ },
+ {
+  "gen": [
+   "A5",
+   "A5 F5"
+  ],
+  "seg": 3,
+  "nDE": 36,
+  "nES": 56,
+  "buy": 19415.0,
+  "sell": 22300.3,
+  "spread": 14.861189801699703,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 752.33125,
+  "coste": 22432.69125,
+  "margen": -132.39125000000058,
+  "ejemplo": "40 TDI 190 CV"
+ },
+ {
+  "gen": [
+   "Serie 1",
+   "Serie 1 F40"
+  ],
+  "seg": 2,
+  "nDE": 71,
+  "nES": 173,
+  "buy": 17480.0,
+  "sell": 20273.0,
+  "spread": 15.978260869565219,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 677.3499999999999,
+  "coste": 20422.71,
+  "margen": -149.70999999999913,
+  "ejemplo": "118d 150 CV M Sport"
+ },
+ {
+  "gen": [
+   "GLB",
+   "GLB X247"
+  ],
+  "seg": 1,
+  "nDE": 170,
+  "nES": 137,
+  "buy": 28990.0,
+  "sell": 32194.3,
+  "spread": 11.05312176612625,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1123.3625,
+  "coste": 32378.7225,
+  "margen": -184.42250000000058,
+  "ejemplo": "GLB 200 d 150 CV diésel"
+ },
+ {
+  "gen": [
+   "Clase A",
+   "Clase A W177"
+  ],
+  "seg": 2,
+  "nDE": 73,
+  "nES": 262,
+  "buy": 18545.0,
+  "sell": 21330.3,
+  "spread": 15.019142626044758,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 718.6187500000001,
+  "coste": 21528.978750000002,
+  "margen": -198.67875000000276,
+  "ejemplo": "A 180 d 116 CV, A 200 d 150 CV, A 220 d 190 CV"
+ },
+ {
+  "gen": [
+   "GLA",
+   "GLA X156"
+  ],
+  "seg": 3,
+  "nDE": 59,
+  "nES": 124,
+  "buy": 13899.0,
+  "sell": 16480.3,
+  "spread": 18.57183970069789,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 538.58625,
+  "coste": 16702.94625,
+  "margen": -222.6462500000016,
+  "ejemplo": "GLA 200 d 136 CV diésel"
+ },
+ {
+  "gen": [
+   "Tiguan",
+   "Tiguan II"
+  ],
+  "seg": 2,
+  "nDE": 340,
+  "nES": 159,
+  "buy": 18500.0,
+  "sell": 21243.0,
+  "spread": 14.827027027027029,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 716.875,
+  "coste": 21482.235,
+  "margen": -239.23500000000058,
+  "ejemplo": "2.0 TDI 150 CV DSG 4Motion"
+ },
+ {
+  "gen": [
+   "GLA",
+   "GLA X156"
+  ],
+  "seg": 2,
+  "nDE": 71,
+  "nES": 80,
+  "buy": 16490.0,
+  "sell": 19133.25,
+  "spread": 16.02941176470589,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 638.9875,
+  "coste": 19394.3475,
+  "margen": -261.09749999999985,
+  "ejemplo": "GLA 200 d 136 CV diésel"
+ },
+ {
+  "gen": [
+   "Serie 2 Active Tourer",
+   "Serie 2 AT F45 225xe"
+  ],
+  "seg": 3,
+  "nDE": 30,
+  "nES": 61,
+  "buy": 11180.0,
+  "sell": 13570.3,
+  "spread": 21.380143112701244,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 433.22499999999997,
+  "coste": 13878.585000000001,
+  "margen": -308.2850000000017,
+  "ejemplo": "225xe Plug-in Hybrid 224 CV"
+ },
+ {
+  "gen": [
+   "Q5",
+   "Q5 FY 55 TFSIe"
+  ],
+  "seg": 2,
+  "nDE": 66,
+  "nES": 79,
+  "buy": 28850.0,
+  "sell": 31913.0,
+  "spread": 10.616984402079721,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1117.9375,
+  "coste": 32233.2975,
+  "margen": -320.2975000000006,
+  "ejemplo": "Q5 55 TFSIe Plug-in Hybrid 367 CV"
+ },
+ {
+  "gen": [
+   "Clase C",
+   "Clase C W205 pre"
+  ],
+  "seg": 3,
+  "nDE": 80,
+  "nES": 166,
+  "buy": 16525.0,
+  "sell": 19108.03,
+  "spread": 15.631043872919804,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 640.34375,
+  "coste": 19430.70375,
+  "margen": -322.67375000000175,
+  "ejemplo": "C 220 d 170 CV diésel"
+ },
+ {
+  "gen": [
+   "A3",
+   "A3 8V"
+  ],
+  "seg": 1,
+  "nDE": 152,
+  "nES": 54,
+  "buy": 17472.5,
+  "sell": 20079.0,
+  "spread": 14.917727858062669,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 677.059375,
+  "coste": 20414.919375,
+  "margen": -335.9193750000013,
+  "ejemplo": "1.5 TFSI 150 CV S-Tronic, 2.0 TDI 150 CV, 2.0 TFSI 190 CV qu"
+ },
+ {
+  "gen": [
+   "Q3",
+   "Q3 F3"
+  ],
+  "seg": 2,
+  "nDE": 279,
+  "nES": 387,
+  "buy": 21485.0,
+  "sell": 24230.6,
+  "spread": 12.779148242960204,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 832.54375,
+  "coste": 24582.90375,
+  "margen": -352.30375000000276,
+  "ejemplo": "2.0 TDI 150 CV S line, 2.0 TDI 190 CV S tronic quattro S Lin"
+ },
+ {
+  "gen": [
+   "Clase C Estate",
+   "Clase C Estate S205"
+  ],
+  "seg": 2,
+  "nDE": 140,
+  "nES": 48,
+  "buy": 20999.0,
+  "sell": 23720.38,
+  "spread": 12.959569503309677,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 813.7112500000001,
+  "coste": 24078.07125,
+  "margen": -357.69124999999985,
+  "ejemplo": "C 220 d 194 CV T"
+ },
+ {
+  "gen": [
+   "Serie 3",
+   "Serie 3 G20"
+  ],
+  "seg": 3,
+  "nDE": 58,
+  "nES": 81,
+  "buy": 20112.5,
+  "sell": 22794.03,
+  "spread": 13.33265382224984,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 779.359375,
+  "coste": 23157.219375,
+  "margen": -363.18937500000175,
+  "ejemplo": "320d 190 CV Laser Leder"
+ },
+ {
+  "gen": [
+   "Range Rover Evoque",
+   "Evoque L538"
+  ],
+  "seg": 3,
+  "nDE": 87,
+  "nES": 31,
+  "buy": 11900.0,
+  "sell": 14249.3,
+  "spread": 19.742016806722674,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 461.125,
+  "coste": 14626.485,
+  "margen": -377.1850000000013,
+  "ejemplo": "Evoque 2.0 TD4 150 CV diésel"
+ },
+ {
+  "gen": [
+   "GLC",
+   "GLC X253 pre"
+  ],
+  "seg": 3,
+  "nDE": 214,
+  "nES": 97,
+  "buy": 21450.0,
+  "sell": 24153.0,
+  "spread": 12.601398601398595,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 831.1875,
+  "coste": 24546.5475,
+  "margen": -393.5475000000006,
+  "ejemplo": "GLC 220 d 170 CV diésel"
+ },
+ {
+  "gen": [
+   "CX-5",
+   "CX-5 KF"
+  ],
+  "seg": 2,
+  "nDE": 85,
+  "nES": 41,
+  "buy": 14499.5,
+  "sell": 16931.35,
+  "spread": 16.771957653712178,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 561.855625,
+  "coste": 17326.715625,
+  "margen": -395.3656250000022,
+  "ejemplo": "CX-5 2.2 Skyactiv-D 150 CV diésel"
+ },
+ {
+  "gen": [
+   "Golf",
+   "Golf VIII"
+  ],
+  "seg": 2,
+  "nDE": 193,
+  "nES": 92,
+  "buy": 17965.0,
+  "sell": 20097.43,
+  "spread": 11.869913721124403,
+  "co2": 118.0,
+  "co2src": "ficha",
+  "imp": 269.47499999999997,
+  "coste": 20499.835,
+  "margen": -402.40499999999884,
+  "ejemplo": "2.0 TDI 150 CV DSG Style"
+ },
+ {
+  "gen": [
+   "X1",
+   "X1 F48"
+  ],
+  "seg": 3,
+  "nDE": 148,
+  "nES": 228,
+  "buy": 14571.25,
+  "sell": 16997.31,
+  "spread": 16.649635412198684,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 564.6359375,
+  "coste": 17401.2459375,
+  "margen": -403.93593749999854,
+  "ejemplo": "xDrive18d 150 CV diésel"
+ },
+ {
+  "gen": [
+   "Yaris",
+   "Yaris III"
+  ],
+  "seg": 3,
+  "nDE": 32,
+  "nES": 54,
+  "buy": 10250.0,
+  "sell": 12508.15,
+  "spread": 22.030731707317063,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 397.1875,
+  "coste": 12912.5475,
+  "margen": -404.39750000000095,
+  "ejemplo": "Yaris 1.5 Hybrid 100 CV"
+ },
+ {
+  "gen": [
+   "Q5",
+   "Q5 8R"
+  ],
+  "seg": 4,
+  "nDE": 135,
+  "nES": 16,
+  "buy": 14980.0,
+  "sell": 17411.5,
+  "spread": 16.231642189586104,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 580.4749999999999,
+  "coste": 17825.835,
+  "margen": -414.3349999999991,
+  "ejemplo": "2.0 TDI quattro 190 CV"
+ },
+ {
+  "gen": [
+   "Golf",
+   "Golf VIII"
+  ],
+  "seg": 3,
+  "nDE": 74,
+  "nES": 36,
+  "buy": 15875.0,
+  "sell": 17945.0,
+  "spread": 13.039370078740165,
+  "co2": 118.0,
+  "co2src": "ficha",
+  "imp": 238.125,
+  "coste": 18378.485,
+  "margen": -433.4850000000006,
+  "ejemplo": "2.0 TDI 150 CV DSG Style"
+ },
+ {
+  "gen": [
+   "Discovery Sport",
+   "Discovery Sport L550"
+  ],
+  "seg": 3,
+  "nDE": 88,
+  "nES": 38,
+  "buy": 11499.25,
+  "sell": 13764.3,
+  "spread": 19.69737156771094,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 445.5959375,
+  "coste": 14210.2059375,
+  "margen": -445.9059375000015,
+  "ejemplo": "Discovery Sport 2.0 TD4 150 CV diésel"
+ },
+ {
+  "gen": [
+   "Q5",
+   "Q5 8R"
+  ],
+  "seg": 2,
+  "nDE": 92,
+  "nES": 20,
+  "buy": 20290.0,
+  "sell": 22891.515,
+  "spread": 12.821660916707733,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 786.2375,
+  "coste": 23341.5975,
+  "margen": -450.08250000000044,
+  "ejemplo": "2.0 TDI quattro 190 CV"
+ },
+ {
+  "gen": [
+   "A6",
+   "A6 C7"
+  ],
+  "seg": 3,
+  "nDE": 211,
+  "nES": 42,
+  "buy": 16950.0,
+  "sell": 19399.03,
+  "spread": 14.448554572271387,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 656.8125,
+  "coste": 19872.1725,
+  "margen": -473.14250000000175,
+  "ejemplo": "A6 2.0 TDI ultra 190 CV"
+ },
+ {
+  "gen": [
+   "A3",
+   "A3 8V"
+  ],
+  "seg": 2,
+  "nDE": 273,
+  "nES": 111,
+  "buy": 15964.5,
+  "sell": 18374.71,
+  "spread": 15.097309655798806,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 618.624375,
+  "coste": 18848.484375,
+  "margen": -473.7743750000009,
+  "ejemplo": "1.5 TFSI 150 CV S-Tronic, 2.0 TDI 150 CV, 2.0 TFSI 190 CV qu"
+ },
+ {
+  "gen": [
+   "Golf",
+   "Golf VII.5"
+  ],
+  "seg": 5,
+  "nDE": 27,
+  "nES": 16,
+  "buy": 9490.0,
+  "sell": 11392.65,
+  "spread": 20.04899894625922,
+  "co2": 110.0,
+  "co2src": "ficha",
+  "imp": 142.35,
+  "coste": 11897.710000000001,
+  "margen": -505.0600000000013,
+  "ejemplo": "1.6 TDI 116 CV IQ.DRIVE Aut, 2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Passat Variant",
+   "Passat Variant B8 GTE"
+  ],
+  "seg": 2,
+  "nDE": 156,
+  "nES": 58,
+  "buy": 18715.0,
+  "sell": 21198.864999999998,
+  "spread": 13.272054501736562,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 725.20625,
+  "coste": 21705.56625,
+  "margen": -506.7012500000019,
+  "ejemplo": "Passat Variant GTE Plug-in Hybrid 218 CV"
+ },
+ {
+  "gen": [
+   "Passat Variant",
+   "Passat Variant B8 GTE"
+  ],
+  "seg": 3,
+  "nDE": 61,
+  "nES": 25,
+  "buy": 15970.0,
+  "sell": 18333.0,
+  "spread": 14.796493425172198,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 618.8375,
+  "coste": 18854.197500000002,
+  "margen": -521.197500000002,
+  "ejemplo": "Passat Variant GTE Plug-in Hybrid 218 CV"
+ },
+ {
+  "gen": [
+   "Kodiaq",
+   "Kodiaq I"
+  ],
+  "seg": 4,
+  "nDE": 210,
+  "nES": 27,
+  "buy": 17499.0,
+  "sell": 19885.0,
+  "spread": 13.6350648608492,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 678.0862500000001,
+  "coste": 20442.44625,
+  "margen": -557.4462500000009,
+  "ejemplo": "1.5 TSI 150 CV Ambition, 2.0 TDI 150 CV Sportline, 2.0 TDI 1"
+ },
+ {
+  "gen": [
+   "Serie 4 Gran Coupe",
+   "Serie 4 Gran Coupé F36"
+  ],
+  "seg": 2,
+  "nDE": 54,
+  "nES": 36,
+  "buy": 18900.0,
+  "sell": 21330.3,
+  "spread": 12.858730158730157,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 732.375,
+  "coste": 21897.735,
+  "margen": -567.4350000000013,
+  "ejemplo": "420d Gran Coupé 190 CV diésel"
+ },
+ {
+  "gen": [
+   "A3",
+   "A3 8Y"
+  ],
+  "seg": 0,
+  "nDE": 83,
+  "nES": 17,
+  "buy": 23788.0,
+  "sell": 26384.0,
+  "spread": 10.913065411131662,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 921.7850000000001,
+  "coste": 26975.145,
+  "margen": -591.1450000000004,
+  "ejemplo": "A3 35 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Passat Variant",
+   "Passat Variant B8"
+  ],
+  "seg": 1,
+  "nDE": 241,
+  "nES": 18,
+  "buy": 21439.5,
+  "sell": 23915.35,
+  "spread": 11.548077147321534,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 830.780625,
+  "coste": 24535.640625,
+  "margen": -620.2906250000015,
+  "ejemplo": "2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Q3",
+   "Q3 F3"
+  ],
+  "seg": 1,
+  "nDE": 484,
+  "nES": 367,
+  "buy": 24490.0,
+  "sell": 27063.0,
+  "spread": 10.50632911392404,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 948.9875,
+  "coste": 27704.3475,
+  "margen": -641.3474999999999,
+  "ejemplo": "2.0 TDI 150 CV S line, 2.0 TDI 190 CV S tronic quattro S Lin"
+ },
+ {
+  "gen": [
+   "Serie 5",
+   "Serie 5 G30"
+  ],
+  "seg": 4,
+  "nDE": 59,
+  "nES": 32,
+  "buy": 19000.0,
+  "sell": 21334.665,
+  "spread": 12.287710526315788,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 736.25,
+  "coste": 22001.61,
+  "margen": -666.9449999999997,
+  "ejemplo": "520d 190 CV"
+ },
+ {
+  "gen": [
+   "A4 Avant",
+   "A4 Avant B9"
+  ],
+  "seg": 4,
+  "nDE": 130,
+  "nES": 27,
+  "buy": 12990.0,
+  "sell": 15025.3,
+  "spread": 15.668206312548104,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 503.36249999999995,
+  "coste": 15758.7225,
+  "margen": -733.4225000000006,
+  "ejemplo": "35 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Discovery Sport",
+   "Discovery Sport L550"
+  ],
+  "seg": 2,
+  "nDE": 69,
+  "nES": 36,
+  "buy": 12999.0,
+  "sell": 14986.015,
+  "spread": 15.285906608200616,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 503.71124999999995,
+  "coste": 15768.07125,
+  "margen": -782.0562500000015,
+  "ejemplo": "Discovery Sport 2.0 TD4 150 CV diésel"
+ },
+ {
+  "gen": [
+   "Serie 4",
+   "Serie 4 F32"
+  ],
+  "seg": 3,
+  "nDE": 26,
+  "nES": 37,
+  "buy": 19121.75,
+  "sell": 21339.03,
+  "spread": 11.595591407690197,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 740.9678125,
+  "coste": 22128.0778125,
+  "margen": -789.0478125000009,
+  "ejemplo": "420d 190 CV"
+ },
+ {
+  "gen": [
+   "Clase B",
+   "Clase B W247"
+  ],
+  "seg": 1,
+  "nDE": 104,
+  "nES": 149,
+  "buy": 20915.0,
+  "sell": 23183.0,
+  "spread": 10.843891943581152,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 810.45625,
+  "coste": 23990.81625,
+  "margen": -807.8162499999999,
+  "ejemplo": "B 200 d 150 CV diésel"
+ },
+ {
+  "gen": [
+   "X5",
+   "X5 F15"
+  ],
+  "seg": 5,
+  "nDE": 113,
+  "nES": 17,
+  "buy": 18225.0,
+  "sell": 20370.0,
+  "spread": 11.769547325102891,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 706.21875,
+  "coste": 21196.57875,
+  "margen": -826.5787500000006,
+  "ejemplo": "xDrive30d 258 CV diésel"
+ },
+ {
+  "gen": [
+   "Clase A",
+   "Clase A W177 250e"
+  ],
+  "seg": 1,
+  "nDE": 147,
+  "nES": 163,
+  "buy": 22890.0,
+  "sell": 25210.3,
+  "spread": 10.136740934906063,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 886.9875,
+  "coste": 26042.3475,
+  "margen": -832.0475000000006,
+  "ejemplo": "A 250 e Plug-in Hybrid 218 CV"
+ },
+ {
+  "gen": [
+   "Serie 1",
+   "Serie 1 F20 LCI"
+  ],
+  "seg": 1,
+  "nDE": 30,
+  "nES": 40,
+  "buy": 15203.75,
+  "sell": 17208.77,
+  "spread": 13.187667516237767,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 589.1453125,
+  "coste": 18058.2553125,
+  "margen": -849.4853125000009,
+  "ejemplo": "116d 116 CV, 118d 150 CV M Sport"
+ },
+ {
+  "gen": [
+   "X5",
+   "X5 F15"
+  ],
+  "seg": 4,
+  "nDE": 164,
+  "nES": 31,
+  "buy": 20992.5,
+  "sell": 23183.0,
+  "spread": 10.434679052042405,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 813.459375,
+  "coste": 24071.319375,
+  "margen": -888.3193749999991,
+  "ejemplo": "xDrive30d 258 CV diésel"
+ },
+ {
+  "gen": [
+   "X2",
+   "X2 F39"
+  ],
+  "seg": 1,
+  "nDE": 60,
+  "nES": 87,
+  "buy": 20900.0,
+  "sell": 23076.3,
+  "spread": 10.412918660287085,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 809.875,
+  "coste": 23975.235,
+  "margen": -898.9350000000013,
+  "ejemplo": "18d 150 CV"
+ },
+ {
+  "gen": [
+   "Tucson",
+   "Tucson TL"
+  ],
+  "seg": 1,
+  "nDE": 101,
+  "nES": 51,
+  "buy": 15500.0,
+  "sell": 17450.3,
+  "spread": 12.58258064516129,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 600.625,
+  "coste": 18365.985,
+  "margen": -915.6850000000013,
+  "ejemplo": "1.6 CRDi 136 CV 48V, 1.7 CRDi 115 CV BlueDrive Klass 4x2, 2."
+ },
+ {
+  "gen": [
+   "Tucson",
+   "Tucson TL"
+  ],
+  "seg": 4,
+  "nDE": 32,
+  "nES": 56,
+  "buy": 12025.0,
+  "sell": 13822.5,
+  "spread": 14.94802494802494,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 465.96875,
+  "coste": 14756.32875,
+  "margen": -933.8287500000006,
+  "ejemplo": "1.6 CRDi 136 CV 48V, 1.7 CRDi 115 CV BlueDrive Klass 4x2, 2."
+ },
+ {
+  "gen": [
+   "Tucson",
+   "Tucson TL"
+  ],
+  "seg": 3,
+  "nDE": 64,
+  "nES": 103,
+  "buy": 12749.25,
+  "sell": 14540.3,
+  "spread": 14.04827734964802,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 494.0334375,
+  "coste": 15508.6434375,
+  "margen": -968.3434375000015,
+  "ejemplo": "1.6 CRDi 136 CV 48V, 1.7 CRDi 115 CV BlueDrive Klass 4x2, 2."
+ },
+ {
+  "gen": [
+   "Clase A",
+   "Clase A W177 250e"
+  ],
+  "seg": 2,
+  "nDE": 85,
+  "nES": 92,
+  "buy": 20500.0,
+  "sell": 22591.3,
+  "spread": 10.201463414634148,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 794.375,
+  "coste": 23559.735,
+  "margen": -968.4350000000013,
+  "ejemplo": "A 250 e Plug-in Hybrid 218 CV"
+ },
+ {
+  "gen": [
+   "Caddy",
+   "Caddy 5"
+  ],
+  "seg": 3,
+  "nDE": 55,
+  "nES": 23,
+  "buy": 16430.0,
+  "sell": 18333.0,
+  "spread": 11.58247108947048,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 636.6624999999999,
+  "coste": 19332.0225,
+  "margen": -999.0224999999991,
+  "ejemplo": "1.5 TSI 114 CV Style, 2.0 TDI 102 CV Kombi, 2.0 TDI 122 CV C"
+ },
+ {
+  "gen": [
+   "Q3",
+   "Q3 8U"
+  ],
+  "seg": 2,
+  "nDE": 93,
+  "nES": 27,
+  "buy": 15500.0,
+  "sell": 17363.0,
+  "spread": 12.019354838709685,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 600.625,
+  "coste": 18365.985,
+  "margen": -1002.9850000000006,
+  "ejemplo": "2.0 TDI 150 CV Sport"
+ },
+ {
+  "gen": [
+   "A3",
+   "A3 8Y"
+  ],
+  "seg": 3,
+  "nDE": 103,
+  "nES": 84,
+  "buy": 17800.0,
+  "sell": 19720.1,
+  "spread": 10.787078651685377,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 689.75,
+  "coste": 20755.11,
+  "margen": -1035.010000000002,
+  "ejemplo": "A3 35 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Clase B",
+   "Clase B W247"
+  ],
+  "seg": 2,
+  "nDE": 96,
+  "nES": 110,
+  "buy": 18900.0,
+  "sell": 20845.3,
+  "spread": 10.292592592592587,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 732.375,
+  "coste": 21897.735,
+  "margen": -1052.4350000000013,
+  "ejemplo": "B 200 d 150 CV diésel"
+ },
+ {
+  "gen": [
+   "Caddy",
+   "Caddy 5"
+  ],
+  "seg": 2,
+  "nDE": 159,
+  "nES": 38,
+  "buy": 17990.0,
+  "sell": 19880.149999999998,
+  "spread": 10.506670372429117,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 697.1125,
+  "coste": 20952.4725,
+  "margen": -1072.322500000002,
+  "ejemplo": "1.5 TSI 114 CV Style, 2.0 TDI 102 CV Kombi, 2.0 TDI 122 CV C"
+ },
+ {
+  "gen": [
+   "X4",
+   "X4 G02"
+  ],
+  "seg": 1,
+  "nDE": 46,
+  "nES": 48,
+  "buy": 33637.5,
+  "sell": 36079.15,
+  "spread": 7.2587142326272724,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1303.453125,
+  "coste": 37206.313125,
+  "margen": -1127.1631249999991,
+  "ejemplo": "xDrive20d X4 G02 190 CV diésel"
+ },
+ {
+  "gen": [
+   "A4",
+   "A4 B9"
+  ],
+  "seg": 3,
+  "nDE": 26,
+  "nES": 40,
+  "buy": 15137.5,
+  "sell": 16853.265,
+  "spread": 11.33453344343518,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 586.578125,
+  "coste": 17989.438125,
+  "margen": -1136.1731250000012,
+  "ejemplo": "A4 2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "GLB",
+   "GLB X247"
+  ],
+  "seg": 2,
+  "nDE": 190,
+  "nES": 143,
+  "buy": 25990.0,
+  "sell": 28120.3,
+  "spread": 8.196614082339359,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1007.1125,
+  "coste": 29262.4725,
+  "margen": -1142.1725000000006,
+  "ejemplo": "GLB 200 d 150 CV diésel"
+ },
+ {
+  "gen": [
+   "Octavia Combi",
+   "Octavia Combi IV"
+  ],
+  "seg": 2,
+  "nDE": 759,
+  "nES": 41,
+  "buy": 17590.0,
+  "sell": 19390.3,
+  "spread": 10.234792495736201,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 681.6125,
+  "coste": 20536.9725,
+  "margen": -1146.6725000000006,
+  "ejemplo": "1.5 TSI 150 CV Tour, 1.6 TDI 115 CV CR Ambition, 2.0 TDI 150"
+ },
+ {
+  "gen": [
+   "Range Rover Evoque",
+   "Evoque L538"
+  ],
+  "seg": 2,
+  "nDE": 65,
+  "nES": 44,
+  "buy": 13900.0,
+  "sell": 15510.3,
+  "spread": 11.584892086330933,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 538.625,
+  "coste": 16703.985,
+  "margen": -1193.6850000000013,
+  "ejemplo": "Evoque 2.0 TD4 150 CV diésel"
+ },
+ {
+  "gen": [
+   "Q3",
+   "Q3 8U"
+  ],
+  "seg": 4,
+  "nDE": 55,
+  "nES": 23,
+  "buy": 12500.0,
+  "sell": 14035.9,
+  "spread": 12.287199999999988,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 484.375,
+  "coste": 15249.735,
+  "margen": -1213.835000000001,
+  "ejemplo": "2.0 TDI 150 CV Sport"
+ },
+ {
+  "gen": [
+   "Yaris",
+   "Yaris III"
+  ],
+  "seg": 0,
+  "nDE": 57,
+  "nES": 23,
+  "buy": 13610.0,
+  "sell": 15131.029999999999,
+  "spread": 11.175826598089621,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 527.3875,
+  "coste": 16402.7475,
+  "margen": -1271.7175000000025,
+  "ejemplo": "Yaris 1.5 Hybrid 100 CV"
+ },
+ {
+  "gen": [
+   "Serie 3",
+   "Serie 3 G20 330e"
+  ],
+  "seg": 3,
+  "nDE": 51,
+  "nES": 40,
+  "buy": 20955.0,
+  "sell": 22261.5,
+  "spread": 6.234788833214022,
+  "co2": 45.0,
+  "co2src": "PHEV (tramo 0%)",
+  "imp": 314.325,
+  "coste": 23534.685,
+  "margen": -1273.1850000000013,
+  "ejemplo": "330e Plug-in Hybrid 292 CV"
+ },
+ {
+  "gen": [
+   "Serie 3 Touring",
+   "Serie 3 Touring F31"
+  ],
+  "seg": 2,
+  "nDE": 108,
+  "nES": 33,
+  "buy": 17260.0,
+  "sell": 18885.899999999998,
+  "spread": 9.420046349942046,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 668.825,
+  "coste": 20194.185,
+  "margen": -1308.2850000000035,
+  "ejemplo": "320d Touring 190 CV diésel"
+ },
+ {
+  "gen": [
+   "GLA",
+   "GLA H247"
+  ],
+  "seg": 2,
+  "nDE": 38,
+  "nES": 167,
+  "buy": 25260.0,
+  "sell": 27130.899999999998,
+  "spread": 7.406571654790173,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 978.8249999999999,
+  "coste": 28504.185,
+  "margen": -1373.2850000000035,
+  "ejemplo": "GLA 200 d 150 CV"
+ },
+ {
+  "gen": [
+   "Tiguan",
+   "Tiguan II"
+  ],
+  "seg": 3,
+  "nDE": 268,
+  "nES": 250,
+  "buy": 16882.5,
+  "sell": 18420.3,
+  "spread": 9.108840515326522,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 654.196875,
+  "coste": 19802.056875000002,
+  "margen": -1381.7568750000028,
+  "ejemplo": "2.0 TDI 150 CV DSG 4Motion"
+ },
+ {
+  "gen": [
+   "Q5",
+   "Q5 FY"
+  ],
+  "seg": 1,
+  "nDE": 406,
+  "nES": 52,
+  "buy": 32490.0,
+  "sell": 34619.299999999996,
+  "spread": 6.553708833487204,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1258.9875,
+  "coste": 36014.3475,
+  "margen": -1395.0475000000079,
+  "ejemplo": "40 TDI 190 CV, 40 TDI 204 CV"
+ },
+ {
+  "gen": [
+   "Duster",
+   "Duster II"
+  ],
+  "seg": 2,
+  "nDE": 61,
+  "nES": 111,
+  "buy": 12235.0,
+  "sell": 13570.3,
+  "spread": 10.913771965672247,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 474.10625000000005,
+  "coste": 14974.466250000001,
+  "margen": -1404.166250000002,
+  "ejemplo": "1.5 Blue dCi 115 CV Prestige, 1.5 dCi 110 CV Prestige"
+ },
+ {
+  "gen": [
+   "CX-5",
+   "CX-5 KF"
+  ],
+  "seg": 1,
+  "nDE": 44,
+  "nES": 30,
+  "buy": 17967.5,
+  "sell": 19487.3,
+  "spread": 8.458605816056775,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 696.2406249999999,
+  "coste": 20929.100625,
+  "margen": -1441.8006249999999,
+  "ejemplo": "CX-5 2.2 Skyactiv-D 150 CV diésel"
+ },
+ {
+  "gen": [
+   "Sandero",
+   "Sandero III"
+  ],
+  "seg": 2,
+  "nDE": 50,
+  "nES": 100,
+  "buy": 9987.5,
+  "sell": 11145.3,
+  "spread": 11.59249061326657,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 387.015625,
+  "coste": 12639.875625,
+  "margen": -1494.5756250000013,
+  "ejemplo": "1.0 TCe 100 CV Stepway Essential GLP, 1.0 TCe 90 CV Stepway"
+ },
+ {
+  "gen": [
+   "Corolla",
+   "Corolla E210"
+  ],
+  "seg": 1,
+  "nDE": 122,
+  "nES": 164,
+  "buy": 18900.0,
+  "sell": 20360.3,
+  "spread": 7.726455026455015,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 732.375,
+  "coste": 21897.735,
+  "margen": -1537.4350000000013,
+  "ejemplo": "1.8 125H Active, Corolla 1.8 Hybrid 122 CV"
+ },
+ {
+  "gen": [
+   "Yaris",
+   "Yaris IV"
+  ],
+  "seg": 0,
+  "nDE": 275,
+  "nES": 98,
+  "buy": 17990.0,
+  "sell": 19399.03,
+  "spread": 7.832295719844362,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 697.1125,
+  "coste": 20952.4725,
+  "margen": -1553.442500000001,
+  "ejemplo": "Yaris 1.5 Hybrid 116 CV"
+ },
+ {
+  "gen": [
+   "GLA",
+   "GLA X156"
+  ],
+  "seg": 1,
+  "nDE": 27,
+  "nES": 32,
+  "buy": 17800.0,
+  "sell": 19196.3,
+  "spread": 7.844382022471907,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 689.75,
+  "coste": 20755.11,
+  "margen": -1558.8100000000013,
+  "ejemplo": "GLA 200 d 136 CV diésel"
+ },
+ {
+  "gen": [
+   "GLC",
+   "GLC X253 pre"
+  ],
+  "seg": 2,
+  "nDE": 173,
+  "nES": 118,
+  "buy": 23499.5,
+  "sell": 25113.3,
+  "spread": 6.867380157024616,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 910.6056249999999,
+  "coste": 26675.465625,
+  "margen": -1562.1656250000015,
+  "ejemplo": "GLC 220 d 170 CV diésel"
+ },
+ {
+  "gen": [
+   "C-HR",
+   "C-HR I"
+  ],
+  "seg": 1,
+  "nDE": 190,
+  "nES": 290,
+  "buy": 17990.0,
+  "sell": 19390.3,
+  "spread": 7.78376876042246,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 697.1125,
+  "coste": 20952.4725,
+  "margen": -1562.1725000000006,
+  "ejemplo": "C-HR 1.8 Hybrid 122 CV"
+ },
+ {
+  "gen": [
+   "CLA",
+   "CLA C117"
+  ],
+  "seg": 2,
+  "nDE": 28,
+  "nES": 85,
+  "buy": 17992.25,
+  "sell": 19390.3,
+  "spread": 7.770289985966183,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 697.1996875,
+  "coste": 20954.8096875,
+  "margen": -1564.5096875000017,
+  "ejemplo": "CLA 200 d 136 CV diésel"
+ },
+ {
+  "gen": [
+   "Q5",
+   "Q5 FY 55 TFSIe"
+  ],
+  "seg": 1,
+  "nDE": 89,
+  "nES": 50,
+  "buy": 32898.0,
+  "sell": 34871.015,
+  "spread": 5.997370660830437,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1274.7975,
+  "coste": 36438.1575,
+  "margen": -1567.1425000000017,
+  "ejemplo": "Q5 55 TFSIe Plug-in Hybrid 367 CV"
+ },
+ {
+  "gen": [
+   "RAV4",
+   "RAV4 V"
+  ],
+  "seg": 1,
+  "nDE": 80,
+  "nES": 145,
+  "buy": 29886.25,
+  "sell": 31719.0,
+  "spread": 6.132418754443925,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1158.0921875,
+  "coste": 33309.7021875,
+  "margen": -1590.7021874999991,
+  "ejemplo": "2.5 Hybrid 218 CV"
+ },
+ {
+  "gen": [
+   "XC40",
+   "XC40"
+  ],
+  "seg": 3,
+  "nDE": 28,
+  "nES": 156,
+  "buy": 17950.0,
+  "sell": 19312.7,
+  "spread": 7.591643454038999,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 695.5625,
+  "coste": 20910.9225,
+  "margen": -1598.2224999999999,
+  "ejemplo": "D3 150 CV"
+ },
+ {
+  "gen": [
+   "Model 3",
+   "Model 3"
+  ],
+  "seg": 1,
+  "nDE": 83,
+  "nES": 47,
+  "buy": 27400.0,
+  "sell": 29100.0,
+  "spread": 6.204379562043805,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1061.75,
+  "coste": 30727.11,
+  "margen": -1627.1100000000006,
+  "ejemplo": "Model 3 Eléctrico 283 CV"
+ },
+ {
+  "gen": [
+   "A3",
+   "A3 8Y"
+  ],
+  "seg": 2,
+  "nDE": 263,
+  "nES": 186,
+  "buy": 19749.0,
+  "sell": 21136.3,
+  "spread": 7.024659476429185,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 765.2737500000001,
+  "coste": 22779.63375,
+  "margen": -1643.3337500000016,
+  "ejemplo": "A3 35 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Caddy",
+   "Caddy 5"
+  ],
+  "seg": 1,
+  "nDE": 239,
+  "nES": 37,
+  "buy": 20799.0,
+  "sell": 22213.0,
+  "spread": 6.798403769411987,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 805.9612500000001,
+  "coste": 23870.32125,
+  "margen": -1657.3212500000009,
+  "ejemplo": "1.5 TSI 114 CV Style, 2.0 TDI 102 CV Kombi, 2.0 TDI 122 CV C"
+ },
+ {
+  "gen": [
+   "Serie 3",
+   "Serie 3 G20"
+  ],
+  "seg": 1,
+  "nDE": 26,
+  "nES": 48,
+  "buy": 24912.5,
+  "sell": 26471.3,
+  "spread": 6.257099849473158,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 965.359375,
+  "coste": 28143.219375,
+  "margen": -1671.9193750000013,
+  "ejemplo": "320d 190 CV Laser Leder"
+ },
+ {
+  "gen": [
+   "Sportage",
+   "Sportage QL"
+  ],
+  "seg": 3,
+  "nDE": 113,
+  "nES": 157,
+  "buy": 12990.0,
+  "sell": 14065.0,
+  "spread": 8.275596612779058,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 503.36249999999995,
+  "coste": 15758.7225,
+  "margen": -1693.7224999999999,
+  "ejemplo": "1.6 CRDi 115 CV Business 4x2, 1.6 CRDi 116 CV MHEV Drive 4x2"
+ },
+ {
+  "gen": [
+   "Serie 3",
+   "Serie 3 F30 LCI"
+  ],
+  "seg": 4,
+  "nDE": 91,
+  "nES": 19,
+  "buy": 14400.0,
+  "sell": 15520.0,
+  "spread": 7.777777777777772,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 558.0,
+  "coste": 17223.36,
+  "margen": -1703.3600000000006,
+  "ejemplo": "320d 184 CV EfficientDynamics, 320d 190 CV diésel"
+ },
+ {
+  "gen": [
+   "Serie 2 Active Tourer",
+   "Serie 2 AT F45"
+  ],
+  "seg": 1,
+  "nDE": 87,
+  "nES": 31,
+  "buy": 14320.0,
+  "sell": 15413.3,
+  "spread": 7.634776536312837,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 554.9,
+  "coste": 17140.260000000002,
+  "margen": -1726.9600000000028,
+  "ejemplo": "218d Active Tourer 150 CV diésel"
+ },
+ {
+  "gen": [
+   "Q5",
+   "Q5 8R"
+  ],
+  "seg": 3,
+  "nDE": 176,
+  "nES": 41,
+  "buy": 16992.25,
+  "sell": 18177.8,
+  "spread": 6.9770042225131945,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 658.4496875,
+  "coste": 19916.0596875,
+  "margen": -1738.2596875000017,
+  "ejemplo": "2.0 TDI quattro 190 CV"
+ },
+ {
+  "gen": [
+   "Karoq",
+   "Karoq"
+  ],
+  "seg": 4,
+  "nDE": 54,
+  "nES": 19,
+  "buy": 14987.5,
+  "sell": 16092.3,
+  "spread": 7.371476230191831,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 580.765625,
+  "coste": 17833.625625,
+  "margen": -1741.3256250000013,
+  "ejemplo": "2.0 TDI 150 CV DSG 4x4"
+ },
+ {
+  "gen": [
+   "C-HR",
+   "C-HR I"
+  ],
+  "seg": 2,
+  "nDE": 146,
+  "nES": 395,
+  "buy": 16945.0,
+  "sell": 18106.02,
+  "spread": 6.851696665683105,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 656.61875,
+  "coste": 19866.978750000002,
+  "margen": -1760.9587500000016,
+  "ejemplo": "C-HR 1.8 Hybrid 122 CV"
+ },
+ {
+  "gen": [
+   "Multivan",
+   "Multivan T6"
+  ],
+  "seg": 2,
+  "nDE": 289,
+  "nES": 32,
+  "buy": 33800.0,
+  "sell": 35599.0,
+  "spread": 5.322485207100591,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1309.75,
+  "coste": 37375.11,
+  "margen": -1776.1100000000006,
+  "ejemplo": "Multivan 2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Q7",
+   "Q7 4M 50"
+  ],
+  "seg": 3,
+  "nDE": 100,
+  "nES": 23,
+  "buy": 28950.0,
+  "sell": 30545.3,
+  "spread": 5.510535405872186,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1121.8125,
+  "coste": 32337.1725,
+  "margen": -1791.8725000000013,
+  "ejemplo": "Q7 3.0 TDI 272 CV"
+ },
+ {
+  "gen": [
+   "X3",
+   "X3 G01"
+  ],
+  "seg": 4,
+  "nDE": 58,
+  "nES": 30,
+  "buy": 20980.0,
+  "sell": 22256.649999999998,
+  "spread": 6.085081029551942,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 812.975,
+  "coste": 24058.335,
+  "margen": -1801.6850000000013,
+  "ejemplo": "xDrive20d 190 CV"
+ },
+ {
+  "gen": [
+   "C-HR",
+   "C-HR I"
+  ],
+  "seg": 0,
+  "nDE": 59,
+  "nES": 66,
+  "buy": 19990.0,
+  "sell": 21218.75,
+  "spread": 6.1468234117058485,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 774.6125,
+  "coste": 23029.9725,
+  "margen": -1811.2224999999999,
+  "ejemplo": "C-HR 1.8 Hybrid 122 CV"
+ },
+ {
+  "gen": [
+   "Octavia Combi",
+   "Octavia Combi IV"
+  ],
+  "seg": 3,
+  "nDE": 242,
+  "nES": 34,
+  "buy": 15450.0,
+  "sell": 16480.3,
+  "spread": 6.668608414239485,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 598.6875,
+  "coste": 18314.0475,
+  "margen": -1833.7475000000013,
+  "ejemplo": "1.5 TSI 150 CV Tour, 1.6 TDI 115 CV CR Ambition, 2.0 TDI 150"
+ },
+ {
+  "gen": [
+   "Golf",
+   "Golf VIII"
+  ],
+  "seg": 1,
+  "nDE": 214,
+  "nES": 60,
+  "buy": 19990.0,
+  "sell": 20704.649999999998,
+  "spread": 3.575037518759361,
+  "co2": 118.0,
+  "co2src": "ficha",
+  "imp": 299.84999999999997,
+  "coste": 22555.21,
+  "margen": -1850.5600000000013,
+  "ejemplo": "2.0 TDI 150 CV DSG Style"
+ },
+ {
+  "gen": [
+   "Clase B",
+   "Clase B W247"
+  ],
+  "seg": 0,
+  "nDE": 41,
+  "nES": 60,
+  "buy": 23885.0,
+  "sell": 25219.03,
+  "spread": 5.585220849905803,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 925.5437499999999,
+  "coste": 27075.90375,
+  "margen": -1856.8737500000025,
+  "ejemplo": "B 200 d 150 CV diésel"
+ },
+ {
+  "gen": [
+   "A4",
+   "A4 B9"
+  ],
+  "seg": 4,
+  "nDE": 32,
+  "nES": 15,
+  "buy": 14100.0,
+  "sell": 15025.3,
+  "spread": 6.562411347517716,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 546.375,
+  "coste": 16911.735,
+  "margen": -1886.4350000000013,
+  "ejemplo": "A4 2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Sandero",
+   "Sandero III"
+  ],
+  "seg": 1,
+  "nDE": 197,
+  "nES": 306,
+  "buy": 11770.0,
+  "sell": 12600.3,
+  "spread": 7.054375531011048,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 456.0875,
+  "coste": 14491.4475,
+  "margen": -1891.147500000001,
+  "ejemplo": "1.0 TCe 100 CV Stepway Essential GLP, 1.0 TCe 90 CV Stepway"
+ },
+ {
+  "gen": [
+   "X3",
+   "X3 F25"
+  ],
+  "seg": 3,
+  "nDE": 166,
+  "nES": 43,
+  "buy": 16450.0,
+  "sell": 17450.3,
+  "spread": 6.080851063829784,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 637.4375,
+  "coste": 19352.7975,
+  "margen": -1902.4975000000013,
+  "ejemplo": "xDrive20d 190 CV diésel"
+ },
+ {
+  "gen": [
+   "Serie 2 Active Tourer",
+   "Serie 2 AT F45 225xe"
+  ],
+  "seg": 2,
+  "nDE": 86,
+  "nES": 76,
+  "buy": 13620.0,
+  "sell": 14496.65,
+  "spread": 6.436490455212929,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 527.775,
+  "coste": 16413.135000000002,
+  "margen": -1916.4850000000024,
+  "ejemplo": "225xe Plug-in Hybrid 224 CV"
+ },
+ {
+  "gen": [
+   "Serie 3",
+   "Serie 3 G20"
+  ],
+  "seg": 2,
+  "nDE": 52,
+  "nES": 26,
+  "buy": 23960.0,
+  "sell": 25207.875,
+  "spread": 5.208159432387305,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 928.4499999999999,
+  "coste": 27153.81,
+  "margen": -1945.9350000000013,
+  "ejemplo": "320d 190 CV Laser Leder"
+ },
+ {
+  "gen": [
+   "GLC",
+   "GLC X253 300e"
+  ],
+  "seg": 3,
+  "nDE": 38,
+  "nES": 25,
+  "buy": 26685.0,
+  "sell": 27402.5,
+  "spread": 2.68877646617951,
+  "co2": 45.0,
+  "co2src": "PHEV (tramo 0%)",
+  "imp": 400.275,
+  "coste": 29350.635000000002,
+  "margen": -1948.135000000002,
+  "ejemplo": "GLC 300 e Plug-in Hybrid 320 CV"
+ },
+ {
+  "gen": [
+   "T-Roc",
+   "T-Roc"
+  ],
+  "seg": 3,
+  "nDE": 80,
+  "nES": 91,
+  "buy": 16975.0,
+  "sell": 17935.3,
+  "spread": 5.6571428571428495,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 657.78125,
+  "coste": 19898.14125,
+  "margen": -1962.8412500000013,
+  "ejemplo": "2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "X2",
+   "X2 F39"
+  ],
+  "seg": 2,
+  "nDE": 59,
+  "nES": 163,
+  "buy": 18410.0,
+  "sell": 19390.3,
+  "spread": 5.324823465507866,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 713.3875,
+  "coste": 21388.7475,
+  "margen": -1998.447500000002,
+  "ejemplo": "18d 150 CV"
+ },
+ {
+  "gen": [
+   "X4",
+   "X4 G02"
+  ],
+  "seg": 3,
+  "nDE": 48,
+  "nES": 72,
+  "buy": 27480.0,
+  "sell": 28803.665,
+  "spread": 4.816830422125196,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1064.85,
+  "coste": 30810.21,
+  "margen": -2006.5449999999983,
+  "ejemplo": "xDrive20d X4 G02 190 CV diésel"
+ },
+ {
+  "gen": [
+   "Clase B",
+   "Clase B W247"
+  ],
+  "seg": 3,
+  "nDE": 62,
+  "nES": 46,
+  "buy": 16850.0,
+  "sell": 17731.6,
+  "spread": 5.2320474777447945,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 652.9375,
+  "coste": 19768.2975,
+  "margen": -2036.697500000002,
+  "ejemplo": "B 200 d 150 CV diésel"
+ },
+ {
+  "gen": [
+   "Sportage",
+   "Sportage QL"
+  ],
+  "seg": 2,
+  "nDE": 257,
+  "nES": 275,
+  "buy": 13975.0,
+  "sell": 14734.3,
+  "spread": 5.4332737030411415,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 541.53125,
+  "coste": 16781.89125,
+  "margen": -2047.5912500000013,
+  "ejemplo": "1.6 CRDi 115 CV Business 4x2, 1.6 CRDi 116 CV MHEV Drive 4x2"
+ },
+ {
+  "gen": [
+   "RAV4",
+   "RAV4 IV"
+  ],
+  "seg": 2,
+  "nDE": 25,
+  "nES": 34,
+  "buy": 18045.0,
+  "sell": 18905.3,
+  "spread": 4.76752563036853,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 699.2437500000001,
+  "coste": 21009.603750000002,
+  "margen": -2104.3037500000028,
+  "ejemplo": "RAV4 2.5 Hybrid 197 CV"
+ },
+ {
+  "gen": [
+   "Q5",
+   "Q5 FY 55 TFSIe"
+  ],
+  "seg": 3,
+  "nDE": 26,
+  "nES": 46,
+  "buy": 25987.5,
+  "sell": 27154.665,
+  "spread": 4.491255411255413,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1007.015625,
+  "coste": 29259.875625,
+  "margen": -2105.2106249999997,
+  "ejemplo": "Q5 55 TFSIe Plug-in Hybrid 367 CV"
+ },
+ {
+  "gen": [
+   "X4",
+   "X4 G02"
+  ],
+  "seg": 2,
+  "nDE": 58,
+  "nES": 120,
+  "buy": 31512.5,
+  "sell": 32883.0,
+  "spread": 4.349067830226105,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1221.109375,
+  "coste": 34998.969375,
+  "margen": -2115.9693750000006,
+  "ejemplo": "xDrive20d X4 G02 190 CV diésel"
+ },
+ {
+  "gen": [
+   "Yaris",
+   "Yaris III"
+  ],
+  "seg": 2,
+  "nDE": 74,
+  "nES": 142,
+  "buy": 11990.0,
+  "sell": 12580.9,
+  "spread": 4.9282735613010775,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 464.61249999999995,
+  "coste": 14719.9725,
+  "margen": -2139.0725,
+  "ejemplo": "Yaris 1.5 Hybrid 100 CV"
+ },
+ {
+  "gen": [
+   "X1",
+   "X1 F48 25e"
+  ],
+  "seg": 1,
+  "nDE": 213,
+  "nES": 66,
+  "buy": 21990.0,
+  "sell": 22436.1,
+  "spread": 2.02864938608458,
+  "co2": 45.0,
+  "co2src": "PHEV (tramo 0%)",
+  "imp": 329.84999999999997,
+  "coste": 24585.21,
+  "margen": -2149.1100000000006,
+  "ejemplo": "xDrive25e Plug-in Hybrid 220 CV"
+ },
+ {
+  "gen": [
+   "Octavia Combi",
+   "Octavia Combi IV"
+  ],
+  "seg": 1,
+  "nDE": 548,
+  "nES": 15,
+  "buy": 19500.0,
+  "sell": 20360.3,
+  "spread": 4.411794871794861,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 755.625,
+  "coste": 22520.985,
+  "margen": -2160.6850000000013,
+  "ejemplo": "1.5 TSI 150 CV Tour, 1.6 TDI 115 CV CR Ambition, 2.0 TDI 150"
+ },
+ {
+  "gen": [
+   "Q2",
+   "Q2"
+  ],
+  "seg": 2,
+  "nDE": 36,
+  "nES": 36,
+  "buy": 18590.0,
+  "sell": 19390.3,
+  "spread": 4.305002689618065,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 720.3625,
+  "coste": 21575.7225,
+  "margen": -2185.4225000000006,
+  "ejemplo": "35 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "UX",
+   "UX 250h"
+  ],
+  "seg": 1,
+  "nDE": 79,
+  "nES": 167,
+  "buy": 24690.0,
+  "sell": 25705.0,
+  "spread": 4.110976103685693,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 956.7375,
+  "coste": 27912.0975,
+  "margen": -2207.0975,
+  "ejemplo": "UX 250h 184 CV Hybrid"
+ },
+ {
+  "gen": [
+   "Passat Variant",
+   "Passat Variant B8"
+  ],
+  "seg": 3,
+  "nDE": 218,
+  "nES": 57,
+  "buy": 15837.5,
+  "sell": 16490.0,
+  "spread": 4.1199684293606875,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 613.703125,
+  "coste": 18716.563125,
+  "margen": -2226.5631250000006,
+  "ejemplo": "2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Serie 1",
+   "Serie 1 F40"
+  ],
+  "seg": 1,
+  "nDE": 67,
+  "nES": 147,
+  "buy": 19599.0,
+  "sell": 20360.3,
+  "spread": 3.884381856217156,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 759.4612500000001,
+  "coste": 22623.82125,
+  "margen": -2263.5212500000016,
+  "ejemplo": "118d 150 CV M Sport"
+ },
+ {
+  "gen": [
+   "Passat Variant",
+   "Passat Variant B8 GTE"
+  ],
+  "seg": 1,
+  "nDE": 142,
+  "nES": 40,
+  "buy": 22472.5,
+  "sell": 23270.3,
+  "spread": 3.5501168094337565,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 870.8093749999999,
+  "coste": 25608.669375,
+  "margen": -2338.369375000002,
+  "ejemplo": "Passat Variant GTE Plug-in Hybrid 218 CV"
+ },
+ {
+  "gen": [
+   "X3",
+   "X3 G01"
+  ],
+  "seg": 3,
+  "nDE": 157,
+  "nES": 94,
+  "buy": 23645.0,
+  "sell": 24466.309999999998,
+  "spread": 3.4735039120321387,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 916.2437500000001,
+  "coste": 26826.603750000002,
+  "margen": -2360.2937500000044,
+  "ejemplo": "xDrive20d 190 CV"
+ },
+ {
+  "gen": [
+   "XC60",
+   "XC60 II T8"
+  ],
+  "seg": 2,
+  "nDE": 51,
+  "nES": 51,
+  "buy": 29900.0,
+  "sell": 30943.0,
+  "spread": 3.4882943143812684,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1158.625,
+  "coste": 33323.985,
+  "margen": -2380.9850000000006,
+  "ejemplo": "XC60 T8 Plug-in Hybrid 390 CV"
+ },
+ {
+  "gen": [
+   "CLA",
+   "CLA C118"
+  ],
+  "seg": 0,
+  "nDE": 26,
+  "nES": 15,
+  "buy": 27501.0,
+  "sell": 28411.3,
+  "spread": 3.3100614523108307,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1065.6637500000002,
+  "coste": 30832.02375,
+  "margen": -2420.723750000001,
+  "ejemplo": "CLA 200 d 150 CV diésel"
+ },
+ {
+  "gen": [
+   "Corolla",
+   "Corolla E210"
+  ],
+  "seg": 0,
+  "nDE": 31,
+  "nES": 44,
+  "buy": 20990.0,
+  "sell": 21631.0,
+  "spread": 3.053835159599805,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 813.3625,
+  "coste": 24068.7225,
+  "margen": -2437.7225,
+  "ejemplo": "1.8 125H Active, Corolla 1.8 Hybrid 122 CV"
+ },
+ {
+  "gen": [
+   "Yaris",
+   "Yaris IV"
+  ],
+  "seg": 1,
+  "nDE": 280,
+  "nES": 242,
+  "buy": 16980.0,
+  "sell": 17460.0,
+  "spread": 2.8268551236749095,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 657.9749999999999,
+  "coste": 19903.335,
+  "margen": -2443.334999999999,
+  "ejemplo": "Yaris 1.5 Hybrid 116 CV"
+ },
+ {
+  "gen": [
+   "5008",
+   "5008 II"
+  ],
+  "seg": 3,
+  "nDE": 37,
+  "nES": 65,
+  "buy": 14199.5,
+  "sell": 14540.3,
+  "spread": 2.4000845100179635,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 550.230625,
+  "coste": 17015.090625,
+  "margen": -2474.7906250000015,
+  "ejemplo": "1.5 BlueHDi 130 CV"
+ },
+ {
+  "gen": [
+   "X2",
+   "X2 F39"
+  ],
+  "seg": 3,
+  "nDE": 42,
+  "nES": 101,
+  "buy": 17852.25,
+  "sell": 18323.3,
+  "spread": 2.6386029772157427,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 691.7746875,
+  "coste": 20809.3846875,
+  "margen": -2486.0846875000025,
+  "ejemplo": "18d 150 CV"
+ },
+ {
+  "gen": [
+   "RAV4",
+   "RAV4 V"
+  ],
+  "seg": 2,
+  "nDE": 42,
+  "nES": 231,
+  "buy": 25885.0,
+  "sell": 26665.3,
+  "spread": 3.0144871547228114,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1003.0437499999999,
+  "coste": 29153.40375,
+  "margen": -2488.103750000002,
+  "ejemplo": "2.5 Hybrid 218 CV"
+ },
+ {
+  "gen": [
+   "Serie 3",
+   "Serie 3 G20 330e"
+  ],
+  "seg": 2,
+  "nDE": 136,
+  "nES": 36,
+  "buy": 25460.0,
+  "sell": 25608.0,
+  "spread": 0.5813040062843777,
+  "co2": 45.0,
+  "co2src": "PHEV (tramo 0%)",
+  "imp": 381.9,
+  "coste": 28107.260000000002,
+  "margen": -2499.260000000002,
+  "ejemplo": "330e Plug-in Hybrid 292 CV"
+ },
+ {
+  "gen": [
+   "Niro",
+   "Niro DE HEV"
+  ],
+  "seg": 2,
+  "nDE": 26,
+  "nES": 157,
+  "buy": 14242.5,
+  "sell": 14540.3,
+  "spread": 2.0909250482710195,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 551.8968749999999,
+  "coste": 17059.756875,
+  "margen": -2519.456875,
+  "ejemplo": "Niro 1.6 GDi Hybrid 141 CV"
+ },
+ {
+  "gen": [
+   "Tucson",
+   "Tucson TL"
+  ],
+  "seg": 2,
+  "nDE": 137,
+  "nES": 130,
+  "buy": 14990.0,
+  "sell": 15316.3,
+  "spread": 2.1767845230153293,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 580.8625,
+  "coste": 17836.2225,
+  "margen": -2519.9225000000006,
+  "ejemplo": "1.6 CRDi 136 CV 48V, 2.0 CRDi 136 CV Intro Edition 4WD, 2.0 "
+ },
+ {
+  "gen": [
+   "Yaris",
+   "Yaris III"
+  ],
+  "seg": 1,
+  "nDE": 126,
+  "nES": 107,
+  "buy": 13350.75,
+  "sell": 13570.3,
+  "spread": 1.6444769020466987,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 517.3415625,
+  "coste": 16133.4515625,
+  "margen": -2563.151562500001,
+  "ejemplo": "Yaris 1.5 Hybrid 100 CV"
+ },
+ {
+  "gen": [
+   "X1",
+   "X1 F48"
+  ],
+  "seg": 1,
+  "nDE": 79,
+  "nES": 96,
+  "buy": 19200.0,
+  "sell": 19632.8,
+  "spread": 2.254166666666668,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 744.0,
+  "coste": 22209.36,
+  "margen": -2576.5600000000013,
+  "ejemplo": "xDrive18d 150 CV diésel"
+ },
+ {
+  "gen": [
+   "GLE",
+   "GLE V167"
+  ],
+  "seg": 3,
+  "nDE": 54,
+  "nES": 28,
+  "buy": 39990.0,
+  "sell": 41220.15,
+  "spread": 3.0761440360089987,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1549.6125000000002,
+  "coste": 43804.9725,
+  "margen": -2584.822500000002,
+  "ejemplo": "GLE 300 d 245 CV diésel"
+ },
+ {
+  "gen": [
+   "California",
+   "California T6"
+  ],
+  "seg": 1,
+  "nDE": 50,
+  "nES": 18,
+  "buy": 46990.0,
+  "sell": 48441.799999999996,
+  "spread": 3.0895935305383926,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1820.8625000000002,
+  "coste": 51076.2225,
+  "margen": -2634.422500000008,
+  "ejemplo": "California 2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Corolla",
+   "Corolla E210"
+  ],
+  "seg": 2,
+  "nDE": 39,
+  "nES": 267,
+  "buy": 16900.0,
+  "sell": 17159.3,
+  "spread": 1.5343195266272147,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 654.875,
+  "coste": 19820.235,
+  "margen": -2660.9350000000013,
+  "ejemplo": "1.8 125H Active, Corolla 1.8 Hybrid 122 CV"
+ },
+ {
+  "gen": [
+   "Niro",
+   "Niro DE HEV"
+  ],
+  "seg": 1,
+  "nDE": 54,
+  "nES": 66,
+  "buy": 16010.0,
+  "sell": 16223.25,
+  "spread": 1.3319800124921954,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 620.3875,
+  "coste": 18895.7475,
+  "margen": -2672.4975000000013,
+  "ejemplo": "Niro 1.6 GDi Hybrid 141 CV"
+ },
+ {
+  "gen": [
+   "Serie 5",
+   "Serie 5 G30"
+  ],
+  "seg": 3,
+  "nDE": 76,
+  "nES": 33,
+  "buy": 20892.5,
+  "sell": 21243.0,
+  "spread": 1.6776355151370215,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 809.584375,
+  "coste": 23967.444375,
+  "margen": -2724.444374999999,
+  "ejemplo": "520d 190 CV"
+ },
+ {
+  "gen": [
+   "GLA",
+   "GLA H247"
+  ],
+  "seg": 1,
+  "nDE": 50,
+  "nES": 220,
+  "buy": 27897.5,
+  "sell": 28508.3,
+  "spread": 2.1894434985213707,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1081.0281249999998,
+  "coste": 31243.888125,
+  "margen": -2735.588125000002,
+  "ejemplo": "GLA 200 d 150 CV"
+ },
+ {
+  "gen": [
+   "X4",
+   "X4 F26"
+  ],
+  "seg": 2,
+  "nDE": 49,
+  "nES": 47,
+  "buy": 21500.0,
+  "sell": 21825.0,
+  "spread": 1.5116279069767424,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 833.125,
+  "coste": 24598.485,
+  "margen": -2773.4850000000006,
+  "ejemplo": "xDrive20d X4 190 CV diésel"
+ },
+ {
+  "gen": [
+   "A4",
+   "A4 B9"
+  ],
+  "seg": 2,
+  "nDE": 27,
+  "nES": 43,
+  "buy": 17490.0,
+  "sell": 17644.3,
+  "spread": 0.8822184105202968,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 677.7375,
+  "coste": 20433.0975,
+  "margen": -2788.7975000000006,
+  "ejemplo": "A4 2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "A3",
+   "A3 8Y"
+  ],
+  "seg": 1,
+  "nDE": 328,
+  "nES": 187,
+  "buy": 22430.0,
+  "sell": 22746.5,
+  "spread": 1.4110566205974173,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 869.1624999999999,
+  "coste": 25564.5225,
+  "margen": -2818.022499999999,
+  "ejemplo": "A3 35 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "3008",
+   "3008 II"
+  ],
+  "seg": 3,
+  "nDE": 33,
+  "nES": 260,
+  "buy": 13145.0,
+  "sell": 13094.515,
+  "spread": -0.38406238113350977,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 509.36875,
+  "coste": 15919.72875,
+  "margen": -2825.213750000001,
+  "ejemplo": "1.5 BlueHDi 130 CV"
+ },
+ {
+  "gen": [
+   "Yaris",
+   "Yaris IV"
+  ],
+  "seg": 2,
+  "nDE": 58,
+  "nES": 164,
+  "buy": 14990.0,
+  "sell": 14986.5,
+  "spread": -0.02334889926617345,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 580.8625,
+  "coste": 17836.2225,
+  "margen": -2849.7225,
+  "ejemplo": "Yaris 1.5 Hybrid 116 CV"
+ },
+ {
+  "gen": [
+   "Passat Variant",
+   "Passat Variant B8"
+  ],
+  "seg": 2,
+  "nDE": 531,
+  "nES": 76,
+  "buy": 18848.0,
+  "sell": 18963.5,
+  "spread": 0.6127971137521282,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 730.3599999999999,
+  "coste": 21843.72,
+  "margen": -2880.220000000001,
+  "ejemplo": "2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "XC60",
+   "XC60 II"
+  ],
+  "seg": 2,
+  "nDE": 78,
+  "nES": 47,
+  "buy": 23996.75,
+  "sell": 24250.0,
+  "spread": 1.055351245481151,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 929.8740624999999,
+  "coste": 27191.9840625,
+  "margen": -2941.9840624999997,
+  "ejemplo": "D4 190 CV"
+ },
+ {
+  "gen": [
+   "3008",
+   "3008 II"
+  ],
+  "seg": 2,
+  "nDE": 106,
+  "nES": 438,
+  "buy": 14977.75,
+  "sell": 14836.15,
+  "spread": -0.945402346814439,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 580.3878125,
+  "coste": 17823.4978125,
+  "margen": -2987.347812500002,
+  "ejemplo": "1.5 BlueHDi 130 CV"
+ },
+ {
+  "gen": [
+   "XC40",
+   "XC40"
+  ],
+  "seg": 2,
+  "nDE": 58,
+  "nES": 55,
+  "buy": 19920.0,
+  "sell": 19875.3,
+  "spread": -0.22439759036144702,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 771.9000000000001,
+  "coste": 22957.260000000002,
+  "margen": -3081.9600000000028,
+  "ejemplo": "D3 150 CV"
+ },
+ {
+  "gen": [
+   "Outlander",
+   "Outlander PHEV III"
+  ],
+  "seg": 2,
+  "nDE": 74,
+  "nES": 65,
+  "buy": 17700.0,
+  "sell": 17551.18,
+  "spread": -0.8407909604519759,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 685.875,
+  "coste": 20651.235,
+  "margen": -3100.0550000000003,
+  "ejemplo": "Outlander PHEV Plug-in Hybrid 224 CV"
+ },
+ {
+  "gen": [
+   "Zoe",
+   "Zoe R135"
+  ],
+  "seg": 1,
+  "nDE": 102,
+  "nES": 50,
+  "buy": 13635.0,
+  "sell": 12988.3,
+  "spread": -4.742940960762754,
+  "co2": 0.0,
+  "co2src": "BEV",
+  "imp": 204.525,
+  "coste": 16104.885,
+  "margen": -3116.585000000001,
+  "ejemplo": "Zoe R135 Eléctrico 136 CV"
+ },
+ {
+  "gen": [
+   "X1",
+   "X1 F48 25e"
+  ],
+  "seg": 2,
+  "nDE": 78,
+  "nES": 86,
+  "buy": 19490.0,
+  "sell": 18905.3,
+  "spread": -3.0000000000000027,
+  "co2": 45.0,
+  "co2src": "PHEV (tramo 0%)",
+  "imp": 292.34999999999997,
+  "coste": 22047.71,
+  "margen": -3142.41,
+  "ejemplo": "xDrive25e Plug-in Hybrid 220 CV"
+ },
+ {
+  "gen": [
+   "Duster",
+   "Duster II"
+  ],
+  "seg": 1,
+  "nDE": 72,
+  "nES": 97,
+  "buy": 14724.75,
+  "sell": 14346.3,
+  "spread": -2.570162481536198,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 570.5840625,
+  "coste": 17560.6940625,
+  "margen": -3214.3940624999996,
+  "ejemplo": "1.5 Blue dCi 115 CV Prestige, 1.5 dCi 110 CV Prestige"
+ },
+ {
+  "gen": [
+   "Sportage",
+   "Sportage QL"
+  ],
+  "seg": 1,
+  "nDE": 265,
+  "nES": 127,
+  "buy": 15970.0,
+  "sell": 15519.029999999999,
+  "spread": -2.8238572323105893,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 618.8375,
+  "coste": 18854.197500000002,
+  "margen": -3335.167500000003,
+  "ejemplo": "1.6 CRDi 136 CV MHEV Drive 4x2, 1.6 CRDi 136 CV Vision, 1.6 "
+ },
+ {
+  "gen": [
+   "Sportage",
+   "Sportage NQ5"
+  ],
+  "seg": 0,
+  "nDE": 47,
+  "nES": 25,
+  "buy": 24870.0,
+  "sell": 24734.03,
+  "spread": -0.5467229593888234,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 963.7125000000001,
+  "coste": 28099.072500000002,
+  "margen": -3365.042500000003,
+  "ejemplo": "1.6 CRDi 136 CV 48V"
+ },
+ {
+  "gen": [
+   "T-Roc",
+   "T-Roc"
+  ],
+  "seg": 2,
+  "nDE": 275,
+  "nES": 108,
+  "buy": 18800.0,
+  "sell": 18376.649999999998,
+  "spread": -2.2518617021276666,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 728.5,
+  "coste": 21793.86,
+  "margen": -3417.2100000000028,
+  "ejemplo": "2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "XC60",
+   "XC60 II"
+  ],
+  "seg": 3,
+  "nDE": 63,
+  "nES": 106,
+  "buy": 22490.0,
+  "sell": 22203.3,
+  "spread": -1.2747887950200099,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 871.4875,
+  "coste": 25626.8475,
+  "margen": -3423.5475000000006,
+  "ejemplo": "D4 190 CV"
+ },
+ {
+  "gen": [
+   "Kodiaq",
+   "Kodiaq I"
+  ],
+  "seg": 3,
+  "nDE": 341,
+  "nES": 62,
+  "buy": 20485.0,
+  "sell": 20074.149999999998,
+  "spread": -2.005613863802791,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 793.79375,
+  "coste": 23544.15375,
+  "margen": -3470.0037500000035,
+  "ejemplo": "1.5 TSI 150 CV Ambition, 2.0 TDI 150 CV Sportline, 2.0 TDI 1"
+ },
+ {
+  "gen": [
+   "Serie 5",
+   "Serie 5 G30"
+  ],
+  "seg": 2,
+  "nDE": 101,
+  "nES": 36,
+  "buy": 24199.5,
+  "sell": 23912.925,
+  "spread": -1.1842186822041856,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 937.7306249999999,
+  "coste": 27402.590625,
+  "margen": -3489.6656250000015,
+  "ejemplo": "520d 190 CV"
+ },
+ {
+  "gen": [
+   "Sandero",
+   "Sandero III"
+  ],
+  "seg": 0,
+  "nDE": 217,
+  "nES": 287,
+  "buy": 13490.0,
+  "sell": 12777.81,
+  "spread": -5.279392142327655,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 522.7375,
+  "coste": 16278.0975,
+  "margen": -3500.2875000000004,
+  "ejemplo": "1.0 TCe 100 CV Stepway Essential GLP, 1.0 TCe 90 CV Stepway"
+ },
+ {
+  "gen": [
+   "Sportage",
+   "Sportage NQ5"
+  ],
+  "seg": 1,
+  "nDE": 49,
+  "nES": 106,
+  "buy": 21110.0,
+  "sell": 20651.3,
+  "spread": -2.17290383704406,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 818.0125,
+  "coste": 24193.3725,
+  "margen": -3542.072500000002,
+  "ejemplo": "1.6 CRDi 136 CV 48V"
+ },
+ {
+  "gen": [
+   "Serie 3",
+   "Serie 3 G20 330e"
+  ],
+  "seg": 1,
+  "nDE": 124,
+  "nES": 25,
+  "buy": 27950.0,
+  "sell": 27063.0,
+  "spread": -3.1735241502683365,
+  "co2": 45.0,
+  "co2src": "PHEV (tramo 0%)",
+  "imp": 419.25,
+  "coste": 30634.61,
+  "margen": -3571.6100000000006,
+  "ejemplo": "330e Plug-in Hybrid 292 CV"
+ },
+ {
+  "gen": [
+   "UX",
+   "UX 250h"
+  ],
+  "seg": 0,
+  "nDE": 90,
+  "nES": 47,
+  "buy": 27477.5,
+  "sell": 27160.0,
+  "spread": -1.1554908561550392,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1064.753125,
+  "coste": 30807.613125,
+  "margen": -3647.613125,
+  "ejemplo": "UX 250h 184 CV Hybrid"
+ },
+ {
+  "gen": [
+   "Sportage",
+   "Sportage NQ5"
+  ],
+  "seg": 2,
+  "nDE": 29,
+  "nES": 166,
+  "buy": 18440.0,
+  "sell": 17721.899999999998,
+  "spread": -3.89425162689806,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 714.55,
+  "coste": 21419.91,
+  "margen": -3698.010000000002,
+  "ejemplo": "1.6 CRDi 136 CV 48V"
+ },
+ {
+  "gen": [
+   "5008",
+   "5008 II"
+  ],
+  "seg": 2,
+  "nDE": 36,
+  "nES": 107,
+  "buy": 16380.0,
+  "sell": 15510.3,
+  "spread": -5.309523809523808,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 634.7249999999999,
+  "coste": 19280.085,
+  "margen": -3769.785,
+  "ejemplo": "1.5 BlueHDi 130 CV"
+ },
+ {
+  "gen": [
+   "Kodiaq",
+   "Kodiaq I"
+  ],
+  "seg": 2,
+  "nDE": 543,
+  "nES": 160,
+  "buy": 23490.0,
+  "sell": 22741.649999999998,
+  "spread": -3.1858237547892854,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 910.2375,
+  "coste": 26665.5975,
+  "margen": -3923.947500000002,
+  "ejemplo": "1.5 TSI 150 CV Ambition, 2.0 TDI 150 CV Sportline, 2.0 TDI 1"
+ },
+ {
+  "gen": [
+   "XC40",
+   "XC40 T5 Recharge"
+  ],
+  "seg": 1,
+  "nDE": 93,
+  "nES": 97,
+  "buy": 26890.0,
+  "sell": 25572.11,
+  "spread": -4.9010412792859785,
+  "co2": 45.0,
+  "co2src": "PHEV (tramo 0%)",
+  "imp": 403.34999999999997,
+  "coste": 29558.71,
+  "margen": -3986.5999999999985,
+  "ejemplo": "XC40 T5 Recharge Plug-in Hybrid 262 CV"
+ },
+ {
+  "gen": [
+   "Tucson",
+   "Tucson NX4"
+  ],
+  "seg": 1,
+  "nDE": 251,
+  "nES": 184,
+  "buy": 22490.0,
+  "sell": 21621.3,
+  "spread": -3.862605602489999,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 871.4875,
+  "coste": 25626.8475,
+  "margen": -4005.5475000000006,
+  "ejemplo": "1.6 CRDi 136 CV 48V Prime, 1.6 T-GDi 150 CV Trend, 1.6 T-GDi"
+ },
+ {
+  "gen": [
+   "Kona",
+   "Kona HEV"
+  ],
+  "seg": 0,
+  "nDE": 49,
+  "nES": 23,
+  "buy": 19440.0,
+  "sell": 18420.3,
+  "spread": -5.245370370370372,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 753.3,
+  "coste": 22458.66,
+  "margen": -4038.3600000000006,
+  "ejemplo": "Kona 1.6 GDi Hybrid 141 CV"
+ },
+ {
+  "gen": [
+   "Karoq",
+   "Karoq"
+  ],
+  "seg": 3,
+  "nDE": 136,
+  "nES": 120,
+  "buy": 17490.0,
+  "sell": 16393.0,
+  "spread": -6.272155517438538,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 677.7375,
+  "coste": 20433.0975,
+  "margen": -4040.0975,
+  "ejemplo": "2.0 TDI 150 CV DSG 4x4"
+ },
+ {
+  "gen": [
+   "T-Roc",
+   "T-Roc"
+  ],
+  "seg": 1,
+  "nDE": 326,
+  "nES": 71,
+  "buy": 21398.0,
+  "sell": 20412.68,
+  "spread": -4.6047294139639146,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 829.1724999999999,
+  "coste": 24492.5325,
+  "margen": -4079.852500000001,
+  "ejemplo": "2.0 TDI 150 CV"
+ },
+ {
+  "gen": [
+   "Tucson",
+   "Tucson NX4"
+  ],
+  "seg": 2,
+  "nDE": 102,
+  "nES": 206,
+  "buy": 19996.0,
+  "sell": 18953.8,
+  "spread": -5.2120424084816985,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 774.845,
+  "coste": 23036.205,
+  "margen": -4082.4050000000025,
+  "ejemplo": "1.6 CRDi 136 CV 48V Prime, 1.6 T-GDi 150 CV Trend, 1.6 T-GDi"
+ },
+ {
+  "gen": [
+   "XC90",
+   "XC90 II"
+  ],
+  "seg": 3,
+  "nDE": 110,
+  "nES": 29,
+  "buy": 26990.0,
+  "sell": 26180.3,
+  "spread": -3.0000000000000027,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1045.8625,
+  "coste": 30301.2225,
+  "margen": -4120.922500000001,
+  "ejemplo": "XC90 D5 AWD 235 CV diésel"
+ },
+ {
+  "gen": [
+   "XC40",
+   "XC40 T5 Recharge"
+  ],
+  "seg": 2,
+  "nDE": 43,
+  "nES": 101,
+  "buy": 23789.0,
+  "sell": 22213.0,
+  "spread": -6.624910673000128,
+  "co2": 45.0,
+  "co2src": "PHEV (tramo 0%)",
+  "imp": 356.835,
+  "coste": 26411.195,
+  "margen": -4198.195,
+  "ejemplo": "XC40 T5 Recharge Plug-in Hybrid 262 CV"
+ },
+ {
+  "gen": [
+   "Kona",
+   "Kona HEV"
+  ],
+  "seg": 1,
+  "nDE": 51,
+  "nES": 51,
+  "buy": 17750.0,
+  "sell": 16480.3,
+  "spread": -7.153239436619718,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 687.8125,
+  "coste": 20703.1725,
+  "margen": -4222.872500000001,
+  "ejemplo": "Kona 1.6 GDi Hybrid 141 CV"
+ },
+ {
+  "gen": [
+   "X5",
+   "X5 F15"
+  ],
+  "seg": 2,
+  "nDE": 29,
+  "nES": 18,
+  "buy": 29195.0,
+  "sell": 28324.0,
+  "spread": -2.983387566364104,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1131.30625,
+  "coste": 32591.666250000002,
+  "margen": -4267.666250000002,
+  "ejemplo": "xDrive30d 258 CV diésel"
+ },
+ {
+  "gen": [
+   "ID.3",
+   "ID.3"
+  ],
+  "seg": 2,
+  "nDE": 55,
+  "nES": 17,
+  "buy": 20690.0,
+  "sell": 18905.3,
+  "spread": -8.625906234896085,
+  "co2": 0.0,
+  "co2src": "BEV",
+  "imp": 310.34999999999997,
+  "coste": 23265.71,
+  "margen": -4360.41,
+  "ejemplo": "ID.3 Eléctrico 204 CV"
+ },
+ {
+  "gen": [
+   "X3",
+   "X3 G01"
+  ],
+  "seg": 1,
+  "nDE": 258,
+  "nES": 69,
+  "buy": 31980.0,
+  "sell": 31030.3,
+  "spread": -2.9696685428392766,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1239.225,
+  "coste": 35484.585,
+  "margen": -4454.285,
+  "ejemplo": "xDrive20d 190 CV"
+ },
+ {
+  "gen": [
+   "Serie 3 Touring",
+   "Serie 3 Touring G21"
+  ],
+  "seg": 2,
+  "nDE": 177,
+  "nES": 32,
+  "buy": 21695.0,
+  "sell": 20340.899999999998,
+  "spread": -6.241530306522247,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 840.6812500000001,
+  "coste": 24801.041250000002,
+  "margen": -4460.141250000004,
+  "ejemplo": "320d 190 CV Touring M Sport"
+ },
+ {
+  "gen": [
+   "Q5",
+   "Q5 FY"
+  ],
+  "seg": 3,
+  "nDE": 115,
+  "nES": 54,
+  "buy": 24800.0,
+  "sell": 23561.3,
+  "spread": -4.994758064516136,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 961.0,
+  "coste": 28026.36,
+  "margen": -4465.060000000001,
+  "ejemplo": "40 TDI 190 CV, 40 TDI 204 CV"
+ },
+ {
+  "gen": [
+   "Corolla Touring Sports",
+   "Corolla TS E210"
+  ],
+  "seg": 1,
+  "nDE": 81,
+  "nES": 60,
+  "buy": 21930.0,
+  "sell": 20360.3,
+  "spread": -7.157774737802103,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 849.7874999999999,
+  "coste": 25045.1475,
+  "margen": -4684.8475,
+  "ejemplo": "2.0 Hybrid 152 CV, 2.0 Hybrid 179 CV Lounge, 2.0 Hybrid 184 "
+ },
+ {
+  "gen": [
+   "Karoq",
+   "Karoq"
+  ],
+  "seg": 2,
+  "nDE": 281,
+  "nES": 172,
+  "buy": 19980.0,
+  "sell": 18206.899999999998,
+  "spread": -8.874374374374383,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 774.2249999999999,
+  "coste": 23019.585,
+  "margen": -4812.685000000001,
+  "ejemplo": "2.0 TDI 150 CV DSG 4x4"
+ },
+ {
+  "gen": [
+   "Q5",
+   "Q5 FY"
+  ],
+  "seg": 2,
+  "nDE": 316,
+  "nES": 82,
+  "buy": 27999.0,
+  "sell": 26533.864999999998,
+  "spread": -5.2328118861387996,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1084.96125,
+  "coste": 31349.32125,
+  "margen": -4815.456250000003,
+  "ejemplo": "40 TDI 190 CV, 40 TDI 204 CV"
+ },
+ {
+  "gen": [
+   "3008",
+   "3008 II Hybrid4"
+  ],
+  "seg": 2,
+  "nDE": 32,
+  "nES": 64,
+  "buy": 19042.5,
+  "sell": 16711.16,
+  "spread": -12.242825259288438,
+  "co2": 45.0,
+  "co2src": "PHEV (tramo 0%)",
+  "imp": 285.6375,
+  "coste": 21593.4975,
+  "margen": -4882.3375000000015,
+  "ejemplo": "3008 Hybrid4 Plug-in Hybrid 300 CV"
+ },
+ {
+  "gen": [
+   "3008",
+   "3008 II"
+  ],
+  "seg": 1,
+  "nDE": 120,
+  "nES": 291,
+  "buy": 17458.75,
+  "sell": 15510.3,
+  "spread": -11.160306436600564,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 676.5265625,
+  "coste": 20400.6365625,
+  "margen": -4890.336562500001,
+  "ejemplo": "1.5 BlueHDi 130 CV"
+ },
+ {
+  "gen": [
+   "X3",
+   "X3 G01"
+  ],
+  "seg": 2,
+  "nDE": 307,
+  "nES": 154,
+  "buy": 27900.0,
+  "sell": 26039.649999999998,
+  "spread": -6.6679211469534145,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1081.125,
+  "coste": 31246.485,
+  "margen": -5206.835000000003,
+  "ejemplo": "xDrive20d 190 CV"
+ },
+ {
+  "gen": [
+   "Tucson",
+   "Tucson NX4"
+  ],
+  "seg": 0,
+  "nDE": 142,
+  "nES": 58,
+  "buy": 24990.0,
+  "sell": 22979.3,
+  "spread": -8.046018407362943,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 968.3625,
+  "coste": 28223.7225,
+  "margen": -5244.422500000001,
+  "ejemplo": "1.6 CRDi 136 CV 48V Prime, 1.6 T-GDi 150 CV Trend, 1.6 T-GDi"
+ },
+ {
+  "gen": [
+   "Outlander",
+   "Outlander PHEV III"
+  ],
+  "seg": 1,
+  "nDE": 83,
+  "nES": 26,
+  "buy": 20490.0,
+  "sell": 18011.93,
+  "spread": -12.094045876037086,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 793.9875,
+  "coste": 23549.3475,
+  "margen": -5537.4175,
+  "ejemplo": "Outlander PHEV Plug-in Hybrid 224 CV"
+ },
+ {
+  "gen": [
+   "ID.3",
+   "ID.3"
+  ],
+  "seg": 1,
+  "nDE": 344,
+  "nES": 21,
+  "buy": 22990.0,
+  "sell": 19744.35,
+  "spread": -14.117659852109622,
+  "co2": 0.0,
+  "co2src": "BEV",
+  "imp": 344.84999999999997,
+  "coste": 25600.21,
+  "margen": -5855.860000000001,
+  "ejemplo": "ID.3 Eléctrico 204 CV"
+ },
+ {
+  "gen": [
+   "Corolla Touring Sports",
+   "Corolla TS E210"
+  ],
+  "seg": 2,
+  "nDE": 65,
+  "nES": 74,
+  "buy": 20730.0,
+  "sell": 17935.3,
+  "spread": -13.481427882296193,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 803.2875,
+  "coste": 23798.6475,
+  "margen": -5863.3475,
+  "ejemplo": "2.0 Hybrid 152 CV, 2.0 Hybrid 179 CV Lounge, 2.0 Hybrid 184 "
+ },
+ {
+  "gen": [
+   "Niro",
+   "e-Niro"
+  ],
+  "seg": 1,
+  "nDE": 35,
+  "nES": 17,
+  "buy": 23490.0,
+  "sell": 20554.3,
+  "spread": -12.497658578118354,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 910.2375,
+  "coste": 26665.5975,
+  "margen": -6111.297500000001,
+  "ejemplo": "e-Niro Eléctrico 204 CV 64 kWh"
+ },
+ {
+  "gen": [
+   "X5",
+   "X5 G05"
+  ],
+  "seg": 2,
+  "nDE": 79,
+  "nES": 23,
+  "buy": 40700.0,
+  "sell": 38315.0,
+  "spread": -5.859950859950858,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1577.125,
+  "coste": 44542.485,
+  "margen": -6227.485000000001,
+  "ejemplo": "xDrive30d G05 265 CV diésel"
+ },
+ {
+  "gen": [
+   "Kona",
+   "Kona EV"
+  ],
+  "seg": 1,
+  "nDE": 145,
+  "nES": 39,
+  "buy": 22900.0,
+  "sell": 19390.3,
+  "spread": -15.326200873362449,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 887.375,
+  "coste": 26052.735,
+  "margen": -6662.435000000001,
+  "ejemplo": "Kona Eléctrico 204 CV 64 kWh"
+ },
+ {
+  "gen": [
+   "3008",
+   "3008 II"
+  ],
+  "seg": 0,
+  "nDE": 68,
+  "nES": 32,
+  "buy": 22962.5,
+  "sell": 19416.975,
+  "spread": -15.440500816548731,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 889.796875,
+  "coste": 26117.656875,
+  "margen": -6700.681875000002,
+  "ejemplo": "1.5 BlueHDi 130 CV"
+ },
+ {
+  "gen": [
+   "Kodiaq",
+   "Kodiaq I"
+  ],
+  "seg": 1,
+  "nDE": 482,
+  "nES": 108,
+  "buy": 26335.0,
+  "sell": 22785.3,
+  "spread": -13.479020315169931,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1020.4812499999999,
+  "coste": 29620.84125,
+  "margen": -6835.541250000002,
+  "ejemplo": "1.5 TSI 150 CV Ambition, 2.0 TDI 150 CV Sportline, 2.0 TDI 1"
+ },
+ {
+  "gen": [
+   "3008",
+   "3008 II Hybrid4"
+  ],
+  "seg": 1,
+  "nDE": 90,
+  "nES": 49,
+  "buy": 21395.0,
+  "sell": 17014.77,
+  "spread": -20.47314793175975,
+  "co2": 45.0,
+  "co2src": "PHEV (tramo 0%)",
+  "imp": 320.925,
+  "coste": 23981.285,
+  "margen": -6966.514999999999,
+  "ejemplo": "3008 Hybrid4 Plug-in Hybrid 300 CV"
+ },
+ {
+  "gen": [
+   "Karoq",
+   "Karoq"
+  ],
+  "seg": 1,
+  "nDE": 266,
+  "nES": 97,
+  "buy": 23965.0,
+  "sell": 19855.899999999998,
+  "spread": -17.146254955142926,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 928.64375,
+  "coste": 27159.00375,
+  "margen": -7303.103750000002,
+  "ejemplo": "2.0 TDI 150 CV DSG 4x4"
+ },
+ {
+  "gen": [
+   "X5",
+   "X5 G05"
+  ],
+  "seg": 3,
+  "nDE": 79,
+  "nES": 33,
+  "buy": 38900.0,
+  "sell": 34696.9,
+  "spread": -10.804884318766062,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1507.375,
+  "coste": 42672.735,
+  "margen": -7975.834999999999,
+  "ejemplo": "xDrive30d G05 265 CV diésel"
+ },
+ {
+  "gen": [
+   "Kodiaq",
+   "Kodiaq I"
+  ],
+  "seg": 0,
+  "nDE": 75,
+  "nES": 21,
+  "buy": 28860.0,
+  "sell": 24220.899999999998,
+  "spread": -16.07449757449758,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1118.3249999999998,
+  "coste": 32243.685,
+  "margen": -8022.7850000000035,
+  "ejemplo": "1.5 TSI 150 CV Ambition, 2.0 TDI 150 CV Sportline, 2.0 TDI 2"
+ },
+ {
+  "gen": [
+   "Karoq",
+   "Karoq"
+  ],
+  "seg": 0,
+  "nDE": 62,
+  "nES": 22,
+  "buy": 27887.5,
+  "sell": 21815.3,
+  "spread": -21.773913043478267,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1080.640625,
+  "coste": 31233.500625,
+  "margen": -9418.200625000001,
+  "ejemplo": "2.0 TDI 150 CV DSG 4x4"
+ },
+ {
+  "gen": [
+   "Serie 5",
+   "Serie 5 G30"
+  ],
+  "seg": 1,
+  "nDE": 58,
+  "nES": 27,
+  "buy": 30521.75,
+  "sell": 24055.03,
+  "spread": -21.187251713941702,
+  "co2": 140.0,
+  "co2src": "hipotesis 140",
+  "imp": 1182.7178125,
+  "coste": 33969.8278125,
+  "margen": -9914.7978125,
+  "ejemplo": "520d 190 CV"
+ }
+]

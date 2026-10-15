@@ -1,0 +1,90 @@
+[
+ {
+  "modelo": "CLA C118",
+  "compraDE": 20890,
+  "ventaES": 25991,
+  "iedmt": 0,
+  "coste": 22225,
+  "margen": 3766
+ },
+ {
+  "modelo": "Macan 95B",
+  "compraDE": 32650,
+  "ventaES": 38703,
+  "iedmt": 1551,
+  "coste": 35536,
+  "margen": 3167
+ },
+ {
+  "modelo": "Clase C W205 pre",
+  "compraDE": 17500,
+  "ventaES": 19642,
+  "iedmt": 0,
+  "coste": 18835,
+  "margen": 807
+ },
+ {
+  "modelo": "Golf VII (5G)",
+  "compraDE": 11999,
+  "ventaES": 13579,
+  "iedmt": 0,
+  "coste": 13334,
+  "margen": 245
+ },
+ {
+  "modelo": "A6 C7",
+  "compraDE": 16999,
+  "ventaES": 19303,
+  "iedmt": 807,
+  "coste": 19142,
+  "margen": 161
+ },
+ {
+  "modelo": "X4 F26",
+  "compraDE": 21000,
+  "ventaES": 23280,
+  "iedmt": 998,
+  "coste": 23333,
+  "margen": -53
+ },
+ {
+  "modelo": "Corolla E210",
+  "compraDE": 17990,
+  "ventaES": 19085,
+  "iedmt": 0,
+  "coste": 19325,
+  "margen": -241
+ },
+ {
+  "modelo": "GLC X253 pre",
+  "compraDE": 23990,
+  "ventaES": 25899,
+  "iedmt": 1140,
+  "coste": 26465,
+  "margen": -566
+ },
+ {
+  "modelo": "Q5 8R",
+  "compraDE": 19985,
+  "ventaES": 21339,
+  "iedmt": 949,
+  "coste": 22270,
+  "margen": -931
+ },
+ {
+  "modelo": "Model 3",
+  "compraDE": 20992,
+  "ventaES": 21049,
+  "iedmt": 0,
+  "coste": 22328,
+  "margen": -1279
+ },
+ {
+  "modelo": "UX 250h",
+  "compraDE": 23342,
+  "ventaES": 23183,
+  "iedmt": 0,
+  "coste": 24678,
+  "margen": -1495
+ }
+]
