@@ -27,6 +27,10 @@ FOTOS = HERE / "fotos_reforma"         # renders de "así va a quedar" (ejemplo)
 FOTO_H_W = 1200.0 / 1600.0            # ratio alto/ancho de los renders (4:3)
 
 D = json.loads((HERE / "plan_ejecucion.json").read_text())
+try:
+    SENS = json.loads((HERE / "sensibilidad_rotacion.json").read_text())
+except FileNotFoundError:
+    SENS = None   # lámina de sensibilidad se omite si no está calculada
 M = {int(k): v for k, v in D["mensual"].items()}   # mes -> [ventas, flota, caja]
 DI = D["dia1"]            # día 1: [lab, mov, run]
 for _k in ("sd", "se", "dv", "div_bruto", "is_anio"):  # años -> int
@@ -421,8 +425,8 @@ def p_paso4(c, n, t):
     bg(c)
     heading(c, "Paso 4  ·  Permanente", "La búsqueda: cómo entran los coches")
     wrap(c, "No hay un único momento de comprar: hay una fuente de coches permanente. Cada coche que se vende "
-            "se reemplaza enseguida. El ciclo por unidad (los papeles no frenan nada: se vende con matrículas "
-            "temporales y la gestoría termina la documentación):",
+            "se reemplaza enseguida. El ciclo por unidad (regla: el coche se entrega con matrícula española "
+            "definitiva; las temporales solo en el caso extremo de venderse el día 1, antes de matricular):",
          36, 442, 890, size=10, leading=14, max_lines=2)
     pasos = [("Buscar y ver", "1-2 días", "varias unidades vistas"),
              ("Viaje de ida", "≤3 días", "coche elegido"),
@@ -934,6 +938,38 @@ def p_resumen(c, n, t):
     card(c, 720, 216, 204, 74, "Patrimonio SL", eur(D["pat50"]) + " €", "caja + coches − IS", acento=GREEN)
     card(c, 36, 140, 888, 66, "El riesgo y su control", f"~{D['insol']:.0f} % de las trayectorias roza la caja en el arranque",
          "se controla con el fondo de 3 meses y los disparadores: si en m6 hay <5 ventas o la caja no sube, se frena la compra y se adelanta el dividendo", acento=RED)
+    footer(c, n, t)
+
+
+@page
+def p_sensibilidad(c, n, t):
+    bg(c)
+    heading(c, "Sensibilidad  ·  rotación", "Si los coches tardan más en venderse: +20 % y +40 % de días")
+    wrap(c, "La hipótesis más frágil del plan es la velocidad de venta (32-58 días por modelo). Esta lámina repite "
+            "las MISMAS 250 simulaciones (misma semilla) cambiando un solo número: los días que tarda cada coche "
+            "en venderse. Todo lo demás (precios, cupos, fondo, dividendos legales, IS) queda idéntico.",
+         36, 448, 890, size=9.5, leading=13, color=SLATE, max_lines=3)
+    filas = []
+    for k, lab in (("central", "Central (días del plan)"), ("rot+20", "Rotación +20 % (Golf 32→38 d)"),
+                   ("rot+40", "Rotación +40 % (Golf 32→45 d)")):
+        s = SENS[k]
+        filas.append([lab, f"{s['ventas_p50']:.0f}", eur(s["patrimonio_p50"]) + " €",
+                      eur(s["casa_p50"]) + " €", f"{s['insolvente_pct']:.1f} %"])
+    table(c, 36, 372, ["Escenario (P50, 250 sims)", "Ventas 36 m", "Patrimonio SL", "A casa neto", "% insolvente"],
+          filas, [300, 110, 160, 160, 120], size=9.5, hrow=24, aligns=["l", "r", "r", "r", "r"], bold_rows=(0,))
+    c.setFillColor(GOLD_DEEP)
+    c.setFont("DejaVuBold", 9)
+    c.drawString(36, 268, "LECTURA HONESTA")
+    wrap(c, "Con +20 % de días las ventas caen de ~286 a ~208 unidades y el dinero a casa de ~264.000 € a "
+            "~124.000 €: el resultado es hipersensible a la rotación (un 20 % menos de velocidad es casi la mitad "
+            "de beneficio), porque cada plaza lenta bloquea reinversión. Con +40 % el negocio sigue siendo viable "
+            "(patrimonio SL intacto: el stock retiene valor) pero apenas genera caja para repartir, y 1 de cada 3 "
+            "trayectorias roza el descubierto.",
+         36, 200, 890, size=9.5, leading=13, max_lines=4)
+    card(c, 36, 118, 888, 66, "DISPARADOR OPERATIVO (regla de tablero)",
+         "Rotación media real > 40 días durante 2 meses seguidos → frenar compra de rotación lenta",
+         "medirlo en el ERP desde el mes 1: es LA métrica que decide si el plan se sostiene o se recorta; "
+         "los vídeos de revisión y prueba con el cliente son la herramienta para defender los 32-35 días", acento=RED)
     footer(c, n, t)
 
 
