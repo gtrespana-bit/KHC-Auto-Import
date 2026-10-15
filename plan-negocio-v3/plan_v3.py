@@ -219,7 +219,7 @@ def simulate(forma, units, meses=MESES, capital=None, pesos_in=None):
     # --- liquidación anual y neto familiar ----------------------------------
     resultado = margen_real - fijos_total - sueldos_total - cotiz_total
     if forma == "SL":
-        neto_casa, bruto_opt, imp = fiscal_sl(margen_real, fijos_total + cotiz_total, meses)
+        neto_casa, bruto_opt, imp, _ss_sl = fiscal_sl(margen_real, fijos_total + cotiz_total, meses)
         reparto = f"óptimo SL: nómina {bruto_opt:,.0f} brutos/mes por socio + resto retenido/dividendo"
     else:
         neto_casa, rn, imp = fiscal_autonomo(margen_real, fijos_total, meses)
@@ -333,3 +333,6 @@ LECTURA HONESTA DEL MODELO COMPLETO:
   · Los meses malos existen: si un coche tarda 90 d, ese mes la familia cobra
     menos. Los 2.200 €/mes de nave se pagan vendas o no vendas.""")
 
+
+if __name__ == "__main__":
+    main()
